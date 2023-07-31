@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "567868861738",
+    "project_id": "gallery-8dc34",
+    "storage_bucket": "gallery-8dc34.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567868861738:android:8b6b023a76ff6e3f7b8253",
+        "android_client_info": {
+          "package_name": "com.prime.gallery2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "567868861738-tvo2hmh35p0gi9u6mbpcrt3gjm44if4r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3A1draoQRzdHNclWM4wdhn1M8kC0m5Ro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "567868861738-tvo2hmh35p0gi9u6mbpcrt3gjm44if4r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567868861738:android:8a5e7a4e126f96857b8253",
+        "android_client_info": {
+          "package_name": "com.prime.gallery2.debug"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "567868861738-tvo2hmh35p0gi9u6mbpcrt3gjm44if4r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3A1draoQRzdHNclWM4wdhn1M8kC0m5Ro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "567868861738-tvo2hmh35p0gi9u6mbpcrt3gjm44if4r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
