@@ -1,5 +1,6 @@
 package com.prime.gallery
 
+
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -38,12 +39,11 @@ import com.prime.gallery.core.billing.observeAsState
 import com.prime.gallery.core.billing.purchased
 import com.prime.gallery.core.compose.LocalSystemFacade
 import com.prime.gallery.core.compose.LocalWindowSizeClass
-import com.prime.gallery.core.compose.SnackbarDuration2
-import com.prime.gallery.core.compose.SnackbarHostState2
-import com.prime.gallery.core.compose.SnackbarResult2
 import com.prime.gallery.core.compose.SystemFacade
+import com.prime.gallery.core.compose.snackbar.SnackDuration
+import com.prime.gallery.core.compose.snackbar.SnackResult
+import com.prime.gallery.core.compose.snackbar.SnackbarHostState2
 import com.primex.core.MetroGreen
-import com.primex.core.Text
 import com.primex.preferences.Key
 import com.primex.preferences.Preferences
 import com.primex.preferences.longPreferenceKey
@@ -124,24 +124,9 @@ class MainActivity : ComponentActivity(), SystemFacade {
         advertiser.show(this, force, action)
     }
 
-
-    override fun showSnackbar(
-        message: Text,
-        title: Text?,
-        action: Text?,
-        icon: Any?,
-        accent: Color,
-        duration: SnackbarDuration2
-    ) {
+    override fun showSnackbar(message: CharSequence, action: CharSequence?, icon: Any?, accent: Color, duration: SnackDuration) {
         lifecycleScope.launch {
-            channel.showSnackbar(
-                message,
-                title,
-                action,
-                icon,
-                accent,
-                duration
-            )
+            channel.showSnackbar(message, action, icon, accent, duration)
         }
     }
 
@@ -261,14 +246,13 @@ class MainActivity : ComponentActivity(), SystemFacade {
                             }
                             // else show the toast.
                             val res = channel.showSnackbar(
-                                title = "Update",
-                                message = "An update has just been downloaded.",
+                                msg = "Update \nAn update has just been downloaded.",
                                 action = "RESTART",
-                                duration = SnackbarDuration2.Indefinite,
+                                duration = SnackDuration.Indefinite,
                                 accent = Color.MetroGreen
                             )
                             // complete update when ever user clicks on action.
-                            if (res == SnackbarResult2.ActionPerformed) manager.completeUpdate()
+                            if (res == SnackResult.ActionPerformed) manager.completeUpdate()
                         }
 
                         is AppUpdateResult.Available -> {

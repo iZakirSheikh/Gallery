@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Gallery</string>
+    <!--The strings that are same as name.-->
+    <string name="settings">Settings</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="allow">Allow</string>
+    <string name="storage_permission">Storage\nPermission</string>
+
+    <!--Messages-->
+    <string name="storage_permission_msg">
+        In order to work properly the app requires permission to your devices storage (Photos, Media and Files).
+    </string>
+
+
 </resources>

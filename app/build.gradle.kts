@@ -1,5 +1,5 @@
-@Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
-plugins {
+// TODO: Remove once KTIJ-19369 is fixed
+@Suppress("DSL_SCOPE_VIOLATION") plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.firebase)
@@ -26,15 +26,14 @@ android {
             isZipAlignEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
         // Add necessary changes to debug apk.
         debug {
             // makes it possible to install both release and debug versions in same device.
             applicationIdSuffix = ".debug"
-            resValue("string", "app_name", "Gallery")
+            resValue("string", "app_name", "Debug")
             versionNameSuffix = "-debug"
         }
     }
@@ -54,7 +53,7 @@ android {
 // Not moving these to libs.version.toml because i think this is redundant.
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
-    val compose_version = "1.6.0-alpha02"
+    val compose_version = "1.6.0-alpha03"
     implementation("androidx.compose.ui:ui:$compose_version")
     implementation("androidx.compose.ui:ui-tooling-preview:$compose_version")
     implementation("androidx.compose.animation:animation-graphics:$compose_version")
@@ -69,18 +68,18 @@ dependencies {
     //Lottie
     implementation("com.airbnb.android:lottie-compose:6.1.0")
     // Preferences and other widgets
-    val toolkit_version = "1.0.9-beta"
+    val toolkit_version = "1.0.10-beta"
     implementation("com.github.prime-zs.toolkit:preferences:$toolkit_version")
     implementation("com.github.prime-zs.toolkit:core-ktx:$toolkit_version")
     implementation("com.github.prime-zs.toolkit:material3:$toolkit_version")
     // Splash Screen API
     implementation("androidx.core:core-splashscreen:1.0.1")
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
     // material3
-    val material3 = "1.2.0-alpha04"
+    val material3 = "1.2.0-alpha05"
     implementation("androidx.compose.material3:material3:$material3")
     implementation("androidx.compose.material3:material3-window-size-class:$material3")
     // Google Play InAppUpdate
@@ -98,10 +97,11 @@ dependencies {
     // Unity Ads
     implementation("com.unity3d.ads:unity-ads:4.8.0")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.7.0-beta02")
+    implementation("androidx.navigation:navigation-compose:2.7.0")
     // Compose Downloadable fonts
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.4.3")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.5.0")
     // Hilt
     implementation("com.google.dagger:hilt-android:2.47")
     kapt("com.google.dagger:hilt-android-compiler:2.47")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 }

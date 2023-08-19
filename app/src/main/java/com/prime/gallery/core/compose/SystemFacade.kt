@@ -1,15 +1,13 @@
 package com.prime.gallery.core.compose
 
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.core.content.res.ResourcesCompat
 import com.android.billingclient.api.Purchase
-import com.primex.core.Text
+import com.prime.gallery.core.compose.snackbar.SnackDuration
 import com.primex.preferences.Key
 
 /**
@@ -42,56 +40,16 @@ interface SystemFacade {
      */
     fun showAd(force: Boolean = false, action: (() -> Unit)? = null)
 
-    /**
-     * This uses the provider to submit message to [SnackbarProvider]
-     *
-     * @see SnackbarProvider.show
-     */
-    fun showSnackbar(
-        message: Text,
-        title: Text? = null,
-        action: Text? = null,
-        icon: Any? = null,
-        accent: Color = Color.Unspecified,
-        duration: SnackbarDuration2 = if (action == null) SnackbarDuration2.Short else SnackbarDuration2.Indefinite
-    )
 
     /**
      * @see show
      */
     fun showSnackbar(
         message: CharSequence,
-        title: CharSequence? = null,
         action: CharSequence? = null,
         icon: Any? = null,
         accent: Color = Color.Unspecified,
-        duration: SnackbarDuration2 = if (action == null) SnackbarDuration2.Short else SnackbarDuration2.Indefinite
-    ) = showSnackbar(
-        message = Text(message),
-        title = if (title == null) null else Text(title),
-        action = if (action == null) null else Text(action),
-        icon = icon,
-        accent = accent,
-        duration
-    )
-
-    /**
-     * @see show
-     */
-    fun showSnackbar(
-        @StringRes message: Int,
-        @StringRes title: Int = ResourcesCompat.ID_NULL,
-        @StringRes action: Int = ResourcesCompat.ID_NULL,
-        icon: Any? = null,
-        accent: Color = Color.Unspecified,
-        duration: SnackbarDuration2 = if (action == ResourcesCompat.ID_NULL) SnackbarDuration2.Short else SnackbarDuration2.Indefinite
-    ) = showSnackbar(
-        Text(message),
-        title = if (title == ResourcesCompat.ID_NULL) null else Text(title),
-        action = if (action == ResourcesCompat.ID_NULL) null else Text(action),
-        icon = icon,
-        accent = accent,
-        duration = duration
+        duration: SnackDuration = if (action == null) SnackDuration.Short else SnackDuration.Indefinite
     )
 
     /**

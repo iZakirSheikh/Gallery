@@ -8,6 +8,7 @@ import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.vector.AnimatedImageVector
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.material3.Typography
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -123,4 +125,30 @@ fun Modifier.marque(iterations: Int) =
             iterations = iterations,
         )
         .then(this)
+
+private val _default = Typography()
+fun Typography(
+    defaultFontFamily: FontFamily = FontFamily.Default,
+) = Typography(
+    _default.displayLarge.copy(fontFamily = defaultFontFamily),
+    _default.displayMedium.copy(fontFamily = defaultFontFamily),
+    _default.displaySmall.copy(fontFamily = defaultFontFamily),
+    _default.headlineLarge.copy(fontFamily = defaultFontFamily),
+    _default.headlineMedium.copy(fontFamily = defaultFontFamily),
+    _default.headlineSmall.copy(fontFamily = defaultFontFamily),
+    _default.titleLarge.copy(fontFamily = defaultFontFamily),
+    _default.titleMedium.copy(fontFamily = defaultFontFamily),
+    _default.titleSmall.copy(fontFamily = defaultFontFamily),
+    _default.bodyLarge.copy(fontFamily = defaultFontFamily),
+    _default.bodyMedium.copy(fontFamily = defaultFontFamily),
+    _default.bodySmall.copy(fontFamily = defaultFontFamily),
+    _default.labelLarge.copy(fontFamily = defaultFontFamily),
+    _default.labelMedium.copy(fontFamily = defaultFontFamily),
+    _default.labelSmall.copy(fontFamily = defaultFontFamily)
+)
+
+@Composable
+inline fun <T> rememberMutableStateOf(initial: T): MutableState<T> =
+    remember { mutableStateOf(initial) }
+
 

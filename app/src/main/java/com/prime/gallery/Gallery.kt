@@ -2,6 +2,7 @@ package com.prime.gallery
 
 import android.app.Application
 import android.os.Build
+import com.prime.gallery.BuildConfig
 import com.primex.preferences.intPreferenceKey
 import dagger.hilt.android.HiltAndroidApp
 
@@ -34,8 +35,9 @@ class Gallery : Application() {
         const val PKG_GOOGLE_PLAY_STORE = "com.android.vending"
 
         val STORAGE_PERMISSION =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) android.Manifest.permission.READ_MEDIA_IMAGES
-            else android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            else
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
     }
 }
-
