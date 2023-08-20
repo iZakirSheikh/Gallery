@@ -147,8 +147,5 @@ fun Typography(
     _default.labelSmall.copy(fontFamily = defaultFontFamily)
 )
 
-@Composable
-inline fun <T> rememberMutableStateOf(initial: T): MutableState<T> =
-    remember { mutableStateOf(initial) }
 
 

@@ -24,12 +24,12 @@ interface StringResolver {
     /**
      * @see getQuantityText2
      */
-    fun getQuantityText2(@PluralsRes id: Int, quantity: Int, vararg args: Any): CharSequence
+    fun getQuantityText(@PluralsRes id: Int, quantity: Int, vararg args: Any): CharSequence
 
     /**
      * @see getQuantityText2
      */
-    fun getQuantityText2(@PluralsRes id: Int, quantity: Int): CharSequence
+    fun getQuantityText(@PluralsRes id: Int, quantity: Int): CharSequence
 }
 
 @OptIn(ExperimentalTextApi::class)
@@ -40,9 +40,9 @@ fun StringResolver(resources: Resources) =
         override fun getText(id: Int, vararg args: Any) =
             resources.getText2(id, *args)
 
-        override fun getQuantityText2(id: Int, quantity: Int, vararg args: Any) =
+        override fun getQuantityText(id: Int, quantity: Int, vararg args: Any) =
             resources.getQuantityText2(id, quantity, *args)
 
-        override fun getQuantityText2(id: Int, quantity: Int) =
+        override fun getQuantityText(id: Int, quantity: Int) =
             resources.getQuantityText2(id, quantity)
     }

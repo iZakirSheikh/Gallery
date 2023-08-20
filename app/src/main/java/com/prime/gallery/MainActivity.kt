@@ -33,7 +33,6 @@ import com.google.android.play.core.ktx.requestUpdateFlow
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.prime.gallery.core.billing.Advertiser
 import com.prime.gallery.core.billing.BillingManager
-import com.prime.gallery.core.billing.Product
 import com.prime.gallery.core.billing.get
 import com.prime.gallery.core.billing.observeAsState
 import com.prime.gallery.core.billing.purchased
@@ -95,7 +94,7 @@ private fun initSplashScreen(isColdStart: Boolean) {
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), SystemFacade {
     private val advertiser by lazy { Advertiser(this) }
-    private val billingManager by lazy { BillingManager(this, arrayOf(Product.DISABLE_ADS)) }
+    private val billingManager by lazy { BillingManager(this, arrayOf(BuildConfig.IAP_NO_ADS)) }
 
     private val _inAppUpdateProgress = mutableFloatStateOf(Float.NaN)
     override val inAppUpdateProgress: Float
@@ -119,7 +118,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
     }
 
     override fun showAd(force: Boolean, action: (() -> Unit)?) {
-        val isAdFree = billingManager[Product.DISABLE_ADS].purchased
+        val isAdFree = billingManager[BuildConfig.IAP_NO_ADS].purchased
         if (isAdFree) return // don't do anything
         advertiser.show(this, force, action)
     }

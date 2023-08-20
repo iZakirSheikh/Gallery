@@ -1,3 +1,5 @@
+import java.util.Properties
+
 // TODO: Remove once KTIJ-19369 is fixed
 @Suppress("DSL_SCOPE_VIOLATION") plugins {
     alias(libs.plugins.androidApplication)
@@ -18,6 +20,19 @@ android {
         versionName = "0.0.1-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+        // Load secret keys from properties of Local Config.
+        // The local properties must be prefixed with secret.
+        val prefix = "SECRET_"
+        Properties().apply {
+            load(project.rootProject.file("local.properties").inputStream())
+            forEach {(name, value) ->
+                if (name !is String || !name.startsWith(prefix))
+                    return@forEach
+                val key = name.removePrefix(prefix)
+                // Add property to BuildConfig
+                buildConfigField("String", key, value!! as String)
+            }
+        }
     }
     buildTypes {
         // Make sure release is version is optimised.
