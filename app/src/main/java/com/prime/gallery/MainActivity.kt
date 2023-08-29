@@ -39,9 +39,9 @@ import com.prime.gallery.core.billing.purchased
 import com.prime.gallery.core.compose.LocalSystemFacade
 import com.prime.gallery.core.compose.LocalWindowSizeClass
 import com.prime.gallery.core.compose.SystemFacade
-import com.prime.gallery.core.compose.snackbar.SnackDuration
-import com.prime.gallery.core.compose.snackbar.SnackResult
+import com.prime.gallery.core.compose.snackbar.SnackbarDuration
 import com.prime.gallery.core.compose.snackbar.SnackbarHostState2
+import com.prime.gallery.core.compose.snackbar.SnackbarResult
 import com.primex.core.MetroGreen
 import com.primex.preferences.Key
 import com.primex.preferences.Preferences
@@ -123,7 +123,13 @@ class MainActivity : ComponentActivity(), SystemFacade {
         advertiser.show(this, force, action)
     }
 
-    override fun showSnackbar(message: CharSequence, action: CharSequence?, icon: Any?, accent: Color, duration: SnackDuration) {
+    override fun showSnackbar(
+        message: CharSequence,
+        action: CharSequence?,
+        icon: Any?,
+        accent: Color,
+        duration: SnackbarDuration
+    ) {
         lifecycleScope.launch {
             channel.showSnackbar(message, action, icon, accent, duration)
         }
@@ -247,11 +253,11 @@ class MainActivity : ComponentActivity(), SystemFacade {
                             val res = channel.showSnackbar(
                                 msg = "Update \nAn update has just been downloaded.",
                                 action = "RESTART",
-                                duration = SnackDuration.Indefinite,
+                                duration = SnackbarDuration.Indefinite,
                                 accent = Color.MetroGreen
                             )
                             // complete update when ever user clicks on action.
-                            if (res == SnackResult.ActionPerformed) manager.completeUpdate()
+                            if (res == SnackbarResult.ActionPerformed) manager.completeUpdate()
                         }
 
                         is AppUpdateResult.Available -> {

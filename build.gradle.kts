@@ -6,6 +6,5 @@
     alias(libs.plugins.firebase) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.crashanlytics) apply false
-}
-// Needed to make the Suppress annotation work for the plugins block
-true
+} true // Needed to make the Suppress annotation work for the plugins block
+

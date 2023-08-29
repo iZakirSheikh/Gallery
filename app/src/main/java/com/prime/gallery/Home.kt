@@ -8,13 +8,17 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.PhotoAlbum
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ButtonDefaults
@@ -31,7 +35,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -43,6 +46,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -50,6 +54,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.prime.gallery.core.ContentPadding
 import com.prime.gallery.core.NightMode
 import com.prime.gallery.core.compose.BottomBarItem
 import com.prime.gallery.core.compose.LocalNavController
@@ -63,13 +68,13 @@ import com.prime.gallery.core.compose.preference
 import com.prime.gallery.core.compose.snackbar.SnackbarHostState2
 import com.prime.gallery.files.Files
 import com.prime.gallery.folders.Folders
-import com.prime.gallery.impl.FilesViewModel
-import com.prime.gallery.impl.FoldersViewModel
-import com.prime.gallery.impl.SettingsViewModel
-import com.prime.gallery.impl.ViewerViewModel
+import com.prime.gallery.impl.vms.FilesViewModel
+import com.prime.gallery.impl.vms.FoldersViewModel
+import com.prime.gallery.impl.vms.SettingsViewModel
+import com.prime.gallery.impl.vms.ViewerViewModel
 import com.prime.gallery.settings.Settings
 import com.prime.gallery.viewer.Viewer
-import com.primex.core.rememberState
+import com.primex.material3.IconButton
 
 private const val TAG = "Home"
 
@@ -84,7 +89,7 @@ typealias Material = MaterialTheme
 @Composable
 @NonRestartableComposable
 private fun isPrefDarkTheme(): Boolean {
-    val mode by preference(key = Settings.KEY_NIGHT_MODE)
+    val mode by preference(key = Settings.NIGHT_MODE)
     return when (mode) {
         NightMode.YES -> true
         NightMode.FOLLOW_SYSTEM -> isSystemInDarkTheme()
@@ -100,7 +105,7 @@ private val ExitTransition = fadeOut(tween(700))
 private val DarkColorScheme = darkColorScheme(background = Color(0xFF0E0E0F))
 private val LightColorScheme = lightColorScheme()
 
-private val DefaultTypography = Typography(defaultFontFamily = Settings.LatoFontFamily)
+private val DefaultTypography = Typography(defaultFontFamily = Settings.DefaultFontFamily)
 
 @Composable
 @NonRestartableComposable
@@ -141,12 +146,14 @@ private fun Permission() {
     val permission = rememberPermissionState(permission = Gallery.STORAGE_PERMISSION) {
         if (!it) return@rememberPermissionState
         controller.graph.setStartDestination(Files.route)
+        // navigate to timeline
         controller.navigate(Files.direction()) { popUpTo(PERMISSION_ROUTE) { inclusive = true } }
     }
     Placeholder(
         iconResId = R.raw.lt_permission,
         title = stringResource(R.string.storage_permission),
-        message = stringResource(R.string.storage_permission_msg),
+        message = stringResource(R.string.msg_storage_permission),
+        vertical = LocalWindowSizeClass.current.widthSizeClass < WindowWidthSizeClass.Medium
     ) {
         com.primex.material3.OutlinedButton(
             onClick = { permission.launchPermissionRequest() },
@@ -159,7 +166,6 @@ private fun Permission() {
         )
     }
 }
-
 
 /**
  * A simple structure of the NavGraph.
@@ -218,7 +224,6 @@ private fun NavGraph(
                         val viewModel = hiltViewModel<SettingsViewModel>()
                         Settings(state = viewModel)
                     }
-
                 }
             )
         }
@@ -228,70 +233,147 @@ private fun NavGraph(
 @Composable
 @NonRestartableComposable
 private fun NavRail(
-    controller: NavHostController,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     NavigationRail(
         modifier = modifier.widthIn(min = 120.dp),
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        var selected by rememberState(initial = 0)
+        val current by navController.currentBackStackEntryAsState()
+        //Timeline
         NavigationRailItem2(
-            label = "Timeline",
+            label = stringResource(R.string.timeline),
             icon = Icons.Outlined.Timeline,
-            onClick = { selected = 0 },
-            selected = selected == 0
-        )
-        NavigationRailItem2(
-            label = "Folders",
-            icon = Icons.Outlined.Folder,
-            onClick = { selected = 1 },
-            selected = selected == 1
+            selected = current?.destination?.route == Files.route,
+            onClick = {
+                navController.navigate(Files.direction()) {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            },
         )
 
         NavigationRailItem2(
-            label = "Albums",
-            icon = Icons.Outlined.Timeline,
-            onClick = { selected = 2 },
-            selected = selected == 2
+            label = stringResource(R.string.folders),
+            icon = Icons.Outlined.Folder,
+            selected = current?.destination?.route == Folders.route,
+            onClick = {
+                navController.navigate(Folders.direction()) {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            },
+        )
+
+        NavigationRailItem2(
+            label = stringResource(R.string.albums),
+            icon = Icons.Outlined.PhotoAlbum,
+            onClick = { /*TODO: This will be added later*/ },
+            selected = false
         )
         Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(
+            icon = Icons.Outlined.Settings,
+            contentDescription = null,
+            onClick = {
+                navController.navigate(Settings.direction())
+            }
+        )
     }
 }
 
 @Composable
 @NonRestartableComposable
-private fun BottomBar(
-    controller: NavHostController,
+private fun BottomNavBar(
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     BottomAppBar(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+        contentPadding = PaddingValues(horizontal = ContentPadding.normal)
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        var selected by rememberState(initial = 0)
+        val current by navController.currentBackStackEntryAsState()
+        //Timeline
         BottomBarItem(
-            label = "Timeline",
+            label = stringResource(R.string.timeline),
             icon = Icons.Outlined.Timeline,
-            onClick = { selected = 0 },
-            selected = selected == 0
-        )
-        BottomBarItem(
-            label = "Folders",
-            icon = Icons.Outlined.Folder,
-            onClick = { selected = 1 },
-            selected = selected == 1
+            selected = current?.destination?.route == Files.route,
+            onClick = {
+                navController.navigate(Files.direction()) {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            },
         )
 
         BottomBarItem(
-            label = "Albums",
-            icon = Icons.Outlined.Timeline,
-            onClick = { selected = 2 },
-            selected = selected == 2
+            label = stringResource(R.string.folders),
+            icon = Icons.Outlined.Folder,
+            selected = current?.destination?.route == Folders.route,
+            onClick = {
+                navController.navigate(Folders.direction()) {
+                    // Pop up to the start destination of the graph to
+                    // avoid building up a large stack of destinations
+                    // on the back stack as users select items
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
+                    }
+                    // Avoid multiple copies of the same destination when
+                    // reselecting the same item
+                    launchSingleTop = true
+                    // Restore state when reselecting a previously selected item
+                    restoreState = true
+                }
+            },
+        )
+
+        BottomBarItem(
+            label = stringResource(R.string.albums),
+            icon = Icons.Outlined.PhotoAlbum,
+            onClick = { /*TODO: This will be added later*/ },
+            selected = false
         )
         Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(
+            icon = Icons.Outlined.Settings,
+            contentDescription = null,
+            onClick = {
+                navController.navigate(Settings.direction())
+            }
+        )
     }
 }
 
@@ -301,7 +383,7 @@ fun Home(channel: SnackbarHostState2) {
     val darkTheme = isPrefDarkTheme()
     // Observe if the user wants dynamic light.
     // Supports only above android 12+
-    val dynamicColor by preference(key = Settings.KEY_DYNAMIC_COLORS)
+    val dynamicColor by preference(key = Settings.DYNAMIC_COLORS)
     Material(darkTheme, dynamicColor) {
         // Place the content.
         val vertical = LocalWindowSizeClass.current.widthSizeClass < WindowWidthSizeClass.Medium
@@ -319,7 +401,8 @@ fun Home(channel: SnackbarHostState2) {
             content = { NavGraph(controller = navController) },
             progress = facade.inAppUpdateProgress,
             hideNavigationBar = hideNavigationBar,
-            navBar = { if (vertical) BottomBar(navController) else NavRail(navController) }
+            navBar = { if (vertical) BottomNavBar(navController) else NavRail(navController) },
+            modifier = Modifier.background(Material.colorScheme.background)
         )
 
         // handle the color of navBars.
@@ -327,10 +410,10 @@ fun Home(channel: SnackbarHostState2) {
         if (view.isInEditMode)
             return@Material
         // Observe if the user wants to color the SystemBars
-        val colorSystemBars by preference(key = Settings.KEY_COLOR_STATUS_BAR)
+        val colorSystemBars by preference(key = Settings.COLOR_SYSTEM_BARS)
         val systemBarsColor =
             if (colorSystemBars) Material.colorScheme.primary else Color.Transparent
-        val hideStatusBar by preference(key = Settings.KEY_HIDE_STATUS_BAR)
+        val hideStatusBar by preference(key = Settings.HIDE_SYSTEM_BARS)
         SideEffect {
             val window = (view.context as Activity).window
             window.navigationBarColor = systemBarsColor.toArgb()
@@ -345,4 +428,3 @@ fun Home(channel: SnackbarHostState2) {
         }
     }
 }
-

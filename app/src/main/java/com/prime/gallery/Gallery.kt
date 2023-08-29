@@ -2,7 +2,6 @@ package com.prime.gallery
 
 import android.app.Application
 import android.os.Build
-import com.prime.gallery.BuildConfig
 import com.primex.preferences.intPreferenceKey
 import dagger.hilt.android.HiltAndroidApp
 

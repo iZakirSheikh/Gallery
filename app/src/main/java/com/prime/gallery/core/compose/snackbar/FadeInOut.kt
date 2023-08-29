@@ -25,11 +25,11 @@ import androidx.compose.ui.semantics.semantics
 // it's basically tweaked nullable version of Crossfade
 @Composable
 internal fun FadeInFadeOutWithScale(
-    current: Snack?,
+    current: Data?,
     modifier: Modifier = Modifier,
-    content: @Composable (Snack) -> Unit
+    content: @Composable (Data) -> Unit
 ) {
-    val state = remember { FadeInFadeOutState<Snack?>() }
+    val state = remember { FadeInFadeOutState<Data?>() }
     if (current != state.current) {
         state.current = current
         val keys = state.items.map { it.key }.toMutableList()

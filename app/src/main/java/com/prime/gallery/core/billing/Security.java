@@ -41,7 +41,7 @@ class Security {
      * your local.properties, it will be echoed into BuildConfig.
      */
 
-    final private static String BASE_64_ENCODED_PUBLIC_KEY = BuildConfig.PLAY_CONSOLE_RSA_KEY;
+    final private static String BASE_64_ENCODED_PUBLIC_KEY = BuildConfig.PLAY_CONSOLE_APP_RSA_KEY;
 
     /**
      * Verifies that the data was signed with the given signature

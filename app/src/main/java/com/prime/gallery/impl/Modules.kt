@@ -3,8 +3,6 @@ package com.prime.gallery.impl
 import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
-import com.prime.gallery.core.StringResolver
-import com.prime.gallery.core.compose.snackbar.SnackbarController
 import com.prime.gallery.core.compose.snackbar.SnackbarHostState2
 import com.primex.preferences.Preferences
 import dagger.Module
@@ -36,11 +34,6 @@ object SingletonModule {
     @Provides
     fun resources(@ApplicationContext context: Context): Resources =
         context.resources
-
-    @Singleton
-    @Provides
-    fun stringResolver(resources: Resources): StringResolver =
-        StringResolver(resources)
 }
 
 @Module
@@ -52,5 +45,6 @@ object ActivityModule {
 
     @ActivityRetainedScoped
     @Provides
-    fun controller(state: SnackbarHostState2): SnackbarController = state
+    fun systemDelegate(@ApplicationContext ctx: Context, channel: SnackbarHostState2): SystemDelegate =
+        SystemDelegate(ctx, channel)
 }

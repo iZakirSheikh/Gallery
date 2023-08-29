@@ -1,15 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Naming convention for string resources:
+     - The string can be styled following the rules of styling without CDATA, as the toolkit does not support CDATA.
+     - The string resources should be named as follows:
+       1. If the string is simple, like Delete, its name should be R.string.delete.
+       2. If the string contains complex text, the name should be in this format: screen_purpose_variables (optional; if no variables, omit this). For example, pref_theme_ss.
+       3. General message (snackbar) messages should be named as msg_add_to_playlist_error_s (optional). The message can be styled as bold or experimental, like alpha superscript. The message can have any length.
+       4. Snackbar messages that belong to a specific screen should be named as msg_screen_name_s (optional).
+       5. The snackbar message should have this structure: Title\n bold + experimental + message.
+   -->
+<!--Some common variables-->
+<!DOCTYPE resources [<!ENTITY appname "Gallery"><!ENTITY author "Zakir Sheikh"><!ENTITY version_name "0.0.1-dev">]><!--The string resources should follow the above rules strictly-->
 <resources>
-    <string name="app_name">Gallery</string>
+    <string name="app_name">&appname;</string>
     <!--The strings that are same as name.-->
     <string name="settings">Settings</string>
     <string name="dismiss">Dismiss</string>
     <string name="allow">Allow</string>
     <string name="storage_permission">Storage\nPermission</string>
+    <string name="donate">Donate</string>
+    <string name="appearance">Appearance</string>
+    <string name="general">General</string>
+    <string name="feedback">Feedback</string>
+    <string name="error">Error</string>
+    <string name="github">Github</string>
 
-    <!--Messages-->
-    <string name="storage_permission_msg">
-        In order to work properly the app requires permission to your devices storage (Photos, Media and Files).
+    <!--Settings Route-->
+    <string name="settings_title">@string/settings</string>
+    <!--Group Appearance-->
+    <string name="pref_header_appearance">@string/appearance</string>
+    <string name="pref_app_theme">App Theme</string>
+    <string name="pref_app_theme_summery">Select the app theme: dark, light, or follow the system settings.</string>
+    <string name="pref_color_system_bars">Color System Bars</string>
+    <string name="pref_color_system_bars_summery">Make the system bars colorful.</string>
+    <string name="pref_hide_system_bars">Hide System Bars</string>
+    <string name="pref_hide_system_bars_summery">Enjoy a more immersive view without the system bars (Status/Navigation Bar).</string>
+    <string name="pref_dynamic_colors">Dynamic colors</string>
+    <string name="pref_dynamic_colors_summery">
+        Toggle the usage of dynamic colors. This feature is available only on <b>Android 12</b> or higher.
     </string>
 
+    <!--Group General-->
+    <string name="pref_header_general">@string/general</string>
+    <string name="pref_enable_trash_can">Enable trash can</string>
+    <string name="pref_enable_trash_can_summery">
+        <b><i>Only available on Android 11 and above</i></b>, when enabled, deleted tracks are moved
+        to a <b>Trash Can</b> folder instead of being permanently deleted.
+    </string>
+    <string name="pref_blacklisted_files">Blacklist</string>
+    <string name="pref_blacklisted_files_summery">Files from the <b><i>blacklist folders</i></b> will be hidden from your library.</string>
 
+    <!--Group title-->
+    <string name="pref_header_feedback">@string/feedback</string>
+    <string name="pref_feedback">@string/feedback</string>
+    <string name="pref_feedback_summery">Have feedback? We\'d love to hear it, but please don\'t share sensitive information.</string>
+
+    <string name="pref_rate_us">Rate Us</string>
+    <string name="pref_rate_us_summery">
+       If you enjoy using <b>&appname;</b>, please take a moment and rate it <b>5 stars</b> on app store.
+        Thanks for your support \nTap to rate.
+    </string>
+
+    <string name="pref_spread_the_word">Spread the word</string>
+    <string name="pref_spread_the_word_summery">
+       We appreciate your support for the app. If you love it, please share it with your friends,
+        family and WhatsApp groups. Remember, sharing is caring!
+    </string>
+
+    <string name="pref_header_about_us">About Us</string>
+    <string name="pref_about_us_summery">
+       Thank you for using <b>&appname;</b> . I am an <b>individual developer</b> who loves to create useful and
+        beautiful apps. I need your <b><i>support</i></b> to keep developing this app and make it better. You can
+        support me by <b>buying</b> the app or rating it <b>5 stars</b> on the store. Your <b>feedback</b>
+        is also very valuable to me. Please share your thoughts and suggestions with me. I appreciate your help
+        and encouragement.
+    </string>
+
+    <string name="pref_app_version">App Version</string>
+    <string name="pref_app_version_summery">
+        &version_name;\nClick to check for updates
+    </string>
+
+    <!--Messages-->
+    <string name="msg_unknown_error">Oops!! “Something went wrong. Please restart the app and try again.”</string>
+    <!--S: Name of the file-->
+    <string name="msg_file_removed_from_blacklist_s">%s has been successfully removed from blacklist</string>
+    <string name="msg_storage_permission">
+        This app lets you enjoy audio files from your device’s storage. To do that, it needs your
+        permission to access your storage
+    </string>
+    <string name="timeline">Timeline</string>
+    <string name="folders">Folders</string>
+    <string name="albums">Albums</string>
 </resources>

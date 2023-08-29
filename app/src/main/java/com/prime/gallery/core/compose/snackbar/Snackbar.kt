@@ -17,10 +17,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.resume
 
+private const val TAG = "Snackbar"
+
 /**
  * Possible results of the [SnackbarHostState.showSnackbar] call
  */
-enum class SnackResult {
+enum class SnackbarResult {
     /**
      * [Snackbar] that is shown has been dismissed either by timeout of by user
      */
@@ -35,7 +37,7 @@ enum class SnackResult {
 /**
  * Possible durations of the [Snackbar] in [SnackbarHost]
  */
-enum class SnackDuration {
+enum class SnackbarDuration {
     /**
      * Show the Snackbar for a short period of time
      */
@@ -62,10 +64,10 @@ enum class SnackDuration {
  * @property leadingIcon optional leading icon for [Snackbar]. Default null. The leading must be a
  *           vector icon or resource drawbale.
  */
-interface Snack {
+interface Data {
     val message: CharSequence
     val actionLabel: CharSequence?
-    val duration: SnackDuration
+    val duration: SnackbarDuration
 
     // optional
     val accent: Color
@@ -82,27 +84,27 @@ interface Snack {
     fun dismiss()
 }
 
-private class SnackImpl(
+private class DataImpl(
     override val message: CharSequence,
     override val actionLabel: CharSequence?,
-    override val duration: SnackDuration,
+    override val duration: SnackbarDuration,
     override val accent: Color,
     override val leadingIcon: Any?,
-    private val continuation: CancellableContinuation<SnackResult>
-) : Snack {
+    private val continuation: CancellableContinuation<SnackbarResult>
+) : Data {
     override fun performAction() {
-        if (continuation.isActive) continuation.resume(SnackResult.ActionPerformed)
+        if (continuation.isActive) continuation.resume(SnackbarResult.ActionPerformed)
     }
 
     override fun dismiss() {
-        if (continuation.isActive) continuation.resume(SnackResult.Dismissed)
+        if (continuation.isActive) continuation.resume(SnackbarResult.Dismissed)
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as SnackImpl
+        other as DataImpl
 
         if (message != other.message) return false
         if (actionLabel != other.actionLabel) return false
@@ -130,8 +132,7 @@ private class SnackImpl(
  * This state is usually [remember]ed and used to provide a [SnackbarHost] to a [Scaffold].
  */
 @Stable
-class SnackbarHostState2 : SnackbarController {
-
+class SnackbarHostState2 {
     /**
      * Only one [Snackbar] can be shown at a time. Since a suspending Mutex is a fair queue, this
      * manages our message queue and we don't have to maintain one.
@@ -141,7 +142,7 @@ class SnackbarHostState2 : SnackbarController {
     /**
      * The current [SnackbarData] being shown by the [SnackbarHost], or `null` if none.
      */
-    var currentSnackbarData by mutableStateOf<Snack?>(null)
+    var currentSnackbarData by mutableStateOf<Data?>(null)
         private set
 
     /**
@@ -154,17 +155,17 @@ class SnackbarHostState2 : SnackbarController {
      * from display and/or the queue to be displayed.
      * @see [SnackbarData2]
      */
-    override suspend fun showSnackbar(
+    suspend fun showSnackbar(
         msg: CharSequence,
-        action: CharSequence?,
-        leading: Any?,
-        accent: Color,
-        duration: SnackDuration
-    ): SnackResult = mutex.withLock {
+        action: CharSequence? = null,
+        leading: Any? = null,
+        accent: Color = Color.Unspecified,
+        duration: SnackbarDuration = if (action == null) SnackbarDuration.Short else SnackbarDuration.Indefinite
+    ): SnackbarResult = mutex.withLock {
         try {
             return suspendCancellableCoroutine { continuation ->
                 currentSnackbarData =
-                    SnackImpl(msg, action, duration, accent, leading, continuation)
+                    DataImpl(msg, action, duration, accent, leading, continuation)
             }
         } finally {
             currentSnackbarData = null
@@ -173,14 +174,14 @@ class SnackbarHostState2 : SnackbarController {
 }
 
 // TODO: magic numbers adjustment
-private fun SnackDuration.toMillis(
+private fun SnackbarDuration.toMillis(
     hasAction: Boolean,
     accessibilityManager: AccessibilityManager?
 ): Long {
     val original = when (this) {
-        SnackDuration.Indefinite -> Long.MAX_VALUE
-        SnackDuration.Long -> 10000L
-        SnackDuration.Short -> 4000L
+        SnackbarDuration.Indefinite -> Long.MAX_VALUE
+        SnackbarDuration.Long -> 10000L
+        SnackbarDuration.Short -> 4000L
     }
     if (accessibilityManager == null) {
         return original
@@ -216,7 +217,7 @@ private fun SnackDuration.toMillis(
 fun SnackbarHost2(
     hostState: SnackbarHostState2,
     modifier: Modifier = Modifier,
-    snackbar: @Composable (Snack) -> Unit = { TODO("Not Implemented yet.") }
+    snackbar: @Composable (Data) -> Unit = { TODO("Not Implemented yet.") }
 ) {
     val currentSnackbarData = hostState.currentSnackbarData
     val manager = LocalAccessibilityManager.current
@@ -236,5 +237,3 @@ fun SnackbarHost2(
         content = snackbar
     )
 }
-
-

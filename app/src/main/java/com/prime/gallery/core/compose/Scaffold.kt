@@ -58,7 +58,7 @@ fun Scaffold2(
     val realContent =
         @Composable {
             // The main content. Autoboxed inside surface.
-            Surface(content = content, color = MaterialTheme.colorScheme.background)
+            content()
             // The SnackBar
             SnackbarHost2(hostState = channel)
             // ProgressBar
@@ -94,7 +94,7 @@ fun Scaffold2(
 
 @Composable
 private inline fun Vertical(
-    noinline content: @Composable () -> Unit,
+    content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var orgNavBarHeightPx by remember { mutableFloatStateOf(Float.NaN) }
@@ -167,7 +167,7 @@ private inline fun Vertical(
 
 @Composable
 private inline fun Horizontal(
-    noinline content: @Composable () -> Unit,
+    content: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Layout(

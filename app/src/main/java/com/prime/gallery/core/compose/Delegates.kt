@@ -243,7 +243,7 @@ inline fun LottieAnimButton(
  */
 @OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
-inline fun AVDIconButton(
+inline fun AnimatedIconButton(
     @DrawableRes id: Int,
     noinline onClick: () -> Unit,
     modifier: Modifier = Modifier,

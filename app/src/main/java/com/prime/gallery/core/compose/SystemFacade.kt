@@ -7,7 +7,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import com.android.billingclient.api.Purchase
-import com.prime.gallery.core.compose.snackbar.SnackDuration
+import com.prime.gallery.core.compose.snackbar.SnackbarDuration
 import com.primex.preferences.Key
 
 /**
@@ -49,7 +49,7 @@ interface SystemFacade {
         action: CharSequence? = null,
         icon: Any? = null,
         accent: Color = Color.Unspecified,
-        duration: SnackDuration = if (action == null) SnackDuration.Short else SnackDuration.Indefinite
+        duration: SnackbarDuration = if (action == null) SnackbarDuration.Short else SnackbarDuration.Indefinite
     )
 
     /**

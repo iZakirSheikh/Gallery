@@ -1,5 +1,3 @@
-import java.util.Properties
-
 // TODO: Remove once KTIJ-19369 is fixed
 @Suppress("DSL_SCOPE_VIOLATION") plugins {
     alias(libs.plugins.androidApplication)
@@ -9,6 +7,24 @@ import java.util.Properties
     alias(libs.plugins.crashanlytics)
     kotlin("kapt")
 }
+
+/**
+ * The secrets that needs to be added to BuildConfig at runtime.
+ * FixMe: Maybe move these to some other location like libs.version.toml if that is possible.
+ */
+private val secrets = arrayOf(
+    // Google Play Billing
+    "IAP_BUY_ME_COFFEE",
+    "IAP_NO_ADS",
+    // These are releated to ads
+    "PLACEMENT_BANNER_1",
+    "PLACEMENT_BANNER_2",
+    "PLACEMENT_INTERSTITIAL",
+    "UNITY_APP_ID",
+    // Google Play Billing
+    "PLAY_CONSOLE_APP_RSA_KEY"
+)
+
 android {
     namespace = "com.prime.gallery"
     compileSdk = 34
@@ -20,18 +36,10 @@ android {
         versionName = "0.0.1-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
-        // Load secret keys from properties of Local Config.
-        // The local properties must be prefixed with secret.
-        val prefix = "SECRET_"
-        Properties().apply {
-            load(project.rootProject.file("local.properties").inputStream())
-            forEach {(name, value) ->
-                if (name !is String || !name.startsWith(prefix))
-                    return@forEach
-                val key = name.removePrefix(prefix)
-                // Add property to BuildConfig
-                buildConfigField("String", key, value!! as String)
-            }
+        //Load secrets into BuildConfig
+        secrets.forEach { secret ->
+            val value = "\"" + (System.getenv(secret) ?: "empty") + "\""
+            buildConfigField("String", secret, value)
         }
     }
     buildTypes {
@@ -52,23 +60,26 @@ android {
             versionNameSuffix = "-debug"
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn", "-Xcontext-receivers")
     }
+
     buildFeatures { compose = true }
-    composeOptions { kotlinCompilerExtensionVersion = "1.5.1" }
+    composeOptions { kotlinCompilerExtensionVersion = "1.5.2" }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 // Not moving these to libs.version.toml because i think this is redundant.
 dependencies {
     implementation("androidx.core:core-ktx:1.10.1")
-    val compose_version = "1.6.0-alpha03"
+    val compose_version = "1.6.0-alpha04"
     implementation("androidx.compose.ui:ui:$compose_version")
     implementation("androidx.compose.ui:ui-tooling-preview:$compose_version")
     implementation("androidx.compose.animation:animation-graphics:$compose_version")
@@ -79,7 +90,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:$compose_version")
     // The Accompanist Libraries
     implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("com.google.accompanist:accompanist-permissions:0.31.5-beta")
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
     //Lottie
     implementation("com.airbnb.android:lottie-compose:6.1.0")
     // Preferences and other widgets
@@ -90,11 +101,11 @@ dependencies {
     // Splash Screen API
     implementation("androidx.core:core-splashscreen:1.0.1")
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:32.2.2"))
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-crashlytics-ktx")
     // material3
-    val material3 = "1.2.0-alpha05"
+    val material3 = "1.2.0-alpha06"
     implementation("androidx.compose.material3:material3:$material3")
     implementation("androidx.compose.material3:material3-window-size-class:$material3")
     // Google Play InAppUpdate
@@ -112,7 +123,7 @@ dependencies {
     // Unity Ads
     implementation("com.unity3d.ads:unity-ads:4.8.0")
     // Compose navigation
-    implementation("androidx.navigation:navigation-compose:2.7.0")
+    implementation("androidx.navigation:navigation-compose:2.7.1")
     // Compose Downloadable fonts
     implementation("androidx.compose.ui:ui-text-google-fonts:1.5.0")
     // Hilt
