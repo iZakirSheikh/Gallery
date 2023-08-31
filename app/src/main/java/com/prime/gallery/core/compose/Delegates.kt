@@ -30,10 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.airbnb.lottie.AsyncUpdates
 import com.airbnb.lottie.RenderMode
 import com.airbnb.lottie.compose.LottieAnimation
@@ -345,3 +349,26 @@ fun NavigationRailItem2(
     )
 }
 
+@Composable
+inline fun Image(
+    data: Any?,
+    modifier: Modifier = Modifier,
+    error: Painter? = null,
+    contentScale: ContentScale = ContentScale.Crop,
+    alignment: Alignment = Alignment.Center,
+    fadeMills: Int = AnimationConstants.DefaultDurationMillis,
+) {
+    val context = LocalContext.current
+    val request = remember(data) {
+        ImageRequest.Builder(context).data(data).crossfade(fadeMills).build()
+    }
+
+    AsyncImage(
+        model = request,
+        contentDescription = null,
+        error = error,
+        modifier = modifier,
+        contentScale = contentScale,
+        alignment = alignment,
+    )
+}

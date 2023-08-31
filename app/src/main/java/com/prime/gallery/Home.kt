@@ -239,6 +239,7 @@ private fun NavRail(
     NavigationRail(
         modifier = modifier.widthIn(min = 120.dp),
         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+        contentColor = Material.colorScheme.onSurface
     ) {
         Spacer(modifier = Modifier.weight(1f))
         val current by navController.currentBackStackEntryAsState()
@@ -312,7 +313,8 @@ private fun BottomNavBar(
     BottomAppBar(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
-        contentPadding = PaddingValues(horizontal = ContentPadding.normal)
+        contentPadding = PaddingValues(horizontal = ContentPadding.normal),
+        contentColor = Material.colorScheme.onSurface
     ) {
         Spacer(modifier = Modifier.weight(1f))
         val current by navController.currentBackStackEntryAsState()

@@ -92,4 +92,8 @@
     <string name="timeline">Timeline</string>
     <string name="folders">Folders</string>
     <string name="albums">Albums</string>
+    <string name="loading">Loading</string>
+    <string name="size">Size</string>
+    <string name="name">Name</string>
+    <string name="date_modified">Date Modified</string>
 </resources>

@@ -42,8 +42,5 @@ class Repository @Inject constructor(
     /**
      * @see MediaProvider.getFolders
      */
-    suspend fun getFolders(
-        filter: String? = null,
-        ascending: Boolean = true,
-    ) = resolver.getFolders(filter, ascending)
+    suspend fun getFolders(filter: String? = null) = resolver.getFolders(filter)
 }

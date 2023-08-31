@@ -72,7 +72,7 @@ android {
     }
 
     buildFeatures { compose = true }
-    composeOptions { kotlinCompilerExtensionVersion = "1.5.2" }
+    composeOptions { kotlinCompilerExtensionVersion = "1.5.3" }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
@@ -89,8 +89,15 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:$compose_version")
     implementation("androidx.compose.material:material-icons-extended:$compose_version")
     // The Accompanist Libraries
-    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("com.google.accompanist:accompanist-permissions:0.32.0")
+
+    //Coil
+    val coil_version = "2.4.0"
+    implementation("io.coil-kt:coil-compose:$coil_version")
+    implementation("io.coil-kt:coil-gif:$coil_version")
+    implementation("io.coil-kt:coil-svg:$coil_version")
+    implementation("io.coil-kt:coil-video:$coil_version")
+
     //Lottie
     implementation("com.airbnb.android:lottie-compose:6.1.0")
     // Preferences and other widgets

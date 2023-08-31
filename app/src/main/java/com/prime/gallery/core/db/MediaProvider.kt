@@ -227,7 +227,8 @@ class Folder(
     @JvmField val artwork: String,
     @JvmField val path: String,
     @JvmField val count: Int,
-    @JvmField val size: Int
+    @JvmField val size: Int,
+    @JvmField val lastModified: Long
 ) {
     val name: String get() = PathUtils.name(path)
 }
@@ -456,25 +457,36 @@ suspend fun ContentResolver.getFolders(
         "(${COLUMN_MEDIA_TYPE} = $MEDIA_TYPE_IMAGE OR $COLUMN_MEDIA_TYPE = ${MEDIA_TYPE_VIDEO})" + if (filter != null) " AND $COLUMN_NAME LIKE ?" else ""
     return query2(
         EXTERNAL_CONTENT_URI,
-        arrayOf(COLUMN_PATH),
+        arrayOf(COLUMN_PATH, COLUMN_SIZE, COLUMN_DATE_MODIFIED),
         selection = selection,
         if (filter != null) arrayOf("%$filter%") else null,
         order = COLUMN_DATE_MODIFIED,
         ascending = ascending
     ) { c ->
-        val result = List(c.count) {
-            c.moveToPosition(it);
+        val list = ArrayList<Folder>()
+        while (c.moveToNext()) {
             val path = c.getString(0)
-            // filter out the individual folders of camera directory.
             val parent = PathUtils.parent(path).let {
                 if (PathUtils.name(it).startsWith("img", true)) PathUtils.parent(it)
                 else it
             }
-            Folder(path, parent, 0, 0)
-        }.distinctBy { it.path }
-        // Fix. TODO: return limit to make consistent with others.
-        // val fromIndex = if (offset > l.size - 1) l.size -1 else offset
-        // val toIndex = if (offset + limit > l.size -1 ) TODO()
-        result
+            val size = c.getInt(1)
+            val lastModified = c.getLong(2)
+            val index = list.indexOfFirst { it.path == parent }
+            if (index == -1) {
+                list += Folder(path, parent, 1, size, lastModified)
+                continue
+            }
+            val old = list[index]
+            val artwork = if (old.lastModified > lastModified) old.artwork else path
+            list[index] = Folder(
+                artwork,
+                parent,
+                old.count + 1,
+                old.size + size,
+                maxOf(old.lastModified, lastModified)
+            )
+        }
+        list
     }
 }
