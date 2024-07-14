@@ -1,0 +1,18 @@
+<!DOCTYPE resources [<!ENTITY appname "Gallery"><!ENTITY author "Zakir Sheikh"><!ENTITY version_name "0.0.1-dev"> <!ENTITY beta "<sup><font color = '#ae1c27' size= '10'><b>Beta</b></font></sup>">]><!--The string resources should follow the above rules strictly-->
+
+<resources>
+    <!--Some common variables-->
+    <string name="app_name">&appname;</string>
+    <string name="permission_screen_title">Storage Permission</string>
+    <string name="allow">Allow</string>
+    <string name="permission_screen_desc"><b>&appname;</b> lets you browse and view <b>images</b> and <b>videos</b> stored on your device.\nTo do that, it needs <b>permission</b> to access your storage.</string>
+    <string name="photos">Photos</string>
+    <string name="settings">Settings</string>
+    <string name="folders">Folders</string>
+    <string name="loading">Loading</string>
+    <string name="oops_empty">Oops Empty!!</string>
+    <string name="folders_formatted_folder_name_sds">%1$d items - %2$s</string>
+    <string name="size">Size</string>
+    <string name="name">Name</string>
+    <string name="recent">Recent</string>
+</resources>
