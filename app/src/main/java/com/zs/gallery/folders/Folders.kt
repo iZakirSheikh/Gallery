@@ -1,16 +1,35 @@
+/*
+ * Copyright 2024 Zakir Sheikh
+ *
+ * Created by Zakir Sheikh on 23-07-2024.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.zs.gallery.folders
 
-
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -21,7 +40,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.filled.FolderCopy
-import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.runtime.Composable
@@ -32,7 +51,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -41,7 +62,6 @@ import com.primex.core.textResource
 import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
 import com.primex.material2.Label
-import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.menu.DropDownMenu2
 import com.primex.material2.neumorphic.NeumorphicTopAppBar
 import com.zs.compose_ktx.AppTheme
@@ -50,18 +70,48 @@ import com.zs.compose_ktx.None
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.Placeholder
+import com.zs.gallery.common.fullLineSpan
 import com.zs.gallery.common.preference
-import com.zs.gallery.files.FilesViewState
-import com.zs.gallery.settings.SettingsViewState
+import com.zs.gallery.files.RouteFolder
+import com.zs.gallery.settings.Settings
 
 private const val TAG = "Folders"
 
+@StringRes
+fun fetchOrderTitle(order: Int): Int {
+    return when (order) {
+        FoldersViewState.ORDER_BY_NAME -> R.string.name
+        FoldersViewState.ORDER_BY_DATE_MODIFIED -> R.string.last_modified
+        FoldersViewState.ORDER_BY_SIZE -> R.string.size
+        else -> error("Oops invalid id passed $order")
+    }
+}
+
+fun fetchOrderIcon(order: Int): ImageVector {
+    return when (order) {
+        FoldersViewState.ORDER_BY_NAME -> Icons.Outlined.TextFields
+        FoldersViewState.ORDER_BY_DATE_MODIFIED -> Icons.Outlined.DateRange
+        FoldersViewState.ORDER_BY_SIZE -> Icons.Outlined.Memory
+        else -> error("Oops invalid id passed $order")
+    }
+}
+
+/**
+ * Constructs an order by menu. if [onRequestChange] == -1 then the menu is not shown.
+ */
+context(RowScope)
 @Composable
-private fun OrderByDropDown(
-    current: Int,
-    onRequestChange: (new: Int) -> Unit
+private inline fun Actions(
+    viewState: FoldersViewState
 ) {
-    // orderBy
+    val ascending = viewState.ascending
+    val rotation by animateFloatAsState(targetValue = if (ascending) 180f else 0f)
+    IconButton(
+        imageVector = Icons.AutoMirrored.Outlined.Sort,
+        onClick = { viewState.ascending = !ascending },
+        modifier = Modifier.rotate(rotation)
+    )
+    // show order
     var expanded by remember { mutableStateOf(false) }
     Button(
         onClick = { expanded = !expanded },
@@ -70,94 +120,47 @@ private fun OrderByDropDown(
             .padding(end = AppTheme.padding.small)
             .scale(0.90f),
         shape = CircleShape,
-        border = ButtonDefaults.outlinedBorder,
+        elevation = null,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = AppTheme.colors.background(elevation = 1.dp),
             contentColor = AppTheme.colors.onBackground,
         ),
         content = {
-            // The leading icon of the Button
+            val order = viewState.order
+            // icon
             Icon(
-                imageVector = Icons.AutoMirrored.Outlined.Sort,
+                painter = rememberVectorPainter(image = fetchOrderIcon(order = order)),
                 contentDescription = null,
                 modifier = Modifier.padding(end = ButtonDefaults.IconSpacing)
             )
-            // Trailing Icon.
-            Label(
-                text = stringResource(
-                    id = when (current) {
-                        FoldersViewState.ORDER_BY_SIZE -> R.string.size
-                        FoldersViewState.ORDER_BY_NAME -> R.string.name
-                        FoldersViewState.ORDER_BY_DATE_MODIFIED -> R.string.recent
-                        else -> error("Oops error!")
-                    }
-                )
-            )
 
-            // Menu
+            // label
+            Label(text = stringResource(id = fetchOrderTitle(order)))
+
             DropDownMenu2(
                 expanded = expanded,
-                onDismissRequest = { expanded = !expanded },
+                onDismissRequest = { expanded = false },
                 shape = AppTheme.shapes.compact,
-                backgroundColor = AppTheme.colors.background(elevation = 2.dp),
-                contentColor = AppTheme.colors.onBackground,
+                modifier = Modifier.sizeIn(minWidth = 180.dp),
                 content = {
                     // Sort by size
-                    DropDownMenuItem(
-                        title = stringResource(R.string.size),
-                        onClick = {
-                            onRequestChange(FoldersViewState.ORDER_BY_SIZE); expanded = false
-                        },
-                        icon = rememberVectorPainter(image = Icons.Outlined.Memory),
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = 190.dp)
-                            .drawHorizontalDivider(
-                                AppTheme.colors.onBackground,
-                                indent = PaddingValues(horizontal = AppTheme.padding.normal)
-                            ),
-                        enabled = current != FoldersViewState.ORDER_BY_SIZE
-                    )
-                    // Sort by name
-                    DropDownMenuItem(
-                        title = stringResource(R.string.name),
-                        onClick = {
-                            onRequestChange(FoldersViewState.ORDER_BY_NAME); expanded = false
-                        },
-                        icon = rememberVectorPainter(image = Icons.Outlined.TextFields),
-                        enabled = current != FoldersViewState.ORDER_BY_NAME,
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = 190.dp)
-                            .drawHorizontalDivider(
-                                AppTheme.colors.onBackground,
-                                indent = PaddingValues(horizontal = AppTheme.padding.normal)
-                            ),
-                    )
-
-                    // Sort by date modified
-                    DropDownMenuItem(
-                        title = stringResource(R.string.recent),
-                        onClick = {
-                            onRequestChange(FoldersViewState.ORDER_BY_DATE_MODIFIED); expanded =
-                            false
-                        },
-                        icon = rememberVectorPainter(image = Icons.Outlined.CalendarMonth),
-                        enabled = current != FoldersViewState.ORDER_BY_DATE_MODIFIED,
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = 190.dp)
-                            .drawHorizontalDivider(
-                                AppTheme.colors.onBackground,
-                                indent = PaddingValues(horizontal = AppTheme.padding.normal)
-                            ),
-                    )
-                },
+                    repeat(3) {
+                        DropDownMenuItem(
+                            title = textResource(id = fetchOrderTitle(it)),
+                            icon = rememberVectorPainter(image = fetchOrderIcon(it)),
+                            onClick = { viewState.order = it; expanded = false },
+                            enabled = order != it
+                        )
+                    }
+                }
             )
-        }
+        },
     )
 }
 
 @Composable
 @NonRestartableComposable
-private fun TopBar(
+private fun Toolbar(
     viewState: FoldersViewState,
     modifier: Modifier = Modifier
 ) {
@@ -171,11 +174,7 @@ private fun TopBar(
         navigationIcon = {
             IconButton(imageVector = Icons.Default.FolderCopy, onClick = {})
         },
-        actions = {
-            OrderByDropDown(
-                current = viewState.order,
-                onRequestChange = { viewState.order = it })
-        }
+        actions = { Actions(viewState = viewState) }
     )
 }
 
@@ -183,52 +182,56 @@ private fun TopBar(
  * The min size of the single cell in grid.
  */
 private val MIN_TILE_SIZE = 100.dp
-private val fullLineSpan: (LazyGridItemSpanScope.() -> GridItemSpan) = { GridItemSpan(maxLineSpan) }
+private val FolderContentPadding =
+    PaddingValues(vertical = AppTheme.padding.normal, horizontal = AppTheme.padding.medium)
+private val GridItemsArrangement = Arrangement.spacedBy(6.dp)
 
 @Composable
-private fun Content(
+private fun FolderGrid(
     state: FoldersViewState,
     modifier: Modifier = Modifier
 ) {
     val values by state.data.collectAsState()
-    val multiplier by preference(key = SettingsViewState.GRID_ITEM_SIZE_MULTIPLIER)
+    val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
     val navController = LocalNavController.current
     LazyVerticalGrid(
         columns = GridCells.Adaptive(MIN_TILE_SIZE * multiplier),
         modifier,
-        contentPadding = PaddingValues(
-            vertical = AppTheme.padding.normal,
-            horizontal = AppTheme.padding.medium
-        ),
+        contentPadding = FolderContentPadding,
+        verticalArrangement = GridItemsArrangement,
         content = {
             // null means loading
-            if (values == null)
-                return@LazyVerticalGrid item(span = fullLineSpan, key = "key_loading_placeholder") {
+            val data = values ?: return@LazyVerticalGrid item(
+                span = fullLineSpan, key = "key_loading_placeholder",
+                content = {
                     Placeholder(
                         title = stringResource(R.string.loading),
                         iconResId = R.raw.lt_loading_dots_blue,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
                     )
-                }
-            val data = values ?: return@LazyVerticalGrid
+                },
+            )
+
             // empty means empty
             if (data.isEmpty())
                 return@LazyVerticalGrid item(
                     span = fullLineSpan,
-                    key = "key_empty_placeholder..."
-                ) {
-                    Placeholder(
-                        title = stringResource(R.string.oops_empty),
-                        iconResId = R.raw.lt_empty_box,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                    key = "key_empty_placeholder...",
+                    content = {
+                        Placeholder(
+                            title = stringResource(R.string.oops_empty),
+                            iconResId = R.raw.lt_empty_box,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                )
+
             // place the actual items on the screen.
-            items(data, key = { it.path }) {
+            items(items = data, key = { it.artworkID }) {
                 Folder(
                     value = it,
                     modifier = Modifier
-                        .clickable { navController.navigate(FilesViewState.direction()) }
+                        .clickable() { navController.navigate(RouteFolder(it.path)) }
                         .animateItem()
                 )
             }
@@ -237,22 +240,20 @@ private fun Content(
 }
 
 @Composable
-fun Folders(state: FoldersViewState) {
-    val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+fun Folders(viewState: FoldersViewState) {
     Scaffold(
         topBar = {
-            TopBar(
-                viewState = state,
+            Toolbar(
+                viewState = viewState,
                 modifier = Modifier
                     .statusBarsPadding()
                     .drawHorizontalDivider(color = AppTheme.colors.onBackground)
                     .padding(bottom = ContentPadding.medium),
-
-                )
+            )
         },
         contentWindowInsets = WindowInsets.None,
         content = {
-            Content(state = state, modifier = Modifier.padding(it))
+            FolderGrid(state = viewState, modifier = Modifier.padding(it))
         }
     )
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 13-07-2024.
+ * Created by Zakir Sheikh on 23-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,14 @@
  * limitations under the License.
  */
 
-package com.zs.gallery.viewer
+package com.zs.gallery.preview
 
-interface ViewerViewState
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.zs.gallery.impl.ViewerViewModel
+
+
+@Composable
+fun Viewer(viewState: ViewerViewState) {
+
+}

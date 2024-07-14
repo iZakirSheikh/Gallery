@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 12-07-2024.
+ * Created by Zakir Sheikh on 17-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,21 +19,24 @@
 package com.zs.gallery.impl
 
 import android.content.res.Resources
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.ViewModel
 import com.primex.core.getText2
 import com.zs.compose_ktx.toast.Duration
-import com.zs.compose_ktx.toast.ToastHostState
 import com.zs.compose_ktx.toast.Result
 import com.zs.compose_ktx.toast.Toast
-import org.koin.core.component.KoinComponent
+import com.zs.compose_ktx.toast.ToastHostState
+import org.koin.androidx.scope.ScopeViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.component.inject
 
-open class AbstractViewModel() : ViewModel(), KoinComponent {
+private const val TAG = "KoinViewModel"
 
+@OptIn(KoinExperimentalAPI::class)
+abstract class KoinViewModel: ScopeViewModel() {
     private val resources: Resources by inject()
     private val relay: ToastHostState by inject()
 
@@ -58,4 +61,12 @@ open class AbstractViewModel() : ViewModel(), KoinComponent {
         accent = accent,
         duration = duration
     )
+
+    fun getText(@StringRes id: Int): CharSequence = resources.getText2(id)
+    fun getText(@StringRes id: Int, vararg args: Any) = resources.getText2(id, args)
+
+    override fun onCleared() {
+        super.onCleared()
+        Log.d(TAG, "onCleared: ${this::class.simpleName}")
+    }
 }

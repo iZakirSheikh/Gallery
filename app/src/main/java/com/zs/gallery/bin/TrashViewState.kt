@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 12-07-2024.
+ * Created by Zakir Sheikh on 23-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,20 @@
  * limitations under the License.
  */
 
-package com.zs.gallery.impl
+package com.zs.gallery.bin
 
-import com.zs.api.store.Media
-import com.zs.gallery.files.FilesViewState
-import kotlinx.coroutines.flow.Flow
+import com.zs.api.store.Trashed
+import com.zs.gallery.common.FileActions
+import com.zs.gallery.common.Route
+import com.zs.gallery.common.SelectionTracker
 
-class FilesViewModel: AbstractViewModel(), FilesViewState {
+object RouteTrash : Route
 
-    override val files: Flow<Media>
-        get() = TODO("Not yet implemented")
+interface TrashViewState : FileActions, SelectionTracker {
+    val data: List<Trashed>?
 
-    override fun delete(vararg file: Media, trash: Boolean) {
-        TODO("Not yet implemented")
-    }
+    /**
+     * Removes all items from bin.
+     */
+    fun empty()
 }

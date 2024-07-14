@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 11-07-2024.
+ * Created by Zakir Sheikh on 20-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package com.zs.api.store
 
 import com.zs.api.util.PathUtils
 
+
 /**
  * Represents a folder with associated properties.
  *
@@ -29,11 +30,12 @@ import com.zs.api.util.PathUtils
  * @property size The size of the folder in bytes.
  */
 data class Folder(
-    @JvmField val artwork: String,
+    @JvmField val artworkID: Long,
     @JvmField val path: String,
     @JvmField val count: Int,
     @JvmField val size: Int,
     @JvmField val lastModified: Long
 ) {
     val name: String get() = PathUtils.name(path)
+    val artworkUri = MediaProvider.contentUri(artworkID)
 }

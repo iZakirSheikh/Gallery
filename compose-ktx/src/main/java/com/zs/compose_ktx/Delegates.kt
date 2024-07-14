@@ -26,10 +26,14 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -87,7 +91,9 @@ fun lottieAnimationPainter(
     return rememberLottiePainter(
         composition = composition,
         progress = progress,
-    )
+
+
+        )
 }
 
 /**
@@ -118,4 +124,58 @@ fun lottieAnimationPainter(
         composition = composition,
         progress = progress
     )
+}
+
+/**
+ * A composable function that delegates to [LottieAnimation] and behaves like [AndroidVectorDrawable].
+ *
+ * @param atEnd: A boolean parameter that determines whether to display the end-frame or the start
+ *              frame of the animation. The change in value causes animation.
+ * @param id: The resource identifier of the [LottieCompositionSpec.RawRes] type.
+ * @param scale: A float parameter that adjusts the size of the animation. The default size is
+ *               24.dp, and the scale can be used to increase or decrease it.
+ * @param progressRange: A range of float values that specifies the start and end frames of the
+ *                       animation. The default range is 0f..1f, which means the animation will
+ *                       start from the first frame and end at the last frame. Some [Lottie]
+ *                       animation files may have different start/end frames, and this parameter
+ *                       can be used to adjust them accordingly.
+ * @param duration: The duration of the animation in milliseconds. The default value is -1, which
+ *                  means the animation will use the duration specified in the
+ *                  [LottieCompositionSpec] object. If a positive value is given, it will override
+ *                  the duration from the [LottieCompositionSpec] object.
+ */
+@Composable
+inline fun LottieAnimatedIcon(
+    @RawRes id: Int,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    atEnd: Boolean = false,
+    scale: Float = 1f,
+    progressRange: ClosedFloatingPointRange<Float> = 0f..1f,
+    duration: Int = -1,
+    easing: Easing = FastOutSlowInEasing
+) {
+    /*Icon(
+        painter = lottieAnimationPainter(id = id, atEnd = atEnd, duration, progressRange, easing),
+        contentDescription = contentDescription,
+        modifier = Modifier
+            .size(24.dp)
+            .scale(scale)
+            .then(modifier),
+    )*/
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(id))
+    val duration2 = composition?.duration?.roundToLong() ?: AnimationConstants.DefaultDurationMillis.toLong()
+    val progress by animateFloatAsState(
+        targetValue = if (atEnd) progressRange.start else progressRange.endInclusive,
+        label = "Lottie $id",
+        animationSpec = tween(if (duration == -1) duration2.toInt() else duration, easing = easing)
+    )
+    LottieAnimation(
+        composition = composition,
+        progress = { progress },
+        modifier = Modifier
+            .size(24.dp * scale)
+            .then(modifier),
+    )
+
 }

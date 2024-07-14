@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 12-07-2024.
+ * Created by Zakir Sheikh on 21-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,17 @@
 package com.zs.gallery.impl
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.startup.Initializer
 import com.zs.api.store.MediaProvider
 import com.zs.compose_ktx.toast.ToastHostState
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-
+private const val TAG = "Initializer"
 
 private val appModules = module {
     // Define Koin modules for dependency injection.
@@ -35,11 +37,14 @@ private val appModules = module {
     single { com.primex.preferences.Preferences(get(), "shared_preferences") }
     // Declare a ViewModel dependency (lifecycle managed by Koin).
     // viewModel { BatteryViewModel(get()) }
-    factory { ToastHostState() }
+    singleOf(::ToastHostState)
     factory { MediaProvider(get()) }
     factory { androidContext().resources }
-    viewModel { FilesViewModel() }
+    // ViewModels
+    viewModel { SettingsViewModel(get()) }
+    viewModel { TimelineViewModel(get()) }
     viewModel { FoldersViewModel(get()) }
+    viewModel { (handle: SavedStateHandle) -> ViewerViewModel(handle, get()) }
 }
 
 class KoinInitializer : Initializer<Unit> {
@@ -50,8 +55,6 @@ class KoinInitializer : Initializer<Unit> {
         }
     }
 
-    override fun dependencies(): List<Class<out Initializer<*>>> {
-        // No dependencies on other libraries.
-        return emptyList()
-    }
+    // No dependencies on other libraries.
+    override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
 }

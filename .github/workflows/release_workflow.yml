@@ -1,0 +1,77 @@
+name: Automated Release Workflow
+on:
+  push:
+    branches: # Change this to master once everything is setup.
+      - 'beta'
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Configure Environment Variables
+        run: |
+          echo "DATE_TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "PLAY_CONSOLE_APP_RSA_KEY=$(echo ${{ secrets.PLAY_CONSOLE_APP_RSA_KEY }})" >> $GITHUB_ENV
+          echo "GIT_TAG=$(grep -E "versionName\s*=?\s*['\"]" "app/build.gradle.kts" | awk -F"['\"]" '{print $2}')" >> $GITHUB_ENV
+      - name: Verify Environment Variables
+        run: |
+          echo $PLAY_CONSOLE_APP_RSA_KEY | sed 's/./&‌/g'
+          echo $GIT_TAG | sed 's/./&‌/g'
+      - name: Set Up Java and Gradle
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: "17"
+          cache: gradle
+      - name: Build Unsigned APK and AAB
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+          ./gradlew bundleRelease
+      - name: Determine Build Tools Version
+        shell: bash
+        run: |
+          BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
+          echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
+          echo Last build tool version is: $BUILD_TOOL_VERSION
+      - name: Sign Release APK
+        uses: r0adkll/sign-android-release@v1
+        id: signed_apk
+        with:
+          releaseDirectory: app/build/outputs/apk/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+      - name: Sign Release AAB
+        uses: r0adkll/sign-android-release@v1
+        id: signed_aab
+        with:
+          releaseDirectory: app/build/outputs/bundle/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+      # Uploading Signed AAB to internal track of PlayConsole
+      - name: Deploy to Play Store (Internal)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.prime.player
+          releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
+          track: internal
+      - name: Create GitHub Release and Upload Artifacts
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.GIT_TAG }}
+          generate_release_notes: true
+          prerelease: true
+          files: |
+            ${{steps.signed_aab.outputs.signedReleaseFile}}
+            ${{steps.signed_apk.outputs.signedReleaseFile}}

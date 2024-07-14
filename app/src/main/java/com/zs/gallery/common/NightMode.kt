@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.zs.megahertz.common
+package com.zs.gallery.common
 
 /**
  * Enum class representing different night modes.

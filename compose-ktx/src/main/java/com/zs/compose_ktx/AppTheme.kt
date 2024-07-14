@@ -19,36 +19,66 @@
 package com.zs.compose_ktx
 
 import android.app.Activity
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.BoundsTransform
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope.OverlayClip
+import androidx.compose.animation.SharedTransitionScope.PlaceHolderSize
+import androidx.compose.animation.SharedTransitionScope.PlaceHolderSize.Companion.contentSize
+import androidx.compose.animation.SharedTransitionScope.ResizeMode
+import androidx.compose.animation.SharedTransitionScope.ResizeMode.Companion.ScaleToBounds
+import androidx.compose.animation.SharedTransitionScope.SharedContentState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.AnimationConstants
+import androidx.compose.animation.core.Spring.StiffnessMediumLow
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
-import com.primex.core.Amber
-import com.primex.core.AzureBlue
+import androidx.core.view.WindowInsetsCompat
 import com.primex.core.MetroGreen2
 import com.primex.core.OrientRed
 import com.primex.core.Rose
 import com.primex.core.SignalWhite
+import com.primex.core.SkyBlue
+import com.primex.core.TrafficYellow
 import com.primex.core.UmbraGrey
 import com.primex.core.hsl
-import com.zs.compose_ktx.AppTheme.alpha
 import com.zs.compose_ktx.AppTheme.colors
 import com.zs.compose_ktx.AppTheme.elevation
 import com.zs.compose_ktx.AppTheme.padding
@@ -86,6 +116,8 @@ import com.zs.compose_ktx.Typography.titleSmall
 import kotlinx.coroutines.delay
 import kotlin.math.ln
 
+private const val TAG = "AppTheme"
+
 /**
  * Provides a set of colors that represent the application's color palette,
  * building upon the colors provided by [MaterialTheme].*
@@ -107,7 +139,8 @@ object Colors {
      * @return A [Color] representing the background with an overlay.*/
     @Composable
     @ReadOnlyComposable
-    fun background(elevation: Dp) = applyTonalElevation(accent, background, elevation)
+    fun background(elevation: Dp) =
+        applyTonalElevation(accent, background, if (isLight) elevation else 0.5f * elevation)
 
     val onAccent: Color @ReadOnlyComposable @Composable inline get() = MaterialTheme.colors.onPrimary
     val onBackground @ReadOnlyComposable @Composable inline get() = MaterialTheme.colors.onBackground
@@ -115,9 +148,13 @@ object Colors {
     val onError @ReadOnlyComposable @Composable inline get() = MaterialTheme.colors.onError
     val isLight @ReadOnlyComposable @Composable inline get() = MaterialTheme.colors.isLight
     val lightShadowColor
-        @Composable @ReadOnlyComposable inline get() = if (isLight) Color.White else Color.White.copy(0.025f)
+        @Composable @ReadOnlyComposable inline get() = if (isLight) Color.White else Color.White.copy(
+            0.025f
+        )
     val darkShadowColor
-        @Composable @ReadOnlyComposable inline get() = if (isLight) Color(0xFFAEAEC0).copy(0.7f) else Color.Black.copy(0.6f)
+        @Composable @ReadOnlyComposable inline get() = if (isLight) Color(0xFFAEAEC0).copy(0.7f) else Color.Black.copy(
+            0.6f
+        )
 }
 
 private fun applyTonalElevation(accent: Color, background: Color, elevation: Dp) =
@@ -279,7 +316,12 @@ object AppTheme {
     val colors: Colors get() = com.zs.compose_ktx.Colors
     val padding get() = ContentPadding
     val elevation get() = ContentElevation
-    val alpha get() = ContentAlpha
+
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    val sharedTransitionScope
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalSharedTransitionScope.current
 }
 
 
@@ -336,19 +378,28 @@ private val Color.lightness: Float
 private val DefaultColorSpec = tween<Color>(AnimationConstants.DefaultDurationMillis)
 
 /**
- * Provides a composable function to set up the application's theme, using the provided
+ * Provides a composable function to set up the application's theme using the provided
  * colors, typography, and shapes.
+ *
+ * @param isLight - if true, applies the light theme.
+ * @param immersive - if true, hides system bars.
+ * @param isSystemBarsTransparent - if true, makes the system bars transparent; otherwise, adds a dark translucent color to
+ * the system bars. This setting might be useful for people who don't disable navigation icons.
+ * @param content - the composable content to be displayed within the theme.
  */
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppTheme(
     isLight: Boolean,
+    immersive: Boolean = false,
+    isSystemBarsTransparent: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val background by animateColorAsState(
         targetValue = if (!isLight) Color(0xFF0E0E0F) else Color(0xFFF5F5FA),
         animationSpec = DefaultColorSpec
     )
-    val accent = if (!isLight) Color.Rose else Color.AzureBlue
+    val accent = if (!isLight) Color.TrafficYellow else Color.MetroGreen2
     val colors = Colors(
         accent = accent,
         background = background,
@@ -360,11 +411,18 @@ fun AppTheme(
     )
 
     // Actual theme compose; in future handle fonts etc.
-    MaterialTheme(
-        colors = colors,
-        content = content,
-        typography = androidx.compose.material.Typography()
-    )
+    SharedTransitionLayout {
+        MaterialTheme(
+            colors = colors,
+            content = {
+                CompositionLocalProvider(
+                    LocalSharedTransitionScope provides this,
+                    content = content
+                )
+            },
+            typography = androidx.compose.material.Typography()
+        )
+    }
 
     // This block handles the logic of color of SystemBars.
     val view = LocalView.current
@@ -373,21 +431,195 @@ fun AppTheme(
     // Update the system bars appearance with a delay to avoid splash screen issue.
     // Use flag to avoid hitting delay multiple times.
     var isFirstPass by remember { mutableStateOf(true) }
-    val systemBarColor = Color.Transparent.toArgb()
-    LaunchedEffect(isLight) {
+    val systemBarColor = when (isSystemBarsTransparent) {
+        true -> Color.Transparent.toArgb()
+        else -> Color(0x20000000).toArgb()
+    }
+    val isAppearanceLightSystemBars = isLight
+    LaunchedEffect(isLight, immersive, isSystemBarsTransparent) {
         // A Small Delay to override the change of system bar after splash screen.
         // This is a workaround for a problem with using sideEffect to hideSystemBars.
         if (isFirstPass) {
             delay(2500)
             isFirstPass = false
         }
+        Log.d(TAG, "AppTheme: $isSystemBarsTransparent $immersive $isLight")
         val window = (view.context as Activity).window
         // Obtain the controller for managing the insets of the window.
         val controller = WindowCompat.getInsetsController(window, view)
         window.navigationBarColor = systemBarColor
         window.statusBarColor = systemBarColor
         // Set the color of the navigation bar and the status bar to the determined color.
-        controller.isAppearanceLightStatusBars = isLight
-        controller.isAppearanceLightNavigationBars = isLight
+        controller.isAppearanceLightStatusBars = isAppearanceLightSystemBars
+        controller.isAppearanceLightNavigationBars = isAppearanceLightSystemBars
+        // Hide or show the status bar based on the user's preference.
+        if (immersive)
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+        else
+            controller.show(WindowInsetsCompat.Type.systemBars())
     }
 }
+
+/**
+ * Provides a [CompositionLocal] to access the current [SharedTransitionScope].
+ *
+ * This CompositionLocal should be provided bya parent composable that manages shared transitions.
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+internal val LocalSharedTransitionScope =
+    staticCompositionLocalOf<SharedTransitionScope> {
+        error("CompositionLocal LocalSharedTransition not present")
+    }
+
+/**
+ * Provides a[CompositionLocal] to access the current [AnimatedVisibilityScope].
+ *
+ * This CompositionLocal should be provided by a parent composable that manages animated visibility.
+ */
+val LocalNavAnimatedVisibilityScope =
+    staticCompositionLocalOf<AnimatedVisibilityScope> { error("CompositionLocal LocalSharedTransition not present") }
+
+private val DefaultSpring = spring(
+    stiffness = StiffnessMediumLow,
+    visibilityThreshold = Rect.VisibilityThreshold
+)
+
+@ExperimentalSharedTransitionApi
+private val DefaultBoundsTransform = BoundsTransform { _, _ -> DefaultSpring }
+
+@ExperimentalSharedTransitionApi
+private val ParentClip: OverlayClip =
+    object : OverlayClip {
+        override fun getClipPath(
+            state: SharedContentState,
+            bounds: Rect,
+            layoutDirection: LayoutDirection,
+            density: Density
+        ): Path? {
+            return state.parentSharedContentState?.clipPathInOverlay
+        }
+    }
+
+/**
+ * @see androidx.compose.animation.SharedTransitionScope.sharedElement
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun Modifier.sharedElement(
+    state: SharedContentState,
+    boundsTransform: BoundsTransform = DefaultBoundsTransform,
+    placeHolderSize: PlaceHolderSize = contentSize,
+    renderInOverlayDuringTransition: Boolean = true,
+    zIndexInOverlay: Float = 0f,
+    clipInOverlayDuringTransition: OverlayClip = ParentClip
+) = composed {
+    val navAnimatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    with(sharedTransitionScope) {
+        Modifier.sharedElement(
+            state = state,
+            placeHolderSize = placeHolderSize,
+            renderInOverlayDuringTransition = renderInOverlayDuringTransition,
+            zIndexInOverlay = zIndexInOverlay,
+            animatedVisibilityScope = navAnimatedVisibilityScope,
+            boundsTransform = boundsTransform,
+            clipInOverlayDuringTransition = clipInOverlayDuringTransition
+        )
+    }
+}
+
+
+/**
+ * A shared bounds modifier that uses scope from [AppTheme]'s [AppTheme.sharedTransitionScope] and [AnimatedVisibilityScope] from [LocalNavAnimatedVisibilityScope]
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun Modifier.sharedBounds(
+    sharedContentState: SharedContentState,
+    enter: EnterTransition = fadeIn(),
+    exit: ExitTransition = fadeOut(),
+    boundsTransform: BoundsTransform = DefaultBoundsTransform,
+    resizeMode: ResizeMode = ScaleToBounds(ContentScale.FillWidth, Center),
+    placeHolderSize: PlaceHolderSize = contentSize,
+    renderInOverlayDuringTransition: Boolean = true,
+    zIndexInOverlay: Float = 0f,
+    clipInOverlayDuringTransition: OverlayClip = ParentClip
+) = composed {
+    val navAnimatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
+    val sharedTransitionScope = LocalSharedTransitionScope.current
+    with(sharedTransitionScope) {
+        Modifier.sharedBounds(
+            sharedContentState = sharedContentState,
+            animatedVisibilityScope = navAnimatedVisibilityScope,
+            enter = enter,
+            exit = exit,
+            boundsTransform = boundsTransform,
+            resizeMode = resizeMode,
+            placeHolderSize = placeHolderSize,
+            renderInOverlayDuringTransition = renderInOverlayDuringTransition,
+            zIndexInOverlay = zIndexInOverlay,
+            clipInOverlayDuringTransition = clipInOverlayDuringTransition
+        )
+    }
+}
+
+/**
+ * @return the state of shared contnet corresponding to [key].
+ * @see androidx.compose.animation.SharedTransitionScope.rememberSharedContentState
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+inline fun rememberSharedContentState(key: Any): SharedContentState =
+    with(AppTheme.sharedTransitionScope) {
+        rememberSharedContentState(key = key)
+    }
+
+
+/**
+ * @see androidx.compose.animation.SharedTransitionScope.sharedElement
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun Modifier.sharedElement(
+    key: Any,
+    boundsTransform: BoundsTransform = DefaultBoundsTransform,
+    placeHolderSize: PlaceHolderSize = contentSize,
+    renderInOverlayDuringTransition: Boolean = true,
+    zIndexInOverlay: Float = 0f,
+    clipInOverlayDuringTransition: OverlayClip = ParentClip
+) = composed {
+    sharedElement(
+        state = rememberSharedContentState(key = key),
+        boundsTransform,
+        placeHolderSize,
+        renderInOverlayDuringTransition,
+        zIndexInOverlay,
+        clipInOverlayDuringTransition
+    )
+}
+
+/**
+ * @see androidx.compose.animation.SharedTransitionScope.sharedBounds
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun Modifier.sharedBounds(
+    key: Any,
+    enter: EnterTransition = fadeIn(),
+    exit: ExitTransition = fadeOut(),
+    boundsTransform: BoundsTransform = DefaultBoundsTransform,
+    resizeMode: ResizeMode = ScaleToBounds(ContentScale.FillWidth, Center),
+    placeHolderSize: PlaceHolderSize = contentSize,
+    renderInOverlayDuringTransition: Boolean = true,
+    zIndexInOverlay: Float = 0f,
+    clipInOverlayDuringTransition: OverlayClip = ParentClip
+) = composed {
+    sharedBounds(
+        sharedContentState = rememberSharedContentState(key = key),
+        enter = enter,
+        exit = exit,
+        boundsTransform = boundsTransform,
+        resizeMode = resizeMode,
+        placeHolderSize = placeHolderSize,
+        renderInOverlayDuringTransition = renderInOverlayDuringTransition,
+        zIndexInOverlay = zIndexInOverlay,
+        clipInOverlayDuringTransition = clipInOverlayDuringTransition
+    )
+}
+

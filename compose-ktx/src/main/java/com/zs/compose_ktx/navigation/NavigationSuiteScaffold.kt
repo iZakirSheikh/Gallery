@@ -1,7 +1,25 @@
+/*
+ * Copyright 2024 Zakir Sheikh
+ *
+ * Created by Zakir Sheikh on 20-07-2024.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.zs.compose_ktx.navigation
+
 import androidx.annotation.FloatRange
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +47,7 @@ import com.zs.compose_ktx.toast.ToastHost
 import com.zs.compose_ktx.toast.ToastHostState
 import kotlin.math.roundToInt
 
-private const val TAG = "Scaffold2"
+private const val TAG = "NavigationSuiteScaffold"
 
 // TODO: b/177571613 this should be a proper decay settling
 // this is taken from the DrawerLayout's DragViewHelper as a min duration.
@@ -57,7 +75,7 @@ private const val LAYOUT_ID_PROGRESS_BAR = "_layout_id_progress_bar"
  * @param content The main content of the screen to be displayed. The context is automatically
  *                boxed, so manual boxing is not required.
  * @param modifier Optional [Modifier] to be applied to the composable.
- * @param channel Optional [SnackbarHostState] object to handle displaying [Snack] messages.
+ * @param toastHostState Optional [SnackbarHostState] object to handle displaying [Snack] messages.
  * @param progress Optional progress value to show a linear progress bar. Pass [Float.NaN] to hide
  *                 the progress bar, -1 to show an indeterminate progress bar, or a value between 0 and 1 to show a determinate progress bar.
  * @param tabs Optional [Composable] function to display a navigation bar or toolbar.
@@ -71,7 +89,7 @@ fun NavigationSuiteScaffold(
     hideNavigationBar: Boolean = false,
     background: Color = MaterialTheme.colors.background,
     contentColor: Color = contentColorFor(backgroundColor = background),
-    channel: ToastHostState = remember(::ToastHostState),
+    toastHostState: ToastHostState = remember(::ToastHostState),
     @FloatRange(0.0, 1.0) progress: Float = Float.NaN,
     navBar: @Composable () -> Unit,
 ) {
@@ -83,7 +101,7 @@ fun NavigationSuiteScaffold(
                 content = content
             )
             // The SnackBar
-            ToastHost(channel)
+            ToastHost(toastHostState)
             // ProgressBar
             // Don't draw when progress is Float.NaN
             when {
@@ -110,8 +128,12 @@ fun NavigationSuiteScaffold(
             }
         }
     when (vertical) {
-        true -> Vertical(content = realContent, modifier = modifier.background(background).fillMaxSize())
-        else -> Horizontal(content = realContent, modifier = modifier.background(background).fillMaxSize())
+        true -> Vertical(content = realContent, modifier = modifier
+            .background(background)
+            .fillMaxSize())
+        else -> Horizontal(content = realContent, modifier = modifier
+            .background(background)
+            .fillMaxSize())
     }
 }
 
@@ -121,7 +143,7 @@ private inline fun Vertical(
     modifier: Modifier = Modifier,
 ) {
     var orgNavBarHeightPx by remember { mutableFloatStateOf(Float.NaN) }
-    val orgAnmNavBarHeight by animateFloatAsState(targetValue = if (orgNavBarHeightPx.isNaN()) 0f else orgNavBarHeightPx, tween(500))
+    val orgAnmNavBarHeight = if (orgNavBarHeightPx.isNaN()) 0f else orgNavBarHeightPx
     var navBarHeight by remember { mutableFloatStateOf(0f) }
     val connection = remember {
         object : NestedScrollConnection {

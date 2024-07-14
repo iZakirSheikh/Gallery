@@ -32,4 +32,5 @@ android {
 dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.annotation.jvm)
+    implementation(libs.androidx.activity.compose)
 }

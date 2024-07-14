@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 12-07-2024.
+ * Created by Zakir Sheikh on 23-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,22 @@
 
 package com.zs.gallery
 
-import NavigationBarItem
-import NavigationDrawerItem
-import NavigationItemDefaults
-import NavigationRailItem
-import NavigationSuiteScaffold
 import android.os.Build
 import android.util.Log
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -42,15 +41,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomAppBar
+import androidx.compose.material.BottomNavigation
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.NavigationRail
 import androidx.compose.material.SelectableChipColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.FolderCopy
+import androidx.compose.material.icons.filled.PhotoLibrary
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
@@ -59,12 +59,11 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -82,62 +81,70 @@ import com.zs.compose_ktx.LocalWindowSize
 import com.zs.compose_ktx.Range
 import com.zs.compose_ktx.WindowSize
 import com.zs.compose_ktx.isPermissionGranted
+import com.zs.compose_ktx.navigation.BottomNavItem
+import com.zs.compose_ktx.navigation.NavRailItem
+import com.zs.compose_ktx.navigation.NavigationItemDefaults
+import com.zs.compose_ktx.navigation.NavigationSuiteScaffold
 import com.zs.compose_ktx.toast.ToastHostState
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
+import com.zs.gallery.common.NightMode
+import com.zs.gallery.common.Route
+import com.zs.gallery.common.composable
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.preference
-import com.zs.gallery.files.Files
-import com.zs.gallery.files.FilesViewState
+import com.zs.gallery.files.RouteTimeline
+import com.zs.gallery.files.Timeline
 import com.zs.gallery.folders.Folders
-import com.zs.gallery.folders.FoldersViewState
-import com.zs.gallery.impl.FilesViewModel
+import com.zs.gallery.folders.RouteFolders
 import com.zs.gallery.impl.FoldersViewModel
 import com.zs.gallery.impl.SettingsViewModel
+import com.zs.gallery.impl.TimelineViewModel
+import com.zs.gallery.impl.ViewerViewModel
+import com.zs.gallery.preview.RouteViewer
+import com.zs.gallery.preview.Viewer
+import com.zs.gallery.settings.RouteSettings
 import com.zs.gallery.settings.Settings
-import com.zs.megahertz.common.NightMode
 import org.koin.androidx.compose.koinViewModel
 
-private const val TAG = "MainContent"
+private const val TAG = "Home"
 
 /**
- * A simple composable that helps in resolving the current app theme as suggested by the [Gallery.NIGHT_MODE]
+ * Observes whether the app is in light mode based on the user's preference and system settings.
+ *
+ * @return `true` if the app is in light mode, `false` otherwise.
  */
 @Composable
 @NonRestartableComposable
-private fun requiresLightTheme(): Boolean {
+private fun isPreferenceDarkTheme(): Boolean {
     val mode by preference(key = Settings.KEY_NIGHT_MODE)
     return when (mode) {
-        NightMode.YES -> false
-        NightMode.FOLLOW_SYSTEM -> !androidx.compose.foundation.isSystemInDarkTheme()
-        else -> true
+        NightMode.YES -> true
+        NightMode.NO -> false
+        NightMode.FOLLOW_SYSTEM -> isSystemInDarkTheme()
     }
 }
 
 /**
  * The route to permission screen.
  */
-private const val ROUTE_STORAGE_PERMISSIONS = "route_storage_permission"
+private object RoutePermission : Route
 
 /**
- * List of required storage permissions, adapting to different Android versions.
- *
- * For Android Tiramisu and above, it includes granularmedia permissions:
- *  * [android.Manifest.permission.READ_MEDIA_VIDEO]
- *  * [android.Manifest.permission.READ_MEDIA_IMAGES]
- *
- * For older Android versions, it uses the broader:
- *  * [android.Manifest.permission.WRITE_EXTERNAL_STORAGE]
+ * List of required storage permissions, adapted for different Android versions.
  */
 private val ADAPTIVE_STORAGE_PERMISSIONS =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-        listOf(
-            android.Manifest.permission.READ_MEDIA_VIDEO,
-            android.Manifest.permission.READ_MEDIA_IMAGES
-        )
-    else
-        listOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) listOf(
+        android.Manifest.permission.READ_MEDIA_VIDEO,
+        android.Manifest.permission.READ_MEDIA_IMAGES,
+        android.Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+    )
+    else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) listOf(
+        android.Manifest.permission.READ_MEDIA_VIDEO,
+        android.Manifest.permission.READ_MEDIA_IMAGES
+    )
+    else listOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
 /**
  * Represents the permission screen
@@ -153,9 +160,9 @@ private fun Permission() {
     // Navigate from here to there.
     val permission = rememberMultiplePermissionsState(permissions = ADAPTIVE_STORAGE_PERMISSIONS) {
         if (!it.all { (_, state) -> state }) return@rememberMultiplePermissionsState
-        controller.graph.setStartDestination(FilesViewState.ROUTE)
-        controller.navigate(FilesViewState.direction()) {
-            popUpTo(ROUTE_STORAGE_PERMISSIONS) {
+        controller.graph.setStartDestination(RouteTimeline())
+        controller.navigate(RouteTimeline()) {
+            popUpTo(RoutePermission()) {
                 inclusive = true
             }
         }
@@ -179,88 +186,11 @@ private fun Permission() {
 }
 
 /**
- * Represents the different types of navigation components that a navigation item can belong to.
- */
-private enum class NavType { NavRail, Drawer, BottomBar }
-
-/**
- * Represents a navigation item either in a [NavigationRail] (when [isNavRail] is true)
- * or a [BottomNavigation] (when [isNavRail] is false).
- *
- * @param label The text label associated with the navigation item.
- * @param icon The vector graphic icon representing the navigation item.
- * @param onClick The callback function to be executed when the navigation item is clicked.
- * @param modifier The modifier for styling and layout customization of the navigation item.
- * @param checked Indicates whether the navigation item is currently selected.
- * @param isNavRail Specifies whether the navigation item is intended for a [NavigationRail].
- */
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-@NonRestartableComposable
-private fun NavigationItem(
-    label: CharSequence,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    checked: Boolean = false,
-    type: NavType = NavType.BottomBar,
-    colors: SelectableChipColors = NavigationItemDefaults.navigationItemColors()
-) {
-    val icon = @Composable {
-        Icon(
-            imageVector = icon,
-            contentDescription = label.toString()
-        )
-    }
-    val label = @Composable {
-        Label(
-            text = label,
-        )
-    }
-    when (type) {
-        NavType.NavRail -> NavigationRailItem(
-            onClick = onClick,
-            icon = icon,
-            label = label,
-            modifier = modifier.scale(0.83f),
-            checked = checked,
-            colors = colors,
-        )
-
-        NavType.Drawer -> NavigationDrawerItem(
-            onClick = onClick,
-            icon = icon,
-            label = label,
-            modifier = modifier.scale(0.85f),
-            checked = checked,
-            colors = colors,
-            shape = AppTheme.shapes.compact
-        )
-
-        NavType.BottomBar -> NavigationBarItem(
-            onClick = onClick,
-            icon = icon,
-            label = label,
-            modifier = modifier.scale(0.83f),
-            checked = checked,
-            colors = colors
-        )
-    }
-}
-
-/**
  * return the navigation type based on the window size.
  */
-private inline val WindowSize.navType
-    get() = when {
-        widthRange < Range.Medium -> NavType.BottomBar
-        widthRange < Range.xLarge -> NavType.NavRail
-        // FixME - For now return only rail as drawer looks pretty bad.
-        else -> NavType.NavRail //TYPE_DRAWER_NAV
-    }
+private inline val WindowSize.navTypeRail get() = widthRange > Range.Medium
 
 private val NAV_RAIL_WIDTH = 96.dp
-private val NAV_DRAWER_WIDTH = 256.dp
 
 /**
  * Calculates an returns newWindowSizeClass after consuming sapce occupied by  [navType].
@@ -270,21 +200,15 @@ private val NAV_DRAWER_WIDTH = 256.dp
  */
 private inline val WindowSize.remaining
     get() = when {
-        widthRange < Range.Medium -> consume(height = 56.dp)
-        widthRange < Range.xLarge -> consume(width = NAV_RAIL_WIDTH)
-        else -> consume(width = NAV_DRAWER_WIDTH)
+        !navTypeRail -> consume(height = 56.dp)
+        else -> consume(width = NAV_RAIL_WIDTH)
     }
 
 /**
- * Extension function for the NavController that facilitates navigation to a specified destination route.
+ *Navigates to the specified route, managing the back stack for a seamless experience.
+ * Pops up to the start destination and uses launchSingleTop to prevent duplicate destinations.
  *
- * @param route The destination route to navigate to.
- *
- * This function uses the provided route to navigate using the navigation graph.
- * It includes additional configuration to manage the back stack and ensure a seamless navigation experience.
- * - It pops up to the start destination of the graph to avoid a buildup of destinations on the back stack.
- * - It uses the `launchSingleTop` flag to prevent multiple copies of the same destination when re-selecting an item.
- * - The `restoreState` flag is set to true, ensuring the restoration of state when re-selecting a previously selected item.
+ * @param route The destination route.
  */
 private fun NavController.toRoute(route: String) {
     navigate(route) {
@@ -302,6 +226,23 @@ private fun NavController.toRoute(route: String) {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun NavItem(
+    onClick: () -> Unit,
+    icon: @Composable () -> Unit,
+    label: @Composable (() -> Unit),
+    modifier: Modifier = Modifier,
+    checked: Boolean = false,
+    typeRail: Boolean = false,
+    colors: SelectableChipColors = NavigationItemDefaults.navigationItemColors(),
+) {
+    when (typeRail) {
+        true -> NavRailItem(onClick, icon, label, modifier, checked, colors = colors)
+        else -> BottomNavItem(onClick, icon, label, modifier, checked, colors = colors)
+    }
+}
+
 /**
  * A composable function that represents a navigation bar, combining both rail and bottom bar elements.
  *
@@ -312,8 +253,8 @@ private fun NavController.toRoute(route: String) {
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 @NonRestartableComposable
-private fun NavBar(
-    type: NavType,
+private fun NavigationBar(
+    typeRail: Boolean,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -321,46 +262,46 @@ private fun NavBar(
         movableContentOf {
             // Get the current navigation destination from NavController
             val current by navController.currentBackStackEntryAsState()
-            val colors = NavigationItemDefaults.navigationItemColors(
-                contentColor = AppTheme.colors.onBackground,
-            )
+            val colors = NavigationItemDefaults.navigationItemColors()
             val domain = current?.destination?.domain
-            // Files
-            NavigationItem(
-                label = textResource(R.string.photos),
-                icon = Icons.Outlined.PhotoLibrary,
-                checked = domain == Files.DOMAIN,
-                onClick = { navController.toRoute(Files.direction()) },
-                type = type,
+
+            // Timeline
+            NavItem(
+                label = { Label(text = textResource(R.string.photos)) },
+                icon = { Icon(imageVector = Icons.Filled.PhotoLibrary, contentDescription = null) },
+                checked = domain == RouteTimeline.domain,
+                onClick = { navController.toRoute(RouteTimeline()) },
+                typeRail = typeRail,
                 colors = colors
             )
 
             // Folders
-            NavigationItem(
-                label = textResource(R.string.folders),
-                icon = Icons.Outlined.Folder,
-                checked = domain == FoldersViewState.DOMAIN,
-                onClick = { navController.toRoute(FoldersViewState.direction()) },
-                type = type,
+            NavItem(
+                label = { Label(text = textResource(R.string.folders)) },
+                icon = { Icon(imageVector = Icons.Filled.FolderCopy, contentDescription = null) },
+                checked = domain == RouteFolders.domain,
+                onClick = { navController.toRoute(RouteFolders()) },
+                typeRail = typeRail,
                 colors = colors
             )
 
-            // Folders
-            NavigationItem(
-                label = textResource(R.string.settings),
-                icon = Icons.Outlined.Settings,
-                checked = domain == Settings.DOMAIN,
-                onClick = { navController.toRoute(Settings.direction()) },
-                type = type,
+            // Settings
+            NavItem(
+                label = { Label(text = textResource(R.string.settings)) },
+                icon = { Icon(imageVector = Icons.Filled.Settings, contentDescription = null) },
+                checked = domain == RouteSettings.domain,
+                onClick = { navController.toRoute(RouteSettings()) },
+                typeRail = typeRail,
                 colors = colors
             )
         }
     }
 
-    when (type) {
-        NavType.NavRail -> NavigationRail(
+    when (typeRail) {
+        true -> NavigationRail(
             modifier = modifier.width(NAV_RAIL_WIDTH),
             windowInsets = WindowInsets.systemBars,
+            contentColor = AppTheme.colors.onBackground,
             backgroundColor = Color.Transparent,
             elevation = 0.dp,
             content = {
@@ -372,16 +313,17 @@ private fun NavBar(
         )
 
         else -> BottomAppBar(
-            modifier = modifier,
+            modifier = modifier.height(110.dp),
             windowInsets = WindowInsets.navigationBars,
             backgroundColor = Color.Transparent,
+            contentColor = AppTheme.colors.onBackground,
             elevation = 0.dp,
             contentPadding = PaddingValues(
                 horizontal = AppTheme.padding.normal,
                 vertical = AppTheme.padding.medium
             ),
             content = {
-                Spacer(Modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
                 // Display routes at the contre of available space
                 routes()
                 Spacer(modifier = Modifier.weight(1f))
@@ -400,51 +342,61 @@ private val CONTENT_SHAPE = RoundedCornerShape(8)
  * For other domains, the navigation bar will be hidden.
  */
 private val DOMAINS_REQUIRING_NAV_BAR =
-    arrayOf(
-        FilesViewState.DOMAIN,
-        FoldersViewState.DOMAIN,
-        Settings.DOMAIN
-    )
+    arrayOf(RouteTimeline.domain, RouteFolders.domain, RouteSettings.domain)
 
 /**
  * Defines the navigation graph for the application.
  */
 private val NavGraphBuilder: NavGraphBuilder.() -> Unit = {
     // Route for handling storage permissions.
-    composable(ROUTE_STORAGE_PERMISSIONS) {
-        Permission() // Composable function for handling permissions.
+    composable(RoutePermission) { Permission() }
+
+    // Route for the Timeline screen.
+    composable(RouteTimeline) {
+        val state = koinViewModel<TimelineViewModel>()
+        Timeline(viewState = state)
     }
 
-    // Route for the Files screen.
-    composable(Files.ROUTE) {
-        val state = koinViewModel<FilesViewModel>()
-        Files(state)
-    }
-
-    // Route for the Folders screen.
-    composable(FoldersViewState.ROUTE) {
+    // Folders
+    composable(RouteFolders) {
         val state = koinViewModel<FoldersViewModel>()
-        Folders(state)
+        Folders(viewState = state)
     }
 
-    // Route for the Settings screen.
-    composable(Settings.ROUTE) {
+    // Settings
+    composable(RouteSettings) {
         val state = koinViewModel<SettingsViewModel>()
-        Settings(state = state)
+        Settings(viewState = state)
+    }
+
+    // Viweer
+    composable(RouteViewer){
+        val state = koinViewModel<ViewerViewModel>()
+        Viewer(viewState = state)
     }
 }
 
 // Default Enter/Exit Transitions.
-@OptIn(ExperimentalAnimationApi::class)
-private val EnterTransition =
-    scaleIn(tween(220, 90), 0.98f) + fadeIn(tween(700))
-private val ExitTransition = fadeOut(tween(700))
+private val GlobalEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
+    {
+        scaleIn(tween(220, 90), 0.98f) + fadeIn(tween(700))
+    }
+private val GlobalExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
+    {
+        fadeOut(animationSpec = tween(700))
+    }
 
 @Composable
 fun Home(toastHostState: ToastHostState) {
-    val isLight = requiresLightTheme()
+    val isLight = !isPreferenceDarkTheme()
     val navController = rememberNavController()
-    AppTheme(isLight = isLight) {
+    val immersiveView by preference(key = Settings.KEY_IMMERSIVE_VIEW)
+    val isSystemBarsTransparent by preference(key = Settings.KEY_TRANSPARENT_SYSTEM_BARS)
+    AppTheme(
+        isLight = isLight,
+        immersive = immersiveView,
+        isSystemBarsTransparent = isSystemBarsTransparent,
+    ) {
         // Get the window size class
         val clazz = LocalWindowSize.current
         // Provide the navController, newWindowClass through LocalComposition.
@@ -455,40 +407,35 @@ fun Home(toastHostState: ToastHostState) {
                 // Determine the navigation type based on the window size class and access the system facade
                 val facade = LocalSystemFacade.current
                 // Determine whether to hide the navigation bar based on the current destination
-                val hideNavigationBar =
-                    navController.current?.domain !in DOMAINS_REQUIRING_NAV_BAR
-                Log.d(TAG, "Home: ${navController.current?.domain}")
+                val current = navController.current
+                Log.d(TAG, "Home: ${current?.domain}")
+                val hideNavigationBar = current?.domain !in DOMAINS_REQUIRING_NAV_BAR
                 NavigationSuiteScaffold(
                     vertical = clazz.widthRange < Range.Medium,
-                    channel = toastHostState,
+                    toastHostState = toastHostState,
                     hideNavigationBar = hideNavigationBar,
                     //progress = facade.inAppUpdateProgress,
                     background = AppTheme.colors.background(elevation = 1.dp),
                     // Set up the navigation bar using the NavBar composable
-                    navBar = {
-                        NavBar(
-                            type = clazz.navType,
-                            navController = navController
-                        )
-                    },
+                    navBar = { NavigationBar(clazz.navTypeRail, navController) },
                     // Display the main content of the app using the NavGraph composable
                     content = {
                         val context = LocalContext.current
                         // Load start destination based on if storage permission is set or not.
-                        val granted = context.isPermissionGranted(ADAPTIVE_STORAGE_PERMISSIONS[0])
+                        val granted =
+                            context.isPermissionGranted(ADAPTIVE_STORAGE_PERMISSIONS[0])
                         val startDestination =
-                            if (granted) Files.ROUTE else ROUTE_STORAGE_PERMISSIONS
-                        // Create the NavHost.
+                            if (granted) RouteTimeline else RoutePermission
                         NavHost(
                             navController = navController,
-                            startDestination = startDestination,
+                            startDestination = startDestination.route,
                             builder = NavGraphBuilder,
                             modifier = Modifier
                                 .clip(CONTENT_SHAPE)
                                 .background(AppTheme.colors.background)
                                 .fillMaxSize(),
-                            enterTransition = { EnterTransition },
-                            exitTransition = { ExitTransition },
+                            enterTransition = GlobalEnterTransition,
+                            exitTransition = GlobalExitTransition,
                         )
                     }
                 )

@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 13-07-2024.
+ * Created by Zakir Sheikh on 17-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import android.content.Context
 import android.os.Environment
 import android.text.format.Formatter
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,15 +62,12 @@ import com.zs.compose_ktx.Divider
 import com.zs.gallery.R
 import java.io.File
 
+private const val TAG = "Folder"
+
 /**
  * The default shape for tiles in the grid.
  */
-private val DEFAULT_TILE_SHAPE = RoundedCornerShape(16)
-
-/**
- * Padding values for items in the grid.
- */
-private val GridItemPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp)
+private val DEFAULT_SHAPE = RoundedCornerShape(16)
 
 /**
  * Formats a file size in bytes to a human-readable string.
@@ -77,7 +75,8 @@ private val GridItemPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp)
  * @param bytes Thefile size in bytes.
  * @return The formatted file size string.
  */
-private fun Context.formattedFileSize(bytes: Long) = Formatter.formatFileSize(this, bytes)
+private fun Context.formattedFileSize(bytes: Long) =
+    Formatter.formatFileSize(this, bytes)
 
 /**
  * Checks if a given path corresponds to removable storage.
@@ -100,38 +99,36 @@ fun Folder(
     modifier: Modifier = Modifier
 ) = Column(
     modifier = Modifier
-        .clip(DEFAULT_TILE_SHAPE)  // clip the ripple
-        .then(modifier)
-        .padding(GridItemPadding) // add padding after size.
-        .wrapContentHeight(),  // wrap the height of the content
+        .clip(DEFAULT_SHAPE)  // clip the ripple
+        .then(modifier),
     horizontalAlignment = Alignment.Start,
     content = {
         val elevation = if (kotlin.random.Random.nextBoolean()) 0.5.dp else 1.dp
+        // Image
         Box(
             content = {
                 AsyncImage(
-                    model = "file://${value.artwork}",
+                    model = value.artworkUri,
                     contentDescription = value.name,
                     modifier = Modifier
                         .aspectRatio(1.0f)
                         .padding(AppTheme.padding.small)
-                        .shadow(AppTheme.elevation.medium, shape = DEFAULT_TILE_SHAPE)
-                        .background(
-                            AppTheme.colors.background(elevation = elevation),
-                            DEFAULT_TILE_SHAPE
-                        ),
+                        .clip(DEFAULT_SHAPE)
+                        .background(AppTheme.colors.background(elevation = elevation)),
                     error = com.primex.core.rememberVectorPainter(
                         image = ImageVector.vectorResource(id = R.drawable.ic_error_image_placeholder),
                         tintColor = AppTheme.colors.onBackground.copy(alpha = ContentAlpha.Divider)
                     ),
                     contentScale = ContentScale.Crop
                 )
+
                 val isRemovable = isRemovableStorage(value.path)
                 if (!isRemovable) return@Box
                 Icon(
                     imageVector = Icons.Outlined.SdStorage,
                     contentDescription = "removable card",
                     modifier = Modifier
+                        .scale(0.8f)
                         .align(Alignment.TopEnd)
                         .padding(8.dp),
                     tint = Color.White
@@ -139,6 +136,8 @@ fun Folder(
             },
         )
         val ctx = LocalContext.current
+
+        // TextLabel
         Label(
             modifier = Modifier.padding(
                 top = AppTheme.padding.medium,
@@ -148,14 +147,19 @@ fun Folder(
             fontWeight = FontWeight.Normal,
             text = value.name
         )
+
+        // More Info
         Label(
             text = textResource(
                 id = R.string.folders_formatted_folder_name_sds, value.count,
                 ctx.formattedFileSize(value.size.toLong())
             ),
             style = AppTheme.typography.caption.copy(fontSize = 10.sp),
-            color = AppTheme.colors.onBackground.copy(AppTheme.alpha.medium),
+            color = AppTheme.colors.onBackground.copy(ContentAlpha.medium),
             modifier = Modifier.padding(start = AppTheme.padding.medium),
         )
     }
 )
+
+
+

@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Contract
 /**
  * A scope for [PathUtils] functions.
  */
-internal object PathUtils {
+object PathUtils {
     /**
      * The Unix separator character.
      */
@@ -75,17 +75,4 @@ internal object PathUtils {
     @Contract(pure = true)
     fun areAncestorsHidden(path: String): Boolean =
         path.contains(HIDDEN_PATTERN)
-
-    /**
-     * Returns [bytes] as formatted data unit.
-     */
-    @Deprecated(message = "find new solution.")
-    fun toFormattedDataUnit(
-        context: Context,
-        bytes: Long,
-        short: Boolean = true,
-    ): String = when (short) {
-        true -> android.text.format.Formatter.formatShortFileSize(context, bytes)
-        else -> android.text.format.Formatter.formatFileSize(context, bytes)
-    }
 }

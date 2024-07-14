@@ -21,11 +21,20 @@ package com.zs.gallery.common
 import android.content.Context
 import android.content.pm.PackageManager
 import androidx.annotation.RawRes
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -50,8 +59,8 @@ import com.zs.compose_ktx.lottieAnimationPainter
  */
 val LocalNavController =
     staticCompositionLocalOf<NavHostController> {
-    error("no local nav host controller found")
-}
+        error("no local nav host controller found")
+    }
 
 /**
  * Returns the current route of the [NavHostController]
@@ -67,16 +76,17 @@ val NavHostController.current
  *
  * @return The domain portion of the route, or null if the route is null or does not contain a '/'.
  */
-val NavDestination.domain:String? get() {
-    // Get the route, or return null if it's not available.
-    val route = route ?: return null
+val NavDestination.domain: String?
+    get() {
+        // Get the route, or return null if it's not available.
+        val route = route ?: return null
 
-    // Find the index of the first '/' character.
-    val index = route.indexOf('/')
+        // Find the index of the first '/' character.
+        val index = route.indexOf('/')
 
-    // Return the substring before the '/' if it exists, otherwise return the entire route.
-    return if (index == -1) route else route.substring(0, index)
-}
+        // Return the substring before the '/' if it exists, otherwise return the entire route.
+        return if (index == -1) route else route.substring(0, index)
+    }
 
 //This file holds the simple extension, utility methods of compose.
 /**
@@ -117,3 +127,24 @@ inline fun Placeholder(
     )
 }
 
+
+/**
+ * Represents the null value in [SavedStateHandle]. This constant is used to store and retrieve null values
+ * within the SavedStateHandle, as it does not natively support storing nulls.
+ *
+ * @author: Zakir Sheikh
+ */
+private const val NULL_STRING = "@null"
+
+/**
+ * Provides convenient access to the [NULL_STRING] constant for use with [SavedStateHandle].
+ */
+val SavedStateHandle.Companion.NULL_STRING get() = com.zs.gallery.common.NULL_STRING
+
+
+private val fullLineSpan: (LazyGridItemSpanScope.() -> GridItemSpan) = { GridItemSpan(maxLineSpan) }
+
+/**
+ *
+ */
+val  LazyGridScope.fullLineSpan get() = com.zs.gallery.common.fullLineSpan

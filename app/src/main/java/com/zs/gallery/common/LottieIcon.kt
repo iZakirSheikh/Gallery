@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 12-07-2024.
+ * Created by Zakir Sheikh on 19-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,5 @@
  * limitations under the License.
  */
 
-package com.zs.gallery.files
+package com.zs.gallery.common
 
-import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
-import com.zs.compose_ktx.AppTheme
-
-@Composable
-fun Files(state: FilesViewState) {
-    Surface(color = AppTheme.colors.background) {
-
-    }
-}

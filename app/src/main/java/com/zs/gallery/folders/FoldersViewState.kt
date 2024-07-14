@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 13-07-2024.
+ * Created by Zakir Sheikh on 20-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,19 @@
 
 package com.zs.gallery.folders
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
 import com.zs.api.store.Folder
-import kotlinx.coroutines.flow.Flow
+import com.zs.gallery.common.Route
 import kotlinx.coroutines.flow.StateFlow
+
+
+object RouteFolders : Route
 
 interface FoldersViewState {
 
     companion object {
-
-        val DOMAIN = "route_folders"
-        val ROUTE = DOMAIN
-
         const val ORDER_BY_NAME = 0
         const val ORDER_BY_DATE_MODIFIED = 1
         const val ORDER_BY_SIZE = 2
-
-        fun direction() = ROUTE
     }
 
     /**
@@ -44,7 +38,7 @@ interface FoldersViewState {
      * A value of [ORDER_BY_NAME] means the list is grouped by the folder name, while a value of [ORDER_BY_DATE_MODIFIED] means the list is grouped by the folder date modified, and a value of [ORDER_BY_SIZE] means the list is grouped by the folder size.
      * The default value is [ORDER_BY_SIZE].
      */
-    val ascending: Boolean
+    var ascending: Boolean
 
     /**
      * Gets or sets the grouping criterion of the list of folders.

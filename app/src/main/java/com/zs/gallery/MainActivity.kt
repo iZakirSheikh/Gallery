@@ -1,3 +1,21 @@
+/*
+ * Copyright 2024 Zakir Sheikh
+ *
+ * Created by Zakir Sheikh on 20-07-2024.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.zs.gallery
 
 import android.animation.ObjectAnimator
@@ -7,13 +25,11 @@ import android.view.animation.AnticipateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material.LocalAbsoluteElevation
+import androidx.compose.material.LocalElevationOverlay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -57,34 +73,11 @@ private fun configureSplashScreen(isColdStart: Boolean) {
 }
 
 class MainActivity : ComponentActivity(), SystemFacade {
-
     private val toastHostState: ToastHostState by inject()
     private val preferences: Preferences by inject()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // The app has started from scratch if savedInstanceState is null.
-        val isColdStart = savedInstanceState == null //why?
-        // Manage SplashScreen
-        configureSplashScreen(isColdStart)
-        enableEdgeToEdge()
-        setContent {
-            val windowSizeClass = calculateWindowSizeClass(activity = this)
-            CompositionLocalProvider(
-                LocalWindowSize provides windowSizeClass,
-                // Disable absolute elevation.
-                LocalAbsoluteElevation provides 0.dp,
-                LocalSystemFacade provides this,
-                content = { Home(toastHostState) }
-            )
-        }
-    }
-
     override fun showToast(
-        message: CharSequence,
-        icon: ImageVector?,
-        action: CharSequence?,
-        duration: Int
+        message: CharSequence, icon: ImageVector?, action: CharSequence?, duration: Int
     ) {
         lifecycleScope.launch {
             toastHostState.showToast(message, action, icon, duration = duration)
@@ -104,12 +97,29 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
     @Composable
     @NonRestartableComposable
-    override fun <S, O> observeAsState(key: Key.Key1<S, O>): State<O?> =
+    override fun <S, O> observeAsState(key: Key.Key1<S, O>) =
         preferences.observeAsState(key = key)
 
     @Composable
     @NonRestartableComposable
-    override fun <S, O> observeAsState(key: Key.Key2<S, O>): State<O> =
+    override fun <S, O> observeAsState(key: Key.Key2<S, O>) =
         preferences.observeAsState(key = key)
-}
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // The app has started from scratch if savedInstanceState is null.
+        val isColdStart = savedInstanceState == null //why?
+        // Manage SplashScreen
+        configureSplashScreen(isColdStart)
+        enableEdgeToEdge()
+        setContent {
+            val windowSizeClass = calculateWindowSizeClass(activity = this)
+            CompositionLocalProvider(
+                LocalWindowSize provides windowSizeClass,
+                LocalElevationOverlay provides null,  // Disable absolute elevation.
+                LocalSystemFacade provides this,
+                content = { Home(toastHostState) }
+            )
+        }
+    }
+}

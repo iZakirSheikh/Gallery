@@ -9,11 +9,11 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.zs.gallery"
+        applicationId = "com.googol.android.apps.photos"
         minSdk = 21
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0-dev01"
+        versionCode = 2
+        versionName = "0.1.0-dev02"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -50,7 +50,7 @@ android {
             "-Xopt-in=com.primex.core.ExperimentalToolkitApi"
         )
     }
-    composeCompiler { enableStrongSkippingMode = false }
+    composeCompiler { enableStrongSkippingMode = true }
     buildFeatures { compose = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
@@ -62,7 +62,7 @@ dependencies {
     implementation(project(":api"))
     implementation(project(":compose-ktx"))
     implementation(libs.toolkit.preferences)
-    implementation (libs.androidx.startup.runtime)
+    implementation(libs.androidx.startup.runtime)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.accompanist.permissions)
     implementation(libs.bundles.compose.icons)
