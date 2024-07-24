@@ -65,7 +65,8 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.googol.android.apps.photos
           releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
-          track: draft
+          track: internal
+          status: draft
       - name: Create GitHub Release and Upload Artifacts
         uses: softprops/action-gh-release@v1
         with:
