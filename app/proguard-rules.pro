@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# Deon't obscate names of those objects that implements SafeArgs and Route
+-keepnames class * implements com.zs.gallery.common.Route
+-keepnames class * implements com.zs.gallery.common.SafeArgs
