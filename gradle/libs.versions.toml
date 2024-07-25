@@ -1,7 +1,7 @@
 [versions]
 agp = "8.5.1"
 kotlin = "2.0.0"
-compose = "1.7.0-beta05" # TODO - Once 1.7.0 is stable; increment only stable releases.
+compose = "1.7.0-beta06" # TODO - Once 1.7.0 is stable; increment only stable releases.
 toolkit = "2.0.2-rc01"
 
 [plugins]
@@ -9,6 +9,8 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+google-service = { id = "com.google.gms.google-services", version = "4.4.2"}
+crashanlytics = { id = "com.google.firebase.crashlytics", version = "3.0.2" }
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.34.0" }
@@ -20,7 +22,9 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "compose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "compose" }
-coil-compose = { module = "io.coil-kt:coil-compose", version = "2.6.0" }
+coil-compose = { module = "io.coil-kt:coil-compose", version = "2.7.0" }
+firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version = "22.0.2" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version = "19.0.3" }
 toolkit-core-ktx = { module = "com.github.prime-zs.toolkit:core-ktx", version.ref = "toolkit" }
 toolkit-material2 = { module = "com.github.prime-zs.toolkit:material2", version.ref = "toolkit" }
 # Navigation
@@ -33,7 +37,7 @@ androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "3.
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 # coroutines
-kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version= "1.7.3" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version= "1.8.1" }
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version = "1.8.0" }
 junit = { group = "junit", name = "junit", version = "4.13.2" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
@@ -43,6 +47,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.1.1" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.4.1" }
+
 
 [bundles]
 compose = [

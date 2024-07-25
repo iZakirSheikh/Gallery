@@ -18,10 +18,7 @@
 
 package com.zs.gallery
 
-import android.animation.ObjectAnimator
 import android.os.Bundle
-import android.view.View
-import android.view.animation.AnticipateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -30,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.core.animation.doOnEnd
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
@@ -55,20 +51,6 @@ private fun configureSplashScreen(isColdStart: Boolean) {
     installSplashScreen().let { screen ->
         // Only animate the exit if this is a cold start of the app
         if (!isColdStart) return@let
-        // Configure the exit animation to play when the splash screen is ready to be removed
-        screen.setOnExitAnimationListener { provider ->
-            val splashScreenView = provider.view
-            // Create a fade-out animation for the splash screen
-            val alpha = ObjectAnimator.ofFloat(
-                splashScreenView, View.ALPHA, 1f, 0f
-            )
-            alpha.interpolator = AnticipateInterpolator()
-            alpha.duration = 700L
-            // Remove the splash screen after the animation completes
-            alpha.doOnEnd { provider.remove() }
-            // Start the fade-out animation
-            alpha.start()
-        }
     }
 }
 

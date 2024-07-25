@@ -94,10 +94,13 @@ import com.zs.gallery.common.composable
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.preference
+import com.zs.gallery.files.Folder
+import com.zs.gallery.files.RouteFolder
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.files.Timeline
 import com.zs.gallery.folders.Folders
 import com.zs.gallery.folders.RouteFolders
+import com.zs.gallery.impl.FolderViewModel
 import com.zs.gallery.impl.FoldersViewModel
 import com.zs.gallery.impl.SettingsViewModel
 import com.zs.gallery.impl.TimelineViewModel
@@ -369,10 +372,16 @@ private val NavGraphBuilder: NavGraphBuilder.() -> Unit = {
         Settings(viewState = state)
     }
 
-    // Viweer
+    // Viewer
     composable(RouteViewer){
         val state = koinViewModel<ViewerViewModel>()
         Viewer(viewState = state)
+    }
+
+    // Folder - That displays files
+    composable(RouteFolder){
+        val state = koinViewModel<FolderViewModel>()
+        Folder(viewState = state)
     }
 }
 

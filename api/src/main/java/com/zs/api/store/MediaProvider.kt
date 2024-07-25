@@ -203,6 +203,24 @@ interface MediaProvider {
         limit: Int = Int.MAX_VALUE
     ): List<MediaFile>
 
+    /**
+     * Retrieves a list of media files from a specific directory based on the provided filter and sorting options.
+     *
+     * @param filter The filter to apply to the media files.
+     * @param sortOrder The order in which to sort the media files.
+     * @return A list of mediafiles that match the filter and sort order.
+     *
+     * FIXME - This function is deprecated and will be removed in a future release. Use [fetchFiles] instead,
+     *          providing the parent directory as an argument.
+     */
+    suspend fun fetchFilesFromDirectory(
+        path: String,
+        filter: String? = null,
+        order: String = COLUMN_NAME,
+        ascending: Boolean = true,
+        offset: Int = 0,
+        limit: Int = Int.MAX_VALUE
+    ): List<MediaFile>
 
     /**
      * Deletes the specified URIs from the device's persistent storage permanently.

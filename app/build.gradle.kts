@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.service)
+    alias(libs.plugins.crashanlytics)
 }
 
 android {
@@ -12,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 21
         targetSdk = 34
-        versionCode = 2
-        versionName = "0.1.0-dev02"
+        versionCode = 3
+        versionName = "0.1.0-dev03"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,9 +35,9 @@ android {
         // Add necessary changes to debug apk.
         debug {
             // makes it possible to install both release and debug versions in same device.
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".dev"
             resValue("string", "app_name", "Debug")
-            versionNameSuffix = "-debug"
+            versionNameSuffix = "-dev"
         }
     }
     compileOptions {
@@ -67,4 +69,6 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.bundles.compose.icons)
     implementation(libs.coil.compose)
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.crashlytics.ktx)
 }

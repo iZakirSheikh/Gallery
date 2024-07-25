@@ -21,6 +21,10 @@ package com.zs.gallery.impl
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.startup.Initializer
+import com.google.firebase.FirebaseApp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 import com.zs.api.store.MediaProvider
 import com.zs.compose_ktx.toast.ToastHostState
 import org.koin.android.ext.koin.androidContext
@@ -45,6 +49,7 @@ private val appModules = module {
     viewModel { TimelineViewModel(get()) }
     viewModel { FoldersViewModel(get()) }
     viewModel { (handle: SavedStateHandle) -> ViewerViewModel(handle, get()) }
+    viewModel { (handle: SavedStateHandle) -> FolderViewModel(handle, get()) }
 }
 
 class KoinInitializer : Initializer<Unit> {
@@ -57,4 +62,26 @@ class KoinInitializer : Initializer<Unit> {
 
     // No dependencies on other libraries.
     override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
+}
+
+class FirebaseInitializer : Initializer<Unit> {
+    override fun create(context: Context): Unit {
+        // Initialize Firebase
+        FirebaseApp.initializeApp(context)
+    }
+
+    override fun dependencies(): List<Class<out Initializer<*>>> {
+        return emptyList()
+    }
+}
+
+class CrashlyticsInitializer : Initializer<Unit> {
+    override fun create(context: Context): Unit {
+        // Initialize Crashlytics
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+    }
+
+    override fun dependencies(): List<Class<out Initializer<*>>> {
+        return emptyList()
+    }
 }

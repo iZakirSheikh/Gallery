@@ -59,3 +59,7 @@ interface TimelineViewState : FileActions, SelectionTracker, DataProvider {
      */
     fun addToFavourite()
 }
+
+interface FolderViewState : TimelineViewState {
+    val title: CharSequence
+}

@@ -1,22 +1,20 @@
 /*
-* Copyright 2024 Zakir Sheikh
-*
-* Created by Zakir Sheikh on 20-07-2024.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   https://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-
-@file:OptIn(ExperimentalSharedTransitionApi::class)
+ * Copyright 2024 Zakir Sheikh
+ *
+ * Created by Zakir Sheikh on 24-07-2024.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.zs.gallery.files
 
@@ -28,82 +26,58 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Deselect
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Recycling
-import androidx.compose.material.icons.outlined.SelectAll
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.primex.core.findActivity
 import com.primex.core.textResource
 import com.primex.material2.DropDownMenuItem
-import com.primex.material2.IconButton
 import com.primex.material2.Label
-import com.primex.material2.appbar.TopAppBar
+import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.primex.material2.menu.DropDownMenu2
 import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.LocalWindowSize
 import com.zs.compose_ktx.None
-import com.zs.compose_ktx.Range
-import com.zs.compose_ktx.VerticalDivider
 import com.zs.compose_ktx.sharedBounds
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
-import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.preview.RouteViewer
+
 
 @Composable
 private fun TopAppBar(
-    tracker: SelectionTracker,
+    viewState: FolderViewState,
     modifier: Modifier = Modifier,
     behavior: TopAppBarScrollBehavior? = null,
     insets: WindowInsets = WindowInsets.None
 ) {
     AnimatedVisibility(
-        visible = !tracker.isInSelectionMode,
+        visible = !viewState.isInSelectionMode,
         enter = slideInVertically() + fadeIn(),
         exit = slideOutVertically() + fadeOut(),
         content = {
-            TopAppBar(
+            LargeTopAppBar(
                 navigationIcon = {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_app),
@@ -112,23 +86,11 @@ private fun TopAppBar(
                         modifier = Modifier.padding(AppTheme.padding.normal)
                     )
                 },
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        content = {
-                            Label(
-                                text = textResource(id = R.string.app_name),
-                                style = AppTheme.typography.titleLarge
-                            )
-                        }
-                    )
-                },
+                title = { Label(text = viewState.title) },
                 scrollBehavior = behavior,
                 windowInsets = insets,
                 modifier = modifier,
-                style = TopAppBarDefaults.topAppBarStyle(
+                style = TopAppBarDefaults.largeAppBarStyle(
                     containerColor = AppTheme.colors.background,
                     scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
                     scrolledContentColor = AppTheme.colors.onBackground,
@@ -162,11 +124,9 @@ private fun TopAppBar(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun Timeline(
-    viewState: TimelineViewState
-) {
+fun Folder(viewState: FolderViewState) {
     BackHandler(viewState.selected.isNotEmpty(), viewState::clear)
     val clazz = LocalWindowSize.current
     val behaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -175,7 +135,7 @@ fun Timeline(
     Scaffold(
         topBar = {
             TopAppBar(
-                tracker = viewState,
+                viewState = viewState,
                 behavior = behaviour,
                 insets = WindowInsets.statusBars,
             )

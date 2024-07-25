@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Devices running Android 12L (API level 32) or lower  -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="30" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="30" />
 
     <!-- Devices running Android 13 (API level 33) or higher -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -30,18 +32,31 @@
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
+
+            <!-- Koin-->
             <meta-data
                 android:name="com.zs.gallery.impl.KoinInitializer"
                 android:value="androidx.startup" />
+
+            <!--Firebase-->
+            <meta-data
+                android:name="com.zs.gallery.impl.FirebaseInitializer"
+                android:value="androidx.startup" />
+
+            <!--Crashlytics-->
+            <meta-data
+                android:name="com.zs.gallery.impl.CrashlyticsInitializer"
+                android:value="androidx.startup" />
         </provider>
-        
+
+        <!--MainActivity-->
         <activity
             android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name">
+            android:exported="true">
+
+            <!--The Intent Filters -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

@@ -130,15 +130,16 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         offset: Int,
         limit: Int
     ): List<MediaFile> {
-        // Compose selection.
-        // FixMe - Maybe allow user somehow pass mediaType as parameter.
-        // Remove trashed items from the query if build version is Android 10 or above.
-        //language = SQL
+        // TODO - Consider allowing users to specify mediaType as a parameter to customize
+        //  the query.
+        // Compose selection criteria based on user's input and filter settings.
+        // On Android 10 and above, remove trashed items from the query to comply with scoped storage restrictions.
+        // language = SQL
         val selection =  // Select only the mediaTypes of Image and Video
         // Filter out trashed items on Android 10+
             // Select only media of type Image or Video.
             "(${COLUMN_MEDIA_TYPE} = $MEDIA_TYPE_IMAGE OR $COLUMN_MEDIA_TYPE = ${MEDIA_TYPE_VIDEO})" +
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "AND $COLUMN_IS_TRASHED != 1" else "" +
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) " AND $COLUMN_IS_TRASHED != 1" else "" +
                             // Filter by parent directory if provided.
                             if (parent != null) " AND $COLUMN_PATH LIKE ?" else "" +
                                     // Add name filter if provided.
@@ -247,6 +248,34 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         TODO("Not yet implemented")
     }
 
+    override suspend fun fetchFilesFromDirectory(
+        path: String,
+        filter: String?,
+        order: String,
+        ascending: Boolean,
+        offset: Int,
+        limit: Int
+    ): List<MediaFile> {
+        val like = if (filter != null) " AND $COLUMN_NAME LIKE ?" else ""
+        val selection = "$COLUMN_PATH LIKE ?$like"
+        val args = if (filter != null) arrayOf("$path%", "%$filter%") else arrayOf("$path%")
+        return resolver.query2(
+            EXTERNAL_CONTENT_URI,
+            projection = MEDIA_PROJECTION,
+            selection = selection,
+            args,
+            order,
+            ascending,
+            offset,
+            limit,
+            transform = { c ->
+                List(c.count) {
+                    c.moveToPosition(it);
+                    c.toMediaFile
+                }
+            },
+        )
+    }
 
     override suspend fun delete(vararg uri: Uri): Int {
         TODO("Not yet implemented")

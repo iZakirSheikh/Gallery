@@ -45,7 +45,7 @@ import kotlinx.coroutines.flow.launchIn
 
 private const val TAG = "TimelineViewModel"
 
-class TimelineViewModel(val provider: MediaProvider) : KoinViewModel(), TimelineViewState {
+open class TimelineViewModel(val provider: MediaProvider) : KoinViewModel(), TimelineViewState {
 
     // Trigger for refreshing the list
     private val _trigger = MutableStateFlow(false)
@@ -66,6 +66,17 @@ class TimelineViewModel(val provider: MediaProvider) : KoinViewModel(), Timeline
         // FixMe: For now this seems reasonable.
         //      However take the example of the case when size is same but ids are different
         selected.size == data?.values?.flatten()?.size
+    }
+
+    override fun select(key: String) {
+        val data = data ?: return
+        val level = evaluateGroupSelectionLevel(key)
+        val all = data[key]?.map { it.id } ?: emptyList()
+        when (level) {
+            GroupSelectionLevel.NONE -> selected.addAll(all)
+            GroupSelectionLevel.PARTIAL -> selected.addAll(all.filterNot { it in selected })
+            GroupSelectionLevel.FULL -> selected.removeAll(all.filter { it in selected })
+        }
     }
 
     private fun evaluateGroupSelectionLevel(key: String): GroupSelectionLevel {
@@ -107,7 +118,7 @@ class TimelineViewModel(val provider: MediaProvider) : KoinViewModel(), Timeline
     override fun restore(activity: Activity): Unit = TODO("Not yet implemented")
     override fun delete(activity: Activity, trash: Boolean) = TODO("Not yet implemented")
 
-    private suspend fun fetch(): Map<String, List<MediaFile>> {
+    open suspend fun fetch(): Map<String, List<MediaFile>> {
         return provider.fetchFiles(order = MediaProvider.COLUMN_DATE_MODIFIED, ascending = false)
             .groupBy {
                 DateUtils.getRelativeTimeSpanString(
