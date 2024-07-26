@@ -45,11 +45,12 @@ private val appModules = module {
     factory { MediaProvider(get()) }
     factory { androidContext().resources }
     // ViewModels
-    viewModel { SettingsViewModel(get()) }
+    viewModel { SettingsViewModel() }
     viewModel { TimelineViewModel(get()) }
     viewModel { FoldersViewModel(get()) }
     viewModel { (handle: SavedStateHandle) -> ViewerViewModel(handle, get()) }
     viewModel { (handle: SavedStateHandle) -> FolderViewModel(handle, get()) }
+    viewModel { AlbumViewModel(get()) }
 }
 
 class KoinInitializer : Initializer<Unit> {

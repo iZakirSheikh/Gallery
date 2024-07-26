@@ -63,6 +63,7 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -392,6 +393,7 @@ private val DefaultColorSpec = tween<Color>(AnimationConstants.DefaultDurationMi
 fun AppTheme(
     isLight: Boolean,
     immersive: Boolean = false,
+    fontFamily: FontFamily = FontFamily.Default,
     isSystemBarsTransparent: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -420,7 +422,7 @@ fun AppTheme(
                     content = content
                 )
             },
-            typography = androidx.compose.material.Typography()
+            typography = androidx.compose.material.Typography(defaultFontFamily = fontFamily)
         )
     }
 

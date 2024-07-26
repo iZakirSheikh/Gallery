@@ -16,7 +16,7 @@
 * limitations under the License.
 */
 
-@file:OptIn(ExperimentalSharedTransitionApi::class)
+@file:OptIn(ExperimentalSharedTransitionApi::class, ExperimentalSharedTransitionApi::class)
 
 package com.zs.gallery.files
 
@@ -28,34 +28,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Deselect
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Recycling
-import androidx.compose.material.icons.outlined.SelectAll
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,18 +50,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.primex.core.findActivity
 import com.primex.core.textResource
 import com.primex.material2.DropDownMenuItem
-import com.primex.material2.IconButton
 import com.primex.material2.Label
 import com.primex.material2.appbar.TopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
@@ -83,8 +65,6 @@ import com.primex.material2.menu.DropDownMenu2
 import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.LocalWindowSize
 import com.zs.compose_ktx.None
-import com.zs.compose_ktx.Range
-import com.zs.compose_ktx.VerticalDivider
 import com.zs.compose_ktx.sharedBounds
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
@@ -119,7 +99,7 @@ private fun TopAppBar(
                         verticalAlignment = Alignment.CenterVertically,
                         content = {
                             Label(
-                                text = textResource(id = R.string.app_name),
+                                text = textResource(id = R.string.app_name_real),
                                 style = AppTheme.typography.titleLarge
                             )
                         }
@@ -135,6 +115,7 @@ private fun TopAppBar(
                     contentColor = AppTheme.colors.onBackground
                 ),
                 actions = {
+                    val navController = LocalNavController.current
                     var expanded by remember { mutableStateOf(false) }
                     androidx.compose.material.IconButton(onClick = { expanded = true }) {
                         Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
@@ -142,18 +123,18 @@ private fun TopAppBar(
                             expanded = expanded,
                             onDismissRequest = { expanded = false }) {
                             // Bin
-                            DropDownMenuItem(title = textResource(id = R.string.recycle_bin),
-                                icon = rememberVectorPainter(
-                                    image = Icons.Outlined.Recycling
-                                ),
-                                onClick = { /*TODO*/ })
+                            DropDownMenuItem(
+                                title = textResource(id = R.string.recycle_bin),
+                                icon = rememberVectorPainter(image = Icons.Outlined.Recycling),
+                                onClick = { /*TODO*/ }
+                            )
 
                             // Favourite
-                            DropDownMenuItem(title = textResource(id = R.string.favourites),
-                                icon = rememberVectorPainter(
-                                    image = Icons.Outlined.Favorite
-                                ),
-                                onClick = { /*TODO*/ })
+                            DropDownMenuItem(
+                                title = textResource(id = R.string.favourites),
+                                icon = rememberVectorPainter(image = Icons.Outlined.Favorite),
+                                onClick = { navController.navigate(RouteAlbum()) }
+                            )
                         }
                     }
                 },
@@ -181,13 +162,14 @@ fun Timeline(
             )
         },
         modifier = Modifier
-            .nestedScroll(behaviour.nestedScrollConnection)
-            .animateContentSize(),
+            .nestedScroll(behaviour.nestedScrollConnection),
         contentWindowInsets = WindowInsets.None,
         content = {
             LazyDataGrid(
                 provider = viewState,
-                modifier = Modifier.padding(it),
+                modifier = Modifier
+                    .padding(it)
+                    .animateContentSize(),
                 itemContent = { item ->
                     MediaFile(
                         value = item,
@@ -214,7 +196,16 @@ fun Timeline(
                 }
             )
         },
-        floatingActionButton = { if (viewState.isInSelectionMode) FilesActionMenu(state = viewState) },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = viewState.isInSelectionMode,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically(),
+                content = {
+                    FilesActionMenu(state = viewState)
+                }
+            )
+        },
         floatingActionButtonPosition = FabPosition.Center
     )
 }

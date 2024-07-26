@@ -20,15 +20,64 @@ package com.zs.gallery.settings
 
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import com.primex.preferences.Key
 import com.zs.gallery.common.Route
 import com.primex.preferences.StringSaver
 import com.primex.preferences.booleanPreferenceKey
 import com.primex.preferences.floatPreferenceKey
 import com.primex.preferences.stringPreferenceKey
+import com.zs.gallery.R
 import com.zs.gallery.common.NightMode
 
 object RouteSettings : Route
+
+private val provider by lazy {
+    GoogleFont.Provider(
+        providerAuthority = "com.google.android.gms.fonts",
+        providerPackage = "com.google.android.gms",
+        certificates = R.array.com_google_android_gms_fonts_certs
+    )
+}
+
+/**
+ * Creates a [FontFamily] from the given Google Font name.
+ *
+ * @param name The name of theGoogle Font to use.
+ * @return A [FontFamily] object
+ */
+@Stable
+private fun FontFamily(name: String): FontFamily {
+    // Create a GoogleFont object from the given name.
+    val font = GoogleFont(name)
+    // Create a FontFamily object with four different font weights.
+    return FontFamily(
+        Font(
+            fontProvider = provider,
+            googleFont = font,
+            weight = FontWeight.Light
+        ),
+        Font(
+            fontProvider = provider,
+            googleFont = font,
+            weight = FontWeight.Medium
+        ),
+        Font(
+            fontProvider = provider,
+            googleFont = font,
+            weight = FontWeight.Normal
+        ),
+        Font(
+            fontProvider = provider,
+            googleFont = font,
+            weight = FontWeight.Bold
+        ),
+    )
+}
+
 
 object Settings {
 
@@ -108,6 +157,7 @@ object Settings {
             object : StringSaver<List<Long>> {
                 val SEPARATOR = ","
                 override fun restore(value: String): List<Long> {
+                    if (value.isEmpty()) return emptyList()
                     return value.split(SEPARATOR).map { it.toLong() }
                 }
 
@@ -123,6 +173,13 @@ object Settings {
      */
     val KEY_SECURE_MODE =
         booleanPreferenceKey(PREFIX + "_secure_gallery", defaultValue = false)
+
+    // Prompt
+    // Nunito Sans
+    // Ubuntu
+    // Kanit
+    val DefaultFontFamily = FontFamily("Outfit")
+    val DancingScriptFontFamily = FontFamily.Cursive
 }
 
 /**

@@ -28,6 +28,7 @@ import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.preview.RouteViewer
 
 object RouteTimeline : Route
+object RouteAlbum : Route
 
 private const val PARAM_PATH = "pram_path"
 
@@ -54,12 +55,37 @@ fun DataProvider.buildViewerRoute(id: Long): String {
 }
 
 interface TimelineViewState : FileActions, SelectionTracker, DataProvider {
+
     /**
-     * Adds selects items to favourite.
+     * Observes the list of selected items and returns an integer indicating the favorite status of all items.
+     *
+     * @return the state of favourites in selection
+     *  - `0` if none of the items are favorite.
+     *  - `-1` if some of the items are favorite.
+     *  - `1` if all of the items are favorite.
      */
-    fun addToFavourite()
+    val allFavourite: Int
+
+    /**
+     * Toggles the favorite status of the selected items.
+     *
+     * This function checks the current favorite status of the selected items and performs the following actions:
+     * - If `all` selected items are already favorite, it `removes` them from favorites.
+     * - If `some` selected items are favorite, it `adds the remaining` unfavored items to favorites.
+     * - If `none` of the selected items are favorite, it `adds all` of them favorites.
+     */
+    fun toggleLike()
 }
 
 interface FolderViewState : TimelineViewState {
     val title: CharSequence
+}
+
+interface AlbumViewState : SelectionTracker, DataProvider {
+    val title: CharSequence
+
+    /**
+     * Removes the selected items from favourite list.
+     */
+    fun remove()
 }

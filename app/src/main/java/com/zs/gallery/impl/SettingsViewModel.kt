@@ -57,9 +57,7 @@ inline fun <T> Flow<T>.asComposeState(initial: T): State<T> {
 context (Preferences, ViewModel)
 private fun <T> Flow<T>.asComposeState(): State<T> = asComposeState(runBlocking { first() })
 
-class SettingsViewModel(
-    private val preferences: Preferences
-) : KoinViewModel(), SettingsViewState {
+class SettingsViewModel() : KoinViewModel(), SettingsViewState {
     override val nightMode: Preference<NightMode> by with(preferences) {
         preferences[Settings.KEY_NIGHT_MODE].map {
             Preference(

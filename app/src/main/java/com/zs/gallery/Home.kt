@@ -68,7 +68,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -94,12 +93,15 @@ import com.zs.gallery.common.composable
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.preference
+import com.zs.gallery.files.Album
 import com.zs.gallery.files.Folder
+import com.zs.gallery.files.RouteAlbum
 import com.zs.gallery.files.RouteFolder
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.files.Timeline
 import com.zs.gallery.folders.Folders
 import com.zs.gallery.folders.RouteFolders
+import com.zs.gallery.impl.AlbumViewModel
 import com.zs.gallery.impl.FolderViewModel
 import com.zs.gallery.impl.FoldersViewModel
 import com.zs.gallery.impl.SettingsViewModel
@@ -383,6 +385,12 @@ private val NavGraphBuilder: NavGraphBuilder.() -> Unit = {
         val state = koinViewModel<FolderViewModel>()
         Folder(viewState = state)
     }
+
+    // Album
+    composable(RouteAlbum){
+        val state = koinViewModel<AlbumViewModel>()
+        Album(viewState = state)
+    }
 }
 
 // Default Enter/Exit Transitions.
@@ -404,6 +412,7 @@ fun Home(toastHostState: ToastHostState) {
     AppTheme(
         isLight = isLight,
         immersive = immersiveView,
+        fontFamily = Settings.DefaultFontFamily,
         isSystemBarsTransparent = isSystemBarsTransparent,
     ) {
         // Get the window size class

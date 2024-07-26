@@ -19,6 +19,7 @@
 package com.zs.gallery
 
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -34,11 +35,13 @@ import com.primex.core.getText2
 import com.primex.preferences.Key
 import com.primex.preferences.Preferences
 import com.primex.preferences.observeAsState
+import com.primex.preferences.value
 import com.zs.compose_ktx.LocalWindowSize
 import com.zs.compose_ktx.calculateWindowSizeClass
 import com.zs.compose_ktx.toast.ToastHostState
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.SystemFacade
+import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -86,6 +89,23 @@ class MainActivity : ComponentActivity(), SystemFacade {
     @NonRestartableComposable
     override fun <S, O> observeAsState(key: Key.Key2<S, O>) =
         preferences.observeAsState(key = key)
+
+    override fun onPause() {
+        val secureMode = preferences.value(Settings.KEY_SECURE_MODE)
+         if (secureMode)
+             window.setFlags(
+                 WindowManager.LayoutParams.FLAG_SECURE,
+                 WindowManager.LayoutParams.FLAG_SECURE
+             )
+        super.onPause()
+    }
+
+    override fun onResume() {
+        val isSecure = preferences.value(Settings.KEY_SECURE_MODE)
+        if (isSecure)
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        super.onResume()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

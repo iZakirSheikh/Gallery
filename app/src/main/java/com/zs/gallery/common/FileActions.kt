@@ -28,11 +28,10 @@ import com.zs.api.store.MediaFile
 interface FileActions {
 
     /**
-     * Deletes the currently [selected] files.
+     * Deletes/Trashes the currently [selected] files.
      * @param activity  the current activity, used for context.
-     * @param trash  whether to move files to trash (if supported) or permanently delete them.
      */
-    fun delete(activity: Activity, trash: Boolean = true)
+    fun delete(activity: Activity,)
 
     /**
      * Moves the currently [selected] files to the specified folder.

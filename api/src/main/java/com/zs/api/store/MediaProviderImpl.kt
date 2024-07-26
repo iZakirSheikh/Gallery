@@ -18,8 +18,11 @@
 
 package com.zs.api.store
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
 import android.database.ContentObserver
 import android.database.Cursor
@@ -32,7 +35,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_ADDED
 import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_EXPIRES
 import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_MODIFIED
@@ -52,6 +54,7 @@ import com.zs.api.store.MediaProvider.Companion.MEDIA_TYPE_IMAGE
 import com.zs.api.store.MediaProvider.Companion.MEDIA_TYPE_VIDEO
 import com.zs.api.util.PathUtils
 import kotlinx.coroutines.flow.Flow
+import java.io.File
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -116,7 +119,39 @@ private val TRASHED_PROJECTION =
         COLUMN_MIME_TYPE, // 5
     )
 
-internal class MediaProviderImpl(context: Context) : MediaProvider {
+/**
+ * Launches an activity for result using the provided [request] [IntentSender].
+ *
+ * @param request The [IntentSender] to launch.
+ * @return An [ActivityResult] wrapped in a [suspendCoroutine].
+ */
+private suspend fun ComponentActivity.launchForResult(
+    request: IntentSender
+): ActivityResult =
+    suspendCoroutine { cont ->
+        var launcher: ActivityResultLauncher<IntentSenderRequest>? = null
+        // Assign result to launcher in such a way tha it allows us to
+        // unregister later.
+        val contract = ActivityResultContracts.StartIntentSenderForResult()
+        val key = UUID.randomUUID().toString()
+        launcher = activityResultRegistry.register(key, contract) { it ->
+            // unregister launcher
+            launcher?.unregister()
+            Log.d(TAG, "launchForResult: $it")
+            cont.resume(it)
+        }
+        // Create an IntentSenderRequest object from the IntentSender object
+        val intentSenderRequest = IntentSenderRequest.Builder(request).setFlags(
+            Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            0
+        ).build()
+        // Launch the activity for result using the IntentSenderRequest object
+        launcher.launch(intentSenderRequest)
+    }
+
+internal class MediaProviderImpl(
+    context: Context
+) : MediaProvider {
     private val resolver = context.contentResolver
     override fun observer(uri: Uri): Flow<Boolean> = resolver.observe(uri)
     override fun register(uri: Uri, onChanged: () -> Unit): ContentObserver =
@@ -176,7 +211,7 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         offset: Int,
         limit: Int
     ): List<MediaFile> {
-        val idsString = ids.joinToString(",") { it.toString() }
+        val idsString = ids.joinToString(",") { "$it" }
         return resolver.query2(
             uri = EXTERNAL_CONTENT_URI,
             projection = MEDIA_PROJECTION,
@@ -202,11 +237,16 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         offset: Int,
         limit: Int
     ): List<Folder> {
-        // Compose selection.
-        // FixMe - Maybe allow user somehow pass mediaType as parameter.
+        // The selection to fetch all folders from the MediaStore.
+        // FixMe - For Android versions below API 10, consider using GroupBy, Count, etc.
+        //         In Android 10 and above, we rely on this current implementation.
+        //         Additionally, explore ways to optimize performance for faster results.
+        // Compose the selection for folders; exclude trashed items for Android 11 and above.
         //language = SQL
         val selection =
-            "(${COLUMN_MEDIA_TYPE} = $MEDIA_TYPE_IMAGE OR $COLUMN_MEDIA_TYPE = ${MEDIA_TYPE_VIDEO})" + if (filter != null) " AND $COLUMN_NAME LIKE ?" else ""
+            "(${COLUMN_MEDIA_TYPE} = $MEDIA_TYPE_IMAGE OR $COLUMN_MEDIA_TYPE = ${MEDIA_TYPE_VIDEO})" +
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) " AND $COLUMN_IS_TRASHED != 1" else "" +
+                            if (filter != null) " AND $COLUMN_NAME LIKE ?" else ""
         return resolver.query2(
             EXTERNAL_CONTENT_URI,
             arrayOf(COLUMN_ID, COLUMN_PATH, COLUMN_SIZE, COLUMN_DATE_MODIFIED),
@@ -256,8 +296,13 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         offset: Int,
         limit: Int
     ): List<MediaFile> {
+        // Compose a selection to return files from a folder path.
+        // TODO: Refactor the original fetchFiles function to accept the parent as an argument;
+        //       I believe it will work better.
+        // language = SQL
         val like = if (filter != null) " AND $COLUMN_NAME LIKE ?" else ""
-        val selection = "$COLUMN_PATH LIKE ?$like"
+        val selection = "$COLUMN_PATH LIKE ?$like" +
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) " AND $COLUMN_IS_TRASHED != 1" else ""
         val args = if (filter != null) arrayOf("$path%", "%$filter%") else arrayOf("$path%")
         return resolver.query2(
             EXTERNAL_CONTENT_URI,
@@ -277,43 +322,221 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         )
     }
 
-    override suspend fun delete(vararg uri: Uri): Int {
-        TODO("Not yet implemented")
-    }
+    /**
+     * Fetches the content URIs for the given media IDs.
+     *
+     * This function queries the MediaStore to determine the typeof each media item (image or video)
+     * based on the provided IDs and constructs the corresponding content URIs.
+     *
+     * @param ids The IDs of the media items to fetch URIs for.
+     * @return A list of content URIs corresponding to the given IDs.
+     */
+    suspend fun fetchContentUri(vararg ids: Long): List<Uri> {
+        // Create a comma-separated string of IDs for the SQL IN clause.
+        val idsString = ids.joinToString(",") { it.toString() }
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    override suspend fun delete(activity: Activity, vararg uri: Uri): Int {
-        val activity = (activity as? ComponentActivity) ?: return -1
-        val result = activity.launchForResult(
-            MediaStore.createDeleteRequest(resolver, uri.toList()).intentSender
+        // Define the projection to retrieve the ID and media type of each item.
+        val projection = arrayOf(COLUMN_ID, COLUMN_MEDIA_TYPE)
+
+        // Define the selection clause to filter items based on the provided IDs.
+        val selection = "$COLUMN_ID IN ($idsString)"
+
+        // Query the MediaStore and transform the result into a list of content URIs.
+        return resolver.query2(
+            EXTERNAL_CONTENT_URI, // The base content URI for media files
+            projection, // The columns to retrieve
+            selection, // The selection clause to filter results
+            transform = { c ->
+                List(c.count) { index -> // Iterate over the cursor results
+                    c.moveToPosition(index) // Move to the current row
+                    val type = c.getInt(1) // Get the media type (image or video)
+                    // Construct the appropriate content URI based on the media type.
+                    val uri = if (type == MEDIA_TYPE_IMAGE) {
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    } else {
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                    }
+                    ContentUris.withAppendedId(uri, c.getLong(0)) // Append the ID to the URI
+                }
+            }
         )
-        return if (Activity.RESULT_OK == result.resultCode) 1 else 0
     }
 
+    override suspend fun delete(vararg id: Long): Int {
+        // Create a comma-separated string of IDs for the SQL IN clause.
+        val idString = id.joinToString(",") { "$it" }
+
+        // Define the projection to retrieve the file path of each item.
+        val projection = arrayOf(COLUMN_PATH)
+
+        // Define the selection clause to filter items based on the provided IDs.
+        val selection = "$COLUMN_ID IN ($idString)"
+
+        // Query the MediaStore to get the file paths of the items to be deleted.
+        val paths = resolver.query2(
+            EXTERNAL_CONTENT_URI,
+            projection,
+            selection,
+            transform = { c ->
+                List(c.count) {
+                    c.moveToPosition(it);
+                    // Get the file path
+                    c.getString(0)
+                }
+            }
+        )
+        // Attempt to delete the items from the MediaStore.
+        var count = resolver.delete(
+            EXTERNAL_CONTENT_URI,
+            "${MediaStore.MediaColumns._ID} IN ($idString)",
+            null
+        )
+
+        // Error deleting from MediaStore
+        if (count == 0) return -1 // error
+
+        // Iterate over the file paths and attempt to delete them from the file system.
+        paths.forEach {
+            // Decrement count if file deletion fails
+            if (!File(it).delete())
+                count--
+        }
+
+        // Return the number of successfully deleted items
+        return count
+    }
+
+    override suspend fun delete(vararg uri: Uri): Int {
+        if (uri.isEmpty()) return 0
+        val ids = uri.map { ContentUris.parseId(it) }
+        return delete(*ids.toLongArray())
+    }
+
+    /**
+     * Counts the number of media items in the MediaStore.
+     *
+     * @param trashed Whether to include trashed items in the count. Defaults to false.
+     * @return The number of media items.
+     */
+    private suspend fun count(trashed: Boolean = false): Int {
+        val noTrashSelection =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "$COLUMN_IS_TRASHED != 1" else ""
+        return resolver.query2(
+            EXTERNAL_CONTENT_URI,
+            arrayOf(COLUMN_ID),
+            selection = if (!trashed) noTrashSelection else "",
+            transform = { c ->
+                c.count
+            },
+        )
+    }
+
+    @SuppressLint("NewApi")
+    override suspend fun delete(activity: Activity, vararg uri: Uri): Int {
+        // Create a delete request for the given URIs.
+        val request = MediaStore.createDeleteRequest(resolver, uri.toList())
+        if (activity is ComponentActivity) {
+            // If the activity is a ComponentActivity, use Activity Result
+            // APIs for detailed feedback.
+            // Count items before deletion (including trashed)
+            val before = count(true)
+            // Launch the delete request and get the result.
+            val result = activity.launchForResult(
+                request.intentSender
+            )
+            // Handle the result of the deletion request.
+            // Deletion was canceled by the user
+            if (Activity.RESULT_CANCELED == result.resultCode) return -3
+            // Count items after deletion (including trashed)
+            val after = count(true)
+            // Return the number of deleted items
+            if (Activity.RESULT_OK == result.resultCode) return before - after
+            // Log for debugging if result is unexpected
+            Log.d(TAG, "delete: before: $before, after: $after")
+            // Deletion failed for an unknown reason
+            return -1
+        }
+        // If the activity is not a ComponentActivity, initiate the deletion without detailed feedback.
+        activity.startIntentSenderForResult(request.intentSender, 100, null, 0, 0, 0)
+        // Deletion request initiated, but the exact outcome is unknown
+        return -2
+    }
+
+
+    override suspend fun delete(activity: Activity, vararg id: Long): Int {
+        val uri = fetchContentUri(*id).toTypedArray()
+        return delete(activity, *uri)
+    }
+
+    @SuppressLint("NewApi")
     override suspend fun trash(activity: Activity, vararg uri: Uri): Int {
-        TODO("Not yet implemented")
+        // Create a delete request for the given URIs.
+        val request = MediaStore.createTrashRequest(resolver, uri.toList(), true)
+        if (activity is ComponentActivity) {
+            // If the activity is a ComponentActivity, use Activity Result
+            // APIs for detailed feedback.
+            // Count items before deletion (including trashed)
+            val before = count(false)
+            // Launch the delete request and get the result.
+            val result = activity.launchForResult(
+                request.intentSender
+            )
+            // Handle the result of the deletion request.
+            // Deletion was canceled by the user
+            if (Activity.RESULT_CANCELED == result.resultCode) return -3
+            // Count items after deletion (including trashed)
+            val after = count(false)
+            // Return the number of deleted items
+            if (Activity.RESULT_OK == result.resultCode) return before - after
+            // Log for debugging if result is unexpected
+            Log.d(TAG, "delete: before: $before, after: $after")
+            // Deletion failed for an unknown reason
+            return -1
+        }
+        // If the activity is not a ComponentActivity, initiate the deletion without detailed feedback.
+        activity.startIntentSenderForResult(request.intentSender, 100, null, 0, 0, 0)
+        // Deletion request initiated, but the exact outcome is unknown
+        return -2
     }
 
+    override suspend fun trash(activity: Activity, vararg id: Long): Int {
+        val uri = fetchContentUri(*id).toTypedArray()
+        return trash(activity, *uri)
+    }
+
+    @SuppressLint("NewApi")
     override suspend fun restore(activity: Activity, vararg uri: Uri): Int {
-        TODO("Not yet implemented")
+        // Create a delete request for the given URIs.
+        val request = MediaStore.createTrashRequest(resolver, uri.toList(), false)
+        if (activity is ComponentActivity) {
+            // If the activity is a ComponentActivity, use Activity Result
+            // APIs for detailed feedback.
+            // Count items before deletion (including trashed)
+            val before = count(true)
+            // Launch the delete request and get the result.
+            val result = activity.launchForResult(
+                request.intentSender
+            )
+            // Handle the result of the deletion request.
+            // Deletion was canceled by the user
+            if (Activity.RESULT_CANCELED == result.resultCode) return -3
+            // Count items after deletion (including trashed)
+            val after = count(true)
+            // Return the number of deleted items
+            if (Activity.RESULT_OK == result.resultCode) return after - before
+            // Log for debugging if result is unexpected
+            Log.d(TAG, "delete: before: $before, after: $after")
+            // Deletion failed for an unknown reason
+            return -1
+        }
+        // If the activity is not a ComponentActivity, initiate the deletion without detailed feedback.
+        activity.startIntentSenderForResult(request.intentSender, 100, null, 0, 0, 0)
+        // Deletion request initiated, but the exact outcome is unknown
+        return -2
+    }
+
+    override suspend fun restore(activity: Activity, vararg id: Long): Int {
+        val uri = fetchContentUri(*id).toTypedArray()
+        return restore(activity, *uri)
     }
 }
-
-private suspend fun ComponentActivity.launchForResult(request: IntentSender): ActivityResult =
-    suspendCoroutine { cont ->
-        var launcher: ActivityResultLauncher<IntentSenderRequest>? = null
-        // Assign result to launcher in such a way tha it allows us to
-        // unregister later.
-        val contract = ActivityResultContracts.StartIntentSenderForResult()
-        val key = UUID.randomUUID().toString()
-        launcher = activityResultRegistry.register(key, contract) { it ->
-            // unregister launcher
-            launcher?.unregister()
-            Log.d(TAG, "launchForResult: $it")
-            cont.resume(it)
-        }
-        // Create an IntentSenderRequest object from the IntentSender object
-        val intentSenderRequest = IntentSenderRequest.Builder(request).build()
-        // Launch the activity for result using the IntentSenderRequest object
-        launcher.launch(intentSenderRequest)
-    }

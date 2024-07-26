@@ -22,6 +22,7 @@ androidx-material-icons-extended = { module = "androidx.compose.material:materia
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "compose" }
 androidx-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.6.8" }
 coil-compose = { module = "io.coil-kt:coil-compose", version = "2.7.0" }
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version = "22.0.2" }
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version = "19.0.3" }

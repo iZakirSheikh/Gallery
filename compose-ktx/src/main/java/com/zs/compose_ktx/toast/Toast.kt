@@ -19,14 +19,19 @@
 package com.zs.compose_ktx.toast
 
 import androidx.annotation.IntDef
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.Surface
+import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
@@ -180,6 +185,7 @@ private fun Modifier.indicatior(color: Color) = this then Modifier.drawBehind {
     drawRect(color = color, size = size.copy(width = 4.dp.toPx()))
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Toast(
     state: Toast,

@@ -3,6 +3,7 @@
 <resources>
     <!--Some common variables-->
     <string name="app_name">&appname;</string>
+    <string name="app_name_real">&appname;</string>
     <string name="permission_screen_title">Storage Permission</string>
     <string name="allow">Allow</string>
     <string name="permission_screen_desc"><b>&appname;</b> requires permission to access your
@@ -68,4 +69,16 @@
     <!--A string res that returns a new formatted string with x added at the end; like 1.2x-->
     <string name="times_factor_x_f">%1$sx</string>
     <string name="last_modified">Last modified</string>
+    <string name="msg_error_sharing_files">Oops, something went wrong while sharing the files. Please try again.</string>
+    <string name="msg_files_delete_unknown_error">Oops, something went wrong while deleting the files. Please try again.</string>
+    <string name="msg_confirm_deletion">Confirm file deletion.</string>
+    <string name="msg_files_deletion_cancelled">File deleting process was canceled by the user.</string>
+    <string name="msg_files_deletion_success_out_total">Successfully deleted %1$s out of %2$s files.</string>
+
+
+    <string name="msg_files_trash_unknown_error">Oops, something went wrong while trashing the files. Please try again.</string>
+    <string name="msg_confirm_trashing">Confirm file trashing.</string>
+    <string name="msg_files_trashing_cancelled">File trashing process was canceled by the user.</string>
+    <string name="msg_files_trashing_success_out_total">Successfully trashed %1$d out of %2$d files.</string>
+
 </resources>

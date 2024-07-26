@@ -18,6 +18,7 @@
 
 package com.zs.api.store
 
+import android.annotation.TargetApi
 import android.app.Activity
 import android.content.ContentUris
 import android.content.Context
@@ -222,25 +223,50 @@ interface MediaProvider {
         limit: Int = Int.MAX_VALUE
     ): List<MediaFile>
 
-    /**
-     * Deletes the specified URIs from the device's persistent storage permanently.
-     *
-     *  Note hat this fun works only unto android 10.
-     * @param uri The URIs to delete.
-     * @return The number of items that were deleted, or -1 if an error occurred.
-     */
-    suspend fun delete(vararg uri: Uri): Int
 
     /**
      * Permanently deletes content from the device at the specified URIs.
      *
-     * @param activity The Activity used to request deletion. If it is a [ComponentActivity],
-     * it reports back information about the deletion. Otherwise, it simply performs the deletion.
-     * @param uri The URIs of the content to delete.
-     * @return The number of items deleted, or -1 if an error occurred, or -3 ifcanceled by the user.
+     * This function handles the deletion of content using the provided URIs. If the given
+     * activity is a [ComponentActivity], it leverages the Activity Result APIs to report
+     * back information about the deletion process, such as the number of items deleted.
+     * For other activity types, it performs the deletion directly without providing detailed feedback.
+     *
+     * @param activity The Activity used to initiate the deletion request. If it is a
+     * [ComponentActivity], it will receive a result callback with deletion information.
+     * @param uris The URIs of the content to be deleted.
+     * @return The number of items successfully deleted.
+     *  - `-1` if an error occurred during the deletion process.
+     *  - `-2` if the activity is not a [ComponentActivity] and the deletion request has been initiated.
+     *     In this case, the user might see a confirmation dialog, but the exact outcome is unknown.
+     *- `-3` if the deletion request was canceled by the user.
      */
     @RequiresApi(Build.VERSION_CODES.R)
     suspend fun delete(activity: Activity, vararg uri: Uri): Int
+
+    /**
+     * Deletes the specified URIs from the device's persistent storage permanently.
+     *
+     *  ***Note hat this fun works only unto android 10.***
+     * @param uri The URIs to delete.
+     * @return The number of items that were deleted, or -1 if an error occurred.
+     * @see delete
+     */
+    @TargetApi(Build.VERSION_CODES.Q)
+    suspend fun delete(vararg uri: Uri): Int
+
+    /**
+     * @see delete
+     */
+    @TargetApi(Build.VERSION_CODES.Q)
+    suspend fun delete(vararg id: Long): Int
+
+
+    /**
+     * @see delete
+     */
+    @RequiresApi(Build.VERSION_CODES.R)
+    suspend fun delete(activity: Activity, vararg id: Long): Int
 
     /**
      * @see delete
@@ -252,7 +278,19 @@ interface MediaProvider {
      * @see delete
      */
     @RequiresApi(Build.VERSION_CODES.R)
+    suspend fun trash(activity: Activity, vararg id: Long): Int
+
+    /**
+     * @see delete
+     */
+    @RequiresApi(Build.VERSION_CODES.R)
     suspend fun restore(activity: Activity, vararg uri: Uri): Int
+
+    /**
+     * @see delete
+     */
+    @RequiresApi(Build.VERSION_CODES.R)
+    suspend fun restore(activity: Activity, vararg id: Long): Int
 }
 
 /**

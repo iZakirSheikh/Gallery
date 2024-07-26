@@ -14,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 21
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.1.0-dev03"
+        versionCode = 4
+        versionName = "0.1.0-dev04"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -71,4 +71,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.androidx.ui.text.google.fonts)
 }

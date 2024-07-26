@@ -27,11 +27,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.StarHalf
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +45,7 @@ import com.primex.material2.IconButton
 import com.primex.material2.Label
 import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.VerticalDivider
+import com.zs.gallery.common.FabActionMenu
 
 
 @Composable
@@ -50,64 +53,54 @@ fun FilesActionMenu(
     state: TimelineViewState,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        modifier = modifier.scale(0.85f),
-        color = AppTheme.colors.background(elevation = 1.dp),
-        contentColor = AppTheme.colors.onBackground,
-        shape = CircleShape,
-        border = BorderStroke(1.dp, AppTheme.colors.background(elevation = 4.dp)),
-        elevation = 12.dp,
-        content = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.padding.small),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.animateContentSize(), content = {
-                    // Label
-                    Label(
-                        text = "${state.selected.size}",
-                        modifier = Modifier.padding(
-                            start = AppTheme.padding.normal,
-                            end = AppTheme.padding.medium
-                        ),
-                        style = AppTheme.typography.titleLarge
-                    )
+    FabActionMenu(modifier = modifier) {
+        // Label
+        Label(
+            text = "${state.selected.size}",
+            modifier = Modifier.padding(
+                start = AppTheme.padding.normal,
+                end = AppTheme.padding.medium
+            ),
+            style = AppTheme.typography.titleLarge
+        )
 
-                    // Divider
-                    VerticalDivider(modifier = Modifier.height(AppTheme.padding.large))
+        // Divider
+        VerticalDivider(modifier = Modifier.height(AppTheme.padding.large))
 
-                    // Select/Deselect
-                    if (!state.allSelected)
-                        IconButton(
-                            imageVector = Icons.Outlined.SelectAll,
-                            onClick = state::selectAll
-                        )
-
-                    IconButton(
-                        imageVector = Icons.Outlined.FavoriteBorder,
-                        onClick = state::addToFavourite
-                    )
-
-                    val context = LocalContext.current
-
-                    // Delete
-                    IconButton(
-                        imageVector = Icons.Outlined.DeleteOutline,
-                        onClick = { state.delete(context.findActivity()) }
-                    )
-
-                    // Share
-                    IconButton(
-                        imageVector = Icons.Outlined.Share,
-                        onClick = { state.share(context.findActivity()) }
-                    )
-
-                    // close
-                    IconButton(
-                        imageVector = Icons.Outlined.Close,
-                        onClick = state::clear
-                    )
-                }
+        // Select/Deselect
+        if (!state.allSelected)
+            IconButton(
+                imageVector = Icons.Outlined.SelectAll,
+                onClick = state::selectAll
             )
-        }
-    )
+
+        IconButton(
+            imageVector = when (state.allFavourite) {
+                1 -> Icons.Filled.Star
+                0 -> Icons.Outlined.StarOutline
+                else -> Icons.Outlined.StarHalf
+            },
+            onClick = state::toggleLike
+        )
+
+        val context = LocalContext.current
+
+        // Delete
+        IconButton(
+            imageVector = Icons.Outlined.DeleteOutline,
+            onClick = { state.delete(context.findActivity()) }
+        )
+
+        // Share
+        IconButton(
+            imageVector = Icons.Outlined.Share,
+            onClick = { state.share(context.findActivity()) }
+        )
+
+        // close
+        IconButton(
+            imageVector = Icons.Outlined.Close,
+            onClick = state::clear
+        )
+    }
 }

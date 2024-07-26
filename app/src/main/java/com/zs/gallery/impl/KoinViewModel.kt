@@ -18,13 +18,16 @@
 
 package com.zs.gallery.impl
 
+import android.app.Application
 import android.content.res.Resources
+import android.text.format.Formatter
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.res.ResourcesCompat
 import com.primex.core.getText2
+import com.primex.preferences.Preferences
 import com.zs.compose_ktx.toast.Duration
 import com.zs.compose_ktx.toast.Result
 import com.zs.compose_ktx.toast.Toast
@@ -39,6 +42,8 @@ private const val TAG = "KoinViewModel"
 abstract class KoinViewModel: ScopeViewModel() {
     private val resources: Resources by inject()
     private val relay: ToastHostState by inject()
+    val preferences: Preferences by inject()
+    private val context: Application by inject()
 
     suspend fun showToast(
         message: CharSequence,
@@ -63,7 +68,8 @@ abstract class KoinViewModel: ScopeViewModel() {
     )
 
     fun getText(@StringRes id: Int): CharSequence = resources.getText2(id)
-    fun getText(@StringRes id: Int, vararg args: Any) = resources.getText2(id, args)
+    fun getText(@StringRes id: Int, vararg args: Any) = resources.getText2(id, *args)
+    fun formatFileSize(sizeBytes: Long): String = Formatter.formatFileSize(context, sizeBytes)
 
     override fun onCleared() {
         super.onCleared()
