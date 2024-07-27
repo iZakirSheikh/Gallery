@@ -18,9 +18,63 @@
 
 package com.zs.gallery.impl
 
+import android.app.Activity
+import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import com.zs.api.store.MediaProvider
+import com.zs.gallery.preview.RouteViewer
 import com.zs.gallery.preview.ViewerViewState
 
-class ViewerViewModel(handle: SavedStateHandle, provider: MediaProvider): KoinViewModel(), ViewerViewState {
+class ViewerViewModel(
+    handle: SavedStateHandle,
+    private val provider: MediaProvider
+): KoinViewModel(), ViewerViewState {
+
+    val args = RouteViewer[handle]
+
+    override var index by mutableIntStateOf(args.index)
+
+    override fun fetchUriForIndex(): Uri = MediaProvider.contentUri(args.ids[index])
+
+    override val size: Int get() = args.ids.size
+
+    override fun fetchIdForIndex(): Long {
+       return args.ids[index]
+    }
+
+    override fun delete(activity: Activity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun remove(activity: Activity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun trash(activity: Activity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun move(dest: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun copy(dest: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun rename(name: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun share(activity: Activity) {
+        TODO("Not yet implemented")
+    }
+
+    override fun restore(activity: Activity) {
+        TODO("Not yet implemented")
+    }
 }

@@ -80,5 +80,11 @@
     <string name="msg_confirm_trashing">Confirm file trashing.</string>
     <string name="msg_files_trashing_cancelled">File trashing process was canceled by the user.</string>
     <string name="msg_files_trashing_success_out_total">Successfully trashed %1$d out of %2$d files.</string>
+    <string name="trash">Trash</string>
 
+    <string name="msg_files_restore_unknown_error">Oops, something went wrong while restoring the files. Please try again.</string>
+    <string name="msg_confirm_restoring">Confirm file restoring.</string>
+    <string name="msg_files_restoring_cancelled">File restoring process was canceled by the user.</string>
+    <string name="msg_files_restoring_success_out_total">Successfully restored %1$d out of %2$d files.</string>
+    
 </resources>

@@ -39,6 +39,7 @@ import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_ADDED
 import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_EXPIRES
 import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_MODIFIED
 import com.zs.api.store.MediaProvider.Companion.COLUMN_DATE_TAKEN
+import com.zs.api.store.MediaProvider.Companion.COLUMN_DURATION
 import com.zs.api.store.MediaProvider.Companion.COLUMN_HEIGHT
 import com.zs.api.store.MediaProvider.Companion.COLUMN_ID
 import com.zs.api.store.MediaProvider.Companion.COLUMN_IS_TRASHED
@@ -89,7 +90,8 @@ private val Cursor.toTrashedFile: Trashed
         expires = getLong(2) * 1000,
         path = getString(3),
         size = getLong(4),
-        mimeType = getString(5)
+        mimeType = getString(5),
+        duration = getInt(6)
     )
 
 private val MEDIA_PROJECTION =
@@ -117,6 +119,7 @@ private val TRASHED_PROJECTION =
         COLUMN_PATH, // 3
         COLUMN_SIZE, // 4
         COLUMN_MIME_TYPE, // 5
+        COLUMN_DURATION // 6
     )
 
 /**
@@ -284,8 +287,24 @@ internal class MediaProviderImpl(
         }
     }
 
-    override suspend fun fetchTrashedFiles(offset: Int, limit: Int): List<Trashed> {
-        TODO("Not yet implemented")
+    override suspend fun fetchTrashedFiles(
+        offset: Int, limit: Int
+    ): List<Trashed> {
+        return resolver.query2(
+            EXTERNAL_CONTENT_URI,
+            TRASHED_PROJECTION,
+            selection = "$COLUMN_IS_TRASHED = 1",
+            offset = offset,
+            limit = limit,
+            order = MediaProvider.COLUMN_DATE_EXPIRES,
+            ascending = false,
+            transform = { c ->
+                List(c.count) { index ->
+                    c.moveToPosition(index)
+                    c.toTrashedFile
+                }
+            }
+        )
     }
 
     override suspend fun fetchFilesFromDirectory(
@@ -450,7 +469,7 @@ internal class MediaProviderImpl(
             // Count items after deletion (including trashed)
             val after = count(true)
             // Return the number of deleted items
-            if (Activity.RESULT_OK == result.resultCode) return before - after
+            if (Activity.RESULT_OK == result.resultCode) return after - before
             // Log for debugging if result is unexpected
             Log.d(TAG, "delete: before: $before, after: $after")
             // Deletion failed for an unknown reason

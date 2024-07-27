@@ -19,50 +19,50 @@
 package com.zs.gallery.impl
 
 import android.text.format.DateUtils
-import android.util.Log
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewModelScope
 import com.primex.core.withSpanStyle
-import com.zs.api.store.MediaFile
 import com.zs.api.store.MediaProvider
 import com.zs.gallery.R
 import com.zs.gallery.files.AlbumViewState
-import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 
 private const val TAG = "AlbumViewModel"
 
-class AlbumViewModel(provider: MediaProvider) : TimelineViewModel(provider), AlbumViewState {
-    override var title: CharSequence  by mutableStateOf(getText(R.string.favourites))
+class AlbumViewModel(
+    provider: MediaProvider
+) : TimelineViewModel(provider), AlbumViewState {
 
+    override var title: CharSequence by mutableStateOf(getText(R.string.favourites))
 
-    override suspend fun update() {
+    override suspend fun refresh() {
+        // Introduce a slight delay (for potential visual feedback)
         delay(50)
-        val ids = favourites.value
+
+        val ids = favorites
+        // If no favorites, skip the refresh
         if (ids.isEmpty()) return
 
+        // Update the title with the number of favorite files
         title = buildAnnotatedString {
             appendLine(getText(R.string.favourites))
             withSpanStyle(fontSize = 10.sp) {
-                append("${favourites.value.size} Files")
+                append("${favorites.size} Files")
             }
         }
 
-        data = provider.fetchFiles(
+        // Fetch favorite files from the provider, ordered by modification date
+        values = provider.fetchFiles(
             *ids.toLongArray(),
             order = MediaProvider.COLUMN_DATE_MODIFIED,
             ascending = false
-        ).groupBy {
+        )
+
+        // Group the files by their relative time span (e.g., "Today", "Yesterday")
+        data = values.groupBy {
             DateUtils.getRelativeTimeSpanString(
                 it.dateModified,
                 System.currentTimeMillis(),
@@ -71,14 +71,11 @@ class AlbumViewModel(provider: MediaProvider) : TimelineViewModel(provider), Alb
         }
     }
 
+
+    // Since all items in this album are favorites, the selected items are also favorites.
+    // Calling toggleLike will therefore remove them from the favorites list.
     override fun remove() {
-        val selected = consume()
-        // Get the current list of favorite items
-        val oldList = favourites.value
-        // Filter the old list to exclude selected items, creating a new list
-        val newList = oldList.filterNot { it in selected }
-        // Update the preferences with the new list of favorite items
-        preferences[Settings.KEY_FAVOURITE_FILES] = newList// Invalidate the current state to trigger recomposition
+        toggleLike()
         invalidate()
     }
 }

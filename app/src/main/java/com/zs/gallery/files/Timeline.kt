@@ -20,6 +20,7 @@
 
 package com.zs.gallery.files
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -67,6 +68,7 @@ import com.zs.compose_ktx.LocalWindowSize
 import com.zs.compose_ktx.None
 import com.zs.compose_ktx.sharedBounds
 import com.zs.gallery.R
+import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.preview.RouteViewer
@@ -126,7 +128,9 @@ private fun TopAppBar(
                             DropDownMenuItem(
                                 title = textResource(id = R.string.recycle_bin),
                                 icon = rememberVectorPainter(image = Icons.Outlined.Recycling),
-                                onClick = { /*TODO*/ }
+                                onClick = { navController.navigate(RouteTrash()) },
+                                // Only enable if R and above
+                                enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
                             )
 
                             // Favourite

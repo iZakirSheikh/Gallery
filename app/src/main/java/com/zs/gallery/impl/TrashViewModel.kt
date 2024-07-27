@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 23-07-2024.
+ * Created by Zakir Sheikh on 27-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,53 +20,27 @@ package com.zs.gallery.impl
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentUris
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
+import android.icu.util.TimeUnit
 import android.text.format.DateUtils
-import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NearbyError
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.viewModelScope
-import com.primex.core.Rose
-import com.primex.preferences.value
-import com.zs.api.store.MediaFile
 import com.zs.api.store.MediaProvider
-import com.zs.compose_ktx.toast.Toast
-import com.zs.gallery.R
+import com.zs.api.store.Trashed
+import com.zs.gallery.bin.TrashViewState
 import com.zs.gallery.common.GroupSelectionLevel
-import com.zs.gallery.files.TimelineViewState
-import com.zs.gallery.settings.Settings
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
 
-private const val TAG = "TimelineViewModel"
 
-open class TimelineViewModel(
+class TrashViewModel(
     provider: MediaProvider
-) : MainViewModel<MediaFile>(provider), TimelineViewState {
-    // This property holds the current list of MediaFile items.
-    // It should only be updated when the actual underlying data changes.
-    // Since this is not observed anywhere so using observable state for this is bit too much
-    override var values: List<MediaFile> = emptyList()
+) : MainViewModel<Trashed>(provider), TrashViewState {
+    override var values: List<Trashed> = emptyList()
 
-    // Point to the existing id property
     @Suppress("EXTENSION_SHADOWED_BY_MEMBER")
-    override val MediaFile.id: Long get() = id
-    override var data: Map<String, List<MediaFile>>? by mutableStateOf(null)
+    override val Trashed.id: Long get() = id
+    override var data: Map<String, List<Trashed>>? by mutableStateOf(null)
 
     override fun evaluateGroupSelectionLevel(key: String): GroupSelectionLevel {
         // Return NONE if data is not available.
@@ -95,17 +69,30 @@ open class TimelineViewModel(
         }
     }
 
+    @SuppressLint("NewApi")
     override suspend fun refresh() {
-        // Fetch files from the provider, ordered by modification date in descending order.
-        values = provider.fetchFiles(order = MediaProvider.COLUMN_DATE_MODIFIED, ascending = false)
+        // Fetch the list of trashed files from the provider
+        values = provider.fetchTrashedFiles()
+
+        // Group the trashed files by their remaining days until expiration
         data = values
-            // Group the files by their relative time span (e.g., "Today", "Yesterday").
-            .groupBy {
-                DateUtils.getRelativeTimeSpanString(
-                    it.dateModified,
-                    System.currentTimeMillis(),
-                    DateUtils.DAY_IN_MILLIS
-                ).toString()
+            // Calculate days left for each file
+            .groupBy() {
+                (it.expires - System.currentTimeMillis()).milliseconds.inWholeDays
             }
+            // Transform the keys to user-friendly labels
+            .mapKeys { (daysLeft, _) ->
+                when {
+                    daysLeft <= 0 -> "Today" // Handle expired items
+                    daysLeft == 1L -> "1 day left"
+                    else -> "$daysLeft days left" // Format remaining days
+                }
+            }
+    }
+
+
+    override fun empty(activity: Activity) {
+        selectAll()
+        trash(activity)
     }
 }

@@ -68,6 +68,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -85,6 +86,8 @@ import com.zs.compose_ktx.navigation.NavRailItem
 import com.zs.compose_ktx.navigation.NavigationItemDefaults
 import com.zs.compose_ktx.navigation.NavigationSuiteScaffold
 import com.zs.compose_ktx.toast.ToastHostState
+import com.zs.gallery.bin.RouteTrash
+import com.zs.gallery.bin.Trash
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
@@ -106,6 +109,7 @@ import com.zs.gallery.impl.FolderViewModel
 import com.zs.gallery.impl.FoldersViewModel
 import com.zs.gallery.impl.SettingsViewModel
 import com.zs.gallery.impl.TimelineViewModel
+import com.zs.gallery.impl.TrashViewModel
 import com.zs.gallery.impl.ViewerViewModel
 import com.zs.gallery.preview.RouteViewer
 import com.zs.gallery.preview.Viewer
@@ -390,6 +394,12 @@ private val NavGraphBuilder: NavGraphBuilder.() -> Unit = {
     composable(RouteAlbum){
         val state = koinViewModel<AlbumViewModel>()
         Album(viewState = state)
+    }
+
+    // Trash
+    composable(RouteTrash){
+        val state = koinViewModel<TrashViewModel>()
+        Trash(viewState = state)
     }
 }
 

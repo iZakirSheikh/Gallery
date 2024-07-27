@@ -51,6 +51,7 @@ private val appModules = module {
     viewModel { (handle: SavedStateHandle) -> ViewerViewModel(handle, get()) }
     viewModel { (handle: SavedStateHandle) -> FolderViewModel(handle, get()) }
     viewModel { AlbumViewModel(get()) }
+    viewModel { TrashViewModel(get()) }
 }
 
 class KoinInitializer : Initializer<Unit> {

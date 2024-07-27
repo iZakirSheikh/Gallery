@@ -88,7 +88,7 @@ fun FilesActionMenu(
         // Delete
         IconButton(
             imageVector = Icons.Outlined.DeleteOutline,
-            onClick = { state.delete(context.findActivity()) }
+            onClick = { state.remove(context.findActivity()) }
         )
 
         // Share

@@ -18,7 +18,9 @@
 
 package com.zs.gallery.preview
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
+import com.zs.gallery.common.FileActions
 import com.zs.gallery.common.SafeArgs
 
 private const val PARAM_INDEX = "param_index"
@@ -52,4 +54,22 @@ object RouteViewer : SafeArgs<ViewerArgs> {
     }
 }
 
-interface ViewerViewState
+interface ViewerViewState: FileActions {
+
+    /**
+     * The current index user is viewing
+     */
+    var index: Int
+
+    /**
+     * @return the number of items in the list
+     */
+    val size: Int
+
+    /**
+     * @return the uri for the current index.
+     */
+    fun fetchUriForIndex(): Uri
+
+     fun fetchIdForIndex(): Long
+}

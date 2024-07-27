@@ -22,7 +22,7 @@ package com.zs.api.store
  * Represents a trashed file.
  *
  * @property id The unique identifier of the trashed file.
- * @propertyname The name of the trashed file.
+ * @property name The name of the trashed file.
  * @property expires The timestamp (in milliseconds) when the trashed file will be permanently deleted.
  * @property path The absolute path to the trashed file.
  * @property size The size of the trashed file in bytes.
@@ -35,6 +35,7 @@ data class Trashed(
     val path: String,
     val size: Long,
     val mimeType: String,
+    val duration: Int,
 )
 
 val Trashed.isImage get() = mimeType.startsWith("image/")

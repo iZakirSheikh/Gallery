@@ -18,6 +18,8 @@
 
 package com.zs.gallery.bin
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import com.zs.api.store.Trashed
 import com.zs.gallery.common.FileActions
 import com.zs.gallery.common.Route
@@ -26,10 +28,18 @@ import com.zs.gallery.common.SelectionTracker
 object RouteTrash : Route
 
 interface TrashViewState : FileActions, SelectionTracker {
-    val data: List<Trashed>?
-
+    val data: Map<String, List<Trashed>>?
     /**
      * Removes all items from bin.
      */
-    fun empty()
+    fun empty(activity: Activity)
+
+    /**
+     * Restores all items from the bin
+     */
+    @SuppressLint("NewApi")
+    fun restoreAll(activity: Activity){
+        selectAll()
+        restore(activity)
+    }
 }

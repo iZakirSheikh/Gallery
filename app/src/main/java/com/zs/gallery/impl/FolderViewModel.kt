@@ -43,8 +43,9 @@ class FolderViewModel(
 ) : TimelineViewModel(provider), FolderViewState {
 
     val path = RouteFolder[handle]
+    override var title: CharSequence by mutableStateOf(PathUtils.name(path))
 
-    override suspend fun update() {
+    override suspend fun refresh() {
         // Workaround: Parameter is unexpectedly null on the first call.
         // Root cause unknown
         delay(50)
@@ -52,17 +53,17 @@ class FolderViewModel(
         Log.d(TAG, "fetch: Path - $path")
 
         // Fetch the files from the directory, ordered by last modified date in descending order
-        val list = provider.fetchFilesFromDirectory(
+        values = provider.fetchFilesFromDirectory(
             order = MediaProvider.COLUMN_DATE_MODIFIED,
             path = path,
             ascending = false
         )
 
         // Calculate the total size of all files and format it to a human readable string
-        val size = formatFileSize(list.sumOf { it.size })
+        val size = formatFileSize(values.sumOf { it.size })
 
         // Get the number of files in the directory
-        val count = list.size
+        val count = values.size
 
         // Extract the name of the current directory from the path
         val name = PathUtils.name(path)
@@ -76,7 +77,7 @@ class FolderViewModel(
         }
 
         // Group the files by the relative time span string (e.g. "1 day ago", "2 hours ago")
-        data = list.groupBy {
+        data = values.groupBy {
             DateUtils.getRelativeTimeSpanString(
                 it.dateModified,
                 System.currentTimeMillis(),
@@ -84,8 +85,4 @@ class FolderViewModel(
             ).toString()
         }
     }
-
-    override var title: CharSequence by mutableStateOf(
-       PathUtils.name(path)
-    )
 }

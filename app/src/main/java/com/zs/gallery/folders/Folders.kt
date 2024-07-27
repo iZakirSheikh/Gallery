@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.zs.gallery.folders
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -67,12 +70,14 @@ import com.primex.material2.neumorphic.NeumorphicTopAppBar
 import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.ContentPadding
 import com.zs.compose_ktx.None
+import com.zs.compose_ktx.sharedElement
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.Placeholder
 import com.zs.gallery.common.fullLineSpan
 import com.zs.gallery.common.preference
 import com.zs.gallery.files.RouteFolder
+import com.zs.gallery.preview.RouteViewer
 import com.zs.gallery.settings.Settings
 
 private const val TAG = "Folders"
@@ -232,6 +237,7 @@ private fun FolderGrid(
                     value = it,
                     modifier = Modifier
                         .clickable() { navController.navigate(RouteFolder(it.path)) }
+                        .sharedElement(RouteViewer.buildSharedFrameKey(it.artworkID))
                         .animateItem()
                 )
             }

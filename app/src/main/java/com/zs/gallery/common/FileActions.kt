@@ -19,48 +19,78 @@
 package com.zs.gallery.common
 
 import android.app.Activity
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.zs.api.store.MediaFile
 
 
 /**
- * An interface that together works with [SelectionTracker] to do operations on [MediaFile] of MediaProvider.
+ * An interface for performing actions on [MediaFile] items in conjunction with a [SelectionTracker].
  */
 interface FileActions {
 
     /**
-     * Deletes/Trashes the currently [selected] files.
-     * @param activity  the current activity, used for context.
+     * permanently `deletes` the currently `selected` files.
+     * @param activity The current activity, used for context.
      */
-    fun delete(activity: Activity,)
+    fun delete(activity: Activity)
 
     /**
-     * Moves the currently [selected] files to the specified folder.
-     * @param dest  the destination folder path.
+     * Deletes or trashes the currently `selected` files, prioritizing trashing if available.
+     *
+     * This method behaves similarly to [delete] but prioritizes moving files to the trash/recycle
+     * bin if it's enabled and supported on the current Android version (R+).
+     *
+     * @param activity The current activity, used for context.
+     */
+    fun remove(activity: Activity)
+
+    /**
+     * Moves the currently `selected` files to the trash/recycle bin.
+     *
+     * ***Note - This method is only available on Android versions R and above.***
+     *
+     * @param activity The current activity, used for context.
+     */
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun trash(activity: Activity)
+
+    /**
+     * Moves the currently `selected` files to the specified folder.
+     *
+     * @param dest The destination folder path.
      */
     fun move(dest: String)
 
     /**
-     * Copies the given [file]s to the specified folder.
-     * @param file  the media files to copy.
-     * @param dest  the destination folder path.
+     * Copies the currently `selected` files to the specified folder.
+     *
+     * @param dest The destination folder path.
      */
     fun copy(dest: String)
 
     /**
-     * Renames the current select file to the new [name].
-     * @param name  the new name for the file.
-     * @throws [IllegalStateException] if selected files are more than 1.
+     * Renames the currently selected file to the new [name].
+     *
+     * @param name The new name for the file.
+     * @throws IllegalStateException if more than one file is selected.
      */
     fun rename(name: String)
 
     /**
      * Shares the currently selected files.
-     * @param activity  the current activity, used for context.
+     *
+     * @param activity The current activity, used for context.
      */
     fun share(activity: Activity)
 
     /**
-     * Restores the  currently selected files from trash.
+     * Restores the currently selected files from the trash/recycle bin.
+     *
+     * ***Note - This method is only available on Android versions R and above.***
+     *
+     * @param activity The current activity, used for context.
      */
+    @RequiresApi(Build.VERSION_CODES.R)
     fun restore(activity: Activity)
 }

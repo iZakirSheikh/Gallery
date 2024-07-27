@@ -19,6 +19,7 @@
 package com.zs.gallery
 
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -44,6 +45,8 @@ import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
+
+private const val TAG = "MainActivity"
 
 /**
  * Manages SplashScreen
@@ -90,27 +93,16 @@ class MainActivity : ComponentActivity(), SystemFacade {
     override fun <S, O> observeAsState(key: Key.Key2<S, O>) =
         preferences.observeAsState(key = key)
 
-    override fun onPause() {
-        val secureMode = preferences.value(Settings.KEY_SECURE_MODE)
-         if (secureMode)
-             window.setFlags(
-                 WindowManager.LayoutParams.FLAG_SECURE,
-                 WindowManager.LayoutParams.FLAG_SECURE
-             )
-        super.onPause()
-    }
-
-    override fun onResume() {
-        val isSecure = preferences.value(Settings.KEY_SECURE_MODE)
-        if (isSecure)
-            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
-        super.onResume()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // The app has started from scratch if savedInstanceState is null.
         val isColdStart = savedInstanceState == null //why?
+        if (preferences.value(Settings.KEY_SECURE_MODE)) {
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+            )
+        }
         // Manage SplashScreen
         configureSplashScreen(isColdStart)
         enableEdgeToEdge()
