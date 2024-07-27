@@ -18,63 +18,100 @@
 
 package com.zs.gallery.impl
 
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.net.Uri
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import com.zs.api.store.MediaFile
 import com.zs.api.store.MediaProvider
+import com.zs.gallery.common.get
 import com.zs.gallery.preview.RouteViewer
+import com.zs.gallery.preview.ViewerArgs
 import com.zs.gallery.preview.ViewerViewState
+import com.zs.gallery.settings.Settings
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+
 
 class ViewerViewModel(
     handle: SavedStateHandle,
-    private val provider: MediaProvider
-): KoinViewModel(), ViewerViewState {
+    provider: MediaProvider
+) : MainViewModel<MediaFile>(provider), ViewerViewState {
 
-    val args = RouteViewer[handle]
+    val args = handle[RouteViewer]
+    override var focused by mutableLongStateOf(args.focused)
+    override val data: List<MediaFile> get() = values
+    override var values: List<MediaFile> by mutableStateOf(emptyList())
+    override val favourite: Boolean by derivedStateOf {
+        favorites.contains(focused)
+    }
 
-    override var index by mutableIntStateOf(args.index)
+    override val MediaFile.id: Long get() = id
 
-    override fun fetchUriForIndex(): Uri = MediaProvider.contentUri(args.ids[index])
-
-    override val size: Int get() = args.ids.size
-
-    override fun fetchIdForIndex(): Long {
-       return args.ids[index]
+    override fun restore(activity: Activity) {
+        select(focused)
+        super.restore(activity)
     }
 
     override fun delete(activity: Activity) {
-        TODO("Not yet implemented")
+        select(focused)
+        super.delete(activity)
     }
 
     override fun remove(activity: Activity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun trash(activity: Activity) {
-        TODO("Not yet implemented")
-    }
-
-    override fun move(dest: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun copy(dest: String) {
-        TODO("Not yet implemented")
-    }
-
-    override fun rename(name: String) {
-        TODO("Not yet implemented")
+        select(focused)
+        super.remove(activity)
     }
 
     override fun share(activity: Activity) {
-        TODO("Not yet implemented")
+        select(focused)
+        super.share(activity)
     }
 
-    override fun restore(activity: Activity) {
-        TODO("Not yet implemented")
+    override fun toggleLike() {
+        select(focused)
+        super.toggleLike()
+    }
+
+    @SuppressLint("NewApi")
+    override suspend fun refresh() {
+        delay(10)
+        val order = MediaProvider.COLUMN_DATE_MODIFIED
+        val ascending = false
+        values = when (args) {
+            is ViewerArgs.Folder -> provider.fetchFilesFromDirectory(
+                path = args.path,
+                order = order,
+                ascending = ascending
+            )
+
+            is ViewerArgs.Timeline -> provider.fetchFiles(
+                order = order,
+                ascending = ascending
+            )
+
+            is ViewerArgs.Album -> {
+                // currently the album is always favorite
+                provider.fetchFiles(
+                    *favorites.toLongArray(),
+                    order = order,
+                    ascending = ascending
+                )
+            }
+
+            else -> throw UnsupportedOperationException("The Operation is not supported! $args")
+        }
+    }
+
+    init {
+        if (args is ViewerArgs.Album)
+            preferences[Settings.KEY_FAVOURITE_FILES].onEach { refresh() }.launchIn(viewModelScope)
     }
 }

@@ -19,7 +19,6 @@
 package com.zs.gallery.impl
 
 import android.text.format.DateUtils
-import android.text.format.Formatter
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,10 +27,9 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import com.primex.core.withSpanStyle
-import com.zs.api.store.MediaFile
 import com.zs.api.store.MediaProvider
 import com.zs.api.util.PathUtils
-import com.zs.gallery.R
+import com.zs.gallery.common.get
 import com.zs.gallery.files.FolderViewState
 import com.zs.gallery.files.RouteFolder
 import kotlinx.coroutines.delay
@@ -42,7 +40,7 @@ class FolderViewModel(
     handle: SavedStateHandle, provider: MediaProvider
 ) : TimelineViewModel(provider), FolderViewState {
 
-    val path = RouteFolder[handle]
+    val path = handle[RouteFolder]
     override var title: CharSequence by mutableStateOf(PathUtils.name(path))
 
     override suspend fun refresh() {

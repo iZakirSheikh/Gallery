@@ -93,7 +93,6 @@ import com.zs.gallery.files.FilesActionMenu
 import com.zs.gallery.files.FolderViewState
 import com.zs.gallery.files.GroupHeader
 import com.zs.gallery.files.MediaFile
-import com.zs.gallery.files.buildViewerRoute
 import com.zs.gallery.preview.RouteViewer
 import com.zs.gallery.settings.Settings
 

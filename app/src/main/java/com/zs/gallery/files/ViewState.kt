@@ -35,7 +35,7 @@ private const val PARAM_PATH = "pram_path"
 object RouteFolder : SafeArgs<String> {
     override val route: String = "$domain/{${PARAM_PATH}}"
     override fun invoke(arg: String): String = "$domain/${Uri.encode(arg)}"
-    override fun get(handle: SavedStateHandle): String = handle[PARAM_PATH]!!
+    override fun build(handle: SavedStateHandle): String = handle[PARAM_PATH]!!
 }
 
 /**
@@ -46,13 +46,7 @@ interface DataProvider {
     val data: Map<String, List<MediaFile>>?
 }
 
-/**
- * @return the route for the given id.
- */
-fun DataProvider.buildViewerRoute(id: Long): String {
-    val list = data?.values?.flatten()?.map { it.id } ?: emptyList()
-    return RouteViewer(list.indexOf(id), list)
-}
+
 
 interface TimelineViewState : FileActions, SelectionTracker, DataProvider {
 

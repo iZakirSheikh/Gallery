@@ -84,6 +84,6 @@ class CrashlyticsInitializer : Initializer<Unit> {
     }
 
     override fun dependencies(): List<Class<out Initializer<*>>> {
-        return emptyList()
+        return listOf(FirebaseInitializer::class.java)
     }
 }

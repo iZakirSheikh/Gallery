@@ -144,7 +144,7 @@ fun Folder(viewState: FolderViewState) {
                                 if (selected.isNotEmpty())
                                     viewState.select(item.id)
                                 else
-                                    navController.navigate(viewState.buildViewerRoute(item.id))
+                                    navController.navigate(RouteViewer(item.id, folder = item.path))
                             },
                             // onLong Click
                             onLongClick = { viewState.select(item.id) }

@@ -1,33 +1,9 @@
-/*
- * Copyright 2024 Zakir Sheikh
- *
- * Created by Zakir Sheikh on 18-07-2024.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 @file:OptIn(ExperimentalSharedTransitionApi::class)
 
 package com.zs.gallery.preview
 
-import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -37,7 +13,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Icon
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -45,64 +20,53 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.times
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
-import androidx.compose.ui.unit.toIntSize
-import androidx.compose.ui.unit.toSize
 import coil.compose.AsyncImage
+import com.primex.core.findActivity
 import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
+import com.primex.material2.appbar.TopAppBar
 import com.primex.material2.menu.DropDownMenu2
 import com.zs.api.store.MediaProvider
+import com.zs.api.store.mediaUri
+import com.zs.compose_ktx.lottieAnimationPainter
 import com.zs.compose_ktx.sharedElement
+import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
-import kotlin.math.cos
+import kotlinx.coroutines.runBlocking
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.zoomable
 
-private const val TAG = "Viewer"
-
-@Composable
-@NonRestartableComposable
-private fun Page(
-    uri: Uri,
-    modifier: Modifier = Modifier
-) {
-
-    AsyncImage(
-        model = uri,
-        contentDescription = null,
-        modifier = modifier
-    )
-}
 
 context(RowScope)
 @Composable
 private inline fun Actions(
+    viewState: ViewerViewState,
 ) {
-    IconButton(imageVector = Icons.TwoTone.Delete, onClick = {})
-    IconButton(imageVector = Icons.Outlined.StarOutline, onClick = { /*TODO*/ })
+    val context = LocalContext.current
+    IconButton(imageVector = Icons.TwoTone.Delete, onClick = {viewState.remove(context.findActivity())})
+
+    IconButton(
+        imageVector = if (!viewState.favourite) Icons.Outlined.StarOutline else Icons.Outlined.Star,
+        onClick = viewState::toggleLike
+    )
     IconButton(imageVector = Icons.Outlined.Info, onClick = { /*TODO*/ })
 
     // DropDownMenu for more options
@@ -129,7 +93,7 @@ private inline fun Actions(
             )
 
             DropDownMenuItem(
-                title = "Share", onClick = { /*TODO*/ }, icon = rememberVectorPainter(
+                title = "Share", onClick = { viewState.share(context.findActivity()) }, icon = rememberVectorPainter(
                     image = Icons.Filled.Share
                 )
             )
@@ -137,87 +101,77 @@ private inline fun Actions(
     }
 }
 
+private val DEFAULT_ZOOM_SPECS = ZoomSpec(5f)
+
 @Composable
-fun Pager(
-    viewState: ViewerViewState,
-    modifier: Modifier = Modifier
-) {
-
-    val state = rememberPagerState(viewState.index, pageCount = { viewState.size })
-
-    // set up all transformation states
-    var zoom by remember { mutableFloatStateOf(1f) }
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                Log.d(TAG, "onPreScroll: Available - $available")
-                return if (zoom > 1f) Offset.Zero else available
-            }
-
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                Log.d(TAG, "onPostScroll: ")
-                return super.onPostScroll(consumed, available, source)
-            }
-        }
-    }
-
-    var offset by remember { mutableStateOf(Offset.Zero) }
-    var sizeI by remember { mutableStateOf(IntSize.Zero) }
-    var sizeP by remember { mutableStateOf(IntSize.Zero) }
-
-    val transformState =     rememberTransformableState { gestureZoom, pan, gestureRotate ->
-        zoom = (zoom * gestureZoom).coerceIn(1f, 3f)
-        // Calculate the new offset with bounds
-        // Calculate new offset with bounds
-        val scaledW = sizeI.width * zoom
-        val scaledH = sizeI.height * zoom
-        val maxX = ((scaledW - sizeP.width) / 2f).coerceAtLeast(0f)
-        val maxY = ((scaledH - sizeP.height) / 2f).coerceAtLeast(0f)
-        val newOffset = offset + pan * zoom
-        offset = Offset(
-            x = (newOffset.x).coerceIn(-maxX, maxX),
-            y = (newOffset.y).coerceIn(-maxY, maxY)
-        )
-        Log.d(TAG, "size - $sizeI, sizeP - $sizeP, maxX - $maxX, maxY - $maxY")
-    }
-
+fun Content(viewState: ViewerViewState, modifier: Modifier = Modifier) {
+    val values = viewState.data
+    if (values.isEmpty()) return
+    val statePager =
+        rememberPagerState(initialPage = viewState.index, pageCount = { values.size })
+    val stateTransformable = rememberZoomableState(
+        DEFAULT_ZOOM_SPECS
+    )
+    stateTransformable.contentScale = ContentScale.None
     HorizontalPager(
-        state = state,
-        key = { it },
-        modifier = modifier
-            //     .nestedScroll(connection = nestedScrollConnection)
-            .background(Color.Black)
-            .onSizeChanged { sizeP = it },
-        userScrollEnabled = !transformState.isTransformInProgress
-        //  pageNestedScrollConnection = nestedScrollConnection,
+        state = statePager,
+        key = { values[it].id },
+        pageSpacing = 16.dp,
+        modifier = modifier,
+        userScrollEnabled = stateTransformable.zoomFraction == 0f,
+        beyondViewportPageCount = 1
     ) { index ->
-        viewState.index = index
-        val uri = viewState.fetchUriForIndex()
-        val id = viewState.fetchIdForIndex()
-        Box(modifier = Modifier) {
-            AsyncImage(
-                model = uri,
-                onSuccess = {sizeI = it.painter.intrinsicSize.toIntSize()},
-                contentDescription = null,
-                modifier = Modifier
-                    .nestedScroll(nestedScrollConnection)
-                    .sharedElement(RouteViewer.buildSharedFrameKey(id))
-            )
-        }
+        val item = values[index]
+        val sharedFrameKey = RouteViewer.buildSharedFrameKey(item.id)
+        val isFocused = statePager.currentPage == index
+        val uri = item.mediaUri
+        viewState.focused = item.id
+        AsyncImage(
+            model = uri,
+            contentDescription = item.name,
+            modifier = Modifier
+                .fillMaxSize()
+                .thenIf(
+                    isFocused,
+                    Modifier
+                        .sharedElement(sharedFrameKey)
+                        .zoomable(stateTransformable)
+                ),
+            onSuccess = {
+                runBlocking {
+                    stateTransformable.setContentLocation(
+                        ZoomableContentLocation.scaledInsideAndCenterAligned(
+                            it.painter.intrinsicSize
+                        )
+                    )
+                }
+            },
+            contentScale = ContentScale.Fit,
+            filterQuality = FilterQuality.None
+        )
     }
+}
+
+/**
+ * Conditionally applies another [Modifier] if the given [condition] is true.
+ *
+ * @param condition The condition to evaluate.
+ * @param other The [Modifier] to apply if the condition is true.
+ * @return This [Modifier] if the condition is false, otherwise this [Modifier] combined with [other].
+ */
+fun Modifier.thenIf(condition: Boolean, other: Modifier): Modifier {
+    return if (condition) this then other else Modifier
 }
 
 @Composable
 fun Viewer(viewState: ViewerViewState) {
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Black)) {
-        Pager(viewState, modifier = Modifier.fillMaxSize())
-        TopAppBar(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Content(viewState, modifier = Modifier.fillMaxSize())
+        androidx.compose.material.TopAppBar(
             title = {},
             navigationIcon = {
                 val navController = LocalNavController.current
@@ -226,12 +180,12 @@ fun Viewer(viewState: ViewerViewState) {
                     onClick = navController::navigateUp
                 )
             },
-            actions = { Actions()},
+            actions = { Actions(viewState)},
             contentColor = Color.White,
             backgroundColor = Color.Transparent,
             elevation = 0.dp,
             modifier = Modifier.align(Alignment.TopCenter),
-            windowInsets = WindowInsets.statusBars
+            windowInsets = WindowInsets.statusBars,
         )
     }
 }

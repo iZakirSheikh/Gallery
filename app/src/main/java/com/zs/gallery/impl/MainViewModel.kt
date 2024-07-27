@@ -180,7 +180,7 @@ abstract class MainViewModel<T>(
      * - If `some` selected items are favorite, it `adds the remaining` unfavored items to favorites.
      * - If `none` of the selected items are favorite, it `adds all` of them favorites.
      */
-    fun toggleLike() {
+    open fun toggleLike() {
         viewModelScope.launch {
             // Get the selected items and clear the selection.
             val selected = consume().toList()
@@ -215,10 +215,12 @@ abstract class MainViewModel<T>(
         }
     }
 
-    abstract fun evaluateGroupSelectionLevel(key: String): GroupSelectionLevel
+    open fun evaluateGroupSelectionLevel(key: String): GroupSelectionLevel {
+        return GroupSelectionLevel.NONE
+    }
+
     override fun isGroupSelected(key: String): State<GroupSelectionLevel> =
         derivedStateOf { evaluateGroupSelectionLevel(key) }
-
 
     @SuppressLint("NewApi")
     override fun trash(activity: Activity) {

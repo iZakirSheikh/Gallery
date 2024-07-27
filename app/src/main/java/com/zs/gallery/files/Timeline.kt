@@ -191,7 +191,7 @@ fun Timeline(
                                 if (selected.isNotEmpty())
                                     viewState.select(item.id)
                                 else
-                                    navController.navigate(viewState.buildViewerRoute(item.id))
+                                    navController.navigate(RouteViewer(item.id))
                             },
                             // onLong Click
                             onLongClick = { viewState.select(item.id) }

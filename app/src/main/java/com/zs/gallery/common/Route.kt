@@ -19,9 +19,6 @@
 package com.zs.gallery.common
 
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.SavedStateHandle
@@ -80,13 +77,22 @@ interface SafeArgs<T> : Route {
     operator fun invoke(arg: T): String
 
     /**
-     * Extracts arguments for this route from the provided [SavedStateHandle].
+     * Builds the arguments for this route from the provided [SavedStateHandle].
      *
-     * @param handle The [SavedStateHandle] to extract arguments from.
+     * @param handle The [SavedStateHandle] to use for building the arguments.
      * @return The arguments for this route.
      */
-    operator fun get(handle: SavedStateHandle): T
+    fun build(handle: SavedStateHandle): T
 }
+
+/**
+ * Retrieves the [SafeArgs] object of type[T] associated with the given [SafeArgs] instance
+ * from this [SavedStateHandle].
+ *
+ * @param route The [SafeArgs] instance representing the navigation route and arguments.
+ * @return The args object of type [T] containing the deserialized arguments.
+ **/
+operator fun <T> SavedStateHandle.get(route: SafeArgs<T>): T = route.build(this)
 
 
 /**
