@@ -1,7 +1,7 @@
 /*
  * Copyright 2024 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 17-07-2024.
+ * Created by Zakir Sheikh on 07-08-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.zs.gallery.files
+package com.zs.gallery.common
 
 import android.text.format.DateUtils
 import androidx.compose.animation.core.animateFloatAsState
@@ -61,6 +61,17 @@ import com.zs.gallery.R
 
 private const val TAG = "MediaFile"
 
+/**
+ * Displays a single MediaFile item.
+ *
+ * @param value The MediaFile object to display.
+ * @param focused Whether the item is currently focused.
+ * @param checked The selection state of the item:
+ *                 - -1: Show a selected circle (partially selected).
+ *                 - 0: Unchecked.
+ *                 - 1: Checked.
+ * @param modifier Modifier to be applied to the item.
+ */
 @Composable
 fun MediaFile(
     value: MediaFile,
@@ -132,4 +143,3 @@ fun MediaFile(
         )
     }
 }
-

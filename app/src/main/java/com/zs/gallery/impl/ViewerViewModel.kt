@@ -52,6 +52,7 @@ class ViewerViewModel(
     override val favourite: Boolean by derivedStateOf {
         favorites.contains(focused)
     }
+    override val isTrashView: Boolean get() = args is ViewerArgs.Trash
 
     override val MediaFile.id: Long get() = id
 
@@ -82,7 +83,7 @@ class ViewerViewModel(
 
     @SuppressLint("NewApi")
     override suspend fun refresh() {
-        delay(10)
+        delay(2)
         val order = MediaProvider.COLUMN_DATE_MODIFIED
         val ascending = false
         values = when (args) {

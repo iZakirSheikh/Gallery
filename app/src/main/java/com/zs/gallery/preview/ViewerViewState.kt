@@ -27,7 +27,7 @@ import com.zs.gallery.common.SafeArgs
 
 /**
  * Represents the arguments for navigating to a viewer screen.
- * @property focused - The current focused item in the viewer.
+ * @property focused  The current focused item in the viewer.
  */
 sealed interface ViewerArgs {
 
@@ -129,15 +129,16 @@ object RouteViewer : SafeArgs<ViewerArgs> {
  * Represents the view state for a viewer screen.
  * @property focused  The current focused item.
  * @property index  The index corresponding to [focused] id. default 0
+ * @property favourite  Whether the current focused item is a favourite.
  * @property data  The list of media files.
  */
 interface ViewerViewState : FileActions {
     var focused: Long
     val data: List<MediaFile>
     val index get() = if (data.isEmpty()) 0 else data.indexOfFirst { it.id == focused }
-
-
     val favourite: Boolean
+
+    val isTrashView: Boolean
 
     fun toggleLike()
 }

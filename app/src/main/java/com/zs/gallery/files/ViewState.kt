@@ -25,7 +25,6 @@ import com.zs.gallery.common.FileActions
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SafeArgs
 import com.zs.gallery.common.SelectionTracker
-import com.zs.gallery.preview.RouteViewer
 
 object RouteTimeline : Route
 object RouteAlbum : Route
@@ -38,17 +37,9 @@ object RouteFolder : SafeArgs<String> {
     override fun build(handle: SavedStateHandle): String = handle[PARAM_PATH]!!
 }
 
-/**
- * A simple interface that provides data for displaying in the list. if the data is null; it represents loading state.
- *  if it is empty; it represents empty state. else it represents the data.
- */
-interface DataProvider {
+interface TimelineViewState : FileActions, SelectionTracker {
+
     val data: Map<String, List<MediaFile>>?
-}
-
-
-
-interface TimelineViewState : FileActions, SelectionTracker, DataProvider {
 
     /**
      * Observes the list of selected items and returns an integer indicating the favorite status of all items.
@@ -75,7 +66,8 @@ interface FolderViewState : TimelineViewState {
     val title: CharSequence
 }
 
-interface AlbumViewState : SelectionTracker, DataProvider {
+interface AlbumViewState : SelectionTracker {
+    val data: Map<String, List<MediaFile>>?
     val title: CharSequence
 
     /**

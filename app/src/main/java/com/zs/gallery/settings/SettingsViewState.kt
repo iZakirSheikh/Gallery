@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.unit.dp
 import com.primex.preferences.Key
 import com.zs.gallery.common.Route
 import com.primex.preferences.StringSaver
@@ -83,6 +84,11 @@ object Settings {
 
     // The keys for the preferences
     private const val PREFIX = "global"
+
+    /**
+     * The default min size of the single cell in grid.
+     */
+    val STANDARD_TILE_SIZE = 100.dp
 
     /**
      * Preference key for the night mode setting (String).

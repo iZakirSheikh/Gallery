@@ -19,25 +19,23 @@
 package com.zs.gallery
 
 import android.os.Build
-import android.util.Log
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomAppBar
@@ -59,37 +57,39 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.primex.core.SignalWhite
 import com.primex.core.textResource
 import com.primex.material2.Label
 import com.primex.material2.OutlinedButton
 import com.zs.compose_ktx.AppTheme
+import com.zs.compose_ktx.ContentPadding
 import com.zs.compose_ktx.LocalWindowSize
+import com.zs.compose_ktx.None
 import com.zs.compose_ktx.Range
 import com.zs.compose_ktx.WindowSize
 import com.zs.compose_ktx.isPermissionGranted
-import com.zs.compose_ktx.navigation.BottomNavItem
-import com.zs.compose_ktx.navigation.NavRailItem
-import com.zs.compose_ktx.navigation.NavigationItemDefaults
-import com.zs.compose_ktx.navigation.NavigationSuiteScaffold
+import com.zs.compose_ktx.adaptive.BottomNavItem
+import com.zs.compose_ktx.adaptive.NavRailItem
+import com.zs.compose_ktx.adaptive.NavigationItemDefaults
+import com.zs.compose_ktx.adaptive.NavigationSuiteScaffold
+import com.zs.compose_ktx.thenIf
 import com.zs.compose_ktx.toast.ToastHostState
 import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.bin.Trash
 import com.zs.gallery.common.LocalNavController
-import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.composable
@@ -252,6 +252,9 @@ fun NavItem(
     }
 }
 
+
+private val BottomNavShape = RoundedCornerShape(16)
+
 /**
  * A composable function that represents a navigation bar, combining both rail and bottom bar elements.
  *
@@ -305,12 +308,12 @@ private fun NavigationBar(
             )
         }
     }
-
+    val colors = AppTheme.colors
     when (typeRail) {
         true -> NavigationRail(
             modifier = modifier.width(NAV_RAIL_WIDTH),
             windowInsets = WindowInsets.systemBars,
-            contentColor = AppTheme.colors.onBackground,
+            contentColor = colors.onBackground,
             backgroundColor = Color.Transparent,
             elevation = 0.dp,
             content = {
@@ -322,15 +325,22 @@ private fun NavigationBar(
         )
 
         else -> BottomAppBar(
-            modifier = modifier.height(110.dp),
-            windowInsets = WindowInsets.navigationBars,
-            backgroundColor = Color.Transparent,
-            contentColor = AppTheme.colors.onBackground,
-            elevation = 0.dp,
+            windowInsets = WindowInsets.None,
+            backgroundColor = if (colors.isLight) Color(0xFF0E0E0F) else colors.background(1.dp),
+            contentColor = if (colors.isLight) Color.SignalWhite else colors.onBackground,
+            elevation = AppTheme.elevation.high,
             contentPadding = PaddingValues(
-                horizontal = AppTheme.padding.normal,
-                vertical = AppTheme.padding.medium
+                horizontal = AppTheme.padding.normal
             ),
+            modifier = modifier
+                .padding(horizontal = ContentPadding.large)
+                .navigationBarsPadding()
+                .shadow(12.dp, BottomNavShape, clip = true)
+                .thenIf(
+                    !colors.isLight,
+                    Modifier.border(1.dp, Color.White.copy(0.06f), BottomNavShape)
+                )
+                .widthIn(max = 400.dp),
             content = {
                 Spacer(modifier = Modifier.weight(1f))
                 // Display routes at the contre of available space
@@ -342,9 +352,10 @@ private fun NavigationBar(
 }
 
 /**
- * The shape of the content inside the scaffold.
+ * The shape of the content inside the scaffold when in horizontal orientation and navbar is shown.
  */
-private val CONTENT_SHAPE = RoundedCornerShape(8)
+private val HORIZONTAL_CONTENT_SHAPE =
+    RoundedCornerShape(topStartPercent = 8, bottomStartPercent = 8)
 
 /**
  * The set of domains that require the navigation bar to be shown.
@@ -379,95 +390,93 @@ private val NavGraphBuilder: NavGraphBuilder.() -> Unit = {
     }
 
     // Viewer
-    composable(RouteViewer){
+    composable(RouteViewer) {
         val state = koinViewModel<ViewerViewModel>()
         Viewer(viewState = state)
     }
 
     // Folder - That displays files
-    composable(RouteFolder){
+    composable(RouteFolder) {
         val state = koinViewModel<FolderViewModel>()
         Folder(viewState = state)
     }
 
     // Album
-    composable(RouteAlbum){
+    composable(RouteAlbum) {
         val state = koinViewModel<AlbumViewModel>()
         Album(viewState = state)
     }
 
     // Trash
-    composable(RouteTrash){
+    composable(RouteTrash) {
         val state = koinViewModel<TrashViewModel>()
         Trash(viewState = state)
     }
 }
 
-// Default Enter/Exit Transitions.
-private val GlobalEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
-    {
-        scaleIn(tween(220, 90), 0.98f) + fadeIn(tween(700))
-    }
-private val GlobalExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
-    {
-        fadeOut(animationSpec = tween(700))
-    }
-
+/**
+ * Composable function representing the Home screen.
+ *
+ * @param toastHostState The [ToastHostState] used to display toasts.
+ */
 @Composable
 fun Home(toastHostState: ToastHostState) {
+    // Check if light theme is preferred
+    // Create a NavController for navigation
     val isLight = !isPreferenceDarkTheme()
     val navController = rememberNavController()
-    val immersiveView by preference(key = Settings.KEY_IMMERSIVE_VIEW)
-    val isSystemBarsTransparent by preference(key = Settings.KEY_TRANSPARENT_SYSTEM_BARS)
-    AppTheme(
-        isLight = isLight,
-        immersive = immersiveView,
-        fontFamily = Settings.DefaultFontFamily,
-        isSystemBarsTransparent = isSystemBarsTransparent,
-    ) {
-        // Get the window size class
-        val clazz = LocalWindowSize.current
-        // Provide the navController, newWindowClass through LocalComposition.
-        CompositionLocalProvider(
-            LocalNavController provides navController,
-            LocalWindowSize provides clazz.remaining,
-            content = {
-                // Determine the navigation type based on the window size class and access the system facade
-                val facade = LocalSystemFacade.current
-                // Determine whether to hide the navigation bar based on the current destination
-                val current = navController.current
-                Log.d(TAG, "Home: ${current?.domain}")
-                val hideNavigationBar = current?.domain !in DOMAINS_REQUIRING_NAV_BAR
-                NavigationSuiteScaffold(
-                    vertical = clazz.widthRange < Range.Medium,
-                    toastHostState = toastHostState,
-                    hideNavigationBar = hideNavigationBar,
-                    //progress = facade.inAppUpdateProgress,
-                    background = AppTheme.colors.background(elevation = 1.dp),
-                    // Set up the navigation bar using the NavBar composable
-                    navBar = { NavigationBar(clazz.navTypeRail, navController) },
-                    // Display the main content of the app using the NavGraph composable
-                    content = {
-                        val context = LocalContext.current
-                        // Load start destination based on if storage permission is set or not.
-                        val granted =
-                            context.isPermissionGranted(ADAPTIVE_STORAGE_PERMISSIONS[0])
-                        val startDestination =
-                            if (granted) RouteTimeline else RoutePermission
-                        NavHost(
-                            navController = navController,
-                            startDestination = startDestination.route,
-                            builder = NavGraphBuilder,
-                            modifier = Modifier
-                                .clip(CONTENT_SHAPE)
-                                .background(AppTheme.colors.background)
-                                .fillMaxSize(),
-                            enterTransition = GlobalEnterTransition,
-                            exitTransition = GlobalExitTransition,
-                        )
-                    }
-                )
-            }
+    // Layout Configuration
+    // Adjust layout configuration based on window size and navigation state.
+    // Hide navigation bar and uses vertical layout on smaller screens.
+    val clazz = LocalWindowSize.current
+    val current = navController.current
+    val hideNavigationBar = current?.domain !in DOMAINS_REQUIRING_NAV_BAR
+    val vertical = clazz.widthRange < Range.Medium
+    // Construct the actual content of the layout
+    val content = @Composable {
+        val context = LocalContext.current
+        // Load start destination based on if storage permission is set or not.
+        val granted =
+            context.isPermissionGranted(ADAPTIVE_STORAGE_PERMISSIONS[0])
+        val startDestination = if (granted) RouteTimeline else RoutePermission
+        NavHost(
+            navController = navController,
+            startDestination = startDestination.route,
+            builder = NavGraphBuilder,
+            modifier = Modifier
+                .thenIf(!vertical && !hideNavigationBar, Modifier.clip(HORIZONTAL_CONTENT_SHAPE))
+                .background(AppTheme.colors.background)
+                .fillMaxSize(),
+            enterTransition = {
+                scaleIn(tween(220, 90), 0.98f) +
+                        fadeIn(tween(700))
+            },
+            exitTransition = { fadeOut(animationSpec = tween(700)) },
         )
     }
+    // Setup App Theme and provide necessary dependencies.
+    // Provide the navController and window size class to child composables.
+    AppTheme(
+        isLight = isLight,
+        fontFamily = Settings.DefaultFontFamily,
+        content = {
+            // Provide the navController, newWindowClass through LocalComposition.
+            CompositionLocalProvider(
+                LocalNavController provides navController,
+                LocalWindowSize provides clazz.remaining,
+                content = {
+                    NavigationSuiteScaffold(
+                        vertical = vertical,
+                        toastHostState = toastHostState,
+                        hideNavigationBar = hideNavigationBar,
+                        background = AppTheme.colors.background(elevation = 1.dp),
+                        // Set up the navigation bar using the NavBar composable
+                        navBar = { NavigationBar(clazz.navTypeRail, navController) },
+                        // Display the main content of the app using the NavGraph composable
+                        content = content
+                    )
+                }
+            )
+        },
+    )
 }

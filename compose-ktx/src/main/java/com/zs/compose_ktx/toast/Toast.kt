@@ -203,7 +203,7 @@ fun Toast(
         // fill whole width and add some padding.
         modifier = modifier
             .padding(horizontal = 16.dp)
-            .sizeIn(minHeight = 56.dp),
+            .sizeIn(minHeight = 56.dp, maxWidth = 400.dp, minWidth = 360.dp),
         shape = shape,
         elevation = elevation,
         color = backgroundColor,

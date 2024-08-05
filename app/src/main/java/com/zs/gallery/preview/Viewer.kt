@@ -1,7 +1,9 @@
 @file:OptIn(ExperimentalSharedTransitionApi::class)
+@file:Suppress("NOTHING_TO_INLINE")
 
 package com.zs.gallery.preview
 
+import android.app.Activity
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -46,6 +48,7 @@ import com.zs.api.store.MediaProvider
 import com.zs.api.store.mediaUri
 import com.zs.compose_ktx.lottieAnimationPainter
 import com.zs.compose_ktx.sharedElement
+import com.zs.compose_ktx.thenIf
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import kotlinx.coroutines.runBlocking
@@ -125,7 +128,8 @@ fun Content(viewState: ViewerViewState, modifier: Modifier = Modifier) {
         val sharedFrameKey = RouteViewer.buildSharedFrameKey(item.id)
         val isFocused = statePager.currentPage == index
         val uri = item.mediaUri
-        viewState.focused = item.id
+        if (isFocused)
+            viewState.focused = item.id
         AsyncImage(
             model = uri,
             contentDescription = item.name,
@@ -134,8 +138,8 @@ fun Content(viewState: ViewerViewState, modifier: Modifier = Modifier) {
                 .thenIf(
                     isFocused,
                     Modifier
-                        .sharedElement(sharedFrameKey)
                         .zoomable(stateTransformable)
+                        .sharedElement(sharedFrameKey)
                 ),
             onSuccess = {
                 runBlocking {
@@ -150,17 +154,6 @@ fun Content(viewState: ViewerViewState, modifier: Modifier = Modifier) {
             filterQuality = FilterQuality.None
         )
     }
-}
-
-/**
- * Conditionally applies another [Modifier] if the given [condition] is true.
- *
- * @param condition The condition to evaluate.
- * @param other The [Modifier] to apply if the condition is true.
- * @return This [Modifier] if the condition is false, otherwise this [Modifier] combined with [other].
- */
-fun Modifier.thenIf(condition: Boolean, other: Modifier): Modifier {
-    return if (condition) this then other else Modifier
 }
 
 @Composable

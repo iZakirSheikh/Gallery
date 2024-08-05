@@ -12,10 +12,10 @@ android {
 
     defaultConfig {
         applicationId = "com.googol.android.apps.photos"
-        minSdk = 21
+        minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "0.1.0-dev06"
+        versionCode = 7
+        versionName = "0.1.0-dev07"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

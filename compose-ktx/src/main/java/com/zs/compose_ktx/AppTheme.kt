@@ -18,8 +18,6 @@
 
 package com.zs.compose_ktx
 
-import android.app.Activity
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.EnterTransition
@@ -46,12 +44,8 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
@@ -62,7 +56,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -70,13 +63,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import com.primex.core.MetroGreen2
 import com.primex.core.OrientRed
 import com.primex.core.Rose
 import com.primex.core.SignalWhite
-import com.primex.core.SkyBlue
 import com.primex.core.TrafficYellow
 import com.primex.core.UmbraGrey
 import com.primex.core.hsl
@@ -114,7 +104,6 @@ import com.zs.compose_ktx.Typography.overline
 import com.zs.compose_ktx.Typography.titleLarge
 import com.zs.compose_ktx.Typography.titleMedium
 import com.zs.compose_ktx.Typography.titleSmall
-import kotlinx.coroutines.delay
 import kotlin.math.ln
 
 private const val TAG = "AppTheme"
@@ -382,19 +371,15 @@ private val DefaultColorSpec = tween<Color>(AnimationConstants.DefaultDurationMi
  * Provides a composable function to set up the application's theme using the provided
  * colors, typography, and shapes.
  *
- * @param isLight - if true, applies the light theme.
- * @param immersive - if true, hides system bars.
- * @param isSystemBarsTransparent - if true, makes the system bars transparent; otherwise, adds a dark translucent color to
- * the system bars. This setting might be useful for people who don't disable navigation icons.
- * @param content - the composable content to be displayed within the theme.
+ * @param isLight  if true, applies the light theme.
+ * @param fontFamily  the font family to be used in the theme.
+ * @param content  the composable content to be displayed within the theme.
  */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppTheme(
     isLight: Boolean,
-    immersive: Boolean = false,
     fontFamily: FontFamily = FontFamily.Default,
-    isSystemBarsTransparent: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val background by animateColorAsState(
@@ -424,41 +409,6 @@ fun AppTheme(
             },
             typography = androidx.compose.material.Typography(defaultFontFamily = fontFamily)
         )
-    }
-
-    // This block handles the logic of color of SystemBars.
-    val view = LocalView.current
-    // If the application is in edit mode, we do not need to handle status_bar related tasks, so we return early.
-    if (view.isInEditMode) return@AppTheme
-    // Update the system bars appearance with a delay to avoid splash screen issue.
-    // Use flag to avoid hitting delay multiple times.
-    var isFirstPass by remember { mutableStateOf(true) }
-    val systemBarColor = when (isSystemBarsTransparent) {
-        true -> Color.Transparent.toArgb()
-        else -> Color(0x20000000).toArgb()
-    }
-    val isAppearanceLightSystemBars = isLight
-    LaunchedEffect(isLight, immersive, isSystemBarsTransparent) {
-        // A Small Delay to override the change of system bar after splash screen.
-        // This is a workaround for a problem with using sideEffect to hideSystemBars.
-        if (isFirstPass) {
-            delay(2500)
-            isFirstPass = false
-        }
-        Log.d(TAG, "AppTheme: $isSystemBarsTransparent $immersive $isLight")
-        val window = (view.context as Activity).window
-        // Obtain the controller for managing the insets of the window.
-        val controller = WindowCompat.getInsetsController(window, view)
-        window.navigationBarColor = systemBarColor
-        window.statusBarColor = systemBarColor
-        // Set the color of the navigation bar and the status bar to the determined color.
-        controller.isAppearanceLightStatusBars = isAppearanceLightSystemBars
-        controller.isAppearanceLightNavigationBars = isAppearanceLightSystemBars
-        // Hide or show the status bar based on the user's preference.
-        if (immersive)
-            controller.hide(WindowInsetsCompat.Type.systemBars())
-        else
-            controller.show(WindowInsetsCompat.Type.systemBars())
     }
 }
 

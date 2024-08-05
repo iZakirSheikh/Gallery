@@ -23,12 +23,12 @@ package com.zs.gallery.folders
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -39,7 +39,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.filled.FolderCopy
@@ -47,7 +46,6 @@ import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +59,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.primex.core.drawHorizontalDivider
+import com.primex.core.plus
 import com.primex.core.textResource
 import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
@@ -69,12 +68,12 @@ import com.primex.material2.menu.DropDownMenu2
 import com.primex.material2.neumorphic.NeumorphicTopAppBar
 import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.ContentPadding
-import com.zs.compose_ktx.None
+import com.zs.compose_ktx.adaptive.TwoPane
+import com.zs.compose_ktx.adaptive.contentInsets
 import com.zs.compose_ktx.sharedElement
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
-import com.zs.gallery.common.Placeholder
-import com.zs.gallery.common.fullLineSpan
+import com.zs.gallery.common.emit
 import com.zs.gallery.common.preference
 import com.zs.gallery.files.RouteFolder
 import com.zs.gallery.preview.RouteViewer
@@ -105,6 +104,7 @@ fun fetchOrderIcon(order: Int): ImageVector {
  * Constructs an order by menu. if [onRequestChange] == -1 then the menu is not shown.
  */
 context(RowScope)
+@Suppress("NOTHING_TO_INLINE")
 @Composable
 private inline fun Actions(
     viewState: FoldersViewState
@@ -164,7 +164,6 @@ private inline fun Actions(
 }
 
 @Composable
-@NonRestartableComposable
 private fun Toolbar(
     viewState: FoldersViewState,
     modifier: Modifier = Modifier
@@ -192,74 +191,41 @@ private val FolderContentPadding =
 private val GridItemsArrangement = Arrangement.spacedBy(6.dp)
 
 @Composable
-private fun FolderGrid(
-    state: FoldersViewState,
-    modifier: Modifier = Modifier
-) {
-    val values by state.data.collectAsState()
-    val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
-    val navController = LocalNavController.current
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(MIN_TILE_SIZE * multiplier),
-        modifier,
-        contentPadding = FolderContentPadding,
-        verticalArrangement = GridItemsArrangement,
-        content = {
-            // null means loading
-            val data = values ?: return@LazyVerticalGrid item(
-                span = fullLineSpan, key = "key_loading_placeholder",
-                content = {
-                    Placeholder(
-                        title = stringResource(R.string.loading),
-                        iconResId = R.raw.lt_loading_dots_blue,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                },
-            )
-
-            // empty means empty
-            if (data.isEmpty())
-                return@LazyVerticalGrid item(
-                    span = fullLineSpan,
-                    key = "key_empty_placeholder...",
-                    content = {
-                        Placeholder(
-                            title = stringResource(R.string.oops_empty),
-                            iconResId = R.raw.lt_empty_box,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                )
-
-            // place the actual items on the screen.
-            items(items = data, key = { it.artworkID }) {
-                Folder(
-                    value = it,
-                    modifier = Modifier
-                        .clickable() { navController.navigate(RouteFolder(it.path)) }
-                        .sharedElement(RouteViewer.buildSharedFrameKey(it.artworkID))
-                        .animateItem()
-                )
-            }
-        }
-    )
-}
-
-@Composable
 fun Folders(viewState: FoldersViewState) {
-    Scaffold(
+    val navInsets = WindowInsets.contentInsets
+    TwoPane(
         topBar = {
             Toolbar(
                 viewState = viewState,
                 modifier = Modifier
+                    .background(AppTheme.colors.background)
                     .statusBarsPadding()
                     .drawHorizontalDivider(color = AppTheme.colors.onBackground)
                     .padding(bottom = ContentPadding.medium),
             )
         },
-        contentWindowInsets = WindowInsets.None,
         content = {
-            FolderGrid(state = viewState, modifier = Modifier.padding(it))
+            val values by viewState.data.collectAsState()
+            val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
+            val navController = LocalNavController.current
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(MIN_TILE_SIZE * multiplier),
+                contentPadding = FolderContentPadding + WindowInsets.contentInsets + navInsets,
+                verticalArrangement = GridItemsArrangement,
+                content = {
+                    val data = emit(values) ?: return@LazyVerticalGrid
+                    // else emit the items.
+                    items(data, key = { it.artworkID }) {
+                        Folder(
+                            value = it,
+                            modifier = Modifier
+                                .clickable() { navController.navigate(RouteFolder(it.path)) }
+                                .sharedElement(RouteViewer.buildSharedFrameKey(it.artworkID))
+                                .animateItem()
+                        )
+                    }
+                },
+            )
         }
     )
 }

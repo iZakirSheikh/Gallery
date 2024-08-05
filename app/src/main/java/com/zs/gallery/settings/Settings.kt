@@ -22,7 +22,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +52,7 @@ import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.Colors
 import com.zs.compose_ktx.None
+import com.zs.compose_ktx.adaptive.contentInsets
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.NightMode
@@ -266,6 +266,7 @@ fun Settings(
     viewState: SettingsViewState
 ) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val insets = WindowInsets.contentInsets
     Scaffold(
         topBar = { Toolbar(behavior = behavior) },
         contentWindowInsets = WindowInsets.None,
@@ -275,11 +276,11 @@ fun Settings(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(it)
+                    .padding(WindowInsets.contentInsets)
                     .padding(
                         horizontal = AppTheme.padding.large,
                         vertical = AppTheme.padding.normal
-                    )
-                    .navigationBarsPadding(),
+                    ),
                 content = {
                     GroupHeader(text = stringResource(id = R.string.general))
                     General(viewState = viewState)

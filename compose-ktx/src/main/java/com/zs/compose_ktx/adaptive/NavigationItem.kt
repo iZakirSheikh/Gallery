@@ -17,7 +17,7 @@
  */
 @file:OptIn(ExperimentalMaterialApi::class)
 
-package com.zs.compose_ktx.navigation
+package com.zs.compose_ktx.adaptive
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement

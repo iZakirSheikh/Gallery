@@ -26,38 +26,32 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlaylistRemove
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.PhotoAlbum
 import androidx.compose.material.icons.outlined.SelectAll
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.StarHalf
-import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.primex.core.findActivity
+import com.primex.core.plus
 import com.primex.material2.IconButton
 import com.primex.material2.Label
 import com.primex.material2.Text
@@ -68,11 +62,18 @@ import com.zs.compose_ktx.AppTheme
 import com.zs.compose_ktx.LocalWindowSize
 import com.zs.compose_ktx.None
 import com.zs.compose_ktx.VerticalDivider
+import com.zs.compose_ktx.adaptive.TwoPane
+import com.zs.compose_ktx.adaptive.contentInsets
 import com.zs.compose_ktx.sharedBounds
-import com.zs.gallery.common.FabActionMenu
+import com.zs.compose_ktx.sharedElement
+import com.zs.gallery.common.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
+import com.zs.gallery.common.MediaFile
+import com.zs.gallery.common.emit
+import com.zs.gallery.common.items
+import com.zs.gallery.common.preference
 import com.zs.gallery.preview.RouteViewer
-
+import com.zs.gallery.settings.Settings
 
 @Composable
 private fun TopAppBar(
@@ -81,40 +82,32 @@ private fun TopAppBar(
     behavior: TopAppBarScrollBehavior? = null,
     insets: WindowInsets = WindowInsets.None
 ) {
-    AnimatedVisibility(
-        visible = !viewState.isInSelectionMode,
-        enter = slideInVertically() + fadeIn(),
-        exit = slideOutVertically() + fadeOut(),
-        content = {
-            LargeTopAppBar(
-                navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.PhotoAlbum,
-                        contentDescription = null,
-                        modifier = Modifier.padding(AppTheme.padding.normal)
-                    )
-                },
-                title = { Text(text = viewState.title, lineHeight = 20.sp) },
-                scrollBehavior = behavior,
-                windowInsets = insets,
-                modifier = modifier,
-                style = TopAppBarDefaults.largeAppBarStyle(
-                    containerColor = AppTheme.colors.background,
-                    scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
-                    scrolledContentColor = AppTheme.colors.onBackground,
-                    contentColor = AppTheme.colors.onBackground
-                )
+    LargeTopAppBar(
+        navigationIcon = {
+            Icon(
+                imageVector = Icons.Outlined.PhotoAlbum,
+                contentDescription = null,
+                modifier = Modifier.padding(AppTheme.padding.normal)
             )
-        }
+        },
+        title = { Text(text = viewState.title, lineHeight = 20.sp) },
+        scrollBehavior = behavior,
+        windowInsets = insets,
+        modifier = modifier,
+        style = TopAppBarDefaults.largeAppBarStyle(
+            containerColor = AppTheme.colors.background,
+            scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
+            scrolledContentColor = AppTheme.colors.onBackground,
+            contentColor = AppTheme.colors.onBackground
+        )
     )
 }
 
-
 @Composable
-private fun ActionMenu(
+private fun Actions(
     viewState: AlbumViewState,
     modifier: Modifier = Modifier,
-) = FabActionMenu(modifier) {
+) = FloatingActionMenu(modifier) {
     // Label
     Label(
         text = "${viewState.selected.size}",
@@ -145,34 +138,57 @@ private fun ActionMenu(
         onClick = viewState::clear
     )
 }
-
+private val GridItemsArrangement = Arrangement.spacedBy(2.dp)
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun Album(viewState: AlbumViewState) {
     BackHandler(viewState.selected.isNotEmpty(), viewState::clear)
-    val clazz = LocalWindowSize.current
     val behaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val selected = viewState.selected
-    val navController = LocalNavController.current
-    Scaffold(
-        floatingActionButtonPosition = FabPosition.Center,
+    val navInsets = WindowInsets.contentInsets
+    TwoPane(
+        fabPosition = FabPosition.Center,
+        modifier = Modifier
+            .nestedScroll(behaviour.nestedScrollConnection),
         topBar = {
-            TopAppBar(
-                viewState = viewState,
-                behavior = behaviour,
-                insets = WindowInsets.statusBars,
+            AnimatedVisibility(
+                visible = !viewState.isInSelectionMode,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically(),
+                modifier = Modifier.animateContentSize(),
+                content = {
+                    TopAppBar(
+                        viewState,
+                        behavior = behaviour,
+                        insets = WindowInsets.statusBars,
+                    )
+                }
             )
         },
-        modifier = Modifier
-            .nestedScroll(behaviour.nestedScrollConnection)
-            .animateContentSize(),
-        contentWindowInsets = WindowInsets.None,
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = viewState.isInSelectionMode,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically(),
+                modifier = Modifier.padding(navInsets),
+                content = {
+                    Actions(viewState)
+                }
+            )
+        },
         content = {
-            LazyDataGrid(
-                provider = viewState,
-                modifier = Modifier.padding(it),
-                itemContent = { item ->
+            val values = viewState.data
+            val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
+            val navController = LocalNavController.current
+            val selected = viewState.selected
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
+                horizontalArrangement = GridItemsArrangement,
+                verticalArrangement = GridItemsArrangement,
+                contentPadding = WindowInsets.contentInsets + navInsets + PaddingValues(vertical = AppTheme.padding.normal),
+            ){
+                val data = emit(values) ?: return@LazyVerticalGrid
+                items(data, key = { it.id }, tracker = viewState) { item ->
                     MediaFile(
                         value = item,
                         focused = false,
@@ -181,7 +197,7 @@ fun Album(viewState: AlbumViewState) {
                             selected.contains(item.id) -> 1
                             else -> 0
                         },
-                        modifier = Modifier.sharedBounds(
+                        modifier = Modifier.sharedElement(
                             key = RouteViewer.buildSharedFrameKey(item.id),
                         ) then Modifier.combinedClickable(
                             // onClick of item
@@ -196,18 +212,7 @@ fun Album(viewState: AlbumViewState) {
                         )
                     )
                 }
-            )
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = viewState.isInSelectionMode,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-                content = {
-                    ActionMenu(viewState = viewState)
-                }
-            )
+            }
         }
     )
 }
-

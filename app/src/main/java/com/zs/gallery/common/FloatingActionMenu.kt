@@ -43,7 +43,7 @@ private val DefaultItemSpace =  Arrangement.spacedBy(AppTheme.padding.small)
  */
 @Composable
 @NonRestartableComposable
-fun FabActionMenu(
+fun FloatingActionMenu(
     modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {

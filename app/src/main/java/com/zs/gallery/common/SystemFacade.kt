@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.zs.gallery.common
 
 import androidx.annotation.StringRes
@@ -43,6 +45,22 @@ interface SystemFacade {
         icon: ImageVector? = null,
         @StringRes action: Int = ResourcesCompat.ID_NULL,
         @Duration duration: Int = if (action == ResourcesCompat.ID_NULL) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE,
+    )
+
+    /**
+     * Configures the system bars (status bar and navigation bar) for the current screen.
+     * Uses system settings by default, but can be overridden with the provided parameters.
+     *
+     * @param hide Hides system bars if true, shows if false, uses system setting if null.
+     * @param translucent Draws a translucent veil behind system bars if true else none,
+     *                    uses system setting if null. Ignored if `hide` is true.
+     * @param dark Uses a dark theme for system bars if true, light theme if false,
+     *             system setting if null. Ignored if `hide` is true.
+     */
+    fun enableEdgeToEdge(
+        hide: Boolean? = null,
+        translucent: Boolean? = null,
+        dark: Boolean? = null
     )
 
     /**
