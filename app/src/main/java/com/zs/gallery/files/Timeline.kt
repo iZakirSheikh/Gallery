@@ -44,7 +44,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
 import androidx.compose.material.IconToggleButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
@@ -60,7 +59,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -79,24 +77,23 @@ import com.primex.material2.appbar.TopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.primex.material2.menu.DropDownMenu2
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.LocalWindowSize
-import com.zs.compose_ktx.None
-import com.zs.compose_ktx.VerticalDivider
-import com.zs.compose_ktx.adaptive.TwoPane
-import com.zs.compose_ktx.adaptive.contentInsets
-import com.zs.compose_ktx.sharedBounds
-import com.zs.compose_ktx.sharedElement
+import com.zs.foundation.AppTheme
+import com.zs.foundation.LocalWindowSize
+import com.zs.foundation.None
+import com.zs.foundation.VerticalDivider
+import com.zs.foundation.adaptive.TwoPane
+import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.renderInSharedTransitionScopeOverlay
+import com.zs.foundation.sharedElement
 import com.zs.gallery.R
 import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.common.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.MediaFile
-import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.common.emit
 import com.zs.gallery.common.items
 import com.zs.gallery.common.preference
-import com.zs.gallery.preview.RouteViewer
+import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.settings.Settings
 
 @Composable
@@ -129,7 +126,7 @@ private fun TopAppBar(
         },
         scrollBehavior = behavior,
         windowInsets = insets,
-        modifier = modifier,
+        modifier = modifier.renderInSharedTransitionScopeOverlay(1f),
         style = TopAppBarDefaults.topAppBarStyle(
             containerColor = AppTheme.colors.background,
             scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),

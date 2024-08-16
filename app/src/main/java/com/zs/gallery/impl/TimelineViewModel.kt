@@ -18,40 +18,14 @@
 
 package com.zs.gallery.impl
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.ContentUris
-import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.text.format.DateUtils
-import android.util.Log
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NearbyError
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.viewModelScope
-import com.primex.core.Rose
-import com.primex.preferences.value
-import com.zs.api.store.MediaFile
-import com.zs.api.store.MediaProvider
-import com.zs.compose_ktx.toast.Toast
-import com.zs.gallery.R
+import com.zs.domain.store.MediaFile
+import com.zs.domain.store.MediaProvider
 import com.zs.gallery.common.GroupSelectionLevel
 import com.zs.gallery.files.TimelineViewState
-import com.zs.gallery.settings.Settings
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
 private const val TAG = "TimelineViewModel"
 

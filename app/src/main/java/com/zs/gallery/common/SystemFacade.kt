@@ -28,8 +28,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.res.ResourcesCompat
 import com.primex.preferences.Key
-import com.zs.compose_ktx.toast.Duration
-import com.zs.compose_ktx.toast.Toast
+import com.zs.foundation.toast.Duration
+import com.zs.foundation.toast.Toast
 
 interface SystemFacade {
 

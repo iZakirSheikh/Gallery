@@ -22,5 +22,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Gallery"
 include(":app")
-include(":api")
-include(":compose-ktx")
+include(":domain")
+include(":foundation")

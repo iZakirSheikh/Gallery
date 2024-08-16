@@ -32,14 +32,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlaylistRemove
 import androidx.compose.material.icons.outlined.Close
@@ -58,21 +56,19 @@ import com.primex.material2.Text
 import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.LocalWindowSize
-import com.zs.compose_ktx.None
-import com.zs.compose_ktx.VerticalDivider
-import com.zs.compose_ktx.adaptive.TwoPane
-import com.zs.compose_ktx.adaptive.contentInsets
-import com.zs.compose_ktx.sharedBounds
-import com.zs.compose_ktx.sharedElement
+import com.zs.foundation.AppTheme
+import com.zs.foundation.None
+import com.zs.foundation.VerticalDivider
+import com.zs.foundation.adaptive.TwoPane
+import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.sharedElement
 import com.zs.gallery.common.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.MediaFile
 import com.zs.gallery.common.emit
 import com.zs.gallery.common.items
 import com.zs.gallery.common.preference
-import com.zs.gallery.preview.RouteViewer
+import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.settings.Settings
 
 @Composable

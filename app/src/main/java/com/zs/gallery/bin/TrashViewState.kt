@@ -20,7 +20,7 @@ package com.zs.gallery.bin
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import com.zs.api.store.Trashed
+import com.zs.domain.store.Trashed
 import com.zs.gallery.common.FileActions
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SelectionTracker

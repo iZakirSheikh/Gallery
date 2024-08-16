@@ -21,7 +21,7 @@ package com.zs.gallery.common
 import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.zs.api.store.MediaFile
+import com.zs.domain.store.MediaFile
 
 
 /**

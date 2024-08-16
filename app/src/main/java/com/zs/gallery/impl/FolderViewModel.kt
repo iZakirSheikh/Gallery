@@ -27,8 +27,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import com.primex.core.withSpanStyle
-import com.zs.api.store.MediaProvider
-import com.zs.api.util.PathUtils
+import com.zs.domain.store.MediaProvider
+import com.zs.domain.util.PathUtils
 import com.zs.gallery.common.get
 import com.zs.gallery.files.FolderViewState
 import com.zs.gallery.files.RouteFolder
@@ -40,7 +40,7 @@ class FolderViewModel(
     handle: SavedStateHandle, provider: MediaProvider
 ) : TimelineViewModel(provider), FolderViewState {
 
-    val path = handle[RouteFolder]
+    override val path = handle[RouteFolder]
     override var title: CharSequence by mutableStateOf(PathUtils.name(path))
 
     override suspend fun refresh() {

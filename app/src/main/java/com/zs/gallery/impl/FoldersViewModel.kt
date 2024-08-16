@@ -28,8 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import com.primex.core.Rose
-import com.zs.api.store.MediaProvider
-import com.zs.compose_ktx.toast.Toast
+import com.zs.domain.store.MediaProvider
+import com.zs.foundation.toast.Toast
 import com.zs.gallery.R
 import com.zs.gallery.folders.FoldersViewState
 import kotlinx.coroutines.flow.MutableStateFlow

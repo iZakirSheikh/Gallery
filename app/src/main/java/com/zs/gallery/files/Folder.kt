@@ -40,59 +40,44 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FolderCopy
-import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.primex.core.findActivity
 import com.primex.core.plus
-import com.primex.core.textResource
-import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
 import com.primex.material2.Label
 import com.primex.material2.Text
 import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
-import com.primex.material2.menu.DropDownMenu2
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.LocalWindowSize
-import com.zs.compose_ktx.None
-import com.zs.compose_ktx.VerticalDivider
-import com.zs.compose_ktx.adaptive.TwoPane
-import com.zs.compose_ktx.adaptive.contentInsets
-import com.zs.compose_ktx.sharedBounds
-import com.zs.compose_ktx.sharedElement
-import com.zs.gallery.R
+import com.zs.foundation.AppTheme
+import com.zs.foundation.LocalWindowSize
+import com.zs.foundation.None
+import com.zs.foundation.VerticalDivider
+import com.zs.foundation.adaptive.TwoPane
+import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.sharedElement
 import com.zs.gallery.common.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.MediaFile
 import com.zs.gallery.common.emit
 import com.zs.gallery.common.items
 import com.zs.gallery.common.preference
-import com.zs.gallery.preview.RouteViewer
+import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.settings.Settings
 
 
@@ -250,7 +235,7 @@ fun Folder(
                                 if (selected.isNotEmpty())
                                     viewState.select(item.id)
                                 else
-                                    navController.navigate(RouteViewer(item.id, folder = item.path))
+                                    navController.navigate(RouteViewer(item.id, folder = viewState.path))
                             },
                             // onLong Click
                             onLongClick = { viewState.select(item.id) }

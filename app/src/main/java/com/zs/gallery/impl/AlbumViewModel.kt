@@ -25,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import com.primex.core.withSpanStyle
-import com.zs.api.store.MediaProvider
+import com.zs.domain.store.MediaProvider
 import com.zs.gallery.R
 import com.zs.gallery.files.AlbumViewState
 import kotlinx.coroutines.delay

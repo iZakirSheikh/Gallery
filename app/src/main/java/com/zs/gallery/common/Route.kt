@@ -26,7 +26,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraph
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.zs.compose_ktx.LocalNavAnimatedVisibilityScope
+import com.zs.foundation.LocalNavAnimatedVisibilityScope
 
 private val SPLIT_REGEX = Regex("(?=[A-Z])")
 

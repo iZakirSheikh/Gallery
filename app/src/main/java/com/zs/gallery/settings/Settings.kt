@@ -49,10 +49,10 @@ import com.primex.material2.SwitchPreference
 import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.Colors
-import com.zs.compose_ktx.None
-import com.zs.compose_ktx.adaptive.contentInsets
+import com.zs.foundation.AppTheme
+import com.zs.foundation.Colors
+import com.zs.foundation.None
+import com.zs.foundation.adaptive.contentInsets
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.NightMode

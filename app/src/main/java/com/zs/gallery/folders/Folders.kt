@@ -66,17 +66,17 @@ import com.primex.material2.IconButton
 import com.primex.material2.Label
 import com.primex.material2.menu.DropDownMenu2
 import com.primex.material2.neumorphic.NeumorphicTopAppBar
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.ContentPadding
-import com.zs.compose_ktx.adaptive.TwoPane
-import com.zs.compose_ktx.adaptive.contentInsets
-import com.zs.compose_ktx.sharedElement
+import com.zs.foundation.AppTheme
+import com.zs.foundation.ContentPadding
+import com.zs.foundation.adaptive.TwoPane
+import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.sharedElement
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.emit
 import com.zs.gallery.common.preference
 import com.zs.gallery.files.RouteFolder
-import com.zs.gallery.preview.RouteViewer
+import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.settings.Settings
 
 private const val TAG = "Folders"

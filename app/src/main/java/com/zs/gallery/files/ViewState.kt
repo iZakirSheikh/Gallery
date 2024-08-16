@@ -20,7 +20,7 @@ package com.zs.gallery.files
 
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
-import com.zs.api.store.MediaFile
+import com.zs.domain.store.MediaFile
 import com.zs.gallery.common.FileActions
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SafeArgs
@@ -64,6 +64,7 @@ interface TimelineViewState : FileActions, SelectionTracker {
 
 interface FolderViewState : TimelineViewState {
     val title: CharSequence
+    val path: String
 }
 
 interface AlbumViewState : SelectionTracker {

@@ -20,16 +20,13 @@ package com.zs.gallery.impl
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.icu.util.TimeUnit
-import android.text.format.DateUtils
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.zs.api.store.MediaProvider
-import com.zs.api.store.Trashed
+import com.zs.domain.store.MediaProvider
+import com.zs.domain.store.Trashed
 import com.zs.gallery.bin.TrashViewState
 import com.zs.gallery.common.GroupSelectionLevel
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
 
 

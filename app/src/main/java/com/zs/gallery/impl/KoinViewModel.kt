@@ -28,10 +28,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.res.ResourcesCompat
 import com.primex.core.getText2
 import com.primex.preferences.Preferences
-import com.zs.compose_ktx.toast.Duration
-import com.zs.compose_ktx.toast.Result
-import com.zs.compose_ktx.toast.Toast
-import com.zs.compose_ktx.toast.ToastHostState
+import com.zs.foundation.toast.Duration
+import com.zs.foundation.toast.Result
+import com.zs.foundation.toast.Toast
+import com.zs.foundation.toast.ToastHostState
 import org.koin.androidx.scope.ScopeViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.component.inject

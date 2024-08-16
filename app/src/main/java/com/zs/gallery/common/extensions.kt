@@ -18,22 +18,14 @@
 
 package com.zs.gallery.common
 
-import android.content.Context
-import android.content.pm.PackageManager
 import androidx.annotation.RawRes
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -41,8 +33,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.primex.core.composableOrNull
 import com.primex.material2.Label
 import com.primex.material2.Text
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.lottieAnimationPainter
+import com.zs.foundation.AppTheme
+import com.zs.foundation.lottieAnimationPainter
 
 /**
  * Used to provide access to the [NavHostController] through composition without needing to pass it down the tree.

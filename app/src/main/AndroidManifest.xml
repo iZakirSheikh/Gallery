@@ -47,6 +47,11 @@
             <meta-data
                 android:name="com.zs.gallery.impl.KoinInitializer"
                 android:value="androidx.startup" />
+
+            <!--Coil ImageLoader-->
+            <meta-data
+                android:name="com.zs.gallery.impl.CoilInitializer"
+                android:value="androidx.startup" />
         </provider>
 
         <!-- Disable FirebaseInitProvider -->
@@ -54,12 +59,14 @@
             android:name="com.google.firebase.provider.FirebaseInitProvider"
             android:authorities="${applicationId}.firebaseinitprovider"
             android:enabled="false"
-            tools:node="remove"
-            android:exported="false"/>
+            android:exported="false"
+            tools:node="remove" />
 
         <!--MainActivity-->
         <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:launchMode="singleTask"
             android:exported="true">
 
             <!--The Intent Filters -->

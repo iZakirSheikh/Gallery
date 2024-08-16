@@ -18,14 +18,12 @@
 
 package com.zs.gallery
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.material.LocalElevationOverlay
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -43,15 +41,13 @@ import com.primex.preferences.Key
 import com.primex.preferences.Preferences
 import com.primex.preferences.observeAsState
 import com.primex.preferences.value
-import com.zs.compose_ktx.LocalWindowSize
-import com.zs.compose_ktx.calculateWindowSizeClass
-import com.zs.compose_ktx.toast.ToastHostState
+import com.zs.foundation.LocalWindowSize
+import com.zs.foundation.calculateWindowSizeClass
+import com.zs.foundation.toast.ToastHostState
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.settings.Settings
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch

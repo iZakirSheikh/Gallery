@@ -86,5 +86,13 @@
     <string name="msg_confirm_restoring">Confirm file restoring.</string>
     <string name="msg_files_restoring_cancelled">File restoring process was canceled by the user.</string>
     <string name="msg_files_restoring_success_out_total">Successfully restored %1$d out of %2$d files.</string>
-    
+    <string name="share">Share</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="info">Info</string>
+    <string name="edit_in">Edit In</string>
+    <string name="use_as">Use as</string>
+    <string name="like">Like</string>
+    <string name="unlike">Unfavorite</string>
+
 </resources>

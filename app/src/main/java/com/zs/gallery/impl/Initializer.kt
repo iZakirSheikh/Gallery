@@ -21,12 +21,13 @@ package com.zs.gallery.impl
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.startup.Initializer
+import coil.Coil
+import coil.ImageLoader
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.ktx.initialize
-import com.zs.api.store.MediaProvider
-import com.zs.compose_ktx.toast.ToastHostState
+import com.zs.domain.store.MediaProvider
+import com.zs.foundation.toast.ToastHostState
+import com.zs.gallery.common.ThumbnailFetcher
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -86,4 +87,18 @@ class CrashlyticsInitializer : Initializer<Unit> {
     override fun dependencies(): List<Class<out Initializer<*>>> {
         return listOf(FirebaseInitializer::class.java)
     }
+}
+
+class CoilInitializer : Initializer<Unit> {
+    override fun create(context: Context) {
+        Coil.setImageLoader(
+            ImageLoader.Builder(context)
+                .components {
+                    add(ThumbnailFetcher.Factory())
+                }.build()
+        )
+    }
+
+    override fun dependencies(): MutableList<Class<out Initializer<*>>> =
+        mutableListOf()
 }

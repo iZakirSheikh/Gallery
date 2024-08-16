@@ -24,18 +24,15 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomAppBar
@@ -57,7 +54,6 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -70,23 +66,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.primex.core.SignalWhite
 import com.primex.core.textResource
 import com.primex.material2.Label
 import com.primex.material2.OutlinedButton
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.ContentPadding
-import com.zs.compose_ktx.LocalWindowSize
-import com.zs.compose_ktx.None
-import com.zs.compose_ktx.Range
-import com.zs.compose_ktx.WindowSize
-import com.zs.compose_ktx.isPermissionGranted
-import com.zs.compose_ktx.adaptive.BottomNavItem
-import com.zs.compose_ktx.adaptive.NavRailItem
-import com.zs.compose_ktx.adaptive.NavigationItemDefaults
-import com.zs.compose_ktx.adaptive.NavigationSuiteScaffold
-import com.zs.compose_ktx.thenIf
-import com.zs.compose_ktx.toast.ToastHostState
+import com.zs.foundation.AppTheme
+import com.zs.foundation.LocalWindowSize
+import com.zs.foundation.Range
+import com.zs.foundation.WindowSize
+import com.zs.foundation.isPermissionGranted
+import com.zs.foundation.adaptive.BottomNavItem
+import com.zs.foundation.adaptive.NavRailItem
+import com.zs.foundation.adaptive.NavigationItemDefaults
+import com.zs.foundation.adaptive.NavigationSuiteScaffold
+import com.zs.foundation.renderInSharedTransitionScopeOverlay
+import com.zs.foundation.thenIf
+import com.zs.foundation.toast.ToastHostState
 import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.bin.Trash
 import com.zs.gallery.common.LocalNavController
@@ -111,8 +105,8 @@ import com.zs.gallery.impl.SettingsViewModel
 import com.zs.gallery.impl.TimelineViewModel
 import com.zs.gallery.impl.TrashViewModel
 import com.zs.gallery.impl.ViewerViewModel
-import com.zs.gallery.preview.RouteViewer
-import com.zs.gallery.preview.Viewer
+import com.zs.gallery.viewer.RouteViewer
+import com.zs.gallery.viewer.Viewer
 import com.zs.gallery.settings.RouteSettings
 import com.zs.gallery.settings.Settings
 import org.koin.androidx.compose.koinViewModel
@@ -325,22 +319,14 @@ private fun NavigationBar(
         )
 
         else -> BottomAppBar(
-            windowInsets = WindowInsets.None,
-            backgroundColor = if (colors.isLight) Color(0xFF0E0E0F) else colors.background(1.dp),
-            contentColor = if (colors.isLight) Color.SignalWhite else colors.onBackground,
-            elevation = AppTheme.elevation.high,
+            windowInsets = WindowInsets.navigationBars,
+            backgroundColor = colors.background(1.dp),
+            contentColor = colors.onBackground,
+            elevation = 0.dp,
             contentPadding = PaddingValues(
                 horizontal = AppTheme.padding.normal
             ),
-            modifier = modifier
-                .padding(horizontal = ContentPadding.large)
-                .navigationBarsPadding()
-                .shadow(12.dp, BottomNavShape, clip = true)
-                .thenIf(
-                    !colors.isLight,
-                    Modifier.border(1.dp, Color.White.copy(0.06f), BottomNavShape)
-                )
-                .widthIn(max = 400.dp),
+            modifier = modifier,
             content = {
                 Spacer(modifier = Modifier.weight(1f))
                 // Display routes at the contre of available space
@@ -471,7 +457,13 @@ fun Home(toastHostState: ToastHostState) {
                         hideNavigationBar = hideNavigationBar,
                         background = AppTheme.colors.background(elevation = 1.dp),
                         // Set up the navigation bar using the NavBar composable
-                        navBar = { NavigationBar(clazz.navTypeRail, navController) },
+                        navBar = {
+                            NavigationBar(
+                                clazz.navTypeRail,
+                                navController,
+                                Modifier.renderInSharedTransitionScopeOverlay(1f)
+                            )
+                        },
                         // Display the main content of the app using the NavGraph composable
                         content = content
                     )

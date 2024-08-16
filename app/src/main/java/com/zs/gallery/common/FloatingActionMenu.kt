@@ -31,7 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
-import com.zs.compose_ktx.AppTheme
+import com.zs.foundation.AppTheme
 
 private val DefaultItemSpace =  Arrangement.spacedBy(AppTheme.padding.small)
 

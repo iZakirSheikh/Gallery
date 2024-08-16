@@ -18,7 +18,7 @@
 
 package com.zs.gallery.folders
 
-import com.zs.api.store.Folder
+import com.zs.domain.store.Folder
 import com.zs.gallery.common.Route
 import kotlinx.coroutines.flow.StateFlow
 

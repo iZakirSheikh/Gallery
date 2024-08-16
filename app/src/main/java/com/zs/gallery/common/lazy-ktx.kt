@@ -42,7 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.primex.material2.IconButton
 import com.primex.material2.Label
-import com.zs.compose_ktx.AppTheme
+import com.zs.foundation.AppTheme
 import com.zs.gallery.R
 
 /**

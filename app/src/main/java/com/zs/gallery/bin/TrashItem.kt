@@ -51,12 +51,12 @@ import androidx.compose.ui.util.lerp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.primex.material2.Label
-import com.zs.api.store.Trashed
-import com.zs.api.store.isImage
-import com.zs.api.store.mediaUri
-import com.zs.compose_ktx.AppTheme
-import com.zs.compose_ktx.ContentPadding
-import com.zs.compose_ktx.Divider
+import com.zs.domain.store.Trashed
+import com.zs.domain.store.isImage
+import com.zs.domain.store.mediaUri
+import com.zs.foundation.AppTheme
+import com.zs.foundation.ContentPadding
+import com.zs.foundation.Divider
 import com.zs.gallery.R
 
 
