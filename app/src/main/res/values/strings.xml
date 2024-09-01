@@ -94,5 +94,9 @@
     <string name="use_as">Use as</string>
     <string name="like">Like</string>
     <string name="unlike">Unfavorite</string>
+    <string name="details">Details</string>
+    <string name="title">Title</string>
+    <string name="path">Path</string>
+    <string name="metadata">MetaData</string>
 
 </resources>

@@ -129,13 +129,17 @@ object RouteViewer : SafeArgs<Kind> {
 }
 
 /**
- * Represents the view state for a viewer screen, providing information about the currently focused item,
- * user preferences, the displayed media data, and the type of viewer.
+ * Represents the view state for a viewer screen. This interface provides information about the
+ * currently focused media item, user preferences, the displayed media data, and the type of viewer.
  *
  * @property focused The ID of the currently focused media item.
  * @property favourite Indicates whether the currently focused item is marked as a favorite by the user.
- * @property data A list of media files.
- * @property kind The source of files in the viewer.
+ * @property data A list of [MediaFile] objects representing the media files being displayed.
+ * @property kind The source of files in the viewer, represented by the [Kind] enum.
+ * @property details The details of the currently displayed file, as a [MediaFile] object.
+ *     Future versions may provide more advanced details using [MediaMetadataRetriever] and [ExifInterface].
+ * @property showDetails Controls the visibility of the details section. Set to `true` to display details,
+ *     or `false` to hide them.
  */
 interface ViewerViewState {
     var focused: Long
@@ -143,13 +147,19 @@ interface ViewerViewState {
     val data: List<MediaFile>
     val kind: Kind
 
+    val details: MediaFile?
+    var showDetails: Boolean
+
     /**
-     * The list of actions supported by the current file.
+     * The list of actions supported by the currently displayed file, represented as [MenuItem] objects.
      */
     val actions: List<MenuItem>
 
     /**
-     * A Single fun that takes an action and an activity.
+     * Callback function to be invoked when an action is selected.
+     *
+     * @param item The [MenuItem] representing the selected action.
+     * @param activity The [Activity] context in which the action is invoked.
      */
     fun onAction(item: MenuItem, activity: Activity)
 }

@@ -45,4 +45,5 @@ dependencies {
     api(libs.bundles.compose.preview)
     implementation(libs.androidx.window)
     implementation(libs.lottie.compose)
+    implementation(libs.bundles.media3)
 }

@@ -73,6 +73,7 @@ import com.primex.core.textResource
 import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
 import com.primex.material2.Label
+import com.primex.material2.Text
 import com.primex.material2.appbar.TopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
@@ -96,6 +97,8 @@ import com.zs.gallery.common.preference
 import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.settings.Settings
 
+private const val SCR_ZINDEX = 0.1f
+
 @Composable
 private fun TopAppBar(
     modifier: Modifier = Modifier,
@@ -117,16 +120,17 @@ private fun TopAppBar(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
                 content = {
-                    Label(
+                    Text(
                         text = textResource(id = R.string.app_name_real),
-                        style = AppTheme.typography.titleLarge
+                        style = AppTheme.typography.titleLarge,
+                        fontFamily = Settings.OutfitFontFamily
                     )
                 }
             )
         },
         scrollBehavior = behavior,
         windowInsets = insets,
-        modifier = modifier.renderInSharedTransitionScopeOverlay(1f),
+        modifier = modifier.renderInSharedTransitionScopeOverlay(SCR_ZINDEX + 0.01f),
         style = TopAppBarDefaults.topAppBarStyle(
             containerColor = AppTheme.colors.background,
             scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
@@ -283,7 +287,7 @@ fun Timeline(
                             else -> 0
                         },
                         modifier = Modifier.sharedElement(
-                            key = RouteViewer.buildSharedFrameKey(item.id),
+                            key = RouteViewer.buildSharedFrameKey(item.id), zIndexInOverlay = SCR_ZINDEX
                         ) then Modifier.combinedClickable(
                             // onClick of item
                             onClick = {

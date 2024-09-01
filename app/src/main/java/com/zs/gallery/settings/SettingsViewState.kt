@@ -184,7 +184,8 @@ object Settings {
     // Nunito Sans
     // Ubuntu
     // Kanit
-    val DefaultFontFamily = FontFamily("Outfit")
+    val OutfitFontFamily = FontFamily("Outfit")
+    val DefaultFontFamily = FontFamily.Default
     val DancingScriptFontFamily = FontFamily.Cursive
 }
 

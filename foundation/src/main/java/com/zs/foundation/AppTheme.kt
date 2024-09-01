@@ -597,4 +597,3 @@ fun Modifier.renderInSharedTransitionScopeOverlay(
         )
     }
 }
-

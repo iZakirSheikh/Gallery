@@ -22,6 +22,14 @@ fun Context.isPermissionGranted(permission: String) =
  * @param other The [Modifier] to apply if the condition is true.
  * @return This [Modifier] if the condition is false, otherwise this [Modifier] combined with [other].
  */
-fun Modifier.thenIf(condition: Boolean, other: Modifier): Modifier {
+inline fun Modifier.thenIf(condition: Boolean, other: Modifier): Modifier {
     return if (condition) this then other else this
+}
+
+/**
+ * Another version of [thenIf]
+ */
+inline fun Modifier.thenIf(condition: Boolean, value: Modifier.() -> Modifier): Modifier {
+    // FixMe - Keep an eye on this; here Modifier is required otherwise value is twice applied.
+    return if (condition) this then Modifier.value() else this
 }

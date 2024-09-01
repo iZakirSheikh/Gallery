@@ -441,7 +441,7 @@ fun Home(toastHostState: ToastHostState) {
         )
     }
     // Setup App Theme and provide necessary dependencies.
-    // Provide the navController and window size class to child composables.
+    // Provide the navController and window size class to child composable.
     AppTheme(
         isLight = isLight,
         fontFamily = Settings.DefaultFontFamily,

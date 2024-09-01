@@ -43,10 +43,10 @@ import com.zs.domain.store.mediaUri
 import com.zs.foundation.menu.MenuItem
 import com.zs.gallery.R
 import com.zs.gallery.common.get
+import com.zs.gallery.settings.Settings
 import com.zs.gallery.viewer.Kind
 import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.viewer.ViewerViewState
-import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -101,6 +101,11 @@ class ViewerViewModel(
 
     val current inline get() = values.find { it.id == focused }
 
+    override var details: MediaFile? by mutableStateOf(null)
+    override var showDetails: Boolean
+        get() = details != null
+        set(value) { details = if (value) current else null }
+
     override val actions: List<MenuItem> by derivedStateOf {
         buildList {
             Log.d(TAG, "actions: changed ")
@@ -118,7 +123,7 @@ class ViewerViewModel(
     override fun onAction(item: MenuItem, activity: Activity) {
         when (item) {
             STAR, UN_STAR -> toggleLike()
-            DELETE -> delete(activity)
+            DELETE -> remove(activity)
             SHARE -> share(activity)
             USE_AS -> {
                 val current = current ?: return

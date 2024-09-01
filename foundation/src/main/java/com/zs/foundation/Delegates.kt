@@ -25,18 +25,25 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottiePainter
+import com.primex.material2.Label
 import kotlin.math.roundToLong
 
 private const val TAG = "Delegates"
@@ -174,3 +181,53 @@ inline fun LottieAnimatedIcon(
     )
 
 }
+
+/**
+ * Creates a header with an optional action.
+ *
+ * @param text The text to display in the header. max 2 lines one for title and other subtitle
+ * @param modifier The [Modifier] to be applied to the header.
+ * @param style The [TextStyle] to be applied to the header text.
+ * @param contentPadding The padding to be applied around the header content.
+ * @param action An optional composable function to display an action within the header.*/
+@Composable
+inline fun Header(
+    text: CharSequence,
+    leading: @Composable (() -> Unit) = {},
+    modifier: Modifier = Modifier,
+    style: TextStyle = AppTheme.typography.headlineSmall,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    action: @Composable () -> Unit
+) = Row(
+    modifier = modifier
+        .fillMaxWidth()
+        .then(Modifier.padding(contentPadding)),
+    // horizontalArrangement = Arrangement.spacedBy(ContentPadding.medium),
+    verticalAlignment = Alignment.CenterVertically,
+    content = {
+        // leading
+        leading()
+        // Title
+        Label(
+            style = style,
+            text = text,
+            maxLines = 2,
+            modifier = Modifier.weight(1f)
+        )
+
+        // action.
+        action()
+    }
+)
+
+
+/**
+ * @see Header
+ */
+@Composable
+inline fun Header(
+    text: CharSequence,
+    modifier: Modifier = Modifier,
+    style: TextStyle = AppTheme.typography.headlineSmall,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+) = Label(text = text, modifier.padding(contentPadding), style = style, maxLines = 2)

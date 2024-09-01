@@ -18,6 +18,7 @@
 
 package com.zs.foundation.adaptive
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -128,8 +129,8 @@ private inline fun Vertical(
         // This ensures content fills the available space efficiently, even if the details pane
         // doesn't fully utilize its allocated area.
         val contentAllocated = splitAt - gapWidthPx / 2
-        val detailsMeasured = detailsPlaceable.height + splitAt / 2
-        val available = maxOf(contentAllocated, detailsMeasured)
+        val detailsMeasured = detailsPlaceable.height + gapWidthPx / 2
+        val available = maxOf(contentAllocated, height - detailsMeasured)
         constraints = if (isDetailsAbsent) c else
             c.copy(
                 minHeight = available,

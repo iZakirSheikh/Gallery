@@ -275,7 +275,6 @@ abstract class MainViewModel<T>(
                 ) // Success with count
             }
             showToast(msg)
-
         }
     }
 

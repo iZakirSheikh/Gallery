@@ -2,6 +2,9 @@
 
 package com.zs.gallery.viewer
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.animateContentSize
@@ -10,35 +13,49 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FabPosition
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.PlayCircle
+import androidx.compose.material.icons.outlined.PlayCircleFilled
+import androidx.compose.material.icons.rounded.PlayCircleOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isUnspecified
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -46,13 +63,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import coil.size.Size
 import com.primex.core.SignalWhite
 import com.primex.core.findActivity
+import com.primex.core.rememberVectorPainter
 import com.primex.material2.IconButton
 import com.zs.domain.store.isImage
 import com.zs.domain.store.mediaUri
 import com.zs.foundation.AppTheme
+import com.zs.foundation.ContentPadding
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.Range
 import com.zs.foundation.WindowSize
@@ -68,6 +86,7 @@ import com.zs.foundation.thenIf
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -75,6 +94,15 @@ import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
+
+/**
+ * The zIndex for sharedBounds of this screen within the SharedTransitionLayout.
+ */
+private const val SCR_Z_INDEX = 0.2f
+
+private const val EVENT_BACK_PRESS = 0
+private const val EVENT_SHOW_INFO = 1
+private const val EVENT_IMMERSIVE_VIEW = 2
 
 @Composable
 private fun FloatingActionMenu(
@@ -100,33 +128,36 @@ private fun FloatingActionMenu(
     )
 }
 
+private val AppBarOverlay = Brush.verticalGradient(
+    listOf(
+        Color.Black,
+        Color.Transparent
+    )
+)
+
 @Composable
 private fun TopAppBar(
-    isInfoShowing: Boolean,
-    onToggleInfo: (Boolean) -> Unit,
+    onRequest: (request: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     androidx.compose.material.TopAppBar(
         title = {},
         navigationIcon = {
-            val navController = LocalNavController.current
             IconButton(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                onClick = navController::navigateUp
+                onClick = { onRequest(EVENT_BACK_PRESS) }
             )
         },
         actions = {
-            IconToggleButton(isInfoShowing, onToggleInfo) {
-                Icon(
-                    if (isInfoShowing) Icons.Filled.Info else Icons.Outlined.Info,
-                    contentDescription = "info"
-                )
-            }
+            IconButton(
+                imageVector = Icons.Default.Info,
+                onClick = { onRequest(EVENT_SHOW_INFO) }
+            )
         },
         contentColor = Color.White,
         backgroundColor = Color.Transparent,
         elevation = 0.dp,
-        modifier = modifier,
+        modifier = modifier.background(AppBarOverlay),
         windowInsets = WindowInsets.statusBars,
     )
 }
@@ -152,107 +183,45 @@ private val WindowSize.strategy: TwoPaneStrategy
 
             // If the height is greater than the width, use a vertical strategy
             // that splits the window at 50% of the height.
-            else -> VerticalTwoPaneStrategy(0.5f)
+            else -> VerticalTwoPaneStrategy(0.3f)
         }
     }
-
-@Composable
-private fun Details(
-    modifier: Modifier = Modifier
-) {
-
-}
-
-@Composable
-fun Viewer(
-    viewState: ViewerViewState
-) {
-
-    val facade = LocalSystemFacade.current
-    DisposableEffect(key1 = Unit) {
-        facade.enableEdgeToEdge(dark = false, translucent = true)
-        onDispose {
-            // Reset to default on disposal
-            facade.enableEdgeToEdge()
-        }
-    }
-
-    var immersive by remember { mutableStateOf(false) }
-    LaunchedEffect(immersive) {
-        facade.enableEdgeToEdge(immersive, true, false)
-    }
-
-    val clazz = LocalWindowSize.current
-    var showDetails by remember { mutableStateOf(false) }
-    TwoPane(
-        fabPosition = FabPosition.Center,
-        strategy = clazz.strategy,
-        background = Color.Black,
-        onColor = Color.SignalWhite,
-        content = {
-            MainContent(
-                viewState = viewState,
-                onRequestImmersive = { immersive = !immersive },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .animateContentSize()
-            )
-        },
-        topBar = {
-            AnimatedVisibility(
-                visible = !immersive,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                content = {
-                    TopAppBar(showDetails, { showDetails = it })
-                }
-            )
-        },
-        details = details@{
-            if (!showDetails) return@details
-            Details()
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = !immersive,
-                modifier = Modifier.padding(bottom = AppTheme.padding.normal),
-                enter = fadeIn(),
-                exit = slideOutVertically() + fadeOut(),
-                content = {
-                    val context = LocalContext.current
-                    FloatingActionMenu(actions = viewState.actions) {
-                        viewState.onAction(it, context.findActivity())
-                    }
-                }
-            )
-        }
-    )
-}
-
 
 /**
  * Scales and centers content based on Painter's size.
  * @param painter Provides intrinsic size for scaling.
  */
-private fun ZoomableState.scaledInsideAndCenterAlignedFrom(painter: Painter) {
-    runBlocking {
-        // Do nothing if intrinsic size is unknown
-        if (painter.intrinsicSize.isUnspecified) return@runBlocking
+private suspend fun ZoomableState.scaledInsideAndCenterAlignedFrom(painter: Painter) {
+    // Do nothing if intrinsic size is unknown
+    if (painter.intrinsicSize.isUnspecified) return
 
-        // Scale and center content based on intrinsic size
-        // TODO - Make this suspend fun instead of runBlocking
-        setContentLocation(
-            ZoomableContentLocation.scaledInsideAndCenterAligned(
-                painter.intrinsicSize
-            )
+    // Scale and center content based on intrinsic size
+    // TODO - Make this suspend fun instead of runBlocking
+    setContentLocation(
+        ZoomableContentLocation.scaledInsideAndCenterAligned(
+            painter.intrinsicSize
         )
-    }
+    )
 }
+
+/**
+ * Indicates whether the content is currently at its default zoom level (not zoomed in).
+ */
+private val ZoomableState.isZoomedOut get() = zoomFraction == null || zoomFraction == 0f
+
+/**
+ * TODO - Instead of opeing video in 3rd party; i will add inBuilt Impl in future versions.
+ */
+private fun VideoIntent(uri: Uri) =
+    Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "video/*") // Set data and MIME type
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grant read permission
+    }
 
 @Composable
 private fun MainContent(
     viewState: ViewerViewState,
-    onRequestImmersive: () -> Unit,
+    onRequest: (request: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     // TODO - Properly handle case, when data is empty
@@ -260,27 +229,53 @@ private fun MainContent(
     if (values.isEmpty()) return
 
     // Construct the state variables for pager.
-    val state = rememberPagerState(initialPage = viewState.index, pageCount = { values.size })
-    val zoomableState = rememberZoomableState(DEFAULT_ZOOM_SPECS).apply {
+    val pager = rememberPagerState(initialPage = viewState.index, pageCount = { values.size })
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val zoomable = rememberZoomableState(DEFAULT_ZOOM_SPECS).apply {
         contentScale = ContentScale.None
     }
+
     // Modifier for zoomable images,
     // triggering immersive mode on click and handling double-tap zoom
     val zoomableModifier = Modifier.zoomable(
-        zoomableState,
-        onClick = { onRequestImmersive() },
+        zoomable,
+        onClick = { onRequest(EVENT_IMMERSIVE_VIEW) },
         onDoubleClick = DoubleClickToZoomListener.cycle(2f)
     )
+    // TODO - Remove this once inBuilt Video Player is available.
+    val vector = rememberVectorPainter(Icons.Outlined.PlayCircleFilled)
+    val playIconModifier = Modifier.drawWithCache {
+        onDrawWithContent {
+            drawContent()
+            // overlay icon on it.
+            val iconSize = Size(74.dp.toPx(), 74.dp.toPx())
+            // draw at the centre of the screen.
+            translate(size.width / 2 - iconSize.width / 2, size.height / 2 - iconSize.height / 2) {
+                with(vector) {
+                    draw(iconSize, alpha = 1f, colorFilter = ColorFilter.tint(Color.White))
+                }
+            }
+        }
+    }
+
+    // Handle BackPress
+    BackHandler {
+        when {
+            !zoomable.isZoomedOut -> scope.launch { zoomable.resetZoom() }
+            else -> onRequest(EVENT_BACK_PRESS)
+        }
+    }
 
     // Horizontal pager to display the images/videos
     // Disable swipe when zoomed in
     // Preload adjacent pages for smoother transitions
     HorizontalPager(
-        state = state,
+        state = pager,
         key = { values[it].id },
         pageSpacing = 16.dp,
         modifier = modifier,
-        userScrollEnabled = zoomableState.zoomFraction == 0f,
+        userScrollEnabled = zoomable.isZoomedOut,
         beyondViewportPageCount = 1,
     ) { index ->
         val item = values[index]
@@ -290,8 +285,7 @@ private fun MainContent(
         // focused item,
         // ensuring smooth animations and optimized performance by avoiding unnecessary modifications
         // to other items.
-        val isFocused = state.currentPage == index
-
+        val isFocused = pager.currentPage == index
         // Constructs the painter for this item, handling both images and videos.
         // TODO: Allow user to choose image quality/filter for optimized loading.
         // In success state, update intrinsic size only if specified AND the item is focused.
@@ -302,7 +296,7 @@ private fun MainContent(
                 .apply {
                     data(item.mediaUri)
                     if (item.isImage) {
-                        size(Size.ORIGINAL)
+                        size(coil.size.Size.ORIGINAL)
                         // Cache images for better performance
                         memoryCacheKey("index:$index")
                     }
@@ -312,15 +306,16 @@ private fun MainContent(
             filterQuality = FilterQuality.Low,
             onState = {
                 if (it is AsyncImagePainter.State.Success && isFocused)
-                    zoomableState.scaledInsideAndCenterAlignedFrom(it.painter)
+                    scope.launch { zoomable.scaledInsideAndCenterAlignedFrom(it.painter) }
             },
         )
 
         // if the user navigated to this item
         if (isFocused) {
             viewState.focused = item.id
-            zoomableState.scaledInsideAndCenterAlignedFrom(painter)
+            runBlocking { zoomable.scaledInsideAndCenterAlignedFrom(painter) }
         }
+
         // Display the image/video
         // Shared element transition for focused item
         // Apply zoom behavior only to focused, non-error images
@@ -331,12 +326,118 @@ private fun MainContent(
             alignment = Alignment.Center,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .thenIf(isFocused, Modifier.sharedElement(sharedFrameKey))
-                .thenIf(
-                    item.isImage && isFocused && painter.state !is AsyncImagePainter.State.Error,
-                    zoomableModifier
-                )
+                .thenIf(isFocused) { sharedElement(sharedFrameKey, zIndexInOverlay = SCR_Z_INDEX) }
+                .thenIf(isFocused && !item.isImage) {
+                    playIconModifier
+                        .clickable(null, null) { context.startActivity(VideoIntent(item.mediaUri)) }
+                }
+                .thenIf(item.isImage && isFocused && painter.state !is AsyncImagePainter.State.Error) { zoomableModifier }
                 .fillMaxSize()
         )
+    }
+}
+
+@Composable
+fun Viewer(
+    viewState: ViewerViewState
+) {
+    // obtain required dependencies
+    val navController = LocalNavController.current
+    val facade = LocalSystemFacade.current
+    val context = LocalContext.current
+    val clazz = LocalWindowSize.current
+
+    // Define required state variables
+    var immersive by remember { mutableStateOf(false) }
+    // Handles incoming requests from nested UI components.
+    val onRequest = { event: Int ->
+        when (event) {
+            // Toggle the visibility of detailed information.
+            EVENT_SHOW_INFO -> {
+                viewState.showDetails = !viewState.showDetails;
+                immersive = viewState.showDetails
+            }
+            // Toggle immersive mode and update system UI accordingly.
+            EVENT_IMMERSIVE_VIEW -> {
+                immersive = !immersive
+                facade.enableEdgeToEdge(immersive, false, false)
+            }
+            // Handle back press events, prioritizing focused states (immersive, details)
+            // before navigating up.
+            EVENT_BACK_PRESS -> {
+                when {
+                    immersive -> {
+                        immersive = false
+                        facade.enableEdgeToEdge(false, false, false)
+                    }
+
+                    viewState.showDetails -> viewState.showDetails = false
+                    // Navigate up if no focused states
+                    else -> navController.navigateUp()
+                }
+            }
+            // Handle unexpected events
+            else -> error("Unknown event: $event")
+        }
+        Unit
+    }
+
+    // The layout
+    TwoPane(
+        fabPosition = FabPosition.Center,
+        strategy = clazz.strategy,
+        background = Color.Black,
+        onColor = Color.SignalWhite,
+        content = {
+            MainContent(
+                viewState = viewState,
+                onRequest = onRequest,
+                modifier = Modifier
+                    .animateContentSize()
+                    .fillMaxSize()
+            )
+        },
+        details = details@{
+            val details = viewState.details
+            Details(
+                details ?: return@details,
+                viewState.actions,
+                onAction = {
+                    viewState.onAction(it, context.findActivity())
+                }
+            )
+        },
+        topBar = {
+            AnimatedVisibility(
+                visible = !immersive,
+                enter = fadeIn(),
+                exit = fadeOut(),
+                content = {
+                    TopAppBar(onRequest)
+                }
+            )
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = !immersive,
+                modifier = Modifier.padding(bottom = AppTheme.padding.normal),
+                enter = fadeIn(),
+                exit = slideOutVertically() + fadeOut(),
+                content = {
+                    FloatingActionMenu(actions = viewState.actions) {
+                        viewState.onAction(it, context.findActivity())
+                    }
+                }
+            )
+        }
+    )
+
+    // Facade set/reset
+    DisposableEffect(key1 = Unit) {
+        facade.enableEdgeToEdge(dark = false, translucent = false)
+        onDispose {
+            // Reset to default on disposal
+            facade.enableEdgeToEdge()
+        }
     }
 }
