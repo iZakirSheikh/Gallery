@@ -46,4 +46,5 @@ dependencies {
     implementation(libs.androidx.window)
     implementation(libs.lottie.compose)
     implementation(libs.bundles.media3)
+    implementation(libs.bundles.material.icons)
 }

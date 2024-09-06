@@ -19,7 +19,26 @@
 package com.zs.foundation.adaptive
 
 import androidx.annotation.FloatRange
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
+import com.zs.foundation.ContentPadding
 import kotlin.math.roundToInt
 
 // TODO: In the future, consider adding functionality to specify the preferred split location,
@@ -110,3 +129,60 @@ value class StackedTwoPaneStrategy(
         return (size.height * bias).roundToInt()
     }
 }
+
+
+/**
+ * The recommended details pane exit animation for the given [TwoPaneStrategy].
+ */
+val TwoPaneStrategy.exitAnimation: ExitTransition
+    get() {
+        return when (this) {
+            is HorizontalTwoPaneStrategy -> fadeOut() + slideOutHorizontally(targetOffsetX = { it / 4 })
+            is VerticalTwoPaneStrategy -> fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+            is StackedTwoPaneStrategy -> fadeOut() + scaleOut(targetScale = 0.95f)
+        }
+    }
+
+/**
+ * @see exitAnimation
+ */
+val TwoPaneStrategy.enterAnimation: EnterTransition
+    get() = when (this) {
+        is HorizontalTwoPaneStrategy -> fadeIn() + slideInHorizontally(initialOffsetX = { it / 4 })
+        is VerticalTwoPaneStrategy -> fadeIn() + slideInVertically(initialOffsetY = { it / 4 })
+        is StackedTwoPaneStrategy -> fadeIn() + scaleIn(initialScale = 0.95f)
+    }
+
+/**
+ * The recommended details pane content padding for the given [TwoPaneStrategy].
+ */
+inline val TwoPaneStrategy.padding: PaddingValues
+    @Composable
+    inline get() = when (this) {
+        is HorizontalTwoPaneStrategy -> WindowInsets.systemBars.asPaddingValues()
+        is VerticalTwoPaneStrategy -> WindowInsets.navigationBars.asPaddingValues()
+        is StackedTwoPaneStrategy -> WindowInsets.systemBars.asPaddingValues()
+    }
+
+/**
+ * The recommended details pane margin for the given [TwoPaneStrategy].
+ */
+inline val TwoPaneStrategy.margin: PaddingValues
+    inline get() = when (this) {
+        is StackedTwoPaneStrategy -> PaddingValues(
+            horizontal = ContentPadding.large,
+            vertical = ContentPadding.normal
+        )
+
+        else -> PaddingValues(0.dp)
+    }
+
+/**
+ * The recommended details pane shape for the given [TwoPaneStrategy].
+ */
+inline val TwoPaneStrategy.shape
+   inline get() = when(this){
+        is HorizontalTwoPaneStrategy -> RoundedCornerShape(topStartPercent = 8, bottomStartPercent = 8)
+        is VerticalTwoPaneStrategy -> RoundedCornerShape(topStartPercent = 8, topEndPercent = 8)
+        is StackedTwoPaneStrategy -> RoundedCornerShape(topStartPercent = 8, topEndPercent = 8, bottomStartPercent = 2, bottomEndPercent = 2)
+    }

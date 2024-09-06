@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -306,7 +307,7 @@ private fun NavigationBar(
     when (typeRail) {
         true -> NavigationRail(
             modifier = modifier.width(NAV_RAIL_WIDTH),
-            windowInsets = WindowInsets.systemBars,
+            windowInsets = WindowInsets.statusBars,
             contentColor = colors.onBackground,
             backgroundColor = Color.Transparent,
             elevation = 0.dp,
@@ -461,7 +462,7 @@ fun Home(toastHostState: ToastHostState) {
                             NavigationBar(
                                 clazz.navTypeRail,
                                 navController,
-                                Modifier.renderInSharedTransitionScopeOverlay(1f)
+                                Modifier.renderInSharedTransitionScopeOverlay(0.2f)
                             )
                         },
                         // Display the main content of the app using the NavGraph composable

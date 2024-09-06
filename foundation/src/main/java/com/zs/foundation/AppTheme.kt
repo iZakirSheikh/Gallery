@@ -582,18 +582,28 @@ private val DefaultClipInOverlayDuringTransition: (LayoutDirection, Density) -> 
     { _, _ -> null }
 
 /**
+ * @param renderInOverlay pass null to make this fun handle with default strategy.
  * @see androidx.compose.animation.SharedTransitionScope.renderInSharedTransitionScopeOverlay
  */
 fun Modifier.renderInSharedTransitionScopeOverlay(
     zIndexInOverlay: Float = 0f,
+    renderInOverlay: (() -> Boolean)? = null,
     clipInOverlayDuringTransition: (LayoutDirection, Density) -> Path? =
         DefaultClipInOverlayDuringTransition
 ) = composed {
     val sharedTransitionScope = LocalSharedTransitionScope.current
     with(sharedTransitionScope) {
         Modifier.renderInSharedTransitionScopeOverlay(
+            renderInOverlay = renderInOverlay ?: { isTransitionActive },
             zIndexInOverlay = zIndexInOverlay,
             clipInOverlayDuringTransition = clipInOverlayDuringTransition
         )
     }
 }
+
+
+fun Modifier.renderAsNavDestBackground(zIndexInOverlay: Float) =
+    this then Modifier.sharedBounds(
+        key = "nav_dest_background",
+        zIndexInOverlay = zIndexInOverlay,
+    )

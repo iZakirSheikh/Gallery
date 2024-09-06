@@ -8,14 +8,14 @@ plugins {
 
 android {
     namespace = "com.zs.gallery"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 9
-        versionName = "0.1.0-dev09"
+        targetSdk = 35
+        versionCode = 10
+        versionName = "0.1.0-dev10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -65,7 +65,7 @@ dependencies {
     implementation(libs.androidx.startup.runtime)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.accompanist.permissions)
-    implementation(libs.bundles.compose.icons)
+    implementation(libs.bundles.material.icons)
     implementation(libs.coil.compose)
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)

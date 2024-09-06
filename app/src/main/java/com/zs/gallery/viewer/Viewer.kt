@@ -15,29 +15,22 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.outlined.PlayArrow
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.PlayCircleFilled
-import androidx.compose.material.icons.rounded.PlayCircleOutline
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,8 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isUnspecified
@@ -65,6 +56,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.primex.core.SignalWhite
 import com.primex.core.findActivity
+import com.primex.core.plus
 import com.primex.core.rememberVectorPainter
 import com.primex.material2.IconButton
 import com.zs.domain.store.isImage
@@ -79,8 +71,15 @@ import com.zs.foundation.adaptive.StackedTwoPaneStrategy
 import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.TwoPaneStrategy
 import com.zs.foundation.adaptive.VerticalTwoPaneStrategy
+import com.zs.foundation.adaptive.enterAnimation
+import com.zs.foundation.adaptive.exitAnimation
+import com.zs.foundation.adaptive.margin
+import com.zs.foundation.adaptive.padding
+import com.zs.foundation.adaptive.shape
 import com.zs.foundation.menu.Menu
 import com.zs.foundation.menu.MenuItem
+import com.zs.foundation.renderAsNavDestBackground
+import com.zs.foundation.renderInSharedTransitionScopeOverlay
 import com.zs.foundation.sharedElement
 import com.zs.foundation.thenIf
 import com.zs.gallery.R
@@ -98,11 +97,52 @@ import me.saket.telephoto.zoomable.zoomable
 /**
  * The zIndex for sharedBounds of this screen within the SharedTransitionLayout.
  */
-private const val SCR_Z_INDEX = 0.2f
+private const val SCR_Z_INDEX = 0.3f
 
 private const val EVENT_BACK_PRESS = 0
 private const val EVENT_SHOW_INFO = 1
 private const val EVENT_IMMERSIVE_VIEW = 2
+
+private val ViewerViewState.index
+    get() = if (data.isEmpty()) 0 else data.indexOfFirst { focused == it.id }
+private val DEFAULT_ZOOM_SPECS = ZoomSpec(5f)
+
+/**
+ * The background color of the app-bar
+ */
+private val AppBarOverlay =
+    Brush.verticalGradient(listOf(Color.Black, Color.Transparent))
+
+/**
+ * Scales and centers content based on Painter's size.
+ * @param painter Provides intrinsic size for scaling.
+ */
+private suspend fun ZoomableState.scaledInsideAndCenterAlignedFrom(painter: Painter) {
+    // Do nothing if intrinsic size is unknown
+    if (painter.intrinsicSize.isUnspecified) return
+
+    // Scale and center content based on intrinsic size
+    // TODO - Make this suspend fun instead of runBlocking
+    setContentLocation(
+        ZoomableContentLocation.scaledInsideAndCenterAligned(
+            painter.intrinsicSize
+        )
+    )
+}
+
+/**
+ * Indicates whether the content is currently at its default zoom level (not zoomed in).
+ */
+private val ZoomableState.isZoomedOut get() = zoomFraction == null || zoomFraction == 0f
+
+/**
+ * TODO - Instead of opening video in 3rd party; Add inBuilt Impl in future versions.
+ */
+private fun VideoIntent(uri: Uri) =
+    Intent(Intent.ACTION_VIEW).apply {
+        setDataAndType(uri, "video/*") // Set data and MIME type
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grant read permission
+    }
 
 @Composable
 private fun FloatingActionMenu(
@@ -127,13 +167,6 @@ private fun FloatingActionMenu(
         },
     )
 }
-
-private val AppBarOverlay = Brush.verticalGradient(
-    listOf(
-        Color.Black,
-        Color.Transparent
-    )
-)
 
 @Composable
 private fun TopAppBar(
@@ -162,10 +195,6 @@ private fun TopAppBar(
     )
 }
 
-private val ViewerViewState.index
-    get() = if (data.isEmpty()) 0 else data.indexOfFirst { focused == it.id }
-private val DEFAULT_ZOOM_SPECS = ZoomSpec(5f)
-
 /**
  * Returns the strategy to use for displaying two panes based on the window size.
  */
@@ -179,43 +208,12 @@ private val WindowSize.strategy: TwoPaneStrategy
 
             // If the width is greater than the height, use a horizontal strategy
             // that splits the window at 50% of the width.
-            wClazz > hClazz -> HorizontalTwoPaneStrategy(0.5f)
+            wClazz > hClazz -> HorizontalTwoPaneStrategy(0.6f)
 
             // If the height is greater than the width, use a vertical strategy
             // that splits the window at 50% of the height.
             else -> VerticalTwoPaneStrategy(0.3f)
         }
-    }
-
-/**
- * Scales and centers content based on Painter's size.
- * @param painter Provides intrinsic size for scaling.
- */
-private suspend fun ZoomableState.scaledInsideAndCenterAlignedFrom(painter: Painter) {
-    // Do nothing if intrinsic size is unknown
-    if (painter.intrinsicSize.isUnspecified) return
-
-    // Scale and center content based on intrinsic size
-    // TODO - Make this suspend fun instead of runBlocking
-    setContentLocation(
-        ZoomableContentLocation.scaledInsideAndCenterAligned(
-            painter.intrinsicSize
-        )
-    )
-}
-
-/**
- * Indicates whether the content is currently at its default zoom level (not zoomed in).
- */
-private val ZoomableState.isZoomedOut get() = zoomFraction == null || zoomFraction == 0f
-
-/**
- * TODO - Instead of opeing video in 3rd party; i will add inBuilt Impl in future versions.
- */
-private fun VideoIntent(uri: Uri) =
-    Intent(Intent.ACTION_VIEW).apply {
-        setDataAndType(uri, "video/*") // Set data and MIME type
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grant read permission
     }
 
 @Composable
@@ -243,6 +241,7 @@ private fun MainContent(
         onClick = { onRequest(EVENT_IMMERSIVE_VIEW) },
         onDoubleClick = DoubleClickToZoomListener.cycle(2f)
     )
+
     // TODO - Remove this once inBuilt Video Player is available.
     val vector = rememberVectorPainter(Icons.Outlined.PlayCircleFilled)
     val playIconModifier = Modifier.drawWithCache {
@@ -326,12 +325,17 @@ private fun MainContent(
             alignment = Alignment.Center,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .thenIf(isFocused) { sharedElement(sharedFrameKey, zIndexInOverlay = SCR_Z_INDEX) }
-                .thenIf(isFocused && !item.isImage) {
-                    playIconModifier
-                        .clickable(null, null) { context.startActivity(VideoIntent(item.mediaUri)) }
+                .thenIf(isFocused) {
+                    sharedElement(sharedFrameKey, zIndexInOverlay = SCR_Z_INDEX + 0.01f)
                 }
-                .thenIf(item.isImage && isFocused && painter.state !is AsyncImagePainter.State.Error) { zoomableModifier }
+                .thenIf(isFocused && !item.isImage) {
+                    playIconModifier.clickable(null, null) {
+                        context.startActivity(VideoIntent(item.mediaUri))
+                    }
+                }
+                .thenIf(item.isImage && isFocused && painter.state !is AsyncImagePainter.State.Error) {
+                    zoomableModifier
+                }
                 .fillMaxSize()
         )
     }
@@ -345,13 +349,11 @@ fun Viewer(
     val navController = LocalNavController.current
     val facade = LocalSystemFacade.current
     val context = LocalContext.current
-    val clazz = LocalWindowSize.current
 
     // Define required state variables
     var immersive by remember { mutableStateOf(false) }
-    // Handles incoming requests from nested UI components.
-    val onRequest = { event: Int ->
-        when (event) {
+    val onRequest: (Int) -> Unit = { request: Int ->
+        when (request) {
             // Toggle the visibility of detailed information.
             EVENT_SHOW_INFO -> {
                 viewState.showDetails = !viewState.showDetails;
@@ -366,45 +368,34 @@ fun Viewer(
             // before navigating up.
             EVENT_BACK_PRESS -> {
                 when {
+                    // consume in making not immersive
                     immersive -> {
                         immersive = false
                         facade.enableEdgeToEdge(false, false, false)
                     }
-
+                    // consume in hiding the details this action
                     viewState.showDetails -> viewState.showDetails = false
                     // Navigate up if no focused states
                     else -> navController.navigateUp()
                 }
             }
             // Handle unexpected events
-            else -> error("Unknown event: $event")
+            else -> error("Unknown event: $request")
         }
-        Unit
     }
 
-    // The layout
+    // Layout
+    val strategy = LocalWindowSize.current.strategy
     TwoPane(
         fabPosition = FabPosition.Center,
-        strategy = clazz.strategy,
+        strategy = strategy,
         background = Color.Black,
         onColor = Color.SignalWhite,
         content = {
             MainContent(
                 viewState = viewState,
                 onRequest = onRequest,
-                modifier = Modifier
-                    .animateContentSize()
-                    .fillMaxSize()
-            )
-        },
-        details = details@{
-            val details = viewState.details
-            Details(
-                details ?: return@details,
-                viewState.actions,
-                onAction = {
-                    viewState.onAction(it, context.findActivity())
-                }
+                modifier = Modifier.fillMaxSize()
             )
         },
         topBar = {
@@ -413,31 +404,51 @@ fun Viewer(
                 enter = fadeIn(),
                 exit = fadeOut(),
                 content = {
-                    TopAppBar(onRequest)
+                    TopAppBar(
+                        onRequest,
+                        modifier = Modifier.renderInSharedTransitionScopeOverlay(SCR_Z_INDEX + 0.02f)
+                    )
                 }
             )
         },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = !immersive,
-                modifier = Modifier.padding(bottom = AppTheme.padding.normal),
                 enter = fadeIn(),
                 exit = slideOutVertically() + fadeOut(),
                 content = {
-                    FloatingActionMenu(actions = viewState.actions) {
-                        viewState.onAction(it, context.findActivity())
-                    }
+                    FloatingActionMenu(
+                        actions = viewState.actions,
+                        onAction = {
+                            viewState.onAction(it, context.findActivity())
+                        },
+                        modifier = Modifier
+                            .renderInSharedTransitionScopeOverlay(SCR_Z_INDEX + 0.02f)
+                            .padding(bottom = AppTheme.padding.normal),
+                    )
                 }
             )
+        },
+        onDismissRequest = { viewState.showDetails = false },
+        modifier = Modifier.renderAsNavDestBackground(SCR_Z_INDEX),
+        details = {
+            val details = viewState.details
+            AnimatedVisibility(
+                details != null,
+                enter = strategy.enterAnimation,
+                exit = strategy.exitAnimation
+            ) {
+                Details(
+                    details ?: return@AnimatedVisibility,
+                    viewState.actions,
+                    shape = strategy.shape,
+                    contentPadding = strategy.padding + PaddingValues(horizontal = ContentPadding.medium),
+                    onAction = {
+                        viewState.onAction(it, context.findActivity())
+                    },
+                    modifier = Modifier.padding(strategy.margin)
+                )
+            }
         }
     )
-
-    // Facade set/reset
-    DisposableEffect(key1 = Unit) {
-        facade.enableEdgeToEdge(dark = false, translucent = false)
-        onDispose {
-            // Reset to default on disposal
-            facade.enableEdgeToEdge()
-        }
-    }
 }

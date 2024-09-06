@@ -84,6 +84,7 @@ import com.zs.foundation.None
 import com.zs.foundation.VerticalDivider
 import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.renderAsNavDestBackground
 import com.zs.foundation.renderInSharedTransitionScopeOverlay
 import com.zs.foundation.sharedElement
 import com.zs.gallery.R
@@ -130,7 +131,7 @@ private fun TopAppBar(
         },
         scrollBehavior = behavior,
         windowInsets = insets,
-        modifier = modifier.renderInSharedTransitionScopeOverlay(SCR_ZINDEX + 0.01f),
+        modifier = modifier.renderInSharedTransitionScopeOverlay(SCR_ZINDEX + 0.02f),
         style = TopAppBarDefaults.topAppBarStyle(
             containerColor = AppTheme.colors.background,
             scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
@@ -238,7 +239,7 @@ fun Timeline(
     // The actual layout
     TwoPane(
         fabPosition = FabPosition.Center,
-        modifier = Modifier
+        modifier = Modifier.renderAsNavDestBackground(SCR_ZINDEX)
             .nestedScroll(behaviour.nestedScrollConnection),
         topBar = {
             AnimatedVisibility(

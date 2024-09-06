@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
@@ -56,14 +58,13 @@ import java.util.Date
 import java.util.Locale
 
 private val formatter
-    get() =
-        SimpleDateFormat("EEE, dd MMM yyyy, h:mm aa", Locale.getDefault())
+    get() = SimpleDateFormat("EEE, dd MMM yyyy, h:mm aa", Locale.getDefault())
 
 private val MediaFile.megapixels
     get() = if (width > 0 && height > 0) (width * height) / 1_000_000f else -1f
 
 @Composable
-private inline fun Actions(
+private inline fun MainMenu(
     actions: List<MenuItem>,
     crossinline onAction: (action: MenuItem) -> Unit
 ) {
@@ -96,16 +97,14 @@ private inline fun Actions(
 
 @Composable
 @NonRestartableComposable
-private fun Info(
+private fun Detail(
     icon: ImageVector,
     title: CharSequence,
     value: CharSequence,
     modifier: Modifier = Modifier
 ) {
     ListTile(
-        leading = {
-            Icon(icon, contentDescription = title.toString())
-        },
+        leading = { Icon(icon, contentDescription = title.toString()) },
         headline = { Label(title, fontWeight = FontWeight.Bold) },
         subtitle = {
             Label(
@@ -119,46 +118,47 @@ private fun Info(
     )
 }
 
-
-private val DetailsContentPadding =
-    PaddingValues(vertical = ContentPadding.normal, horizontal = ContentPadding.medium)
-
 @Composable
 fun Details(
     value: MediaFile,
     actions: List<MenuItem>,
     onAction: (action: MenuItem) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    shape: Shape = RoundedCornerShape(topStartPercent = 8, topEndPercent = 8)
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(topStartPercent = 8, topEndPercent = 8),
+        shape = shape,
         content = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(DetailsContentPadding),
-                content = {
+                    .padding(contentPadding),
+            ) {
+                // Handle
+                Icon(
+                    Icons.Rounded.Minimize,
+                    modifier = Modifier
+                        .scale(2.0f)
+                        .offset(y = -12.dp)
+                        .align(Alignment.CenterHorizontally),
+                    contentDescription = null,
+                    tint = LocalContentColor.current.copy(alpha = ContentAlpha.disabled)
+                )
 
-                    // Handle
-                    Icon(
-                        Icons.Rounded.Minimize,
-                        modifier = Modifier
-                            .scale(2.0f)
-                            .offset(y = -12.dp)
-                            .align(Alignment.CenterHorizontally),
-                        contentDescription = null,
-                        tint = LocalContentColor.current.copy(alpha = ContentAlpha.disabled)
-                    )
+                // FileActions
+                MainMenu(actions, onAction = onAction)
 
-                    // FileActions
-                    Actions(
-                        actions,
-                        onAction = onAction
-                    )
+                Divider()
 
-                    Divider()
-
+                val state = rememberScrollState()
+                Column(
+                    modifier = Modifier
+                        .fadeEdge(AppTheme.colors.background(2.dp), state, length = 16.dp, horizontal = false)
+                        .verticalScroll(state)
+                        .padding(horizontal = ContentPadding.small)
+                ) {
                     Header(
                         remember(value.id) { formatter.format(Date(value.dateModified)) },
                         style = AppTheme.typography.titleLarge,
@@ -179,14 +179,14 @@ fun Details(
                     )
 
                     // Title
-                    Info(
+                    Detail(
                         icon = Icons.Outlined.Image,
                         title = stringResource(R.string.title),
                         value = value.name
                     )
 
                     // Path
-                    Info(
+                    Detail(
                         icon = Icons.Outlined.Memory,
                         title = stringResource(R.string.path),
                         value = value.path.substringBeforeLast("/"),
@@ -194,7 +194,7 @@ fun Details(
 
                     // Metadata
                     val context = LocalContext.current
-                    Info(
+                    Detail(
                         icon = Icons.Outlined.ImageSearch,
                         title = stringResource(R.string.metadata),
                         value = buildString {
@@ -207,9 +207,8 @@ fun Details(
                                 append(" • " + DateUtils.formatElapsedTime(value.duration / 1000L))
                         }
                     )
-                },
-            )
+                }
+            }
         }
     )
 }
-

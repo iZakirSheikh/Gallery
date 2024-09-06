@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
 
 /**
  * Checks if a given permission is granted for the application in the current context.
@@ -33,3 +36,12 @@ inline fun Modifier.thenIf(condition: Boolean, value: Modifier.() -> Modifier): 
     // FixMe - Keep an eye on this; here Modifier is required otherwise value is twice applied.
     return if (condition) this then Modifier.value() else this
 }
+
+/*@ExperimentalContracts
+inline fun Modifier.thenIf(condition: Boolean, crossinline value: Modifier.() -> Modifier): Modifier {
+    contract {
+        callsInPlace(value, InvocationKind.EXACTLY_ONCE)
+        returns() implies (condition)
+    }
+    return if (condition) this then Modifier.value() else this
+}*/
