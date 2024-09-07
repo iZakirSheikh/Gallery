@@ -35,7 +35,6 @@ android {
             "-Xopt-in=com.primex.core.ExperimentalToolkitApi"
         )
     }
-    composeCompiler { enableStrongSkippingMode = false }
     buildFeatures { compose = true }
     kotlinOptions { jvmTarget = "1.8" }
 }

@@ -40,6 +40,7 @@ import coil.decode.DecodeUtils
 import coil.fetch.DrawableResult
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
+import coil.request.ImageRequest
 import coil.request.Options
 import coil.size.Size
 import coil.size.pxOrElse
@@ -47,6 +48,29 @@ import kotlin.math.roundToInt
 import android.util.Size as ThumbnailSize
 
 private const val TAG = "ThumbnailFetcher"
+
+/**
+ * Enables or disables the use of android's cached thumbnails for this request.
+ *
+ * If enabled and a cached thumbnail is available, Coil will use it instead of
+ * generating a thumbnail from the image's URI. This can improve performance,
+ * especially for large images.
+ *
+ * By default, this is enabled.
+ *
+ * @param value True to use cached thumbnails if available, false otherwise.
+ */
+fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean)
+        =  setParameter("coil#preferCachedThumbnail", value)
+
+/**
+ * Whether to use cached thumbnails for this request.
+ *
+ * @see preferCachedThumbnail
+ */
+private val Options.preferCachedThumbnail: Boolean
+    get() = parameters.value("coil#preferCachedThumbnail") ?: true
+
 
 class ThumbnailFetcher(
     private val data: Uri,
@@ -67,11 +91,13 @@ class ThumbnailFetcher(
             // Early exit if the URI is not a content URI
             if (data.scheme != ContentResolver.SCHEME_CONTENT) return null
 
-            // Early exit if the size is original
+            // Early exit if the request is
             // because we only support loading thumbnails from this that too of images and videos
             // that android automatically generated.
-            if (options.size == Size.ORIGINAL)
+            if (!options.preferCachedThumbnail) {
+                Log.d(TAG, "preferCachedThumbnail: ${options.preferCachedThumbnail}")
                 return null
+            }
 
             val context = options.context
             // Retrieve the MIME type of the content

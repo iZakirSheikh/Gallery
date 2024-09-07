@@ -31,6 +31,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.PlayCircleFilled
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.primex.core.SignalWhite
 import com.primex.core.findActivity
@@ -85,6 +87,7 @@ import com.zs.foundation.thenIf
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
+import com.zs.gallery.common.preferCachedThumbnail
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
@@ -295,14 +298,13 @@ private fun MainContent(
                 .apply {
                     data(item.mediaUri)
                     if (item.isImage) {
-                        size(coil.size.Size.ORIGINAL)
-                        // Cache images for better performance
-                        memoryCacheKey("index:$index")
+                        // Make sure that image is not loaded from Thumbnail repo.
+                        preferCachedThumbnail(false)
+                        diskCachePolicy(CachePolicy.DISABLED)
                     }
                     // Placeholder for errors
                     error(R.drawable.ic_error_image_placeholder)
                 }.build(),
-            filterQuality = FilterQuality.Low,
             onState = {
                 if (it is AsyncImagePainter.State.Success && isFocused)
                     scope.launch { zoomable.scaledInsideAndCenterAlignedFrom(it.painter) }
@@ -451,4 +453,13 @@ fun Viewer(
             }
         }
     )
+
+    // set/reset
+    DisposableEffect(key1 = Unit) {
+        facade.enableEdgeToEdge(dark = false, translucent = false)
+        onDispose {
+            // Reset to default on disposal
+            facade.enableEdgeToEdge()
+        }
+    }
 }

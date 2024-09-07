@@ -35,6 +35,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import com.primex.core.Rose
+import com.primex.core.runCatching
 import com.primex.preferences.value
 import com.zs.domain.store.MediaProvider
 import com.zs.foundation.toast.Toast
@@ -225,7 +226,7 @@ abstract class MainViewModel<T>(
         viewModelScope.launch {
             val selected = consume()
             // Ensure this is called on Android 10 or higher (API level 29).
-            val result = com.primex.core.runCatching(TAG) {
+            val result = runCatching(TAG) {
                 provider.trash(activity, *selected)
             }
             val msg = when (result) {
@@ -252,27 +253,41 @@ abstract class MainViewModel<T>(
 
     override fun delete(activity: Activity) {
         viewModelScope.launch {
+            // Get the selected items for deletion
             val selected = consume()
-            val result = com.primex.core.runCatching(TAG) {
-                // Less than R trash not matters.
+            val result = runCatching(TAG) {
+                // For Android R and above, use the provider's delete function directly
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                    provider.delete(activity, *selected)
-                else
-                // Delete directly if trash is disabled.
-                // TODO - Test this version of delete on android version < 11
-                //        Add Confirmation snack for this.
+                    return@runCatching provider.delete(activity, *selected)
+                // For versions below Android R, show a confirmation toast
+                // If the user performs the action, proceed with deletion
+                // Otherwise, return -3 to indicate user cancellation
+                val action = showToast(
+                    message = R.string.msg_files_deletion_confirm,
+                    action = R.string.delete,
+                    icon = Icons.Outlined.NearbyError,
+                    accent = Color.Rose,
+                    duration = Toast.DURATION_LONG
+                )
+                // Delete the selected items
+                // else return -3 to indicate user cancellation
+                return@runCatching if (action == Toast.ACTION_PERFORMED)
                     provider.delete(*selected)
+                else
+                    -3
             }
+            Log.d(TAG, "delete: $result")
             // Display a message based on the result of the deletion operation.
             val msg = when (result) {
                 null, 0, -1 -> getText(R.string.msg_files_delete_unknown_error) // General error
                 -2 -> getText(R.string.msg_confirm_deletion) // Pending user confirmation (likely for trashing)
                 -3 -> getText(R.string.msg_files_deletion_cancelled) // User canceled the operation
+                // Success with count
                 else -> getText(
                     R.string.msg_files_deletion_success_out_total,
                     result,
                     selected.size
-                ) // Success with count
+                )
             }
             showToast(msg)
         }
@@ -322,7 +337,7 @@ abstract class MainViewModel<T>(
     override fun restore(activity: Activity) {
         viewModelScope.launch {
             val selected = consume()
-            val result = com.primex.core.runCatching(TAG) {
+            val result = runCatching(TAG) {
                 provider.restore(activity, *selected)
             }
             // Display a message based on the result of the deletion operation.

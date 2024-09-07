@@ -35,15 +35,24 @@ import com.zs.foundation.toast.ToastHostState
 import org.koin.androidx.scope.ScopeViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.component.inject
+import android.widget.Toast as AndroidToast
 
 private const val TAG = "KoinViewModel"
 
 @OptIn(KoinExperimentalAPI::class)
 abstract class KoinViewModel: ScopeViewModel() {
     private val resources: Resources by inject()
-    private val relay: ToastHostState by inject()
+    private val toastHostState: ToastHostState by inject()
     val preferences: Preferences by inject()
     private val context: Application by inject()
+
+    fun showAndroidToast(
+        @StringRes message: Int
+    ) = AndroidToast.makeText(context, message, AndroidToast.LENGTH_LONG).show()
+
+    fun showAndroidToast(
+        message: String
+    ) = AndroidToast.makeText(context, message, AndroidToast.LENGTH_LONG).show()
 
     suspend fun showToast(
         message: CharSequence,
@@ -51,7 +60,7 @@ abstract class KoinViewModel: ScopeViewModel() {
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
         @Duration duration: Int = if (action == null) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE
-    ): @Result Int = relay.showToast(message, action, icon, accent, duration)
+    ): @Result Int = toastHostState.showToast(message, action, icon, accent, duration)
 
     suspend fun showToast(
         @StringRes message: Int,

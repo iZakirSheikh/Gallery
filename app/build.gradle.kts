@@ -14,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 10
-        versionName = "0.1.0-dev10"
+        versionCode = 11
+        versionName = "0.1.0-dev11"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -52,7 +52,6 @@ android {
             "-Xopt-in=com.primex.core.ExperimentalToolkitApi"
         )
     }
-    composeCompiler { enableStrongSkippingMode = true }
     buildFeatures { compose = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
