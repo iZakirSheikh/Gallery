@@ -17,6 +17,7 @@
  */
 
 @file:OptIn(ExperimentalSharedTransitionApi::class)
+@file:Suppress("NOTHING_TO_INLINE")
 
 package com.zs.foundation
 
@@ -65,11 +66,11 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.core.graphics.ColorUtils
+import com.primex.core.BlueLilac
 import com.primex.core.MetroGreen2
 import com.primex.core.OrientRed
 import com.primex.core.Rose
 import com.primex.core.SignalWhite
-import com.primex.core.SkyBlue
 import com.primex.core.TrafficYellow
 import com.primex.core.UmbraGrey
 import com.primex.core.hsl
@@ -112,6 +113,25 @@ import kotlin.math.ln
 private const val TAG = "AppTheme"
 
 /**
+ * Provides a [CompositionLocal] to access the current [SharedTransitionScope].
+ *
+ * This CompositionLocal should be provided bya parent composable that manages shared transitions.
+ */
+@OptIn(ExperimentalSharedTransitionApi::class)
+internal val LocalSharedTransitionScope =
+    staticCompositionLocalOf<SharedTransitionScope> {
+        error("CompositionLocal LocalSharedTransition not present")
+    }
+
+/**
+ * Provides a[CompositionLocal] to access the current [AnimatedVisibilityScope].
+ *
+ * This CompositionLocal should be provided by a parent composable that manages animated visibility.
+ */
+val LocalNavAnimatedVisibilityScope =
+    staticCompositionLocalOf<AnimatedVisibilityScope> { error("CompositionLocal LocalSharedTransition not present") }
+
+/**
  * Provides a set of colors that represent the application's color palette,
  * building upon the colors provided by [MaterialTheme].*
  * @property accent The accent color of the application.
@@ -150,6 +170,17 @@ object Colors {
         )
 }
 
+/**
+ * Applies tonal elevation to a color based on an accent color, background color, and elevation value.
+ *
+ * This function calculates the alpha value for the accent color based on the elevation and
+ * composites it over the background color to create a tonal elevation effect.
+ *
+ * @param accent the accent color to apply tonal elevation to.
+ * @param background the background color to composite the accent color over.
+ * @param elevation the elevation value to use in the calculation.
+ * @return the color with tonal elevation applied.
+ */
 private fun applyTonalElevation(accent: Color, background: Color, elevation: Dp) =
     accent.copy(alpha = ((4.5f * ln(elevation.value + 1)) + 2f) / 100f)
         .compositeOver(background)
@@ -385,11 +416,15 @@ fun AppTheme(
     fontFamily: FontFamily = FontFamily.Default,
     content: @Composable () -> Unit
 ) {
+    val accent = if (!isLight) Color.TrafficYellow else Color.BlueLilac
     val background by animateColorAsState(
-        targetValue = if (!isLight) Color(0xFF0E0E0F) else Color(0xFFF5F5FA),
-        animationSpec = DefaultColorSpec
+        targetValue = if (!isLight) Color(0xFF0E0E0F) else applyTonalElevation(
+            accent,
+            Color.White,
+            0.8.dp
+        ),
+        animationSpec = DefaultColorSpec, label = ""
     )
-    val accent = if (!isLight) Color.TrafficYellow else Color.SkyBlue
     val colors = Colors(
         accent = accent,
         background = background,
@@ -415,25 +450,6 @@ fun AppTheme(
     }
 }
 
-/**
- * Provides a [CompositionLocal] to access the current [SharedTransitionScope].
- *
- * This CompositionLocal should be provided bya parent composable that manages shared transitions.
- */
-@OptIn(ExperimentalSharedTransitionApi::class)
-internal val LocalSharedTransitionScope =
-    staticCompositionLocalOf<SharedTransitionScope> {
-        error("CompositionLocal LocalSharedTransition not present")
-    }
-
-/**
- * Provides a[CompositionLocal] to access the current [AnimatedVisibilityScope].
- *
- * This CompositionLocal should be provided by a parent composable that manages animated visibility.
- */
-val LocalNavAnimatedVisibilityScope =
-    staticCompositionLocalOf<AnimatedVisibilityScope> { error("CompositionLocal LocalSharedTransition not present") }
-
 private val DefaultSpring = spring(
     stiffness = StiffnessMediumLow,
     visibilityThreshold = Rect.VisibilityThreshold
@@ -455,40 +471,44 @@ private val ParentClip: OverlayClip =
         }
     }
 
+private val DefaultClipInOverlayDuringTransition: (LayoutDirection, Density) -> Path? =
+    { _, _ -> null }
+
 /**
- * @see androidx.compose.animation.SharedTransitionScope.sharedElement
+ * @param renderInOverlay pass null to make this fun handle with default strategy.
+ * @see androidx.compose.animation.SharedTransitionScope.renderInSharedTransitionScopeOverlay
  */
-@OptIn(ExperimentalSharedTransitionApi::class)
-fun Modifier.sharedElement(
-    state: SharedContentState,
-    boundsTransform: BoundsTransform = DefaultBoundsTransform,
-    placeHolderSize: PlaceHolderSize = contentSize,
-    renderInOverlayDuringTransition: Boolean = true,
+fun Modifier.renderInSharedTransitionScopeOverlay(
     zIndexInOverlay: Float = 0f,
-    clipInOverlayDuringTransition: OverlayClip = ParentClip
+    renderInOverlay: (() -> Boolean)? = null,
+    clipInOverlayDuringTransition: (LayoutDirection, Density) -> Path? = DefaultClipInOverlayDuringTransition
 ) = composed {
-    val navAnimatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
     with(sharedTransitionScope) {
-        Modifier.sharedElement(
-            state = state,
-            placeHolderSize = placeHolderSize,
-            renderInOverlayDuringTransition = renderInOverlayDuringTransition,
+        renderInSharedTransitionScopeOverlay(
+            renderInOverlay = renderInOverlay ?: { isTransitionActive },
             zIndexInOverlay = zIndexInOverlay,
-            animatedVisibilityScope = navAnimatedVisibilityScope,
-            boundsTransform = boundsTransform,
             clipInOverlayDuringTransition = clipInOverlayDuringTransition
         )
     }
 }
 
+/**
+ * @return the state of shared contnet corresponding to [key].
+ * @see androidx.compose.animation.SharedTransitionScope.rememberSharedContentState
+ */
+@Composable
+private inline fun rememberSharedContentState(key: Any) =
+    with(AppTheme.sharedTransitionScope) {
+        rememberSharedContentState(key = key)
+    }
 
 /**
- * A shared bounds modifier that uses scope from [AppTheme]'s [AppTheme.sharedTransitionScope] and [AnimatedVisibilityScope] from [LocalNavAnimatedVisibilityScope]
+ * A shared bounds modifier that uses scope from [AppTheme]'s [AppTheme.sharedTransitionScope] and
+ * [AnimatedVisibilityScope] from [LocalNavAnimatedVisibilityScope]
  */
-@OptIn(ExperimentalSharedTransitionApi::class)
 fun Modifier.sharedBounds(
-    sharedContentState: SharedContentState,
+    key: Any,
     enter: EnterTransition = fadeIn(),
     exit: ExitTransition = fadeOut(),
     boundsTransform: BoundsTransform = DefaultBoundsTransform,
@@ -500,6 +520,7 @@ fun Modifier.sharedBounds(
 ) = composed {
     val navAnimatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
+    val sharedContentState = rememberSharedContentState(key)
     with(sharedTransitionScope) {
         Modifier.sharedBounds(
             sharedContentState = sharedContentState,
@@ -517,18 +538,6 @@ fun Modifier.sharedBounds(
 }
 
 /**
- * @return the state of shared contnet corresponding to [key].
- * @see androidx.compose.animation.SharedTransitionScope.rememberSharedContentState
- */
-@OptIn(ExperimentalSharedTransitionApi::class)
-@Composable
-inline fun rememberSharedContentState(key: Any): SharedContentState =
-    with(AppTheme.sharedTransitionScope) {
-        rememberSharedContentState(key = key)
-    }
-
-
-/**
  * @see androidx.compose.animation.SharedTransitionScope.sharedElement
  */
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -540,70 +549,19 @@ fun Modifier.sharedElement(
     zIndexInOverlay: Float = 0f,
     clipInOverlayDuringTransition: OverlayClip = ParentClip
 ) = composed {
-    sharedElement(
-        state = rememberSharedContentState(key = key),
-        boundsTransform,
-        placeHolderSize,
-        renderInOverlayDuringTransition,
-        zIndexInOverlay,
-        clipInOverlayDuringTransition
-    )
-}
-
-/**
- * @see androidx.compose.animation.SharedTransitionScope.sharedBounds
- */
-@OptIn(ExperimentalSharedTransitionApi::class)
-fun Modifier.sharedBounds(
-    key: Any,
-    enter: EnterTransition = fadeIn(),
-    exit: ExitTransition = fadeOut(),
-    boundsTransform: BoundsTransform = DefaultBoundsTransform,
-    resizeMode: ResizeMode = ScaleToBounds(ContentScale.FillWidth, Center),
-    placeHolderSize: PlaceHolderSize = contentSize,
-    renderInOverlayDuringTransition: Boolean = true,
-    zIndexInOverlay: Float = 0f,
-    clipInOverlayDuringTransition: OverlayClip = ParentClip
-) = composed {
-    sharedBounds(
-        sharedContentState = rememberSharedContentState(key = key),
-        enter = enter,
-        exit = exit,
-        boundsTransform = boundsTransform,
-        resizeMode = resizeMode,
-        placeHolderSize = placeHolderSize,
-        renderInOverlayDuringTransition = renderInOverlayDuringTransition,
-        zIndexInOverlay = zIndexInOverlay,
-        clipInOverlayDuringTransition = clipInOverlayDuringTransition
-    )
-}
-
-private val DefaultClipInOverlayDuringTransition: (LayoutDirection, Density) -> Path? =
-    { _, _ -> null }
-
-/**
- * @param renderInOverlay pass null to make this fun handle with default strategy.
- * @see androidx.compose.animation.SharedTransitionScope.renderInSharedTransitionScopeOverlay
- */
-fun Modifier.renderInSharedTransitionScopeOverlay(
-    zIndexInOverlay: Float = 0f,
-    renderInOverlay: (() -> Boolean)? = null,
-    clipInOverlayDuringTransition: (LayoutDirection, Density) -> Path? =
-        DefaultClipInOverlayDuringTransition
-) = composed {
+    val sharedContentState = rememberSharedContentState(key = key)
+    val navAnimatedVisibilityScope = LocalNavAnimatedVisibilityScope.current
     val sharedTransitionScope = LocalSharedTransitionScope.current
     with(sharedTransitionScope) {
-        Modifier.renderInSharedTransitionScopeOverlay(
-            renderInOverlay = renderInOverlay ?: { isTransitionActive },
+        sharedElement(
+            state = sharedContentState,
+            placeHolderSize = placeHolderSize,
+            renderInOverlayDuringTransition = renderInOverlayDuringTransition,
             zIndexInOverlay = zIndexInOverlay,
+            animatedVisibilityScope = navAnimatedVisibilityScope,
+            boundsTransform = boundsTransform,
             clipInOverlayDuringTransition = clipInOverlayDuringTransition
         )
     }
 }
 
-
-fun Modifier.renderAsNavDestBackground(zIndexInOverlay: Float) =
-    this then Modifier.sharedBounds(
-        key = "nav_dest_background",
-        zIndexInOverlay = zIndexInOverlay,
-    )

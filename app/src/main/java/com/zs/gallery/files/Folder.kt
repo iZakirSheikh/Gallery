@@ -164,7 +164,6 @@ private fun Actions(
 
 private val GridItemsArrangement = Arrangement.spacedBy(2.dp)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Folder(
     viewState: FolderViewState
@@ -185,7 +184,6 @@ fun Folder(
                 visible = !viewState.isInSelectionMode,
                 enter = fadeIn() + slideInVertically(),
                 exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.animateContentSize(),
                 content = {
                     TopAppBar(
                         viewState,
@@ -215,7 +213,8 @@ fun Folder(
                 columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
                 horizontalArrangement = GridItemsArrangement,
                 verticalArrangement = GridItemsArrangement,
-                contentPadding = WindowInsets.contentInsets + navInsets + PaddingValues(vertical = AppTheme.padding.normal),
+                contentPadding = navInsets + PaddingValues(vertical = AppTheme.padding.normal),
+                modifier = Modifier.padding(WindowInsets.contentInsets)
             ) {
                 val data = emit(values) ?: return@LazyVerticalGrid
                 items(data, key = { it.id }, tracker = viewState) { item ->

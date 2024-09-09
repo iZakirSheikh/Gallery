@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.BottomNavigation
@@ -55,9 +56,15 @@ import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -67,6 +74,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.primex.core.plus
 import com.primex.core.textResource
 import com.primex.material2.Label
 import com.primex.material2.OutlinedButton
@@ -80,6 +88,7 @@ import com.zs.foundation.adaptive.NavRailItem
 import com.zs.foundation.adaptive.NavigationItemDefaults
 import com.zs.foundation.adaptive.NavigationSuiteScaffold
 import com.zs.foundation.renderInSharedTransitionScopeOverlay
+import com.zs.foundation.shapes.TopConcaveShape
 import com.zs.foundation.thenIf
 import com.zs.foundation.toast.ToastHostState
 import com.zs.gallery.bin.RouteTrash
@@ -325,9 +334,12 @@ private fun NavigationBar(
             contentColor = colors.onBackground,
             elevation = 0.dp,
             contentPadding = PaddingValues(
-                horizontal = AppTheme.padding.normal
-            ),
-            modifier = modifier,
+                horizontal = AppTheme.padding.normal,
+                vertical = AppTheme.padding.medium
+            ) + PaddingValues(top = 16.dp),
+            modifier = modifier
+                .clip(TopConcaveShape(radius = 20.dp))
+            ,
             content = {
                 Spacer(modifier = Modifier.weight(1f))
                 // Display routes at the contre of available space

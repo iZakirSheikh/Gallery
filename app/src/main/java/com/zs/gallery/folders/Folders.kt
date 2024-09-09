@@ -209,7 +209,7 @@ fun Folders(viewState: FoldersViewState) {
             val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
             val navController = LocalNavController.current
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(MIN_TILE_SIZE * multiplier),
+                columns = GridCells.Adaptive((MIN_TILE_SIZE * multiplier.coerceAtLeast(1f))),
                 contentPadding = FolderContentPadding + WindowInsets.contentInsets + navInsets,
                 verticalArrangement = GridItemsArrangement,
                 content = {

@@ -20,6 +20,8 @@
 
 package com.zs.gallery.common
 
+import android.content.Intent
+import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
@@ -30,6 +32,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.primex.preferences.Key
 import com.zs.foundation.toast.Duration
 import com.zs.foundation.toast.Toast
+import com.zs.gallery.BuildConfig
 
 interface SystemFacade {
 
@@ -73,6 +76,28 @@ interface SystemFacade {
     @Composable
     @NonRestartableComposable
     fun <S, O> observeAsState(key: Key.Key2<S, O>): State<O>
+
+    /**
+     * Launches the provided [intent] with the specified [options].
+     */
+    fun launch(intent: Intent, options: Bundle? = null)
+
+    /**
+     * Launches the App Store to open the app details page for a given package.
+     *
+     * This function first attempts to open the App Store directly using [AppStoreIntent].
+     * If this fails, it falls back to using [FallbackAppStoreIntent] as an alternative.
+     *
+     * @param pkg the package name of the app to open on the App Store.
+     */
+    fun launchAppStore(pkg: String = BuildConfig.APPLICATION_ID) {
+        val result = runCatching {
+            launch(AppStoreIntent(pkg))
+        }
+        if (result.isFailure)
+            launch(FallbackAppStoreIntent(pkg))
+    }
+
 }
 
 /**

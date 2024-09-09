@@ -46,7 +46,6 @@ import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
@@ -80,8 +79,7 @@ import com.zs.foundation.adaptive.padding
 import com.zs.foundation.adaptive.shape
 import com.zs.foundation.menu.Menu
 import com.zs.foundation.menu.MenuItem
-import com.zs.foundation.renderAsNavDestBackground
-import com.zs.foundation.renderInSharedTransitionScopeOverlay
+import com.zs.foundation.sharedBounds
 import com.zs.foundation.sharedElement
 import com.zs.foundation.thenIf
 import com.zs.gallery.R
@@ -97,10 +95,8 @@ import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
 
-/**
- * The zIndex for sharedBounds of this screen within the SharedTransitionLayout.
- */
-private const val SCR_Z_INDEX = 0.3f
+private const val TAG = "Viewer"
+
 
 private const val EVENT_BACK_PRESS = 0
 private const val EVENT_SHOW_INFO = 1
@@ -136,7 +132,8 @@ private suspend fun ZoomableState.scaledInsideAndCenterAlignedFrom(painter: Pain
 /**
  * Indicates whether the content is currently at its default zoom level (not zoomed in).
  */
-private val ZoomableState.isZoomedOut get() = zoomFraction == null || zoomFraction == 0f
+private val ZoomableState.isZoomedOut
+    get() = zoomFraction == null || zoomFraction == 0f
 
 /**
  * TODO - Instead of opening video in 3rd party; Add inBuilt Impl in future versions.
@@ -228,7 +225,6 @@ private fun MainContent(
     // TODO - Properly handle case, when data is empty
     val values = viewState.data
     if (values.isEmpty()) return
-
     // Construct the state variables for pager.
     val pager = rememberPagerState(initialPage = viewState.index, pageCount = { values.size })
     val scope = rememberCoroutineScope()
@@ -281,7 +277,6 @@ private fun MainContent(
         beyondViewportPageCount = 1,
     ) { index ->
         val item = values[index]
-
         // isFocused indicates whether this item is currently the focused item in the viewpager.
         // It's used to selectively apply properties (like shared element modifiers) only to the
         // focused item,
@@ -300,7 +295,6 @@ private fun MainContent(
                     if (item.isImage) {
                         // Make sure that image is not loaded from Thumbnail repo.
                         preferCachedThumbnail(false)
-                        diskCachePolicy(CachePolicy.DISABLED)
                     }
                     // Placeholder for errors
                     error(R.drawable.ic_error_image_placeholder)
@@ -317,19 +311,13 @@ private fun MainContent(
             runBlocking { zoomable.scaledInsideAndCenterAlignedFrom(painter) }
         }
 
-        // Display the image/video
-        // Shared element transition for focused item
-        // Apply zoom behavior only to focused, non-error images
-        val sharedFrameKey = RouteViewer.buildSharedFrameKey(item.id)
         Image(
             painter = painter,
             contentDescription = null,
             alignment = Alignment.Center,
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .thenIf(isFocused) {
-                    sharedElement(sharedFrameKey, zIndexInOverlay = SCR_Z_INDEX + 0.01f)
-                }
+                .thenIf(isFocused) { sharedBounds(RouteViewer.buildSharedFrameKey(item.id)) }
                 .thenIf(isFocused && !item.isImage) {
                     playIconModifier.clickable(null, null) {
                         context.startActivity(VideoIntent(item.mediaUri))
@@ -351,7 +339,6 @@ fun Viewer(
     val navController = LocalNavController.current
     val facade = LocalSystemFacade.current
     val context = LocalContext.current
-
     // Define required state variables
     var immersive by remember { mutableStateOf(false) }
     val onRequest: (Int) -> Unit = { request: Int ->
@@ -385,14 +372,15 @@ fun Viewer(
             else -> error("Unknown event: $request")
         }
     }
-
     // Layout
+    // calculate the 2 pane strategy
     val strategy = LocalWindowSize.current.strategy
     TwoPane(
         fabPosition = FabPosition.Center,
         strategy = strategy,
         background = Color.Black,
         onColor = Color.SignalWhite,
+        onDismissRequest = { viewState.showDetails = false },
         content = {
             MainContent(
                 viewState = viewState,
@@ -406,10 +394,7 @@ fun Viewer(
                 enter = fadeIn(),
                 exit = fadeOut(),
                 content = {
-                    TopAppBar(
-                        onRequest,
-                        modifier = Modifier.renderInSharedTransitionScopeOverlay(SCR_Z_INDEX + 0.02f)
-                    )
+                    TopAppBar(onRequest)
                 }
             )
         },
@@ -418,21 +403,17 @@ fun Viewer(
                 visible = !immersive,
                 enter = fadeIn(),
                 exit = slideOutVertically() + fadeOut(),
+                modifier = Modifier
+                    .padding(bottom = AppTheme.padding.normal),
+                // .renderInSharedTransitionScopeOverlay(navController.zIndexScr + 0.02f),
                 content = {
                     FloatingActionMenu(
                         actions = viewState.actions,
-                        onAction = {
-                            viewState.onAction(it, context.findActivity())
-                        },
-                        modifier = Modifier
-                            .renderInSharedTransitionScopeOverlay(SCR_Z_INDEX + 0.02f)
-                            .padding(bottom = AppTheme.padding.normal),
+                        onAction = { viewState.onAction(it, context.findActivity()) },
                     )
                 }
             )
         },
-        onDismissRequest = { viewState.showDetails = false },
-        modifier = Modifier.renderAsNavDestBackground(SCR_Z_INDEX),
         details = {
             val details = viewState.details
             AnimatedVisibility(

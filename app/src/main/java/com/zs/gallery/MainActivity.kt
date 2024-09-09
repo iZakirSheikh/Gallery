@@ -18,6 +18,7 @@
 
 package com.zs.gallery
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -150,6 +151,8 @@ class MainActivity : ComponentActivity(), SystemFacade {
     override fun <S, O> observeAsState(key: Key.Key2<S, O>) =
         preferences.observeAsState(key = key)
 
+    override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         // caused the change in config. means the system bars need to be configured again
@@ -157,8 +160,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
         enableEdgeToEdge()
     }
 
-
-    private fun initialize(){
+    private fun initialize() {
         if (preferences.value(Settings.KEY_SECURE_MODE)) {
             window.setFlags(
                 WindowManager.LayoutParams.FLAG_SECURE,
