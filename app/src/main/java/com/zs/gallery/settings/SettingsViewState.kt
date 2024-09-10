@@ -30,6 +30,7 @@ import com.zs.gallery.common.Route
 import com.primex.preferences.StringSaver
 import com.primex.preferences.booleanPreferenceKey
 import com.primex.preferences.floatPreferenceKey
+import com.primex.preferences.intPreferenceKey
 import com.primex.preferences.stringPreferenceKey
 import com.zs.gallery.R
 import com.zs.gallery.common.NightMode
@@ -179,6 +180,12 @@ object Settings {
      */
     val KEY_SECURE_MODE =
         booleanPreferenceKey(PREFIX + "_secure_gallery", defaultValue = false)
+
+    /**
+     * The counter counts the number of times this app was launched.
+     */
+    val KEY_LAUNCH_COUNTER =
+        intPreferenceKey( PREFIX + "_launch_counter", 0)
 
     // Prompt
     // Nunito Sans

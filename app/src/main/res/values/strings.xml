@@ -102,5 +102,10 @@
         <font color='grey'>\nAre you sure you want to delete this? You won\'t be able to get it back
         </font>
     </string>
+    <string name="msg_update_check_error">Oops! Something went wrong while checking for updates.</string>
+    <string name="msg_update_not_available">You’re all set! No updates available.</string>
+    <string name="msg_new_update_downloaded">Update ready! Installation can proceed now.</string>
+    <string name="install">Install</string>
+    <string name="pref_app_version">App Version</string>
 
 </resources>

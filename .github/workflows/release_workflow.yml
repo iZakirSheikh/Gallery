@@ -66,7 +66,7 @@ jobs:
           packageName: com.googol.android.apps.photos
           releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
           track: internal
-          status: draft
+          changesNotSentForReview: false
       - name: Create GitHub Release and Upload Artifacts
         uses: softprops/action-gh-release@v1
         with:

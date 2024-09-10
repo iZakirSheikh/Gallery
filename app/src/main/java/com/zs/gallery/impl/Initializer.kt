@@ -19,15 +19,18 @@
 package com.zs.gallery.impl
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.startup.Initializer
 import coil.Coil
 import coil.ImageLoader
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.primex.preferences.value
 import com.zs.domain.store.MediaProvider
 import com.zs.foundation.toast.ToastHostState
 import com.zs.gallery.common.ThumbnailFetcher
+import com.zs.gallery.settings.Settings
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -39,7 +42,17 @@ private const val TAG = "Initializer"
 private val appModules = module {
     // Define Koin modules for dependency injection.
     // Declare a singleton instance of Preferences.
-    single { com.primex.preferences.Preferences(get(), "shared_preferences") }
+    single {
+        // Initialize Preferences
+        val preferences = com.primex.preferences.Preferences(get(), "shared_preferences")
+        // Retrieve the current launch counter value, defaulting to 0 if not set
+        val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER) ?: 0
+        // Increment the launch counter for cold starts
+        preferences[Settings.KEY_LAUNCH_COUNTER] = counter + 1
+        Log.d(TAG, "Cold start counter: ${preferences.value(Settings.KEY_LAUNCH_COUNTER)}")
+        // Return the preferences instance
+        preferences
+    }
     // Declare a ViewModel dependency (lifecycle managed by Koin).
     // viewModel { BatteryViewModel(get()) }
     singleOf(::ToastHostState)

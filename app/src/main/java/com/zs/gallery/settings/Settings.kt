@@ -19,6 +19,7 @@
 package com.zs.gallery.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -31,11 +32,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -53,8 +56,10 @@ import com.zs.foundation.AppTheme
 import com.zs.foundation.Colors
 import com.zs.foundation.None
 import com.zs.foundation.adaptive.contentInsets
+import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
+import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
 import kotlin.math.roundToInt
 
@@ -235,12 +240,13 @@ private inline fun AboutUs(
     viewState: SettingsViewState
 ) {
     // The app version and check for updates.
-    val version = /*BuildConfig.VERSION_NAME*/ "0.1.0-dev01"
+    val facade = LocalSystemFacade.current
     Preference(
-        title = textResource(id = R.string.app_name),
-        //  icon = ImageVector.vectorResource(id = R.drawable.ic_app),
-        summery = textResource(id = R.string.pref_app_version_summery, version),
+        title = textResource(id = R.string.pref_app_version),
+        icon = Icons.Outlined.TouchApp,
+        summery = textResource(id = R.string.pref_app_version_summery, BuildConfig.VERSION_NAME),
         modifier = Modifier
+            .clickable { facade.launchUpdateFlow(true) }
             .background(AppTheme.colors.tileBackgroundColor, TopTileShape)
     )
 

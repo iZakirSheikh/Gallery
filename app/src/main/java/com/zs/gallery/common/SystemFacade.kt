@@ -21,24 +21,32 @@
 package com.zs.gallery.common
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.core.app.ShareCompat
 import androidx.core.content.res.ResourcesCompat
 import com.primex.preferences.Key
 import com.zs.foundation.toast.Duration
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.BuildConfig
 
+private const val PREFIX_MARKET_URL = "market://details?id="
+private const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
+private const val PKG_MARKET_ID = "com.android.vending"
+
 interface SystemFacade {
 
     fun showToast(
         message: CharSequence,
         icon: ImageVector? = null,
+        accent: Color = Color.Unspecified,
         action: CharSequence? = null,
         @Duration duration: Int = if (action == null) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE,
     )
@@ -46,6 +54,7 @@ interface SystemFacade {
     fun showToast(
         @StringRes message: Int,
         icon: ImageVector? = null,
+        accent: Color = Color.Unspecified,
         @StringRes action: Int = ResourcesCompat.ID_NULL,
         @Duration duration: Int = if (action == ResourcesCompat.ID_NULL) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE,
     )
@@ -91,13 +100,45 @@ interface SystemFacade {
      * @param pkg the package name of the app to open on the App Store.
      */
     fun launchAppStore(pkg: String = BuildConfig.APPLICATION_ID) {
-        val result = runCatching {
-            launch(AppStoreIntent(pkg))
+        val url = "$PREFIX_MARKET_URL$pkg"
+        // Create an Intent to open the Play Store app.
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            // Set the package to explicitly target the Play Store app.
+            // Don't add this activity to the history stack.
+            // Open in a new document (tab or window).
+            // Allow multiple instances of the task.
+            setPackage(PKG_MARKET_ID)
+            addFlags(
+                Intent.FLAG_ACTIVITY_NO_HISTORY
+                        or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                        or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+            )
         }
-        if (result.isFailure)
-            launch(FallbackAppStoreIntent(pkg))
+        // Try launching the Play Store app.
+        val res = kotlin.runCatching { launch(intent) }
+        // If launching the app fails, use the fallback URL to open in a web browser.
+        if (res.isFailure) {
+            val fallback = "${PREFIX_MARKET_FALLBACK}$pkg"
+            launch(Intent(Intent.ACTION_VIEW, Uri.parse(fallback)))
+        }
     }
 
+    /**
+     * A utility method to launch the in-app update flow, with an option to report low-priority
+     * issues to the user via a Toast.
+     *
+     * @param report If `true`, low-priority issues will be reported to the user using the
+     *               ToastHostState channel.
+     */
+    fun launchUpdateFlow(report: Boolean = false)
+
+    /**
+     * Launches an in-app review process if appropriate.
+     *
+     * This method ensures the review dialog is shown only at suitable intervals based on launch count and time since last prompt.
+     * It considers [MIN_LAUNCH_COUNT], [MAX_DAYS_BEFORE_FIRST_REVIEW], and [MAX_DAYS_AFTER_FIRST_REVIEW] to prevent excessive prompting.
+     */
+    fun launchReviewFlow()
 }
 
 /**

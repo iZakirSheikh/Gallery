@@ -18,6 +18,8 @@
 
 package com.zs.gallery.common
 
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.annotation.RawRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -35,6 +37,8 @@ import com.primex.material2.Label
 import com.primex.material2.Text
 import com.zs.foundation.AppTheme
 import com.zs.foundation.lottieAnimationPainter
+
+private const val TAG = "extensions"
 
 /**
  * Used to provide access to the [NavHostController] through composition without needing to pass it down the tree.
@@ -131,7 +135,8 @@ private const val NULL_STRING = "@null"
 /**
  * Provides convenient access to the [NULL_STRING] constant for use with [SavedStateHandle].
  */
-val SavedStateHandle.Companion.NULL_STRING get() = com.zs.gallery.common.NULL_STRING
+val SavedStateHandle.Companion.NULL_STRING
+    get() = com.zs.gallery.common.NULL_STRING
 
 
 private val fullLineSpan: (LazyGridItemSpanScope.() -> GridItemSpan) = { GridItemSpan(maxLineSpan) }
@@ -139,4 +144,18 @@ private val fullLineSpan: (LazyGridItemSpanScope.() -> GridItemSpan) = { GridIte
 /**
  *
  */
-val  LazyGridScope.fullLineSpan get() = com.zs.gallery.common.fullLineSpan
+val LazyGridScope.fullLineSpan
+    get() = com.zs.gallery.common.fullLineSpan
+
+/**
+ * Gets the package info of this app using the package manager.
+ * @return a PackageInfo object containing information about the app, or null if an exception occurs.
+ * @see android.content.pm.PackageManager.getPackageInfo
+ */
+fun PackageManager.getPackageInfoCompat(pkgName: String) =
+    com.primex.core.runCatching(TAG + "_review") {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            getPackageInfo(pkgName, PackageManager.PackageInfoFlags.of(0))
+        else
+            getPackageInfo(pkgName, 0)
+    }

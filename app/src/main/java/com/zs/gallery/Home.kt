@@ -94,6 +94,7 @@ import com.zs.foundation.toast.ToastHostState
 import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.bin.Trash
 import com.zs.gallery.common.LocalNavController
+import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.composable
@@ -280,13 +281,14 @@ private fun NavigationBar(
             val current by navController.currentBackStackEntryAsState()
             val colors = NavigationItemDefaults.navigationItemColors()
             val domain = current?.destination?.domain
+            val facade = LocalSystemFacade.current
 
             // Timeline
             NavItem(
                 label = { Label(text = textResource(R.string.photos)) },
                 icon = { Icon(imageVector = Icons.Filled.PhotoLibrary, contentDescription = null) },
                 checked = domain == RouteTimeline.domain,
-                onClick = { navController.toRoute(RouteTimeline()) },
+                onClick = { facade.launchReviewFlow(); navController.toRoute(RouteTimeline()) },
                 typeRail = typeRail,
                 colors = colors
             )
@@ -296,7 +298,7 @@ private fun NavigationBar(
                 label = { Label(text = textResource(R.string.folders)) },
                 icon = { Icon(imageVector = Icons.Filled.FolderCopy, contentDescription = null) },
                 checked = domain == RouteFolders.domain,
-                onClick = { navController.toRoute(RouteFolders()) },
+                onClick = { facade.launchReviewFlow(); navController.toRoute(RouteFolders()) },
                 typeRail = typeRail,
                 colors = colors
             )
@@ -306,7 +308,7 @@ private fun NavigationBar(
                 label = { Label(text = textResource(R.string.settings)) },
                 icon = { Icon(imageVector = Icons.Filled.Settings, contentDescription = null) },
                 checked = domain == RouteSettings.domain,
-                onClick = { navController.toRoute(RouteSettings()) },
+                onClick = { facade.launchReviewFlow(); navController.toRoute(RouteSettings()) },
                 typeRail = typeRail,
                 colors = colors
             )
