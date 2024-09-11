@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.primex.core.textResource
 import com.primex.material2.DropDownPreference
@@ -219,17 +220,21 @@ private inline fun Appearance(
         title = prefFontScale.title,
         summery = prefFontScale.summery,
         icon = prefFontScale.vector,
-        steps = 11,
-        valueRange = 0.5f..1.5f,
+        // (2.0 - 0.7) / 0.1 = 13 steps
+        steps = 13,
+        valueRange = 0.7f..2.0f,
         defaultValue = prefFontScale.value,
-        onValueChange = { sliderValue ->
-            val it = (sliderValue * 10).roundToInt() / 10f
-            viewState.set(Settings.KEY_FONT_SCALE, it)
+        onValueChange = { value ->
+            val newValue = if (value < 0.76f) -1f else value
+            viewState.set(Settings.KEY_FONT_SCALE, newValue)
         },
         modifier = Modifier
             .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
         preview = {
-            Label(text = stringResource(R.string.times_factor_x_f, prefFontScale.value))
+            Label(
+                text = if (prefFontScale.value == -1f) "System" else stringResource(R.string.times_factor_x_f, prefFontScale.value),
+                fontWeight = FontWeight.Bold
+            )
         }
     )
 }

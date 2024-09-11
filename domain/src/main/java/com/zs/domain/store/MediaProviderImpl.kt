@@ -30,6 +30,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -69,11 +70,11 @@ private val Cursor.toMediaFile: MediaFile
     inline get() {
         return MediaFile(
             id = getLong(0),
-            name = getString(1),
+            name = getString(1) ?: "",
             dateAdded = getLong(2) * 1000,
             dateModified = getLong(3) * 1000,
             size = getLong(4),
-            mimeType = getString(5),
+            mimeType = getString(5) ?: "",
             orientation = getInt(6),
             height = getInt(7),
             width = getInt(8),
@@ -86,11 +87,11 @@ private val Cursor.toMediaFile: MediaFile
 private val Cursor.toTrashedFile: Trashed
     inline get() = Trashed(
         id = getLong(0),
-        name = getString(1),
+        name = getString(1) ?: "",
         expires = getLong(2) * 1000,
-        path = getString(3),
+        path = getString(3) ?: "",
         size = getLong(4),
-        mimeType = getString(5),
+        mimeType = getString(5) ?: "",
         duration = getInt(6)
     )
 

@@ -107,5 +107,8 @@
     <string name="msg_new_update_downloaded">Update ready! Installation can proceed now.</string>
     <string name="install">Install</string>
     <string name="pref_app_version">App Version</string>
+    <string name="scr_lock_screen_title">Verify Your Identity</string>
+    <string name="scr_lock_screen_subtitle">Authenticate with Biometrics</string>
+    <string name="src_lock_screen_desc">Authenticate with your fingerprint or facial recognition to continue. This step is crucial for safeguarding your data.</string>
 
 </resources>

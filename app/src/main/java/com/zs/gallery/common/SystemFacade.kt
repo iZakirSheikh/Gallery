@@ -22,7 +22,9 @@ package com.zs.gallery.common
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
@@ -139,6 +141,56 @@ interface SystemFacade {
      * It considers [MIN_LAUNCH_COUNT], [MAX_DAYS_BEFORE_FIRST_REVIEW], and [MAX_DAYS_AFTER_FIRST_REVIEW] to prevent excessive prompting.
      */
     fun launchReviewFlow()
+
+    /**
+     * Unlocks the app, granting access to its content.
+     *
+     * This function initiates the authentication process, typically using biometric verification or
+     * other security measures, to unlock the app and allow the user to access its features.
+     */
+    fun unlock()
+
+    /**
+     * Initiates biometric authentication.
+     *
+     * Displays a biometric prompt to the user. If authentication is successful, the [onAuthenticated]
+     * callback will be executed. This function requires Android P (API level 28) or higher.
+     *
+     * @param onAuthenticated A callback function that will be executed upon successful authentication.
+     * @param desc A description of the authentication process. This description will be displayed
+     */
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun authenticate(desc: String? = null, onAuthenticated: () -> Unit)
+
+    /**
+     * Guides the user to the system settings for biometric enrollment.
+     *
+     * This function helps users set up biometric authentication (e.g., fingerprint, face recognition)
+     * by directing them to the appropriate settings on their device. This is necessary before the app
+     * can use biometric authentication features.
+     *
+     * Requires Android P (API level 28) or higher.
+     */
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun enroll()
+
+    /**
+     * Displays a toast message using the platform's default toast mechanism.
+     *
+     * This function shows a short toast message with the provided text.
+     *
+     * @param string The text message to display in the toast.
+     */
+    fun showPlatformToast(string: String)
+
+    /**
+     * Displays a toast message using the platform's default toast mechanism.
+     *
+     * This function shows a short toast message with the text from the specified string resource.
+     *
+     * @param string The string resource ID of the text message to display in the toast.
+     */
+    fun showPlatformToast(@StringRes string: Int)
 }
 
 /**

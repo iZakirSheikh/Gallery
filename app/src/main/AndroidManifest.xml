@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--Required to provide app-lock feature.-->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <!-- Devices running Android 12L (API level 32) or lower  -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -10,6 +12,9 @@
     <!-- Devices running Android 13 (API level 33) or higher -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+    <!-- Required to access GPS Data of Media -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
     <!-- To handle the reselection within the app on devices running Android 14
          or higher if your app targets Android 14 (API level 34) or higher.  -->

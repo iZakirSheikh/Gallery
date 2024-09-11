@@ -115,3 +115,4 @@ fun NavGraphBuilder.composable(
  */
 fun <T> NavGraph.setStartDestination(route: Route) =
     setStartDestination(route.route)
+

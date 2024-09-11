@@ -363,7 +363,7 @@ abstract class MainViewModel<T>(
         provider.observer(MediaProvider.EXTERNAL_CONTENT_URI)
             .onEach { refresh() }
             .catch { exception ->
-                Log.e(TAG, "provider: ${exception.message}")
+                Log.d(TAG, "provider: ${exception.stackTraceToString()}")
                 // Handle any exceptions that occur during the flow.
                 // This might involve logging the exception using Firebase Crashlytics.
                 // Display a toast message to the user, indicating something went wrong and suggesting they report the issue.

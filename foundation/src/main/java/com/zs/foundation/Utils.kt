@@ -17,6 +17,11 @@ import kotlin.contracts.contract
 fun Context.isPermissionGranted(permission: String) =
     ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 
+/**
+ * @see isPermissionGranted
+ */
+fun Context.checkSelfPermissions(values: List<String>) =
+    values.all { isPermissionGranted(it) }
 
 /**
  * Conditionally applies another [Modifier] if the given [condition] is true.
