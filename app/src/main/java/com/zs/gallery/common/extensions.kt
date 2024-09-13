@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -103,7 +104,9 @@ inline fun Placeholder(
         message = composableOrNull(message != null) {
             Text(
                 text = message!!,
-                color = AppTheme.colors.onBackground
+                color = AppTheme.colors.onBackground,
+                maxLines = 6,
+                overflow = TextOverflow.Ellipsis
             )
         },
         title = {
