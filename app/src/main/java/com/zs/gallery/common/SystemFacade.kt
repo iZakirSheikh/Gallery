@@ -20,10 +20,14 @@
 
 package com.zs.gallery.common
 
+import android.content.Context
 import android.content.Intent
+import android.hardware.biometrics.BiometricManager
+import android.hardware.fingerprint.FingerprintManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
@@ -32,12 +36,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.core.app.ShareCompat
 import androidx.core.content.res.ResourcesCompat
 import com.primex.preferences.Key
 import com.zs.foundation.toast.Duration
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.BuildConfig
+import com.zs.gallery.R
 
 private const val PREFIX_MARKET_URL = "market://details?id="
 private const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
@@ -171,8 +175,33 @@ interface SystemFacade {
      *
      * Requires Android P (API level 28) or higher.
      */
-    @RequiresApi(Build.VERSION_CODES.P)
-    fun enroll()
+    fun enroll() {
+        // Create an intent based on the Android version
+        val intent = when {
+            // For Android 11 (API level 30) and above, use the biometric enrollment action
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
+                Intent(Settings.ACTION_BIOMETRIC_ENROLL)
+                    .putExtra(
+                        Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                        BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                    )
+            // For Android 9 (API level 28) and Android 10 (API level 29), use the fingerprint enrollment action
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P ->
+                Intent(Settings.ACTION_FINGERPRINT_ENROLL)
+            // For versions below Android 9, open the general security settings
+            else -> Intent(Settings.ACTION_SECURITY_SETTINGS)
+        }
+        // Show a toast message to inform the user to enable biometric authentication
+        showPlatformToast(R.string.msg_enroll_biometric)
+        // Attempt to launch the intent and handle any potential failures
+        val result = kotlin.runCatching {
+            launch(intent)
+        }
+        // If the intent fails to resolve, fall back to opening the general settings
+        if (result.isFailure)
+            launch(Intent(Settings.ACTION_SETTINGS))
+    }
 
     /**
      * Displays a toast message using the platform's default toast mechanism.
@@ -191,6 +220,43 @@ interface SystemFacade {
      * @param string The string resource ID of the text message to display in the toast.
      */
     fun showPlatformToast(@StringRes string: Int)
+
+    /**
+     * Returns the handle to a system-level service by name.
+     *
+     * @param name The name of the desired service.
+     * @return The service object, or null if the name does not exist.
+     * @throws ClassCastException if the service is not of the expected type.
+     * @see Context.BIOMETRIC_SERVICE
+     * @see android.app.Activity.getSystemService
+     */
+    fun <T> getDeviceService(name: String): T
+
+
+    /**
+     * Checks if biometric authentication is available on the device.
+     */
+    fun canAuthenticate(): Boolean = when {
+        // Biometric authentication is not available on devices below Android P.
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.P -> false
+        // For Android P, check if fingerprints are enrolled using FingerprintManager.
+        Build.VERSION.SDK_INT == Build.VERSION_CODES.P -> {
+            val manager = getDeviceService<FingerprintManager>(Context.FINGERPRINT_SERVICE)
+            manager.hasEnrolledFingerprints()
+        }
+        // For Android Q and above, check if any biometric authentication is available using BiometricManager.
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+            val manager = getDeviceService(Context.BIOMETRIC_SERVICE) as BiometricManager
+            manager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        }
+        // For other Android versions, check if strong biometric or device credential authentication is available.
+        else -> {
+            val manager = getDeviceService(Context.BIOMETRIC_SERVICE) as BiometricManager
+            val authenticators =
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_STRONG
+            manager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
+        }
+    }
 }
 
 /**

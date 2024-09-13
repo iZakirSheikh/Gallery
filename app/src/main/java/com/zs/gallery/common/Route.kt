@@ -19,6 +19,10 @@
 package com.zs.gallery.common
 
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.lifecycle.SavedStateHandle
@@ -103,12 +107,40 @@ operator fun <T> SavedStateHandle.get(route: SafeArgs<T>): T = route.build(this)
  */
 fun NavGraphBuilder.composable(
     route: Route,
+    enterTransition:
+    (@JvmSuppressWildcards
+    AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? =
+        null,
+    exitTransition:
+    (@JvmSuppressWildcards
+    AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? =
+        null,
+    popEnterTransition:
+    (@JvmSuppressWildcards
+    AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? =
+        enterTransition,
+    popExitTransition:
+    (@JvmSuppressWildcards
+    AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? =
+        exitTransition,
+    sizeTransform:
+    (@JvmSuppressWildcards
+    AnimatedContentTransitionScope<NavBackStackEntry>.() -> SizeTransform?)? =
+        null,
     content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
-) = composable(route = route.route, content = { id ->
-    CompositionLocalProvider(value = LocalNavAnimatedVisibilityScope provides this) {
-        content(id)
+) = composable(
+    route = route.route,
+    enterTransition = enterTransition,
+    exitTransition = exitTransition,
+    popExitTransition = popExitTransition,
+    popEnterTransition = popEnterTransition,
+    sizeTransform = sizeTransform,
+    content = { id ->
+        CompositionLocalProvider(value = LocalNavAnimatedVisibilityScope provides this) {
+            content(id)
+        }
     }
-})
+)
 
 /**
  * @see androidx.navigation.NavGraph.setStartDestination(java.lang.String)

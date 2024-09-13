@@ -39,6 +39,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.FabPosition
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -47,14 +49,17 @@ import androidx.compose.material.icons.filled.Restore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.primex.core.findActivity
 import com.primex.core.plus
 import com.primex.core.textResource
+import com.primex.material2.Button
 import com.primex.material2.IconButton
 import com.primex.material2.Label
+import com.primex.material2.OutlinedButton
 import com.primex.material2.TextButton
 import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
@@ -107,12 +112,22 @@ private fun TopAppBar(
                 ),
                 actions = {
                     val context = LocalContext.current
-                    TextButton(
+                    Button(
                         label = "Restore",
-                        onClick = { viewState.restoreAll(context.findActivity()) })
-                    TextButton(
-                        label = "Empty",
-                        onClick = { viewState.empty(context.findActivity()) })
+                        onClick = { viewState.restoreAll(context.findActivity()) },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.background(2.dp)),
+                        shape = CircleShape,
+                        elevation = null,
+                        modifier = Modifier.scale(0.9f)
+                    )
+                    Button(
+                        label = "Empty Bin",
+                        onClick = { viewState.empty(context.findActivity()) },
+                        colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.background(2.dp)),
+                        shape = CircleShape,
+                        elevation = null,
+                        modifier = Modifier.scale(0.9f)
+                    )
                 }
             )
         }

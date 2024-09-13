@@ -187,13 +187,12 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         // If authentication is required on a fresh start, the app will be
         // automatically navigated to the lock screen in onCreate().
         if (timeAppWentToBackground != -1L && isAuthenticationRequired) {
-            navController?.navigate(RouteLockScreen())
+            Log.d(TAG, "onResume: navigating -> RouteLockScreen.")
+            navController?.navigate(RouteLockScreen()){
+                launchSingleTop = true
+            }
             unlock()
         }
-    }
-
-    override fun enroll() {
-        TODO("Not yet implemented")
     }
 
     override fun showPlatformToast(string: Int) =
@@ -252,6 +251,9 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             }
         )
     }
+
+    override fun <T> getDeviceService(name: String): T =
+        getSystemService(name) as T
 
     @SuppressLint("NewApi")
     override fun unlock() = authenticate(getString(R.string.src_lock_screen_desc)) {
@@ -507,15 +509,15 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         setContent {
             val navController = rememberNavController()
             // if authentication is required move to lock screen
-            Gallery(
-                toastHostState,
-                navController,
-                { if (isAuthenticationRequired) RouteLockScreen else RouteTimeline }
-            )
-
+            Gallery(toastHostState, navController)
             DisposableEffect(Unit) {
                 navController.addOnDestinationChangedListener(this@MainActivity)
-                if (isAuthenticationRequired) unlock()
+                // since auth is required; we will cover the scrren with lock_screen
+                // only when user authenticate can remove this veil.
+                if (isAuthenticationRequired) {
+                    navController.navigate(RouteLockScreen())
+                    unlock()
+                }
                 this@MainActivity.navController = navController
                 onDispose {
                     navController.removeOnDestinationChangedListener(this@MainActivity)

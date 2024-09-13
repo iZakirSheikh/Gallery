@@ -422,8 +422,6 @@ private fun NavigationBar(
 fun Gallery(
     toastHostState: ToastHostState,
     navController: NavHostController,
-    // TODO- Find why i can't pass Route just an argument.
-    startDestination: () -> Route,
 ) {
     // dependencies
     val activity = LocalView.current.context as MainActivity
@@ -454,7 +452,7 @@ fun Gallery(
                 val granted = activity.checkSelfPermissions(REQUIRED_PERMISSIONS)
                 NavHost(
                     navController = navController,
-                    startDestination = if (!granted) RoutePermission() else startDestination().route,
+                    startDestination = if (!granted) RoutePermission() else RouteTimeline(),
                     builder = navGraphBuilder
                 )
             }

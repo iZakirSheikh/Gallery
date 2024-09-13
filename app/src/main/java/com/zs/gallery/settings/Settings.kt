@@ -18,6 +18,7 @@
 
 package com.zs.gallery.settings
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -120,10 +121,13 @@ private inline fun GroupHeader(
 }
 
 context(ColumnScope)
+@SuppressLint("NewApi")
 @Composable
 private inline fun General(
     viewState: SettingsViewState
 ) {
+
+
     val prefLiveGallery = viewState.liveGallery
     SwitchPreference(
         title = prefLiveGallery.title,
@@ -133,6 +137,33 @@ private inline fun General(
         onCheckedChange = { viewState.set(Settings.KEY_DYNAMIC_GALLERY, it) },
         modifier = Modifier
             .background(AppTheme.colors.tileBackgroundColor, TopTileShape)
+    )
+
+    val prefAppLock = viewState.applock
+    val facade = LocalSystemFacade.current
+    DropDownPreference(
+        title = prefAppLock.title,
+        defaultValue = prefAppLock.value,
+        icon = prefAppLock.vector,
+        entries = listOf(
+            "App Lock Disabled" to -1,
+            "Lock Immediately" to 0,
+            "Lock After 1 Minute" to 1,
+            "Lock After 30 Minutes" to 30
+        ),
+        modifier = Modifier
+            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
+        onRequestChange = {value ->
+            // User wishes to enable app lock
+            if (!facade.canAuthenticate()) {
+                // If the user cannot authenticate, prompt them to enroll in biometric authentication
+                return@DropDownPreference facade.enroll()
+            }
+            // Securely make sure that app_lock is set.
+            facade.authenticate("Confirm Biometric") {
+                viewState.set(Settings.KEY_APP_LOCK_TIME_OUT, value)
+            }
+        },
     )
 
     val prefTrashCan = viewState.trashCanEnabled
@@ -232,7 +263,10 @@ private inline fun Appearance(
             .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
         preview = {
             Label(
-                text = if (prefFontScale.value == -1f) "System" else stringResource(R.string.times_factor_x_f, prefFontScale.value),
+                text = if (prefFontScale.value == -1f) "System" else stringResource(
+                    R.string.times_factor_x_f,
+                    prefFontScale.value
+                ),
                 fontWeight = FontWeight.Bold
             )
         }

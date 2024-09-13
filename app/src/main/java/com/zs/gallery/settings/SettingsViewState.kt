@@ -122,6 +122,7 @@ interface SettingsViewState {
     val isSystemBarsTransparent: Preference<Boolean>
     val immersiveView: Preference<Boolean>
     val secureMode: Preference<Boolean>
+    val applock: Preference<Int>
 
     fun <S, O> set(key: Key<S, O>, value: O)
 }
@@ -222,7 +223,7 @@ object Settings {
     val KEY_LAUNCH_COUNTER =
         intPreferenceKey(PREFIX + "_launch_counter", 0)
     val KEY_APP_LOCK_TIME_OUT =
-        intPreferenceKey("${PREFIX}_app_lock_time_out", 0)
+        intPreferenceKey("${PREFIX}_app_lock_time_out", -1)
 
 
     val DefaultFontFamily get() = FontFamily.Default

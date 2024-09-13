@@ -4,6 +4,7 @@
 
     <!--Required to provide app-lock feature.-->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <!-- Devices running Android 12L (API level 32) or lower  -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"

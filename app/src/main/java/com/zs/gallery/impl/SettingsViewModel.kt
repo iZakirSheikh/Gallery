@@ -68,7 +68,6 @@ class SettingsViewModel() : KoinViewModel(), SettingsViewState {
             )
         }.asComposeState()
     }
-
     override val trashCanEnabled: Preference<Boolean> by with(preferences) {
         preferences[Settings.KEY_TRASH_CAN_ENABLED].map {
             Preference(
@@ -79,7 +78,6 @@ class SettingsViewModel() : KoinViewModel(), SettingsViewState {
             )
         }.asComposeState()
     }
-
     override val gridItemSizeMultiplier by with(preferences) {
         preferences[Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER].map {
             Preference(
@@ -97,6 +95,16 @@ class SettingsViewModel() : KoinViewModel(), SettingsViewState {
                 title = getText(R.string.pref_live_gallery),
                 summery = getText(R.string.pref_live_gallery_summery),
                 vector = Icons.Outlined.AutoAwesomeMotion
+            )
+        }.asComposeState()
+    }
+    override val applock: Preference<Int> by with(preferences) {
+        preferences[Settings.KEY_APP_LOCK_TIME_OUT].map {
+            Preference(
+                value = it,
+                title = getText(R.string.pref_app_lock),
+                summery = null,
+                vector = Icons.Outlined.Security
             )
         }.asComposeState()
     }
@@ -130,7 +138,6 @@ class SettingsViewModel() : KoinViewModel(), SettingsViewState {
             )
         }.asComposeState()
     }
-
     override val secureMode: Preference<Boolean> by with(preferences) {
         preferences[Settings.KEY_SECURE_MODE].map {
             Preference(

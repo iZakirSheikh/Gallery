@@ -215,6 +215,7 @@ internal class MediaProviderImpl(
         offset: Int,
         limit: Int
     ): List<MediaFile> {
+        if (ids.isEmpty()) return emptyList()
         val idsString = ids.joinToString(",") { "$it" }
         return resolver.query2(
             uri = EXTERNAL_CONTENT_URI,

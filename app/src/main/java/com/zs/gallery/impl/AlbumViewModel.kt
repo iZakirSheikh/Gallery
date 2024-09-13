@@ -43,8 +43,6 @@ class AlbumViewModel(
         delay(50)
 
         val ids = favorites
-        // If no favorites, skip the refresh
-        if (ids.isEmpty()) return
 
         // Update the title with the number of favorite files
         title = buildAnnotatedString {

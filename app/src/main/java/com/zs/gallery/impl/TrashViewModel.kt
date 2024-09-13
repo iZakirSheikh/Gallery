@@ -90,6 +90,6 @@ class TrashViewModel(
 
     override fun empty(activity: Activity) {
         selectAll()
-        trash(activity)
+        delete(activity)
     }
 }
