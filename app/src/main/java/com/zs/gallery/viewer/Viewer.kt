@@ -4,6 +4,7 @@ package com.zs.gallery.viewer
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -133,7 +134,7 @@ private suspend fun ZoomableState.scaledInsideAndCenterAlignedFrom(painter: Pain
  * Indicates whether the content is currently at its default zoom level (not zoomed in).
  */
 private val ZoomableState.isZoomedOut
-    get() = zoomFraction == null || zoomFraction == 0f
+    get() = (zoomFraction ?: 0f) <= 0.0001f
 
 /**
  * TODO - Instead of opening video in 3rd party; Add inBuilt Impl in future versions.
@@ -162,7 +163,7 @@ private fun FloatingActionMenu(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.animateContentSize()
             ) {
-                Menu(actions, onItemClicked = onAction)
+                Menu(actions, onItemClicked = onAction, collapsed = 3)
             }
         },
     )
@@ -268,6 +269,7 @@ private fun MainContent(
     // Horizontal pager to display the images/videos
     // Disable swipe when zoomed in
     // Preload adjacent pages for smoother transitions
+    Log.d(TAG, "MainContent - ZoomFraction: ${zoomable.zoomFraction}")
     HorizontalPager(
         state = pager,
         key = { values[it].id },

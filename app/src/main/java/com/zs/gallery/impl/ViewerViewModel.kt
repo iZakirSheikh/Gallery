@@ -19,6 +19,7 @@
 package com.zs.gallery.impl
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.Wallpaper
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -55,7 +57,7 @@ private const val TAG = "ViewerViewModel"
 
 private val DELETE = MenuItem("action_delete", R.string.delete, Icons.Outlined.Delete)
 private val SHARE = MenuItem("action_share", R.string.share, Icons.Outlined.Share)
-private val USE_AS = MenuItem("action_use_as", R.string.use_as, Icons.Outlined.Image)
+private val USE_AS = MenuItem("action_use_as", R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
 private val EDIT_IN = MenuItem("action_edit_in", R.string.edit_in, Icons.Outlined.Edit)
 private val STAR = MenuItem("action_like", R.string.like, Icons.Outlined.StarOutline)
 private val UN_STAR = MenuItem("action_unlike", R.string.unlike, Icons.Outlined.Star)
@@ -79,11 +81,43 @@ private fun EditIn(uri: Uri) =
  * @return An Intent configured for setting the wallpaper.
  */
 private fun Wallpaper(uri: Uri) =
-    Intent(Intent.ACTION_ATTACH_DATA).apply {
+    Intent("android.service.wallpaper.CROP_AND_SET_WALLPAPER").apply {
         setDataAndType(uri, "image/*")
         putExtra("mimeType", "image/*") // Specifies the MIME type of the image
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the wallpaper app
+        addCategory(Intent.CATEGORY_DEFAULT)
     }
+
+/**
+ * Sets the wallpaper using the provided URI.
+ *
+ * This function attempts to set the wallpaper using the default wallpaper cropper app.
+ * If the specified package is not found, it falls back to a generic wallpaper intent.
+ * If any other exception occurs, it shows a toast message to the user.
+ *
+ * @param uri The URI of the image to be set as wallpaper.
+ */
+private fun Activity.setWallpaper(uri: Uri) {
+    try {
+        // Create an intent to set the wallpaper using the specified URI
+        val intent = Wallpaper(uri).apply {
+            // Set the package to use the default wallpaper cropper app
+            setPackage("com.android.wallpapercropper")
+        }
+        // Attempt to start the activity with the specified package
+        startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        // If the specified package is not found, fallback to a generic wallpaper intent
+        startActivity(Wallpaper(uri))
+    } catch (e: Exception) {
+        // If any other exception occurs, show a toast message to the user
+        android.widget.Toast.makeText(
+            this,
+            "No wallpaper app found",
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+}
 
 
 class ViewerViewModel(
@@ -104,7 +138,9 @@ class ViewerViewModel(
     override var details: MediaFile? by mutableStateOf(null)
     override var showDetails: Boolean
         get() = details != null
-        set(value) { details = if (value) current else null }
+        set(value) {
+            details = if (value) current else null
+        }
 
     override val actions: List<MenuItem> by derivedStateOf {
         buildList {
@@ -125,14 +161,14 @@ class ViewerViewModel(
             STAR, UN_STAR -> toggleLike()
             DELETE -> remove(activity)
             SHARE -> share(activity)
-            USE_AS -> {
-                val current = current ?: return
-                activity.startActivity(Wallpaper(current.mediaUri))
-            }
-
             EDIT_IN -> {
                 val current = current ?: return
                 activity.startActivity(EditIn(current.mediaUri))
+            }
+
+            USE_AS -> {
+                val image = current?.mediaUri ?: return
+                activity.setWallpaper(image)
             }
         }
     }

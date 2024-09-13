@@ -78,6 +78,9 @@ private inline fun Slot(content: @Composable () -> Unit) =
     Box(content = { content() })
 
 
+private val TwoPaneStrategy.scrim get() =
+    if (this is StackedTwoPaneStrategy) DEFAULT_SCRIM_COLOR else Color.Transparent
+
 /**
  * A two-pane layout that displays content and details using a configurable strategy.
  *
@@ -134,13 +137,13 @@ fun TwoPane(
     spacing: Dp = DEFAULT_SPACING,
     background: Color = AppTheme.colors.background,
     onColor: Color = AppTheme.colors.onBackground,
-    scrim: Color = DEFAULT_SCRIM_COLOR,
+    strategy: TwoPaneStrategy = VerticalTwoPaneStrategy(0.5f),
+    scrim: Color = strategy.scrim,
     details: @Composable () -> Unit = { },
     topBar: @Composable () -> Unit = { },
     floatingActionButton: @Composable () -> Unit = { },
-    fabPosition: FabPosition = FabPosition.End,
     onDismissRequest: (() -> Unit)? = null,
-    strategy: TwoPaneStrategy = VerticalTwoPaneStrategy(0.5f)
+    fabPosition: FabPosition = FabPosition.End,
 ) {
     // The indent propagated through window.contentIndent
     // The removes its old value; which means child has access to only topBar indent.
