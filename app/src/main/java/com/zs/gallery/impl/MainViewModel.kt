@@ -44,9 +44,7 @@ import com.zs.gallery.common.FileActions
 import com.zs.gallery.common.GroupSelectionLevel
 import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.settings.Settings
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -189,30 +187,22 @@ abstract class MainViewModel<T>(
             val favourites = favorites.toMutableList()
 
             // Determine the action and message based on whether all selected items are already favorites.
-            val result = when {
-                favourites.containsAll(selected) -> {
-                    favourites.removeAll(selected) // Remove all selected items from favorites.
-                    "Removed ${selected.size} files from favorites"
-                }
-
+            when {
+                // Remove all selected items from favorites.
+                favourites.containsAll(selected) -> favourites.removeAll(selected)
+                // Add the un-favorite selected items to favorites.
                 selected.any { it in favourites } -> {
-                    // Add the un-favorite selected items to favorites.
                     val filtered = selected.filterNot { it in favourites }
                     favourites.addAll(filtered)
-                    "Added ${filtered.size} out of ${selected.size} files to favorites"
                 }
-
-                else -> {
-                    // Add the un-favorite selected items to favorites.
-                    favourites.addAll(selected)
-                    "Added ${selected.size} files to favorites"
-                }
+                // Add the un-favorite selected items to favorites.
+                else -> favourites.addAll(selected)
             }
 
             // Update the favorite items in preferences.
             preferences[Settings.KEY_FAVOURITE_FILES] = favourites
             // Display a message to the user.
-            showToast(result)
+            showPlatformToast(R.string.msg_favourites_updated)
         }
     }
 
@@ -226,22 +216,15 @@ abstract class MainViewModel<T>(
     @SuppressLint("NewApi")
     override fun trash(activity: Activity) {
         viewModelScope.launch {
-            val selected = consume()
             // Ensure this is called on Android 10 or higher (API level 29).
             val result = runCatching(TAG) {
+                // consume selected
+                val selected = consume()
                 provider.trash(activity, *selected)
             }
-            val msg = when (result) {
-                null, 0, -1 -> getText(R.string.msg_files_trash_unknown_error) // General error
-                -2 -> getText(R.string.msg_confirm_trashing) // Pending user confirmation (likely for trashing)
-                -3 -> getText(R.string.msg_files_trashing_cancelled) // User canceled the operation
-                else -> getText(
-                    R.string.msg_files_trashing_success_out_total,
-                    result,
-                    selected.size
-                ) // Success with count
-            }
-            showToast(msg)
+            // General error
+            if (result == null || result == 0 || result == -1)
+                showToast(R.string.msg_files_trash_unknown_error)
         }
     }
 
@@ -249,15 +232,16 @@ abstract class MainViewModel<T>(
         val isTrashEnabled = preferences.value(Settings.KEY_TRASH_CAN_ENABLED)
         if (isTrashEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             trash(activity)
-        else
+        else {
             delete(activity)
+        }
     }
 
     override fun delete(activity: Activity) {
         viewModelScope.launch {
-            // Get the selected items for deletion
-            val selected = consume()
             val result = runCatching(TAG) {
+                // Get the selected items for deletion
+                val selected = consume()
                 // For Android R and above, use the provider's delete function directly
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
                     return@runCatching provider.delete(activity, *selected)
@@ -278,20 +262,9 @@ abstract class MainViewModel<T>(
                 else
                     -3
             }
-            Log.d(TAG, "delete: $result")
             // Display a message based on the result of the deletion operation.
-            val msg = when (result) {
-                null, 0, -1 -> getText(R.string.msg_files_delete_unknown_error) // General error
-                -2 -> getText(R.string.msg_confirm_deletion) // Pending user confirmation (likely for trashing)
-                -3 -> getText(R.string.msg_files_deletion_cancelled) // User canceled the operation
-                // Success with count
-                else -> getText(
-                    R.string.msg_files_deletion_success_out_total,
-                    result,
-                    selected.size
-                )
-            }
-            showToast(msg)
+            if (result == null || result == 0 || result == -1)
+                showToast(R.string.msg_files_delete_unknown_error)// General error
         }
     }
 
@@ -343,18 +316,9 @@ abstract class MainViewModel<T>(
                 provider.restore(activity, *selected)
             }
             // Display a message based on the result of the deletion operation.
-            val msg = when (result) {
-                null, 0, -1 -> getText(R.string.msg_files_restore_unknown_error) // General error
-                -2 -> getText(R.string.msg_confirm_restoring) // Pending user confirmation (likely for trashing)
-                -3 -> getText(R.string.msg_files_restoring_cancelled) // User canceled the operation
-                else -> getText(
-                    R.string.msg_files_restoring_success_out_total,
-                    result,
-                    selected.size
-                ) // Success with count
-            }
-            Log.d(TAG, "restore: $result")
-            showToast(msg)
+            // General error
+            if (result == null || result == 0 || result == -1)
+                showToast(R.string.msg_files_restore_unknown_error)
         }
     }
 

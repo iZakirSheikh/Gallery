@@ -20,6 +20,7 @@
 
 package com.zs.gallery.folders
 
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.animateFloatAsState
@@ -28,11 +29,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
@@ -43,7 +46,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.HotelClass
 import androidx.compose.material.icons.outlined.Memory
+import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,6 +63,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.primex.core.drawHorizontalDivider
 import com.primex.core.plus
 import com.primex.core.textResource
@@ -72,12 +78,15 @@ import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.contentInsets
 import com.zs.foundation.sharedElement
 import com.zs.gallery.R
+import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.emit
+import com.zs.gallery.common.fullLineSpan
 import com.zs.gallery.common.preference
+import com.zs.gallery.files.RouteAlbum
 import com.zs.gallery.files.RouteFolder
-import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.settings.Settings
+import com.zs.gallery.viewer.RouteViewer
 
 private const val TAG = "Folders"
 
@@ -190,6 +199,25 @@ private val FolderContentPadding =
     PaddingValues(vertical = AppTheme.padding.normal, horizontal = AppTheme.padding.medium)
 private val GridItemsArrangement = Arrangement.spacedBy(6.dp)
 
+private fun LazyGridScope.shortcuts(navController: NavHostController) =
+    items(2, contentType = { "shortcut" }) { index ->
+        when (index) {
+            0 -> Shortcut(
+                Icons.Outlined.HotelClass,
+                "Favourites",
+                onClick = { navController.navigate(RouteAlbum()) }
+            )
+
+            1 -> Shortcut(
+                Icons.Outlined.Recycling,
+                "Recycle Bin",
+                onClick = { navController.navigate(RouteTrash()) },
+                // Only enable if R and above
+                enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+            )
+        }
+    }
+
 @Composable
 fun Folders(viewState: FoldersViewState) {
     val navInsets = WindowInsets.contentInsets
@@ -212,8 +240,17 @@ fun Folders(viewState: FoldersViewState) {
                 columns = GridCells.Adaptive((MIN_TILE_SIZE * multiplier.coerceAtLeast(1f))),
                 contentPadding = FolderContentPadding + WindowInsets.contentInsets + navInsets,
                 verticalArrangement = GridItemsArrangement,
+                horizontalArrangement = GridItemsArrangement,
                 content = {
                     val data = emit(values) ?: return@LazyVerticalGrid
+
+                    // The standard shortcuts.
+                    shortcuts(navController)
+
+                    item(span = fullLineSpan) {
+                        Spacer(Modifier.padding(vertical = ContentPadding.medium))
+                    }
+
                     // else emit the items.
                     items(data, key = { it.artworkID }) {
                         Folder(

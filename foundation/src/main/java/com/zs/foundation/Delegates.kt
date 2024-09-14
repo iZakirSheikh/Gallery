@@ -31,10 +31,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -230,4 +232,5 @@ inline fun Header(
     modifier: Modifier = Modifier,
     style: TextStyle = AppTheme.typography.headlineSmall,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-) = Label(text = text, modifier.padding(contentPadding), style = style, maxLines = 2)
+    color: Color = LocalContentColor.current
+) = Label(text = text, modifier.padding(contentPadding), style = style, maxLines = 2, color = color)

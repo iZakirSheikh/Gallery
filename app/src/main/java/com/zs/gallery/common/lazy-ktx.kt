@@ -223,7 +223,7 @@ private fun GroupHeader(
 
         IconButton(
             imageVector = when (state) {
-                GroupSelectionLevel.NONE -> Icons.Outlined.Circle
+                GroupSelectionLevel.NONE -> Icons.Outlined.CheckCircleOutline
                 GroupSelectionLevel.PARTIAL -> Icons.Outlined.RemoveCircle
                 GroupSelectionLevel.FULL -> Icons.Outlined.CheckCircleOutline
             },

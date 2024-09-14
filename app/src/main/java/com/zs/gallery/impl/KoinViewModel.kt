@@ -46,11 +46,11 @@ abstract class KoinViewModel: ScopeViewModel() {
     val preferences: Preferences by inject()
     private val context: Application by inject()
 
-    fun showAndroidToast(
+    fun showPlatformToast(
         @StringRes message: Int
     ) = AndroidToast.makeText(context, message, AndroidToast.LENGTH_LONG).show()
 
-    fun showAndroidToast(
+    fun showPlatformToast(
         message: String
     ) = AndroidToast.makeText(context, message, AndroidToast.LENGTH_LONG).show()
 

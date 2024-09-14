@@ -19,6 +19,13 @@
 package com.zs.foundation.shapes
 
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 
 private const val TAG = "Folder"
 
@@ -40,4 +47,45 @@ val FolderShape = GenericShape { (x, y), _ ->
     lineTo(0f, radius)
     quadraticTo(0f, 0f, radius, 0f)
     close()
+}
+
+/**
+ * A custom shape that resembles a folder with a curved top-right corner.
+ *
+ * @param radius The radius of the corners.
+ */
+class Folder(private val radius: Dp): Shape {
+    override fun createOutline(
+        size: Size,
+        layoutDirection: LayoutDirection,
+        density: Density
+    ): Outline {
+        // Create a Path object to define the shape
+        val path = Path().apply {
+            // Convert the radius from Dp to pixels
+            val r = with(density){ radius.toPx() }
+            // Get the width and height of the shape
+            val (x, y ) = size
+            // Calculate the x-coordinate for the step
+            val stepAt = 0.40f * x
+            // Define the path by moving to different points and drawing lines or curves
+            moveTo(r, 0f)
+            // Line to the step
+            // then take the step; move to end
+            lineTo(stepAt, 0f)
+            lineTo(stepAt + r, r)
+            lineTo(x - r, r)
+            // Quadratic curve to the right edge
+            quadraticTo(x, r, x, 2 * r)
+            lineTo(x, y - r)
+            quadraticTo(x, y, x - r, y)
+            lineTo(r, y)
+            quadraticTo(0f, y, 0f, y - r)
+            lineTo(0f, r)
+            quadraticTo(0f, 0f, r, 0f)
+            close()
+            // Close the path
+        }
+        return Outline.Generic(path)
+    }
 }

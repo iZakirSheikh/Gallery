@@ -26,7 +26,6 @@ import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.StarOutline
@@ -74,41 +73,33 @@ private fun EditIn(uri: Uri) =
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the editing app
     }
 
-/**
- * Creates an Intent to use an image as wallpaper.
- *
- * @param uri The URI of the image to set as wallpaper.
- * @return An Intent configured for setting the wallpaper.
- */
-private fun Wallpaper(uri: Uri) =
-    Intent("android.service.wallpaper.CROP_AND_SET_WALLPAPER").apply {
-        setDataAndType(uri, "image/*")
-        putExtra("mimeType", "image/*") // Specifies the MIME type of the image
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the wallpaper app
-        addCategory(Intent.CATEGORY_DEFAULT)
-    }
 
 /**
  * Sets the wallpaper using the provided URI.
- *
- * This function attempts to set the wallpaper using the default wallpaper cropper app.
- * If the specified package is not found, it falls back to a generic wallpaper intent.
- * If any other exception occurs, it shows a toast message to the user.
  *
  * @param uri The URI of the image to be set as wallpaper.
  */
 private fun Activity.setWallpaper(uri: Uri) {
     try {
-        // Create an intent to set the wallpaper using the specified URI
-        val intent = Wallpaper(uri).apply {
-            // Set the package to use the default wallpaper cropper app
-            setPackage("com.android.wallpapercropper")
+        // first try to set the wallpaper through offcial way
+        val intent = Intent("android.service.wallpaper.CROP_AND_SET_WALLPAPER").apply {
+            setDataAndType(uri, "image/*")
+            putExtra("mimeType", "image/*") // Specifies the MIME type of the image
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the wallpaper app
+            addCategory(Intent.CATEGORY_DEFAULT)
+            startActivity(intent)
         }
-        // Attempt to start the activity with the specified package
         startActivity(intent)
     } catch (e: ActivityNotFoundException) {
-        // If the specified package is not found, fallback to a generic wallpaper intent
-        startActivity(Wallpaper(uri))
+        // If the official intent is not supported, try using ACTION_ATTACH_DATA
+        val intent = Intent(Intent.ACTION_ATTACH_DATA).apply {
+            addCategory(Intent.CATEGORY_DEFAULT);
+            // Grant read permission to the wallpaper app
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//add this if your targetVersion is more than Android 7.0+
+            setDataAndType(uri, "image/*");
+            putExtra("mimeType", "image/*");
+        }
+        startActivity(Intent.createChooser(intent, "Set as:"));
     } catch (e: Exception) {
         // If any other exception occurs, show a toast message to the user
         android.widget.Toast.makeText(

@@ -71,21 +71,10 @@
     <string name="last_modified">Last modified</string>
     <string name="msg_error_sharing_files">Oops, something went wrong while sharing the files. Please try again.</string>
     <string name="msg_files_delete_unknown_error">Oops, something went wrong while deleting the files. Please try again.</string>
-    <string name="msg_confirm_deletion">Confirm file deletion.</string>
-    <string name="msg_files_deletion_cancelled">File deleting process was canceled by the user.</string>
-    <string name="msg_files_deletion_success_out_total">Successfully deleted %1$s out of %2$s files.</string>
-
-
     <string name="msg_files_trash_unknown_error">Oops, something went wrong while trashing the files. Please try again.</string>
-    <string name="msg_confirm_trashing">Confirm file trashing.</string>
-    <string name="msg_files_trashing_cancelled">File trashing process was canceled by the user.</string>
-    <string name="msg_files_trashing_success_out_total">Successfully trashed %1$d out of %2$d files.</string>
     <string name="trash">Trash</string>
 
     <string name="msg_files_restore_unknown_error">Oops, something went wrong while restoring the files. Please try again.</string>
-    <string name="msg_confirm_restoring">Confirm file restoring.</string>
-    <string name="msg_files_restoring_cancelled">File restoring process was canceled by the user.</string>
-    <string name="msg_files_restoring_success_out_total">Successfully restored %1$d out of %2$d files.</string>
     <string name="share">Share</string>
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
@@ -114,5 +103,6 @@
     <string name="msg_enroll_biometric">Enable biometric authentication in settings.</string>
     <string name="pref_app_lock">App Lock &beta;</string>
     <string name="pref_app_lock_summery"><b>Unlock with biometrics</b>\nWhen enabled, you\'ll need to use the fingerprint, face or other unique identifiers to open &appname;.</string>
+    <string name="msg_favourites_updated">Favorites updated!</string>
 
 </resources>

@@ -511,6 +511,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             // if authentication is required move to lock screen
             Gallery(toastHostState, navController)
             DisposableEffect(Unit) {
+                Log.d(TAG, "onCreate - DisposableEffect: $timeAppWentToBackground")
                 navController.addOnDestinationChangedListener(this@MainActivity)
                 // since auth is required; we will cover the scrren with lock_screen
                 // only when user authenticate can remove this veil.
