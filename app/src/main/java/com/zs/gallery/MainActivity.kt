@@ -24,7 +24,6 @@ import android.content.res.Configuration
 import android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import android.hardware.biometrics.BiometricPrompt
-import android.hardware.biometrics.BiometricPrompt.AuthenticationCallback
 import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
@@ -35,6 +34,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Downloading
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
@@ -69,6 +69,7 @@ import com.primex.core.getText2
 import com.primex.core.runCatching
 import com.primex.preferences.Key
 import com.primex.preferences.Preferences
+import com.primex.preferences.intPreferenceKey
 import com.primex.preferences.longPreferenceKey
 import com.primex.preferences.observeAsState
 import com.primex.preferences.value
@@ -81,7 +82,6 @@ import com.zs.gallery.common.getPackageInfoCompat
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -90,7 +90,7 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
-import android.widget.Toast as PlatformToast
+import com.zs.foundation.showPlatformToast as showAndroidToast
 
 private const val TAG = "MainActivity"
 
@@ -113,6 +113,10 @@ private val STANDARD_REVIEW_DELAY = 5.days
 
 private val KEY_LAST_REVIEW_TIME =
     longPreferenceKey(TAG + "_last_review_time", 0)
+
+private val KEY_APP_VERSION_CODE =
+    intPreferenceKey(TAG + "_app_version_code", -1)
+
 
 /**
  * @property inAppUpdateProgress A simple property that represents the progress of the in-app update.
@@ -200,12 +204,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         }
     }
 
-    override fun showPlatformToast(string: Int) =
-        PlatformToast.makeText(this, getString(string), PlatformToast.LENGTH_SHORT).show()
-
-    override fun showPlatformToast(string: String) =
-        PlatformToast.makeText(this, string, PlatformToast.LENGTH_SHORT).show()
-
     @RequiresApi(Build.VERSION_CODES.P)
     override fun authenticate(subtitle: String?, desc: String?, onAuthenticated: () -> Unit) {
         Log.d(TAG, "preparing to show authentication dialog.")
@@ -256,6 +254,12 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             }
         )
     }
+
+    override fun showPlatformToast(message: String, duration: Int) =
+        showAndroidToast(message, duration)
+
+    override fun showPlatformToast(message: Int, duration: Int) =
+        showAndroidToast(message, duration)
 
     override fun <T> getDeviceService(name: String): T =
         getSystemService(name) as T
@@ -391,6 +395,14 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         flow1.combine(flow2) { _, _ -> enableEdgeToEdge() }
             .launchIn(scope = lifecycleScope)
         lifecycleScope.launch { launchUpdateFlow() }
+
+        // show what's new message on click.
+        val versionCode = BuildConfig.VERSION_CODE
+        val savedVersionCode = preferences.value(KEY_APP_VERSION_CODE)
+        if (savedVersionCode != versionCode){
+            preferences[KEY_APP_VERSION_CODE] = versionCode
+            showToast(R.string.what_s_new_latest, duration = Toast.DURATION_INDEFINITE)
+        }
     }
 
     override fun launchUpdateFlow(report: Boolean) {

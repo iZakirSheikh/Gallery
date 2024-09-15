@@ -337,44 +337,42 @@ private fun NavigationBar(
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
-    val routes = remember {
-        movableContentOf {
-            // Get the current navigation destination from NavController
-            val current by navController.currentBackStackEntryAsState()
-            val colors = NavigationItemDefaults.navigationItemColors()
-            val domain = current?.destination?.domain
-            val facade = LocalSystemFacade.current
+    val routes = @Composable {
+        // Get the current navigation destination from NavController
+        val current by navController.currentBackStackEntryAsState()
+        val colors = NavigationItemDefaults.navigationItemColors()
+        val domain = current?.destination?.domain
+        val facade = LocalSystemFacade.current
 
-            // Timeline
-            NavItem(
-                label = { Label(text = textResource(R.string.photos)) },
-                icon = { Icon(imageVector = Icons.Filled.PhotoLibrary, contentDescription = null) },
-                checked = domain == RouteTimeline.domain,
-                onClick = { facade.launchReviewFlow(); navController.toRoute(RouteTimeline) },
-                typeRail = typeRail,
-                colors = colors
-            )
+        // Timeline
+        NavItem(
+            label = { Label(text = textResource(R.string.photos)) },
+            icon = { Icon(imageVector = Icons.Filled.PhotoLibrary, contentDescription = null) },
+            checked = domain == RouteTimeline.domain,
+            onClick = { facade.launchReviewFlow(); navController.toRoute(RouteTimeline) },
+            typeRail = typeRail,
+            colors = colors
+        )
 
-            // Folders
-            NavItem(
-                label = { Label(text = textResource(R.string.folders)) },
-                icon = { Icon(imageVector = Icons.Filled.FolderCopy, contentDescription = null) },
-                checked = domain == RouteFolders.domain,
-                onClick = { facade.launchReviewFlow(); navController.toRoute(RouteFolders) },
-                typeRail = typeRail,
-                colors = colors
-            )
+        // Folders
+        NavItem(
+            label = { Label(text = textResource(R.string.folders)) },
+            icon = { Icon(imageVector = Icons.Filled.FolderCopy, contentDescription = null) },
+            checked = domain == RouteFolders.domain,
+            onClick = { facade.launchReviewFlow(); navController.toRoute(RouteFolders) },
+            typeRail = typeRail,
+            colors = colors
+        )
 
-            // Settings
-            NavItem(
-                label = { Label(text = textResource(R.string.settings)) },
-                icon = { Icon(imageVector = Icons.Filled.Settings, contentDescription = null) },
-                checked = domain == RouteSettings.domain,
-                onClick = { facade.launchReviewFlow(); navController.toRoute(RouteSettings) },
-                typeRail = typeRail,
-                colors = colors
-            )
-        }
+        // Settings
+        NavItem(
+            label = { Label(text = textResource(R.string.settings)) },
+            icon = { Icon(imageVector = Icons.Filled.Settings, contentDescription = null) },
+            checked = domain == RouteSettings.domain,
+            onClick = { facade.launchReviewFlow(); navController.toRoute(RouteSettings) },
+            typeRail = typeRail,
+            colors = colors
+        )
     }
 
     // Get the current theme colors

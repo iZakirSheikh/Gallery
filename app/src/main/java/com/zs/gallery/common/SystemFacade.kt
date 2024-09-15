@@ -205,22 +205,14 @@ interface SystemFacade {
     }
 
     /**
-     * Displays a toast message using the platform's default toast mechanism.
-     *
-     * This function shows a short toast message with the provided text.
-     *
-     * @param string The text message to display in the toast.
+     * @see com.zs.foundation.showPlatformToast
      */
-    fun showPlatformToast(string: String)
+    fun showPlatformToast(message: String, @Duration duration: Int = Toast.DURATION_SHORT)
 
     /**
-     * Displays a toast message using the platform's default toast mechanism.
-     *
-     * This function shows a short toast message with the text from the specified string resource.
-     *
-     * @param string The string resource ID of the text message to display in the toast.
+     * @see com.zs.foundation.showPlatformToast
      */
-    fun showPlatformToast(@StringRes string: Int)
+    fun showPlatformToast(@StringRes message: Int, @Duration duration: Int = Toast.DURATION_SHORT)
 
     /**
      * Returns the handle to a system-level service by name.

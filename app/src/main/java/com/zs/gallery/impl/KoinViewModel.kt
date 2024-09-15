@@ -35,7 +35,7 @@ import com.zs.foundation.toast.ToastHostState
 import org.koin.androidx.scope.ScopeViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.component.inject
-import android.widget.Toast as AndroidToast
+import com.zs.foundation.showPlatformToast as showAndroidToast
 
 private const val TAG = "KoinViewModel"
 
@@ -47,12 +47,14 @@ abstract class KoinViewModel: ScopeViewModel() {
     private val context: Application by inject()
 
     fun showPlatformToast(
-        @StringRes message: Int
-    ) = AndroidToast.makeText(context, message, AndroidToast.LENGTH_LONG).show()
+        @StringRes message: Int,
+        @Duration duration: Int = Toast.DURATION_SHORT
+    ) = context.showAndroidToast(message, duration)
 
     fun showPlatformToast(
-        message: String
-    ) = AndroidToast.makeText(context, message, AndroidToast.LENGTH_LONG).show()
+        message: String,
+        @Duration duration: Int = Toast.DURATION_SHORT
+    )  = context.showAndroidToast(message, duration)
 
     suspend fun showToast(
         message: CharSequence,

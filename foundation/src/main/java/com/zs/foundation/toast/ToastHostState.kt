@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalAccessibilityManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * A class that manages the display of [Toast] messages, ensuring only one Toast is shown at a time.
@@ -62,12 +63,14 @@ class ToastHostState {
         accent: Color = Color.Unspecified,
         @Duration duration: Int = if (action == null) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE
     ): @Result Int {
-        try {
-            return suspendCancellableCoroutine { continuation ->
-                current = Data(icon, message, duration, action, accent, continuation)
+        mutex.withLock {
+            try {
+                return suspendCancellableCoroutine { continuation ->
+                    current = Data(icon, message, duration, action, accent, continuation)
+                }
+            } finally {
+                current = null
             }
-        } finally {
-            current = null
         }
     }
 }
@@ -90,7 +93,7 @@ fun ToastHost(
     }
     FadeInFadeOutWithScale(
         current = state.current, modifier = modifier, content = {
-            Toast(state = it)
+            Toast(it)
         }
     )
 }

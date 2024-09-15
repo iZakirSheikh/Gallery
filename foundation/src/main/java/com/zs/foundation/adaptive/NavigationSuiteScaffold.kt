@@ -39,6 +39,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.UiComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.zs.foundation.toast.ToastHost
 import com.zs.foundation.toast.ToastHostState
@@ -70,109 +75,6 @@ val WindowInsets.Companion.contentInsets
  */
 private val STANDARD_SPACING = 8.dp
 
-@Composable
-private inline fun Vertical(
-    content: @UiComposable @Composable () -> Unit,
-    crossinline onNewInsets: (PaddingValues) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // Insets for the system navigation bar. This will be used to adjust
-    // the position of elements when the navigation bar is hidden.
-    val systemNavBarInsets = WindowInsets.navigationBars
-    Layout(
-        content = content,
-        modifier = modifier,
-    ) { measurables, c ->
-        val width = c.maxWidth;
-        val height = c.maxHeight
-        // Measure the size requirements of each child element, allowing
-        // them to use the full width
-        val constraints = c.copy(minHeight = 0)
-        val toastPlaceable = measurables[INDEX_TOAST].measure(constraints)
-        val progressBarPlaceable = measurables[INDEX_PROGRESS_BAR].measure(constraints)
-        val navBarPlaceable = measurables[INDEX_NAV_BAR].measure(constraints)
-        // Measure content against original constraints.
-        // the content must fill the entire screen.
-        val contentPlaceable = measurables[INDEX_CONTENT].measure(c)
-        // Calculate the insets for the content.
-        // and report through onNewIntent
-        onNewInsets(PaddingValues(bottom = navBarPlaceable.height.toDp()))
-        // Place the content
-        layout(width, height) {
-            var x = 0;
-            var y = 0
-            // Place the main content at the top, filling the space up to the navigation bar
-            contentPlaceable.placeRelative(x, y)
-            // Place navbar at the bottom of the screen.
-            x = 0; y = height - navBarPlaceable.height
-            navBarPlaceable.placeRelative(x, y)
-            // Place progress bar at the very bottom of the screen, ignoring system insets
-            // (it might overlap system bars if they are not colored)
-            x = width / 2 - progressBarPlaceable.width / 2
-            y = (height - progressBarPlaceable.height)
-            progressBarPlaceable.placeRelative(x, y)
-            // we only need bottom insets since we are placing above the navBar
-            val insetBottom =
-                if (navBarPlaceable.height == 0) systemNavBarInsets.getBottom(density = this@Layout) else 0
-            // Place Toast at the centre bottom of the screen
-            // remove nav bar offset from it.
-            x = width / 2 - toastPlaceable.width / 2   // centre
-            // full height - toaster height - navbar - 16dp padding + navbar offset.
-            y =
-                (height - navBarPlaceable.height - toastPlaceable.height - STANDARD_SPACING.roundToPx() - insetBottom)
-            toastPlaceable.placeRelative(x, y)
-        }
-    }
-}
-
-@Composable
-private inline fun Horizontal(
-    content: @UiComposable @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    // Insets for the system navigation bar. This will be used to adjust
-    // the position of elements when the navigation bar is hidden.
-    val systemNavBarInsets = WindowInsets.navigationBars
-    Layout(
-        content = content,
-        modifier = modifier,
-    ) { measurables, c ->
-        val width = c.maxWidth;
-        val height = c.maxHeight
-        // Measure the size requirements of each child element
-        // Allow the elements to have a custom size by not constraining them.
-        var constraints = c.copy(minHeight = 0)
-        val progressBarPlaceable = measurables[INDEX_PROGRESS_BAR].measure(constraints)
-        constraints = c.copy(minHeight = 0, minWidth = 0)
-        val toastPlaceable = measurables[INDEX_TOAST].measure(constraints)
-        val navBarPlaceable = measurables[INDEX_NAV_BAR].measure(constraints)
-        // Calculate the width available for the main content, excluding the navigation bar
-        val contentWidth = width - navBarPlaceable.width
-        constraints = c.copy(minWidth = contentWidth, maxWidth = contentWidth)
-        val contentPlaceable = measurables[INDEX_CONTENT].measure(constraints)
-        layout(width, height) {
-            var x = 0;
-            var y = 0
-            // place nav_bar from top at the start of the screen
-            navBarPlaceable.placeRelative(x, y)
-            x = navBarPlaceable.width
-            // Place the main content at the top, after nav_bar width
-            contentPlaceable.placeRelative(x, y)
-            // Place progress bar at the very bottom of the screen, ignoring system insets
-            // (it might overlap system bars if they are not colored)
-            x = width / 2 - progressBarPlaceable.width / 2
-            y = (height - progressBarPlaceable.height)
-            progressBarPlaceable.placeRelative(x, y)
-            // Place toast above the system navigationBar at the centre of the screen.
-            val insetBottom = systemNavBarInsets.getBottom(density = this@Layout)
-            x = width / 2 - toastPlaceable.width / 2   // centre
-            // full height - toaster height - navbar - 16dp padding + navbar offset.
-            y = (height - toastPlaceable.height - STANDARD_SPACING.roundToPx() - insetBottom)
-            toastPlaceable.placeRelative(x, y)
-        }
-    }
-}
-
 /**
  * A flexible Scaffold composable for navigation-based layouts.
  *
@@ -202,40 +104,136 @@ fun NavigationSuiteScaffold(
     navBar: @Composable () -> Unit,
 ) {
     // Compose all the individual elements of the Scaffold into a single composable
-    val (insets, onNewInsets) = remember { mutableStateOf(EmptyPadding) }
-    val composed = @Composable {
-        // Provide the content color for the main content
-        CompositionLocalProvider(
-            LocalContentColor provides contentColor,
-            LocalContentInsets provides insets,
-            content = content
-        )
-        // Conditionally display the navigation bar based on
-        // 'hideNavigationBar'
-        // Display the navigation bar (either bottom bar or navigation rail)
-        when {
-            // Don't show anything.
-            hideNavigationBar -> Spacer(modifier = Modifier)
-            else -> navBar()
+    val (insets, onNewInsets) =
+        remember { mutableStateOf(EmptyPadding) }
+    val navBarInsets = WindowInsets.navigationBars
+    Layout(
+        modifier = modifier
+            .background(background)
+            .fillMaxSize(),
+        measurePolicy = remember(vertical, navBarInsets) {
+            when{
+                vertical -> NavVerticalMeasurePolicy(navBarInsets, onNewInsets)
+                else -> NavHorizontalMeasurePolicy(navBarInsets, onNewInsets)
+            }
+        },
+        content = {
+            // Provide the content color for the main content
+            CompositionLocalProvider(
+                LocalContentColor provides contentColor,
+                LocalContentInsets provides insets,
+                content = content
+            )
+            // Conditionally display the navigation bar based on
+            // 'hideNavigationBar'
+            // Display the navigation bar (either bottom bar or navigation rail)
+            when {
+                // Don't show anything.
+                hideNavigationBar -> Spacer(modifier = Modifier)
+                else -> navBar()
+            }
+            // Display the Snackbar using the provided channel
+            ToastHost(toastHostState)
+            // Conditionally display the progress bar based on the 'progress' value
+            // Show an indeterminate progress bar when progress is -1
+            // Show a determinate progress bar when progress is between 0 and 1
+            when {
+                progress == -1f -> LinearProgressIndicator()
+                !progress.isNaN() -> LinearProgressIndicator(progress = progress)
+                else -> Spacer(modifier = Modifier)
+            }
         }
-        // Display the Snackbar using the provided channel
-        ToastHost(toastHostState)
-        // Conditionally display the progress bar based on the 'progress' value
-        // Show an indeterminate progress bar when progress is -1
-        // Show a determinate progress bar when progress is between 0 and 1
-        when {
-            progress == -1f -> LinearProgressIndicator()
-            !progress.isNaN() -> LinearProgressIndicator(progress = progress)
-            else -> Spacer(modifier = Modifier)
+    )
+}
+
+private class NavVerticalMeasurePolicy(
+    private val insets: WindowInsets,
+    private val onNewInsets: (PaddingValues) -> Unit
+): MeasurePolicy {
+    override fun MeasureScope.measure(measurables: List<Measurable>, c: Constraints): MeasureResult {
+        val width = c.maxWidth;
+        val height = c.maxHeight
+        // Measure the size requirements of each child element, allowing
+        // them to use the full width
+        val constraints = c.copy(minHeight = 0)
+        val toastPlaceable = measurables[INDEX_TOAST].measure(constraints)
+        val progressBarPlaceable = measurables[INDEX_PROGRESS_BAR].measure(constraints)
+        val navBarPlaceable = measurables[INDEX_NAV_BAR].measure(constraints)
+        // Measure content against original constraints.
+        // the content must fill the entire screen.
+        val contentPlaceable = measurables[INDEX_CONTENT].measure(c)
+        // Calculate the insets for the content.
+        // and report through onNewIntent
+        onNewInsets(PaddingValues(bottom = navBarPlaceable.height.toDp()))
+        // Place the content
+        return layout(width, height){
+            var x = 0;
+            var y = 0
+            // Place the main content at the top, filling the space up to the navigation bar
+            contentPlaceable.placeRelative(x, y)
+            // Place navbar at the bottom of the screen.
+            x = 0; y = height - navBarPlaceable.height
+            navBarPlaceable.placeRelative(x, y)
+            // Place progress bar at the very bottom of the screen, ignoring system insets
+            // (it might overlap system bars if they are not colored)
+            x = width / 2 - progressBarPlaceable.width / 2
+            y = (height - progressBarPlaceable.height)
+            progressBarPlaceable.placeRelative(x, y)
+            // we only need bottom insets since we are placing above the navBar
+            val insetBottom =
+                if (navBarPlaceable.height == 0) insets.getBottom(density = this@measure) else 0
+            // Place Toast at the centre bottom of the screen
+            // remove nav bar offset from it.
+            x = width / 2 - toastPlaceable.width / 2   // centre
+            // full height - toaster height - navbar - 16dp padding + navbar offset.
+            y =
+                (height - navBarPlaceable.height - toastPlaceable.height - STANDARD_SPACING.roundToPx() - insetBottom)
+            toastPlaceable.placeRelative(x, y)
         }
     }
-    // Apply background color and fill the available space with the Scaffold
-    val finalModifier = modifier
-        .background(background)
-        .fillMaxSize()
-    // Choose the layout based on 'vertical' flag
-    when (vertical) {
-        true -> Vertical(content = composed, onNewInsets, modifier = finalModifier)
-        else -> Horizontal(content = composed, modifier = finalModifier)
+}
+
+private class NavHorizontalMeasurePolicy(
+    private val insets: WindowInsets,
+    private val onNewInsets: (PaddingValues) -> Unit
+): MeasurePolicy {
+    override fun MeasureScope.measure(measurables: List<Measurable>, c: Constraints): MeasureResult {
+        val width = c.maxWidth;
+        val height = c.maxHeight
+        // Measure the size requirements of each child element
+        // Allow the elements to have a custom size by not constraining them.
+        var constraints = c.copy(minHeight = 0)
+        val progressBarPlaceable = measurables[INDEX_PROGRESS_BAR].measure(constraints)
+        constraints = c.copy(minHeight = 0, minWidth = 0)
+        val toastPlaceable = measurables[INDEX_TOAST].measure(constraints)
+        val navBarPlaceable = measurables[INDEX_NAV_BAR].measure(constraints)
+        // Calculate the width available for the main content, excluding the navigation bar
+        val contentWidth = width - navBarPlaceable.width
+        constraints = c.copy(minWidth = contentWidth, maxWidth = contentWidth)
+        val contentPlaceable = measurables[INDEX_CONTENT].measure(constraints)
+        // Calculate the insets for the content.
+        // and report through onNewIntent
+        // onNewInsets(PaddingValues(start = navBarPlaceable.width.toDp()))
+        // Place the content
+        return layout(width, height) {
+            var x = 0;
+            var y = 0
+            // place nav_bar from top at the start of the screen
+            navBarPlaceable.placeRelative(x, y)
+            x = navBarPlaceable.width
+            // Place the main content at the top, after nav_bar width
+            contentPlaceable.placeRelative(x, y)
+            // Place progress bar at the very bottom of the screen, ignoring system insets
+            // (it might overlap system bars if they are not colored)
+            x = width / 2 - progressBarPlaceable.width / 2
+            y = (height - progressBarPlaceable.height)
+            progressBarPlaceable.placeRelative(x, y)
+            // Place toast above the system navigationBar at the centre of the screen.
+            val insetBottom = insets.getBottom(density = this@measure)
+            x = width / 2 - toastPlaceable.width / 2   // centre
+            // full height - toaster height - navbar - 16dp padding + navbar offset.
+            y = (height - toastPlaceable.height - STANDARD_SPACING.roundToPx() - insetBottom)
+            toastPlaceable.placeRelative(x, y)
+        }
     }
 }

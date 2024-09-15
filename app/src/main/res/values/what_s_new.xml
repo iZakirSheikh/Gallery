@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <string name="what_s_new_latest" translatable="false">
+        <b>What\'s new</b>
+        <font color='grey'>
+            \n🐞 Bug fixes and performance enhancements
+            \n✨ Enhanced Toast/Snackbar: Now supports swipe to dismiss and expandability
+            \n<b>In Focus</b>
+            \n1. 🎥 In-App Media Player.
+            \n2. Support for various file types: GIF, SVG, etc.
+            \n3. General performance improvements
+        </font>
+    </string>
+
+    <!--20_dev20-->
+    <string name="what_s_new_20_dev20">
+        <b>0.1.0-dev20</b>
+        <font color='grey'>
+            \n🌟 Thanks for using our app! ❤️😍
+            \n🌟 Biometric Authentication: Supports Android 9+.
+            \n🌟 UI Updates: We\'ve made improvements to the design and navigation.
+            \n🌟 Introduced Favourites and Recycle Bin in Folders
+            \n🌟 Bug Fixes: We\'ve resolved issues with loading and app lock.
+            \n🌟 Some minor bug fixes
+        </font>
+    </string>
+
+    <!---->
+    <string-array name="what_s_new">
+        <!--first is always latest-->
+        <item>@string/what_s_new_latest</item>
+        <item>@string/what_s_new_20_dev20</item>
+    </string-array>
+</resources>

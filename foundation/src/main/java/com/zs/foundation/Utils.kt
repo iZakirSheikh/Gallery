@@ -2,11 +2,12 @@ package com.zs.foundation
 
 import android.content.Context
 import android.content.pm.PackageManager
+import androidx.annotation.StringRes
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.InvocationKind
-import kotlin.contracts.contract
+import com.zs.foundation.toast.Duration
+import com.zs.foundation.toast.Toast
+import android.widget.Toast as AndroidWidgetToast
 
 /**
  * Checks if a given permission is granted for the application in the current context.
@@ -50,3 +51,36 @@ inline fun Modifier.thenIf(condition: Boolean, crossinline value: Modifier.() ->
     }
     return if (condition) this then Modifier.value() else this
 }*/
+
+/**
+ * Shows a platform Toast message with the given text.
+ *
+ * This function uses the standard Android Toast class to display a short message to the user.
+ *
+ * @param message The text message to display in the Toast.
+ * @param duration The duration of the Toast. Must be either [Toast.DURATION_SHORT] or [Toast.DURATION_LONG].
+ */
+fun Context.showPlatformToast(message: String, @Duration duration: Int = Toast.DURATION_SHORT) {
+    // Ensure the duration is valid
+    require(duration == Toast.DURATION_SHORT || duration == Toast.DURATION_LONG) {
+        "Duration must be either Toast.DURATION_SHORT or Toast.DURATION_LONG"
+    }
+    // Create and show the Toast
+    val toastDuration = if (duration == Toast.DURATION_SHORT) AndroidWidgetToast.LENGTH_SHORT else AndroidWidgetToast.LENGTH_LONG
+    AndroidWidgetToast.makeText(this, message, toastDuration).show()
+}
+
+/**
+ * @see showPlatformToast
+ */
+fun Context.showPlatformToast(
+    @StringRes message: Int,
+    @Duration duration: Int = Toast.DURATION_SHORT
+) {
+    require(duration == Toast.DURATION_SHORT || duration == Toast.DURATION_LONG) {
+        "Duration must be either Toast.DURATION_SHORT or Toast.DURATION_LONG"
+    }
+    // Create and show the Toast
+    val toastDuration = if (duration == Toast.DURATION_SHORT) AndroidWidgetToast.LENGTH_SHORT else AndroidWidgetToast.LENGTH_LONG
+    AndroidWidgetToast.makeText(this, message, toastDuration).show()
+}
