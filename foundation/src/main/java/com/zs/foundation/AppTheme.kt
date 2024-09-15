@@ -67,9 +67,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import androidx.core.graphics.ColorUtils
 import com.primex.core.BlueLilac
+import com.primex.core.MetroGreen
 import com.primex.core.MetroGreen2
 import com.primex.core.OrientRed
 import com.primex.core.Rose
+import com.primex.core.SepiaBrown
 import com.primex.core.SignalWhite
 import com.primex.core.TrafficYellow
 import com.primex.core.UmbraGrey
@@ -416,7 +418,7 @@ fun AppTheme(
     fontFamily: FontFamily = FontFamily.Default,
     content: @Composable () -> Unit
 ) {
-    val accent = if (!isLight) Color.TrafficYellow else Color.BlueLilac
+    val accent = if (!isLight) Color.TrafficYellow else Color.SepiaBrown
     val background by animateColorAsState(
         targetValue = if (!isLight) Color(0xFF0E0E0F) else applyTonalElevation(
             accent,

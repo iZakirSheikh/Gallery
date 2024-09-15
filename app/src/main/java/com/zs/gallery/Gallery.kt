@@ -438,6 +438,7 @@ fun Gallery(
             toastHostState = toastHostState,
             hideNavigationBar = !requiresNavBar,
             background = AppTheme.colors.background,
+            progress = activity.inAppUpdateProgress,
             // Set up the navigation bar using the NavBar composable
             navBar = {
                 NavigationBar(

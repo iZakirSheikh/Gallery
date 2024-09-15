@@ -24,6 +24,7 @@ import android.content.res.Configuration
 import android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import android.hardware.biometrics.BiometricPrompt
+import android.hardware.biometrics.BiometricPrompt.AuthenticationCallback
 import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
@@ -37,7 +38,9 @@ import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -123,7 +126,8 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
     private val toastHostState: ToastHostState by inject()
     private val preferences: Preferences by inject()
     private var navController: NavHostController? = null
-    private val inAppUpdateProgress = mutableFloatStateOf(Float.NaN)
+    var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
+    private set
 
     /**
      * Timestamp (mills) indicating when the app last went to the background.
@@ -236,7 +240,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             object : BiometricPrompt.AuthenticationCallback() {
                 // Implement callback methods for authentication events (success, error, etc.)
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
-                    showPlatformToast("Authentication Successful! Welcome back.")
+                    showPlatformToast("Authentication Successful!")
                     onAuthenticated()
                 }
 
@@ -387,11 +391,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         flow1.combine(flow2) { _, _ -> enableEdgeToEdge() }
             .launchIn(scope = lifecycleScope)
         lifecycleScope.launch { launchUpdateFlow() }
-        if (isAuthenticationRequired)
-            lifecycleScope.launch {
-                delay(1000)
-                unlock()
-            }
     }
 
     override fun launchUpdateFlow(report: Boolean) {
@@ -408,7 +407,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                         total == downloaded -> Float.NaN
                         else -> downloaded / total.toFloat()
                     }
-                    inAppUpdateProgress.floatValue = progress
+                    inAppUpdateProgress = progress
                 }
 
                 is AppUpdateResult.Downloaded -> {
@@ -525,6 +524,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                     navController.navigate(RouteLockScreen()) {
                         launchSingleTop = true
                     }
+                    unlock()
                 }
                 this@MainActivity.navController = navController
                 onDispose {
