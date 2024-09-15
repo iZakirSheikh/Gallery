@@ -68,7 +68,7 @@ val NavHostController.current
 /**
  * Extracts the domain portion from a [NavDestination]'s route.
  *
- * The domain is considered to be the part ofthe route before the first '/'.
+ * The domain is considered to be the part of the route before the first '/'.
  * For example, for the route "settings/profile", the domain would be "settings".
  *
  * @return The domain portion of the route, or null if the route is null or does not contain a '/'.

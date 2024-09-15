@@ -152,6 +152,7 @@ abstract class MainViewModel<T>(
         val data = selected.toLongArray()
         // Clear the selected items list.
         selected.clear()
+        Log.d(TAG, "consume: ${data.size}")
         return data
     }
 
@@ -233,6 +234,7 @@ abstract class MainViewModel<T>(
         if (isTrashEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             trash(activity)
         else {
+            Log.d(TAG, "remove: ${selected.size}")
             delete(activity)
         }
     }
@@ -241,10 +243,10 @@ abstract class MainViewModel<T>(
         viewModelScope.launch {
             val result = runCatching(TAG) {
                 // Get the selected items for deletion
-                val selected = consume()
+                val consumed = consume()
                 // For Android R and above, use the provider's delete function directly
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                    return@runCatching provider.delete(activity, *selected)
+                    return@runCatching provider.delete(activity, *consumed)
                 // For versions below Android R, show a confirmation toast
                 // If the user performs the action, proceed with deletion
                 // Otherwise, return -3 to indicate user cancellation
@@ -257,16 +259,17 @@ abstract class MainViewModel<T>(
                 )
                 // Delete the selected items
                 // else return -3 to indicate user cancellation
-                return@runCatching if (action == Toast.ACTION_PERFORMED)
-                    provider.delete(*selected)
-                else
-                    -3
+                if (action == Toast.ACTION_PERFORMED)
+                    return@runCatching provider.delete(*consumed)
+                // else return user cancelled
+                -3
             }
             // Display a message based on the result of the deletion operation.
             if (result == null || result == 0 || result == -1)
                 showToast(R.string.msg_files_delete_unknown_error)// General error
         }
     }
+
 
     override fun share(activity: Activity) {
         viewModelScope.launch {

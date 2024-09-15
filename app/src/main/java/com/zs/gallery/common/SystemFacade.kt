@@ -162,9 +162,10 @@ interface SystemFacade {
      *
      * @param onAuthenticated A callback function that will be executed upon successful authentication.
      * @param desc A description of the authentication process. This description will be displayed
+     * @param subtitle A subtitle for the biometric prompt.
      */
     @RequiresApi(Build.VERSION_CODES.P)
-    fun authenticate(desc: String? = null, onAuthenticated: () -> Unit)
+    fun authenticate(subtitle: String? = null, desc: String? = null, onAuthenticated: () -> Unit)
 
     /**
      * Guides the user to the system settings for biometric enrollment.

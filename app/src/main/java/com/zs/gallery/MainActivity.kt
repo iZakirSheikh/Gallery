@@ -78,6 +78,7 @@ import com.zs.gallery.common.getPackageInfoCompat
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -188,7 +189,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         // automatically navigated to the lock screen in onCreate().
         if (timeAppWentToBackground != -1L && isAuthenticationRequired) {
             Log.d(TAG, "onResume: navigating -> RouteLockScreen.")
-            navController?.navigate(RouteLockScreen()){
+            navController?.navigate(RouteLockScreen()) {
                 launchSingleTop = true
             }
             unlock()
@@ -202,12 +203,12 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         PlatformToast.makeText(this, string, PlatformToast.LENGTH_SHORT).show()
 
     @RequiresApi(Build.VERSION_CODES.P)
-    override fun authenticate(desc: String?, onAuthenticated: () -> Unit) {
+    override fun authenticate(subtitle: String?, desc: String?, onAuthenticated: () -> Unit) {
         Log.d(TAG, "preparing to show authentication dialog.")
         // Build the BiometricPrompt
         val prompt = BiometricPrompt.Builder(this).apply {
             setTitle(getString(R.string.scr_lock_screen_title))
-            setSubtitle(getString(R.string.scr_lock_screen_subtitle))
+            if (subtitle != null) setSubtitle(subtitle)
             if (desc != null) setDescription(desc)
             // Set allowed authenticators for Android R and above
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
@@ -256,7 +257,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         getSystemService(name) as T
 
     @SuppressLint("NewApi")
-    override fun unlock() = authenticate(getString(R.string.src_lock_screen_desc)) {
+    override fun unlock() = authenticate() {
         val navController = navController ?: return@authenticate
         // if it is initial app_lock update timeAppWentToBackground to 0
         if (timeAppWentToBackground == -1L)
@@ -386,6 +387,11 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         flow1.combine(flow2) { _, _ -> enableEdgeToEdge() }
             .launchIn(scope = lifecycleScope)
         lifecycleScope.launch { launchUpdateFlow() }
+        if (isAuthenticationRequired)
+            lifecycleScope.launch {
+                delay(1000)
+                unlock()
+            }
     }
 
     override fun launchUpdateFlow(report: Boolean) {
@@ -516,8 +522,9 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                 // since auth is required; we will cover the scrren with lock_screen
                 // only when user authenticate can remove this veil.
                 if (isAuthenticationRequired) {
-                    navController.navigate(RouteLockScreen())
-                    unlock()
+                    navController.navigate(RouteLockScreen()) {
+                        launchSingleTop = true
+                    }
                 }
                 this@MainActivity.navController = navController
                 onDispose {
