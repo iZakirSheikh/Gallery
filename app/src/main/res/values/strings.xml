@@ -104,5 +104,9 @@
     <string name="pref_app_lock">App Lock &beta;</string>
     <string name="pref_app_lock_summery"><b>Unlock with biometrics</b>\nWhen enabled, you\'ll need to use the fingerprint, face or other unique identifiers to open &appname;.</string>
     <string name="msg_favourites_updated">Favorites updated!</string>
+    <string name="msg_media_player_promotion"><b>New Media Player App!</b>
+        <font color ='gray'>\n🎶 Check out our new <b>Media Player!</b> Enjoy your favorite tunes and videos effortlessly. Give it a try! 🎥</font>
+    </string>
+    <string name="get">Get</string>
 
 </resources>

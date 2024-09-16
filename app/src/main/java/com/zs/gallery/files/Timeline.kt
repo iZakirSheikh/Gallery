@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HotelClass
+import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.Share
@@ -83,6 +84,7 @@ import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.contentInsets
 import com.zs.foundation.sharedBounds
 import com.zs.foundation.sharedElement
+import com.zs.foundation.toast.Toast
 import com.zs.gallery.R
 import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.common.FloatingActionMenu
@@ -105,11 +107,14 @@ private fun TopAppBar(
 ) {
     LargeTopAppBar(
         navigationIcon = {
-            Icon(
+            val facade = LocalSystemFacade.current
+            IconButton(
                 painter = painterResource(id = R.drawable.ic_app),
                 contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.padding(AppTheme.padding.normal)
+                tint = null,
+                onClick = {
+                    facade.showToast(R.string.what_s_new_latest, Icons.Outlined.NewReleases, duration = Toast.DURATION_INDEFINITE)
+                }
             )
         },
         title = { Text(text = textResource(id = R.string.timeline)) },

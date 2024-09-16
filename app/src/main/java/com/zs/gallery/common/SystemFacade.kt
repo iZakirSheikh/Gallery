@@ -49,20 +49,24 @@ private const val PKG_MARKET_ID = "com.android.vending"
 
 interface SystemFacade {
 
+    /**
+     * @see com.zs.foundation.toast.ToastHostState.showToast
+     */
     fun showToast(
         message: CharSequence,
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
-        action: CharSequence? = null,
-        @Duration duration: Int = if (action == null) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE,
+        @Duration duration: Int = Toast.DURATION_SHORT,
     )
 
+    /**
+     * @see com.zs.foundation.toast.ToastHostState.showToast
+     */
     fun showToast(
         @StringRes message: Int,
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
-        @StringRes action: Int = ResourcesCompat.ID_NULL,
-        @Duration duration: Int = if (action == ResourcesCompat.ID_NULL) Toast.DURATION_SHORT else Toast.DURATION_INDEFINITE,
+        @Duration duration: Int = Toast.DURATION_SHORT,
     )
 
     /**

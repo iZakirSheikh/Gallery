@@ -34,6 +34,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Downloading
+import androidx.compose.material.icons.outlined.GetApp
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -65,6 +66,7 @@ import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
 import com.google.firebase.crashlytics.crashlytics
 import com.primex.core.MetroGreen
+import com.primex.core.Rose
 import com.primex.core.getText2
 import com.primex.core.runCatching
 import com.primex.preferences.Key
@@ -82,6 +84,7 @@ import com.zs.gallery.common.getPackageInfoCompat
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -131,7 +134,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
     private val preferences: Preferences by inject()
     private var navController: NavHostController? = null
     var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
-    private set
+        private set
 
     /**
      * Timestamp (mills) indicating when the app last went to the background.
@@ -335,11 +338,10 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         message: CharSequence,
         icon: ImageVector?,
         accent: Color,
-        action: CharSequence?,
         duration: Int
     ) {
         lifecycleScope.launch {
-            toastHostState.showToast(message, action, icon, accent, duration)
+            toastHostState.showToast(message, null, icon, accent, duration)
         }
     }
 
@@ -347,15 +349,12 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         message: Int,
         icon: ImageVector?,
         accent: Color,
-        action: Int,
         duration: Int
     ) {
         lifecycleScope.launch {
-            val action =
-                if (action == ResourcesCompat.ID_NULL) null else resources.getText2(action)
             toastHostState.showToast(
                 resources.getText2(id = message),
-                action,
+                null,
                 icon,
                 accent,
                 duration
@@ -399,9 +398,27 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         // show what's new message on click.
         val versionCode = BuildConfig.VERSION_CODE
         val savedVersionCode = preferences.value(KEY_APP_VERSION_CODE)
-        if (savedVersionCode != versionCode){
+        if (savedVersionCode != versionCode) {
             preferences[KEY_APP_VERSION_CODE] = versionCode
             showToast(R.string.what_s_new_latest, duration = Toast.DURATION_INDEFINITE)
+        }
+
+        // promote media player
+        // TODO - properly handle promotional content.
+        lifecycleScope.launch {
+            val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER)
+            if (counter > 0 && counter % 5 == 0) {
+                delay(3000)
+                val result = toastHostState.showToast(
+                    message = resources.getText2(R.string.msg_media_player_promotion),
+                    icon = Icons.Outlined.NewReleases,
+                    duration = Toast.DURATION_INDEFINITE,
+                    action = resources.getText2(R.string.get),
+                    accent = Color.Rose
+                )
+                if (result == Toast.ACTION_PERFORMED)
+                    launchAppStore("com.prime.player")
+            }
         }
     }
 
