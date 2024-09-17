@@ -21,17 +21,16 @@ package com.zs.foundation.player
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
 
 /**
@@ -41,67 +40,39 @@ import kotlinx.coroutines.flow.callbackFlow
  * in a more concise and expressive way.
  *
  * @property value The underlying [Player] instance.
+ * @property duration The duration of the media content in milliseconds.
+ * @property position The current playback position in milliseconds.
+ * @property state The current playback state of the [Player].
+ * @property playWhenReady A boolean indicating whether the player should start playing when it becomes ready.
+ * @property isPlaying A boolean indicating whether the player is currently playing.
+ * @property onMediaStateChanged A [Flow] that emits a Unit value whenever the [Player.getPlaybackState] changes.
+ *
  * @see rememberPlayerController
  */
 @JvmInline
-value class PlayerController internal constructor(internal val value: Player){
+value class PlayerController internal constructor(internal val value: Player) {
 
+    /**
+     * @property TIME_UNSET Represents an unset time value.
+     * @property STATE_IDLE Player is idle.
+     * @property STATE_BUFFERING Player is buffering.
+     * @property STATE_READY Player is ready to play.
+     * @property STATE_ENDED Playback has ended.
+     */
     companion object {
-        /**
-         * Represents an unset time value.
-         * @see C.TIME_UNSET
-         */
         val TIME_UNSET = C.TIME_UNSET
-
-        /**
-         * Player is idle.
-         * @see Player.STATE_IDLE
-         */
         val STATE_IDLE = Player.STATE_IDLE
-
-        /**
-         * Player is buffering.
-         * @see Player.STATE_BUFFERING
-         */
         val STATE_BUFFERING = Player.STATE_BUFFERING
-
-        /**
-         * Player is ready to play.
-         * @see Player.STATE_READY
-         */
         val STATE_READY = Player.STATE_READY
-
-        /**
-         * Playback has ended.
-         * @see Player.STATE_ENDED
-         */
         val STATE_ENDED = Player.STATE_ENDED
     }
 
-    /**
-     * @see Player.getDuration
-     */
+
     val duration get() = value.duration
-
-    /**
-     * @see Player.getCurrentPosition
-     */
     val position get() = value.currentPosition
-
-    /**
-     * @see Player.getPlaybackState
-     */
     val state get() = value.playbackState
-
-    /**
-     * @see Player.getPlayWhenReady
-     */
     var playWhenReady get() = value.playWhenReady
         set(value) { this.value.playWhenReady = value }
-
-    /**
-     * @see Player.isPlaying
-     */
     val isPlaying get() = value.isPlaying
 
     /**
@@ -133,31 +104,63 @@ value class PlayerController internal constructor(internal val value: Player){
         awaitClose { value.removeListener(listener) }
     }
 
-
-    fun load(url: Uri){
-        value.setMediaItem(MediaItem.fromUri(url))
-        value.prepare()
-    }
+    fun setMediaItem(url: Uri) = value.setMediaItem(MediaItem.fromUri(url))
 
     fun play(playWhenReady: Boolean = true){
         this.playWhenReady = playWhenReady
         value.play()
     }
-
     fun pause() = value.pause()
     fun stop() = value.stop()
+    fun release() = value.release()
+    fun prepare() = value.prepare()
+    fun clear() = value.clearMediaItems()
 }
 
 /**
- * Creates and remembers a [PlayerController] instance.
+ * Creates and remembers a [PlayerController] instance using [remember].
+ *
+ * This composable function provides a convenient way to create and manage a `PlayerController` within a Jetpack Compose context.
+ * The `PlayerController` is created lazily and stored in the composition's memory, ensuring that it's only initialized once
+ * and reused across recompositions.
+ *
+ * @param handleAudioBecomingNoisy Whether the player should handle audio becoming noisy events. Defaults to false.
+ * @param handleAudioFocus Whether the player should handle audio focus changes. Defaults to false.
+ *
+ * @return A [PlayerController] instance that is remembered across recompositions.
  */
 @Composable
 @NonRestartableComposable
-fun rememberPlayerController(): PlayerController {
+fun rememberPlayerController(
+    handleAudioBecomingNoisy: Boolean = false,
+    handleAudioFocus: Boolean = false
+): PlayerController {
     val context = LocalContext.current
-   return remember {
-       PlayerController(
-           value = ExoPlayer.Builder(context).build()
-       )
-   }
+    return remember {
+        // Lazily create the PlayerController
+        val controller by lazy {
+            // Create a DefaultRenderersFactory with decoder fallback and extension renderers enabled
+            val renderers = DefaultRenderersFactory(context).apply {
+                setEnableDecoderFallback(true)
+                setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+            }
+
+            // Create audio attributes for media playback
+            val attrib = AudioAttributes.Builder()
+                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                .setUsage(C.USAGE_MEDIA)
+                .build()
+
+            // Create and initialize the PlayerController
+            PlayerController(
+                value = ExoPlayer.Builder(context)
+                    .setRenderersFactory(renderers)
+                    .setHandleAudioBecomingNoisy(handleAudioBecomingNoisy)
+                    .setAudioAttributes(attrib, handleAudioFocus)
+                    .build()
+            )
+        }
+        // Return the PlayerController instance
+        controller
+    }
 }

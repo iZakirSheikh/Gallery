@@ -2,6 +2,7 @@
 
 package com.zs.gallery.viewer
 
+import PlayerView
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.outlined.PlayCircleFilled
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -80,6 +82,8 @@ import com.zs.foundation.adaptive.padding
 import com.zs.foundation.adaptive.shape
 import com.zs.foundation.menu.Menu
 import com.zs.foundation.menu.MenuItem
+import com.zs.foundation.player.PlayerController
+import com.zs.foundation.player.rememberPlayerController
 import com.zs.foundation.sharedBounds
 import com.zs.foundation.sharedElement
 import com.zs.foundation.thenIf
@@ -196,30 +200,10 @@ private fun TopAppBar(
     )
 }
 
-/**
- * Returns the strategy to use for displaying two panes based on the window size.
- */
-private val WindowSize.strategy: TwoPaneStrategy
-    get() {
-        val (wClazz, hClazz) = this
-        return when {
-            // If the window is compact (e.g., 360 x 360 || 400 x 400),
-            // use a stacked strategy with the dialog at the center.
-            wClazz == Range.Compact && hClazz == Range.Compact -> StackedTwoPaneStrategy(0.5f)
-
-            // If the width is greater than the height, use a horizontal strategy
-            // that splits the window at 50% of the width.
-            wClazz > hClazz -> HorizontalTwoPaneStrategy(0.6f)
-
-            // If the height is greater than the width, use a vertical strategy
-            // that splits the window at 50% of the height.
-            else -> VerticalTwoPaneStrategy(0.3f)
-        }
-    }
-
 @Composable
 private fun MainContent(
     viewState: ViewerViewState,
+    controller: PlayerController,
     onRequest: (request: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -229,7 +213,6 @@ private fun MainContent(
     // Construct the state variables for pager.
     val pager = rememberPagerState(initialPage = viewState.index, pageCount = { values.size })
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     val zoomable = rememberZoomableState(DEFAULT_ZOOM_SPECS).apply {
         contentScale = ContentScale.None
     }
@@ -258,10 +241,37 @@ private fun MainContent(
         }
     }
 
+    // State to control the visibility of the PlayerView
+    // Lazily create the PlayerView content
+    var showVideoView by remember { mutableStateOf(false) }
+    val videoView by remember {
+        lazy {
+            movableContentOf {
+                PlayerView(
+                    controller,
+                    Modifier.fillMaxSize(),
+                    Color.Transparent,
+                    true,
+                    true
+                )
+            }
+        }
+    }
+
     // Handle BackPress
     BackHandler {
         when {
+            // pause if playing
+            controller.isPlaying -> controller.pause()
+            // hide videoView
+            showVideoView -> {
+                onRequest(EVENT_IMMERSIVE_VIEW) // reset immersive-view
+                controller.pause()
+                showVideoView = false // hide video-view.
+            }
+            // reset zoom
             !zoomable.isZoomedOut -> scope.launch { zoomable.resetZoom() }
+            // else ask parent to handle back-press
             else -> onRequest(EVENT_BACK_PRESS)
         }
     }
@@ -275,7 +285,7 @@ private fun MainContent(
         key = { values[it].id },
         pageSpacing = 16.dp,
         modifier = modifier,
-        userScrollEnabled = zoomable.isZoomedOut,
+        userScrollEnabled = zoomable.isZoomedOut && !showVideoView,
         beyondViewportPageCount = 1,
     ) { index ->
         val item = values[index]
@@ -308,30 +318,63 @@ private fun MainContent(
         )
 
         // if the user navigated to this item
+        // TODO - maybe move to launched- effect.
         if (isFocused) {
             viewState.focused = item.id
             runBlocking { zoomable.scaledInsideAndCenterAlignedFrom(painter) }
+            controller.clear()
+            if (!item.isImage) {
+                controller.setMediaItem(item.mediaUri)
+                controller.prepare()
+            }
         }
 
-        Image(
-            painter = painter,
-            contentDescription = null,
-            alignment = Alignment.Center,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .thenIf(isFocused) { sharedBounds(RouteViewer.buildSharedFrameKey(item.id)) }
-                .thenIf(isFocused && !item.isImage) {
-                    playIconModifier.clickable(null, null) {
-                        context.startActivity(VideoIntent(item.mediaUri))
+        // The content
+        when {
+            isFocused && showVideoView -> videoView()
+            else -> Image(
+                painter = painter,
+                contentDescription = null,
+                alignment = Alignment.Center,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .thenIf(isFocused) { sharedBounds(RouteViewer.buildSharedFrameKey(item.id)) }
+                    .thenIf(isFocused && !item.isImage) {
+                        playIconModifier.clickable(null, null) {
+                            onRequest(EVENT_IMMERSIVE_VIEW)
+                            controller.play(true)
+                            showVideoView = true
+                        }
                     }
-                }
-                .thenIf(item.isImage && isFocused && painter.state !is AsyncImagePainter.State.Error) {
-                    zoomableModifier
-                }
-                .fillMaxSize()
-        )
+                    .thenIf(item.isImage && isFocused && painter.state !is AsyncImagePainter.State.Error) {
+                        zoomableModifier
+                    }
+                    .fillMaxSize()
+            )
+        }
     }
 }
+
+/**
+ * Returns the strategy to use for displaying two panes based on the window size.
+ */
+private val WindowSize.strategy: TwoPaneStrategy
+    get() {
+        val (wClazz, hClazz) = this
+        return when {
+            // If the window is compact (e.g., 360 x 360 || 400 x 400),
+            // use a stacked strategy with the dialog at the center.
+            wClazz == Range.Compact && hClazz == Range.Compact -> StackedTwoPaneStrategy(0.5f)
+
+            // If the width is greater than the height, use a horizontal strategy
+            // that splits the window at 50% of the width.
+            wClazz > hClazz -> HorizontalTwoPaneStrategy(0.6f)
+
+            // If the height is greater than the width, use a vertical strategy
+            // that splits the window at 50% of the height.
+            else -> VerticalTwoPaneStrategy(0.3f)
+        }
+    }
 
 @Composable
 fun Viewer(
@@ -341,6 +384,10 @@ fun Viewer(
     val navController = LocalNavController.current
     val facade = LocalSystemFacade.current
     val context = LocalContext.current
+    // The player controller
+    // initialized here because we can destroy it once the view is destroyed.
+    val controller =
+        rememberPlayerController(true, true)
     // Define required state variables
     var immersive by remember { mutableStateOf(false) }
     val onRequest: (Int) -> Unit = { request: Int ->
@@ -386,6 +433,7 @@ fun Viewer(
         content = {
             MainContent(
                 viewState = viewState,
+                controller = controller,
                 onRequest = onRequest,
                 modifier = Modifier.fillMaxSize()
             )
@@ -443,6 +491,8 @@ fun Viewer(
         onDispose {
             // Reset to default on disposal
             facade.enableEdgeToEdge()
+            controller.release()
         }
     }
 }
+

@@ -4,12 +4,12 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🐞 Bug fixes and performance enhancements
-            \n✨ Enhanced Toast/Snackbar: Now supports swipe to dismiss and expandability
-            \n<b>In Focus</b>
-            \n1. 🎥 In-App Media Player.
-            \n2. Support for various file types: GIF, SVG, etc.
-            \n3. General performance improvements
+            \n🎥 Enjoy seamless <b>video playback</b> with our new in-app <b>media player!</b>
+            \n✨<b>Toasts</b> &amp; <b>Snackbars</b> got a boost! Swipe to dismiss, expand for more info, and enjoy smoother interactions.
+            \n🐞 Various bug fixes and performance improvements.
+            \n\n<b>In Focus</b>
+            \n ⦿ General performance improvements
+            \n ⦿ Support for various file types: <b>GIF, SVG,</b> etc.
         </font>
     </string>
 

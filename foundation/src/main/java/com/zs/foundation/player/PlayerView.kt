@@ -16,35 +16,76 @@
  * limitations under the License.
  */
 
-package com.zs.foundation.player
-
-import android.view.View
+import android.annotation.SuppressLint
+import android.util.Log
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.media3.ui.PlayerControlView
 import androidx.media3.ui.PlayerView
+import com.zs.foundation.R
+import com.zs.foundation.player.PlayerController
 
+private const val TAG = "PlayerView"
+
+/**
+ * A composable function that displays a [PlayerView] for media playback.
+ *
+ * This function provides a convenient way to integrate an ExoPlayer view into your Jetpack Compose UI.
+ * It takes a [PlayerController] instance as input and configures the `PlayerView` accordingly.
+ *
+ * @param controller The [PlayerController] instance to use for media playback.
+ * @param modifier The modifier to apply to the `PlayerView`.
+ * @param background The background color of the `PlayerView`. Defaults to black.
+ * @param keepScreenOn Whether to keep the screen on during playback. Defaults to false.
+ * @param useController Whether to display the default playback controls. Defaults to false.
+ */
+@SuppressLint("UnsafeOptInUsageError")
 @Composable
 fun PlayerView(
     controller: PlayerController,
-    modifier: Modifier = Modifier
-) {
-    AndroidView(
-        modifier = modifier,
-        factory = {
-            PlayerView(it).apply {
-                player = controller.value
-                useController = false
-                clipToOutline = true
-                // Set the Background Color of the player as Solid Black Color.
-                setBackgroundColor(Color.Black.toArgb())
-            }
-        },
-        onRelease = {
-            it.player = null
-            it.visibility = View.GONE
+    modifier: Modifier = Modifier,
+    background: Color = Color.Black,
+    keepScreenOn: Boolean = false,
+    useController: Boolean = false,
+) = AndroidView(
+    modifier = modifier,
+    onRelease = {
+        Log.d(TAG, "PlayerView: releasing")
+        it.player = null
+    },
+    factory = { context ->
+        Log.d(TAG, "PlayerView: creating")
+        PlayerView(context).apply {
+            player = controller.value
+            clipToOutline = true
+            layoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
         }
-    )
-}
+    },
+    update = { playerView ->
+        Log.d(TAG, "PlayerView: updating")
+        Log.d(TAG, "PlayerView: updating")
+        playerView.setBackgroundColor(background.toArgb())
+        playerView.keepScreenOn = keepScreenOn
+        playerView.useController = useController
+        playerView.setShowFastForwardButton(true)
+        playerView.setShowRewindButton(true)
+        playerView.setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+        playerView.setShowSubtitleButton(true)
+        playerView.setShowVrButton(true)
+        playerView.setShowShuffleButton(true)
+        playerView.setShowNextButton(false)
+        playerView.setShowPreviousButton(false)
+
+        playerView.fitsSystemWindows = true
+        if (!useController)
+            playerView.hideController()
+    }
+)
