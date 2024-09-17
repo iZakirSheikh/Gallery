@@ -239,7 +239,7 @@ internal fun Toast(
     val dismissState = rememberDismissState(
         confirmStateChange = {
             val confirm = !isExpanded // Dismiss only if not expanded
-            if (confirm) value.action() // Execute action if confirmed
+            if (confirm) value.dismiss() // Execute action if confirmed
             confirm
         }
     )
