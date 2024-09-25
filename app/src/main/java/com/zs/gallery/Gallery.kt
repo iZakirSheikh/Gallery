@@ -202,6 +202,9 @@ private val REQUIRED_PERMISSIONS = buildList {
     // legacy storage access
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q)
         this += android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) {
+        this += android.Manifest.permission.READ_EXTERNAL_STORAGE
+    }
 }
 
 private object RoutePermission : Route
