@@ -21,6 +21,7 @@ package com.zs.foundation.toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.IntDef
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,10 +31,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.DismissValue
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.Icon
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.rememberDismissState
@@ -51,12 +55,14 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Label
 import com.primex.core.ImageBrush
 import com.primex.core.MetroGreen
 import com.primex.core.SignalWhite
@@ -66,6 +72,7 @@ import com.primex.core.visualEffect
 import com.primex.material2.Button
 import com.primex.material2.Label
 import com.primex.material2.ListTile
+import com.primex.material2.OutlinedButton
 import com.primex.material2.TextButton
 import com.zs.foundation.AppTheme
 import com.zs.foundation.Colors
@@ -132,7 +139,6 @@ interface Toast {
      */
     fun dismiss()
 }
-
 
 @Stable
 internal data class Data(
@@ -202,10 +208,7 @@ internal fun Toast.toMillis(
     )
 }
 
-
 private val EXPANDED_TOAST_SHAPE = RoundedCornerShape(8)
-private val TOAST_SHAPE = RoundedCornerShape(16)
-
 private inline val Colors.toastBackgroundColor
     @Composable
     get() = if (isLight) Color(0xFF0E0E0F) else AppTheme.colors.background(1.dp)
@@ -234,20 +237,23 @@ internal fun Toast(
     // State to track if Toast is expanded
     var isExpanded: Boolean by remember { mutableStateOf(false) }
     // Handle back press to dismiss expanded Toast or the entire Toast
-    BackHandler(isExpanded) { isExpanded = !isExpanded }
+    // BackHandler(isExpanded) { isExpanded = !isExpanded }
     // State for swipe-to-dismiss gesture
     val dismissState = rememberDismissState(
         confirmStateChange = {
-            val confirm = !isExpanded // Dismiss only if not expanded
-            if (confirm) value.dismiss() // Execute action if confirmed
-            confirm
+            // Dismiss only if not expanded
+            if (isExpanded) return@rememberDismissState false
+            // Execute action if confirmed
+            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) value.dismiss()
+            true
         }
     )
-
+    val colors = AppTheme.colors
     // SwipeToDismiss composable for handling swipe gesture
     SwipeToDismiss(
         dismissState,
-        background = {},
+        background = { },
+        dismissThresholds = { FractionalThreshold(0.65f) },
         modifier = modifier
             .animateContentSize()
             .renderInSharedTransitionScopeOverlay(1.0f),
@@ -255,28 +261,8 @@ internal fun Toast(
             // Shape of the Toast based on expanded state
             val shape = if (isExpanded) EXPANDED_TOAST_SHAPE else AppTheme.shapes.small
             ListTile(
-                shape = shape,
-                color = backgroundColor,
                 onColor = contentColor,
-                modifier = Modifier
-                    .padding(horizontal = 18.dp)
-                    // Size constraints for the Toast
-                    .shadow(6.dp, shape)
-                    .sizeIn(360.dp, 56.dp, 400.dp, 340.dp)
-                    // Toggle expanded state on click
-                    .clickable(indication = null, interactionSource = null) {
-                        isExpanded = !isExpanded
-                    }
-                    // Apply border and visual effect if dark theme
-                    .thenIf(!isExpanded){
-                        drawWithContent {
-                            drawContent()
-                            drawRect(color = actionColor, size = size.copy(width = 3.dp.toPx()))
-                        }
-                    }
-                    //.border(0.7.dp, Color.SignalWhite.copy(0.08f), shape)
-                    .visualEffect(ImageBrush.NoiseBrush, 0.60f, overlay = true)
-                ,
+                spacing = 4.dp,
                 leading = composableOrNull(value.icon != null) {
                     // FixMe: It might cause problems.
                     val icon = value.icon!!
@@ -288,12 +274,15 @@ internal fun Toast(
                 },
                 // Trailing action button if available and not expanded
                 trailing = composableOrNull(value.action != null && !isExpanded) {
-                    TextButton(
+                    OutlinedButton(
                         label = value.action!!,
                         onClick = value::action,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = actionColor
-                        )
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = actionColor,
+                            backgroundColor = Color.Transparent,
+                        ),
+                        shape = CircleShape,
+                        modifier = Modifier.scale(0.9f)
                     )
                 },
                 // Toast message
@@ -318,15 +307,20 @@ internal fun Toast(
                 footer = composableOrNull(isExpanded) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.thenIf (value.icon != null) { padding(start = 20.dp) },
+                        modifier = Modifier.thenIf(value.icon != null) { padding(start = 20.dp) },
                         content = {
                             // Action button if available
                             val action = value.action
                             if (action != null)
-                                TextButton(
+                                Button(
                                     label = action,
                                     onClick = value::action,
-                                    colors = ButtonDefaults.buttonColors(contentColor = actionColor),
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = actionColor,
+                                        backgroundColor = actionColor.copy(0.2f).compositeOver(
+                                            AppTheme.colors.toastBackgroundColor
+                                        )
+                                    ),
                                     modifier = Modifier.scale(0.9f),
                                     shape = AppTheme.shapes.compact,
                                     elevation = null
@@ -341,7 +335,28 @@ internal fun Toast(
                             )
                         }
                     )
-                }
+                },
+                modifier = Modifier
+                    .padding(horizontal = 18.dp)
+                    .shadow(6.dp, shape, clip = true)
+                    // Toggle expanded state on click
+                    .clickable(indication = null, interactionSource = null) {
+                        if (value.message.length < 100)
+                            return@clickable
+                        isExpanded = !isExpanded
+                    }
+                    // Apply border and visual effect if dark theme
+                    .thenIf(!isExpanded) {
+                        drawWithContent {
+                            drawContent()
+                            drawRect(color = actionColor, size = size.copy(width = 3.dp.toPx()))
+                        }
+                    }
+                    .thenIf(!colors.isLight) { border(0.5.dp, actionColor.copy(0.10f), shape) }
+                    .visualEffect(ImageBrush.NoiseBrush, 0.60f, overlay = true)
+                    .background(backgroundColor)
+                    //.clip(shape)
+                    .sizeIn(360.dp, 56.dp, 400.dp, 340.dp)
             )
         }
     )

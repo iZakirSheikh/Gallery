@@ -70,6 +70,7 @@ import com.zs.foundation.ContentPadding
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.Range
 import com.zs.foundation.WindowSize
+import com.zs.foundation.WindowStyle.Companion as Flag
 import com.zs.foundation.adaptive.HorizontalTwoPaneStrategy
 import com.zs.foundation.adaptive.StackedTwoPaneStrategy
 import com.zs.foundation.adaptive.TwoPane
@@ -400,7 +401,7 @@ fun Viewer(
             // Toggle immersive mode and update system UI accordingly.
             EVENT_IMMERSIVE_VIEW -> {
                 immersive = !immersive
-                facade.enableEdgeToEdge(immersive, false, false)
+                facade.style += if (immersive) Flag.FLAG_SYSTEM_BARS_HIDDEN else Flag.FLAG_SYSTEM_BARS_VISIBLE
             }
             // Handle back press events, prioritizing focused states (immersive, details)
             // before navigating up.
@@ -409,7 +410,7 @@ fun Viewer(
                     // consume in making not immersive
                     immersive -> {
                         immersive = false
-                        facade.enableEdgeToEdge(false, false, false)
+                        facade.style += Flag.FLAG_SYSTEM_BARS_VISIBLE
                     }
                     // consume in hiding the details this action
                     viewState.showDetails -> viewState.showDetails = false
@@ -487,10 +488,12 @@ fun Viewer(
 
     // set/reset
     DisposableEffect(key1 = Unit) {
-        facade.enableEdgeToEdge(dark = false, translucent = false)
+        //facade.enableEdgeToEdge(dark = false, translucent = false)
+        val original = facade.style
+        facade.style = original + Flag.FLAG_SYSTEM_BARS_APPEARANCE_DARK + Flag.FLAG_SYSTEM_BARS_BG_TRANSPARENT
         onDispose {
             // Reset to default on disposal
-            facade.enableEdgeToEdge()
+            facade.style = original
             controller.release()
         }
     }

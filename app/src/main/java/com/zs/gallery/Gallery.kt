@@ -43,18 +43,20 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
@@ -71,12 +73,14 @@ import com.zs.foundation.AppTheme
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.Range
 import com.zs.foundation.WindowSize
+import com.zs.foundation.WindowStyle
 import com.zs.foundation.adaptive.BottomNavItem
 import com.zs.foundation.adaptive.NavRailItem
 import com.zs.foundation.adaptive.NavigationItemDefaults
 import com.zs.foundation.adaptive.NavigationSuiteScaffold
 import com.zs.foundation.calculateWindowSizeClass
 import com.zs.foundation.checkSelfPermissions
+import com.zs.foundation.isAppearanceLightSystemBars
 import com.zs.foundation.renderInSharedTransitionScopeOverlay
 import com.zs.foundation.shapes.EndConcaveShape
 import com.zs.foundation.shapes.TopConcaveShape
@@ -419,8 +423,12 @@ private fun NavigationBar(
     }
 }
 
+/**
+ * Represents the entry to the app ui.
+ */
 @Composable
 fun Gallery(
+    origin: Route,
     toastHostState: ToastHostState,
     navController: NavHostController,
 ) {
@@ -430,8 +438,14 @@ fun Gallery(
     val current = navController.current
 
     // variables
-    val requiresNavBar = current?.domain in DOMAINS_REQUIRING_NAV_BAR
+    val style = (activity as SystemFacade).style
+    val requiresNavBar = when (style.flagAppNavBar) {
+        WindowStyle.FLAG_APP_NAV_BAR_HIDDEN -> false
+        WindowStyle.FLAG_APP_NAV_BAR_VISIBLE -> true
+        else -> current?.domain in DOMAINS_REQUIRING_NAV_BAR  // auto
+    }
     val portrait = clazz.portrait
+
     // content
     val content = @Composable {
         NavigationSuiteScaffold(
@@ -454,13 +468,12 @@ fun Gallery(
                 val granted = activity.checkSelfPermissions(REQUIRED_PERMISSIONS)
                 NavHost(
                     navController = navController,
-                    startDestination = if (!granted) RoutePermission() else RouteTimeline(),
+                    startDestination = if (!granted) RoutePermission() else origin(),
                     builder = navGraphBuilder
                 )
             }
         )
     }
-
     // Check if light theme is preferred
     val isDark = run {
         val mode by activity.observeAsState(key = Settings.KEY_NIGHT_MODE)
@@ -470,7 +483,6 @@ fun Gallery(
             NightMode.FOLLOW_SYSTEM -> isSystemInDarkTheme()
         }
     }
-
     // Setup App Theme and provide necessary dependencies.
     // Provide the navController and window size class to child composable.
     AppTheme(
@@ -488,4 +500,40 @@ fun Gallery(
             )
         }
     )
+
+    // Observe the state of the IMMERSE_VIEW setting
+    val immersiveView by activity.observeAsState(Settings.KEY_IMMERSIVE_VIEW)
+    val translucentBg by activity.observeAsState(Settings.KEY_TRANSPARENT_SYSTEM_BARS)
+    LaunchedEffect(immersiveView, style, isDark, translucentBg) {
+        // Get the WindowInsetsController for managing system bars
+        val window = activity.window
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+
+        // Determine the visibility of system bars based on the current style settings
+        val visible = when (style.flagSystemBarVisibility) {
+            WindowStyle.FLAG_SYSTEM_BARS_HIDDEN -> false  // Hide system bars
+            WindowStyle.FLAG_SYSTEM_BARS_VISIBLE -> true  // Show system bars
+            else -> !immersiveView  // If not explicitly set, use the immersiveView setting
+        }
+        // Apply the visibility setting to the system bars
+        if (!visible) controller.hide(WindowInsetsCompat.Type.systemBars())
+        else controller.show(WindowInsetsCompat.Type.systemBars())
+        // Determine the appearance of system bars (dark or light) based on the current style settings
+        controller.isAppearanceLightSystemBars = when (style.flagSystemBarAppearance) {
+            WindowStyle.FLAG_SYSTEM_BARS_APPEARANCE_DARK -> false  // Use dark system bars appearance
+            WindowStyle.FLAG_SYSTEM_BARS_APPEARANCE_LIGHT -> true  // Use light system bars appearance
+            else -> !isDark  // If not explicitly set, use the isDark setting
+        }
+        // Configure the system bars background color based on the current style settings
+        window.apply {
+            val color = when (style.flagSystemBarBackground) {
+                WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSLUCENT -> Color(0x20000000).toArgb()  // Translucent background
+                WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSPARENT -> Color.Transparent.toArgb()  // Transparent background
+                else ->  (if (translucentBg) Color(0x20000000) else Color.Transparent).toArgb()// automate using the setting
+            }
+            // Set the status and navigation bar colors
+            statusBarColor = color
+            navigationBarColor = color
+        }
+    }
 }

@@ -4,7 +4,17 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🐞 Fixed a major bug that prevented the app from requesting permissions on Android 11/12.
+            \n🌟 Fixed an issue causing some weired animation in Lockscreen.
+            \n🌟 Fixed some minor bugs in Toast
+        </font>
+    </string>
+
+    <!--1.0.0-alpha03-->
+    <string name="what_s_new_1_0_0_alpha03">
+        <b>1.0.0-alpha03</b>
+         <font color='grey'>
+            \n fixed an issue causing
+            \n Fixed a major bug that prevented the app from requesting permissions on Android 11/12.
             \n🎥 Enjoy seamless <b>video playback</b> with our new in-app <b>media player!</b>
             \n✨<b>Toasts</b> &amp; <b>Snackbars</b> got a boost! Swipe to dismiss, expand for more info, and enjoy smoother interactions.
             \n\n<b>In Focus</b>

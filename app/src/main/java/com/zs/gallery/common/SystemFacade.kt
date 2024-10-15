@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.content.res.ResourcesCompat
 import com.primex.preferences.Key
+import com.zs.foundation.WindowStyle
 import com.zs.foundation.toast.Duration
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.BuildConfig
@@ -47,7 +48,18 @@ private const val PREFIX_MARKET_URL = "market://details?id="
 private const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
 private const val PKG_MARKET_ID = "com.android.vending"
 
+/**
+ * An interface defining the methods and properties needed for common app functionality,
+ * such as in-app updates, showing ads, and launching the app store.
+ *
+ * This interface is intended to be implemented by a class that is scoped to the entire app,
+ * and is accessible from all parts of the app hierarchy.
+ *
+ * @property style The current [WindowStyle] as requested by the current screen. Defaults to `Automatic`
+ */
 interface SystemFacade {
+
+    var style: WindowStyle
 
     /**
      * @see com.zs.foundation.toast.ToastHostState.showToast
@@ -67,22 +79,6 @@ interface SystemFacade {
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
         @Duration duration: Int = Toast.DURATION_SHORT,
-    )
-
-    /**
-     * Configures the system bars (status bar and navigation bar) for the current screen.
-     * Uses system settings by default, but can be overridden with the provided parameters.
-     *
-     * @param hide Hides system bars if true, shows if false, uses system setting if null.
-     * @param translucent Draws a translucent veil behind system bars if true else none,
-     *                    uses system setting if null. Ignored if `hide` is true.
-     * @param dark Uses a dark theme for system bars if true, light theme if false,
-     *             system setting if null. Ignored if `hide` is true.
-     */
-    fun enableEdgeToEdge(
-        hide: Boolean? = null,
-        translucent: Boolean? = null,
-        dark: Boolean? = null
     )
 
     /**

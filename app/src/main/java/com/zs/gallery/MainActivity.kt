@@ -20,7 +20,6 @@ package com.zs.gallery
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.Configuration
 import android.hardware.biometrics.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import android.hardware.biometrics.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import android.hardware.biometrics.BiometricPrompt
@@ -28,27 +27,23 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CancellationSignal
 import android.util.Log
-import android.view.WindowManager
+import android.view.WindowManager.LayoutParams
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Downloading
-import androidx.compose.material.icons.outlined.GetApp
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -75,9 +70,9 @@ import com.primex.preferences.intPreferenceKey
 import com.primex.preferences.longPreferenceKey
 import com.primex.preferences.observeAsState
 import com.primex.preferences.value
+import com.zs.foundation.WindowStyle
 import com.zs.foundation.toast.Toast
 import com.zs.foundation.toast.ToastHostState
-import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.getPackageInfoCompat
@@ -86,13 +81,13 @@ import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen as configSplashScreen
 import com.zs.foundation.showPlatformToast as showAndroidToast
 
 private const val TAG = "MainActivity"
@@ -133,6 +128,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
     private val toastHostState: ToastHostState by inject()
     private val preferences: Preferences by inject()
     private var navController: NavHostController? = null
+    override var style: WindowStyle by mutableStateOf(WindowStyle())
     var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
         private set
 
@@ -291,49 +287,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         navController.popBackStack()
     }
 
-    override fun enableEdgeToEdge(
-        hide: Boolean?,
-        translucent: Boolean?,
-        dark: Boolean?
-    ) {
-        // Get the WindowInsetsController for managing system bars
-        val controller = WindowCompat.getInsetsController(window, window.decorView)
-        // ensure edge to edge is enabled
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        // If hide is true, hide the system bars and return
-        if (hide == true)
-            return controller.hide(WindowInsetsCompat.Type.systemBars())
-        // Otherwise, show the system bars
-        controller.show(WindowInsetsCompat.Type.systemBars())
-        // Determine translucency based on provided value or preference
-        val translucent =
-            translucent ?: !preferences.value(Settings.KEY_TRANSPARENT_SYSTEM_BARS)
-        // Set the color for status and navigation bars based on translucency
-        val color = when (translucent) {
-            false -> Color.Transparent.toArgb()
-            else -> Color(0x20000000).toArgb()
-        }
-        // Set the status and navigation bar colors
-        window.statusBarColor = color
-        window.navigationBarColor = color
-        // Determine dark mode based on provided value, preference, or system setting
-        val isAppearanceDark = dark ?: preferences.value(Settings.KEY_NIGHT_MODE).let {
-            when (it) {
-                NightMode.YES -> false
-                NightMode.NO -> true
-                NightMode.FOLLOW_SYSTEM -> {
-                    val config = resources.configuration
-                    val uiMode = config.uiMode
-                    Log.d(TAG, "configureSystemBars: $uiMode")
-                    (uiMode and Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES
-                }
-            }
-        }
-        // Set the appearance of system bars based on dark mode
-        controller.isAppearanceLightStatusBars = isAppearanceDark
-        controller.isAppearanceLightNavigationBars = isAppearanceDark
-    }
-
     override fun showToast(
         message: CharSequence,
         icon: ImageVector?,
@@ -373,54 +326,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         preferences.observeAsState(key = key)
 
     override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        // caused the change in config. means the system bars need to be configured again
-        // but what would happen if the system bars are already configured?
-        enableEdgeToEdge()
-        Log.d(TAG, "onConfigurationChanged: ${navController?.currentDestination?.route}")
-    }
-
-    private fun initialize() {
-        if (preferences.value(Settings.KEY_SECURE_MODE)) {
-            window.setFlags(
-                WindowManager.LayoutParams.FLAG_SECURE,
-                WindowManager.LayoutParams.FLAG_SECURE
-            )
-        }
-        val flow1 = preferences[Settings.KEY_NIGHT_MODE]
-        val flow2 = preferences[Settings.KEY_TRANSPARENT_SYSTEM_BARS]
-        flow1.combine(flow2) { _, _ -> enableEdgeToEdge() }
-            .launchIn(scope = lifecycleScope)
-        lifecycleScope.launch { launchUpdateFlow() }
-
-        // show what's new message on click.
-        val versionCode = BuildConfig.VERSION_CODE
-        val savedVersionCode = preferences.value(KEY_APP_VERSION_CODE)
-        if (savedVersionCode != versionCode) {
-            preferences[KEY_APP_VERSION_CODE] = versionCode
-            showToast(R.string.what_s_new_latest, duration = Toast.DURATION_INDEFINITE)
-        }
-
-        // promote media player
-        // TODO - properly handle promotional content.
-        lifecycleScope.launch {
-            val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER)
-            if (counter > 0 && counter % 5 == 0) {
-                delay(3000)
-                val result = toastHostState.showToast(
-                    message = resources.getText2(R.string.msg_media_player_promotion),
-                    icon = Icons.Outlined.NewReleases,
-                    duration = Toast.DURATION_INDEFINITE,
-                    action = resources.getText2(R.string.get),
-                    accent = Color.Rose
-                )
-                if (result == Toast.ACTION_PERFORMED)
-                    launchAppStore("com.prime.player")
-            }
-        }
-    }
 
     override fun launchUpdateFlow(report: Boolean) {
         val manager = AppUpdateManagerFactory.create(this@MainActivity)
@@ -518,15 +423,10 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         }
     }
 
-    override fun onDestinationChanged(
-        controller: NavController,
-        destination: NavDestination,
-        arguments: Bundle?
-    ) {
-        // Log the event.
-        Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+    override fun onDestinationChanged(cont: NavController, dest: NavDestination, args: Bundle?) {
+        Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {  // Log the event.
             // create params for the event.
-            val domain = destination.domain ?: "unknown"
+            val domain = dest.domain ?: "unknown"
             Log.d(TAG, "onNavDestChanged: $domain")
             param(FirebaseAnalytics.Param.SCREEN_NAME, domain)
         }
@@ -535,26 +435,65 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
-        // Manage SplashScreen
-        installSplashScreen()
-        // init the heavy duty tasks in initialize()
-        initialize()
+        // This is determined by checking if savedInstanceState is null.
+        // If null, it's a cold start (first time launch or activity recreated from scratch)
+        val isColdStart = savedInstanceState == null
+        // Configure the splash screen for the app
+        configSplashScreen()
+        // Initialize
+        if (isColdStart){
+            // Trigger update flow
+            launchUpdateFlow()
+
+            // Enable secure mode if required by user settings
+            if (preferences.value(Settings.KEY_SECURE_MODE))
+                window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
+
+            // Show "What's New" message if the app version has changed
+            val versionCode = BuildConfig.VERSION_CODE
+            val savedVersionCode = preferences.value(KEY_APP_VERSION_CODE)
+            if (savedVersionCode != versionCode) {
+                preferences[KEY_APP_VERSION_CODE] = versionCode
+                showToast(R.string.what_s_new_latest, duration = Toast.DURATION_INDEFINITE)
+            }
+
+            // Promote media player on every 5th launch
+            // TODO - properly handle promotional content.
+            lifecycleScope.launch {
+                val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER)
+                if (counter > 0 && counter % 5 == 0) {
+                    delay(3000)
+                    val result = toastHostState.showToast(
+                        message = resources.getText2(R.string.msg_media_player_promotion),
+                        icon = Icons.Outlined.NewReleases,
+                        duration = Toast.DURATION_INDEFINITE,
+                        action = resources.getText2(R.string.get),
+                        accent = Color.Rose
+                    )
+                    if (result == Toast.ACTION_PERFORMED)
+                        launchAppStore("com.prime.player")
+                }
+            }
+        }
+        // Set up the window to fit the system windows
+        // This setting is usually configured in the app theme, but is ensured here
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         // Set the content of the activity
         setContent {
             val navController = rememberNavController()
-            // if authentication is required move to lock screen
-            Gallery(toastHostState, navController)
+            // If authentication is required, move to the lock screen
+            Gallery(
+                if (isAuthenticationRequired) RouteLockScreen else RouteTimeline,
+                toastHostState,
+                navController
+            )
+            // Manage lifecycle-related events and listeners
             DisposableEffect(Unit) {
                 Log.d(TAG, "onCreate - DisposableEffect: $timeAppWentToBackground")
                 navController.addOnDestinationChangedListener(this@MainActivity)
-                // since auth is required; we will cover the scrren with lock_screen
-                // only when user authenticate can remove this veil.
-                if (isAuthenticationRequired) {
-                    navController.navigate(RouteLockScreen()) {
-                        launchSingleTop = true
-                    }
-                    unlock()
-                }
+                // Cover the screen with lock_screen if authentication is required
+                // Only remove this veil when the user authenticates
+                if (isAuthenticationRequired) unlock()
                 this@MainActivity.navController = navController
                 onDispose {
                     navController.removeOnDestinationChangedListener(this@MainActivity)
