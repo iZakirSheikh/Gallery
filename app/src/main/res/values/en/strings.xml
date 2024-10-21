@@ -8,7 +8,7 @@
 <!--The string resources should follow the above rules strictly-->
 <resources>
     <!--Some common variables-->
-    <string name="app_name">&appname;</string>
+    <string name="app_name"></string>
     <string name="app_name_real">&appname;</string>
     <string name="permission_screen_title">Storage Permission</string>
     <string name="allow">Allow</string>
