@@ -19,6 +19,7 @@
 package com.zs.gallery
 
 import android.os.Build
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -65,8 +66,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.primex.core.ImageBrush
+import com.primex.core.blur.legacyBackgroundBlur
+import com.primex.core.blur.newBackgroundBlur
 import com.primex.core.plus
 import com.primex.core.textResource
+import com.primex.core.visualEffect
 import com.primex.material2.Label
 import com.primex.material2.OutlinedButton
 import com.zs.foundation.AppTheme
@@ -403,8 +408,8 @@ private fun NavigationBar(
 
         else -> BottomAppBar(
             windowInsets = WindowInsets.navigationBars,
-            backgroundColor = colors.background(1.dp),
-            contentColor = colors.onBackground,
+            backgroundColor = Color.Transparent,
+            contentColor = AppTheme.colors.onBackground,
             elevation = 0.dp,
             contentPadding = PaddingValues(
                 horizontal = AppTheme.padding.normal,
@@ -412,7 +417,16 @@ private fun NavigationBar(
             ) + PaddingValues(top = 16.dp),
             modifier = modifier
                 .heightIn(BOTTOM_NAV_MIN_HEIGHT)
-                .clip(BottomNavShape),
+                .clip(BottomNavShape)
+                .background(AppTheme.colors.background.copy(if (AppTheme.colors.isLight) 0.73f else 0.8f))
+                .let {
+                    when(Build.VERSION.SDK_INT){
+                        Build.VERSION_CODES.S -> it.newBackgroundBlur(8.dp, downsample = 0.3f)
+                        else -> it.legacyBackgroundBlur(25f, 0.3f)
+                    }
+                }
+                .visualEffect(ImageBrush.NoiseBrush, if (AppTheme.colors.isLight) 0.5f else 0.3f)
+,
             content = {
                 Spacer(modifier = Modifier.weight(1f))
                 // Display routes at the contre of available space
