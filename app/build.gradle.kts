@@ -14,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 27
-        versionName = "1.0.0-alpha04"
+        versionCode = 28
+        versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -64,15 +64,18 @@ dependencies {
     implementation(libs.androidx.startup.runtime)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.accompanist.permissions)
-    implementation(libs.bundles.material.icons)
-    implementation(libs.coil.compose)
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.saket.zoomable)
+
+    // bundles
     implementation(libs.bundles.play.services)
+    implementation(libs.bundles.material.icons)
+    implementation(libs.bundles.coil)
 
     implementation(project(":domain"))
     implementation(project(":foundation"))
+
     // project modules
 }

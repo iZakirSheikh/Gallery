@@ -54,10 +54,10 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.request.CachePolicy
-import coil.request.ImageRequest
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
 import com.primex.core.SignalWhite
 import com.primex.core.findActivity
 import com.primex.core.plus
@@ -303,14 +303,12 @@ private fun MainContent(
         // For videos, load the preview image; otherwise, load the original image.
         val painter = rememberAsyncImagePainter(
             model = ImageRequest.Builder(LocalContext.current)
+                .memoryCacheKey("${item.id}")
                 .apply {
                     data(item.mediaUri)
-                    if (item.isImage) {
-                        // Make sure that image is not loaded from Thumbnail repo.
+                    // Make sure that image is not loaded from Thumbnail repo.
+                    if (item.isImage)
                         preferCachedThumbnail(false)
-                    }
-                    // Placeholder for errors
-                    error(R.drawable.ic_error_image_placeholder)
                 }.build(),
             onState = {
                 if (it is AsyncImagePainter.State.Success && isFocused)

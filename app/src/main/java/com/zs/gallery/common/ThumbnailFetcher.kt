@@ -25,29 +25,37 @@ import android.content.ContentUris
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createBitmap
 import android.graphics.Paint
-import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
 import android.provider.MediaStore
 import android.provider.MediaStore.Images.Thumbnails.getThumbnail
 import android.util.Log
 import androidx.core.graphics.applyCanvas
-import androidx.core.graphics.drawable.toDrawable
-import coil.ImageLoader
-import coil.annotation.ExperimentalCoilApi
-import coil.decode.DataSource
-import coil.decode.DecodeUtils
-import coil.fetch.DrawableResult
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
-import coil.request.ImageRequest
-import coil.request.Options
-import coil.size.Size
-import coil.size.pxOrElse
+import coil3.Extras
+import coil3.ImageLoader
+import coil3.Uri
+import coil3.annotation.ExperimentalCoilApi
+import coil3.asImage
+import coil3.decode.DataSource
+import coil3.decode.DecodeUtils
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.ImageFetchResult
+import coil3.getExtra
+import coil3.request.ImageRequest
+import coil3.request.Options
+import coil3.request.bitmapConfig
+import coil3.size.Precision
+import coil3.size.Size
+import coil3.size.pxOrElse
+import coil3.toAndroidUri
 import kotlin.math.roundToInt
 import android.util.Size as ThumbnailSize
 
 private const val TAG = "ThumbnailFetcher"
+
+
+private val PreferCachedKey = Extras.Key(true)
 
 /**
  * Enables or disables the use of android's cached thumbnails for this request.
@@ -60,8 +68,9 @@ private const val TAG = "ThumbnailFetcher"
  *
  * @param value True to use cached thumbnails if available, false otherwise.
  */
-fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean)
-        =  setParameter("coil#preferCachedThumbnail", value)
+fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean) {
+    extras[PreferCachedKey] = value
+}
 
 /**
  * Whether to use cached thumbnails for this request.
@@ -69,7 +78,7 @@ fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean)
  * @see preferCachedThumbnail
  */
 private val Options.preferCachedThumbnail: Boolean
-    get() = parameters.value("coil#preferCachedThumbnail") ?: true
+    get() = getExtra(PreferCachedKey)
 
 
 class ThumbnailFetcher(
@@ -101,7 +110,7 @@ class ThumbnailFetcher(
 
             val context = options.context
             // Retrieve the MIME type of the content
-            val mimeType = context.contentResolver.getType(data) ?: return null
+            val mimeType = context.contentResolver.getType(data.toAndroidUri()) ?: return null
 
             // Check if the MIME type is supported (image or video)
             if (!mimeType.startsWith("image/") && !mimeType.startsWith("video/")) {
@@ -117,14 +126,14 @@ class ThumbnailFetcher(
         bitmap: Bitmap,
         options: Options
     ): Boolean =
-        SDK_INT < 26 || bitmap.config != Bitmap.Config.HARDWARE || options.config == Bitmap.Config.HARDWARE
+        SDK_INT < 26 || bitmap.config != Bitmap.Config.HARDWARE || options.bitmapConfig == Bitmap.Config.HARDWARE
 
     private fun isSizeValid(
         bitmap: Bitmap,
         options: Options,
         size: Size
     ): Boolean {
-        if (options.allowInexactSize) return true
+        if (options.precision == Precision.INEXACT) return true
         val multiplier = DecodeUtils.computeSizeMultiplier(
             srcWidth = bitmap.width,
             srcHeight = bitmap.height,
@@ -156,8 +165,8 @@ class ThumbnailFetcher(
         val dstWidth = (scale * inBitmap.width).roundToInt()
         val dstHeight = (scale * inBitmap.height).roundToInt()
         val safeConfig = when {
-            SDK_INT >= 26 && options.config == Bitmap.Config.HARDWARE -> Bitmap.Config.ARGB_8888
-            else -> options.config
+            SDK_INT >= 26 && options.bitmapConfig == Bitmap.Config.HARDWARE -> Bitmap.Config.ARGB_8888
+            else -> options.bitmapConfig
         }
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
@@ -173,7 +182,7 @@ class ThumbnailFetcher(
 
     override suspend fun fetch(): FetchResult {
         val resolver = options.context.contentResolver
-
+        val uri = data.toAndroidUri()
         // Fetch the raw bitmap based on Android version
         val rawBitmap = when {
             SDK_INT >= Build.VERSION_CODES.Q -> {
@@ -182,12 +191,12 @@ class ThumbnailFetcher(
                     ThumbnailSize(it.width.pxOrElse { 256 },
                         it.height.pxOrElse { 256 })
                 }
-                resolver.loadThumbnail(data, size, null)
+                resolver.loadThumbnail(uri, size, null)
             }
 
             else -> {
                 // On older versions, use getThumbnail with appropriate kind based on requested size
-                val id = ContentUris.parseId(data)
+                val id = ContentUris.parseId(uri)
                 val size =
                     options.size.let { it.width.pxOrElse { 256 } to it.height.pxOrElse { 256 } }
                 val kind = when {
@@ -228,8 +237,9 @@ class ThumbnailFetcher(
         )
 
         // Return the decoded drawable result
-        return DrawableResult(
-            drawable = bitmap.toDrawable(options.context.resources),
+        // Return the decoded drawable result
+        return ImageFetchResult(
+            image = bitmap.asImage(),
             isSampled = isSampled,
             dataSource = DataSource.DISK
         )

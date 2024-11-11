@@ -25,6 +25,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SelectableChipColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
@@ -37,6 +39,9 @@ import com.primex.core.composableOrNull
 import com.primex.material2.Label
 import com.primex.material2.Text
 import com.zs.foundation.AppTheme
+import com.zs.foundation.adaptive.BottomNavItem
+import com.zs.foundation.adaptive.NavRailItem
+import com.zs.foundation.adaptive.NavigationItemDefaults
 import com.zs.foundation.lottieAnimationPainter
 
 private const val TAG = "extensions"
@@ -162,3 +167,21 @@ fun PackageManager.getPackageInfoCompat(pkgName: String) =
         else
             getPackageInfo(pkgName, 0)
     }
+
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+inline fun NavItem(
+    noinline onClick: () -> Unit,
+    noinline icon: @Composable () -> Unit,
+    noinline label: @Composable (() -> Unit),
+    modifier: Modifier = Modifier,
+    checked: Boolean = false,
+    typeRail: Boolean = false,
+    colors: SelectableChipColors = NavigationItemDefaults.navigationItemColors(),
+) {
+    when (typeRail) {
+        true -> NavRailItem(onClick, icon, label, modifier, checked, colors = colors)
+        else -> BottomNavItem(onClick, icon, label, modifier, checked, colors = colors)
+    }
+}

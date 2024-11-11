@@ -16,14 +16,21 @@
  * limitations under the License.
  */
 
+@file:OptIn(DelicateCoilApi::class)
+
 package com.zs.gallery.impl
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.animation.core.AnimationConstants
+import androidx.appcompat.content.res.AppCompatResources.getDrawable as Drawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.startup.Initializer
-import coil.Coil
-import coil.ImageLoader
+import coil3.SingletonImageLoader.setUnsafe as Coil
+import coil3.ImageLoader.Builder as ImageLoader
+import coil3.annotation.DelicateCoilApi
+import coil3.asImage
+import coil3.request.crossfade
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.primex.preferences.value
@@ -36,6 +43,7 @@ import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
+import com.zs.gallery.R
 
 private const val TAG = "Initializer"
 
@@ -104,12 +112,16 @@ class CrashlyticsInitializer : Initializer<Unit> {
 
 class CoilInitializer : Initializer<Unit> {
     override fun create(context: Context) {
-        Coil.setImageLoader(
-            ImageLoader.Builder(context)
-                .components {
-                    add(ThumbnailFetcher.Factory())
-                }.build()
-        )
+        val error = Drawable(context, R.drawable.ic_error_image_placeholder)!!.asImage()
+        // Construct imageLoader
+        val loader = ImageLoader(context)
+            .error(error)
+            .crossfade(AnimationConstants.DefaultDurationMillis)
+            .components {
+                add(ThumbnailFetcher.Factory())
+            }.build()
+        // set global image loader
+        Coil(loader)
     }
 
     override fun dependencies(): MutableList<Class<out Initializer<*>>> =
