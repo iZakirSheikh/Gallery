@@ -18,6 +18,8 @@
 
 package com.zs.gallery.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
@@ -31,21 +33,9 @@ import com.primex.preferences.booleanPreferenceKey
 import com.primex.preferences.floatPreferenceKey
 import com.primex.preferences.intPreferenceKey
 import com.primex.preferences.stringPreferenceKey
+import com.zs.foundation.NightMode
 import com.zs.gallery.R
-import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
-import com.zs.gallery.settings.Settings.KEY_APP_LOCK_TIME_OUT
-import com.zs.gallery.settings.Settings.KEY_DYNAMIC_GALLERY
-import com.zs.gallery.settings.Settings.KEY_FAVOURITE_FILES
-import com.zs.gallery.settings.Settings.KEY_FONT_SCALE
-import com.zs.gallery.settings.Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER
-import com.zs.gallery.settings.Settings.KEY_IMMERSIVE_VIEW
-import com.zs.gallery.settings.Settings.KEY_LAUNCH_COUNTER
-import com.zs.gallery.settings.Settings.KEY_NIGHT_MODE
-import com.zs.gallery.settings.Settings.KEY_SECURE_MODE
-import com.zs.gallery.settings.Settings.KEY_TRANSPARENT_SYSTEM_BARS
-import com.zs.gallery.settings.Settings.KEY_TRASH_CAN_ENABLED
-import com.zs.gallery.settings.Settings.STANDARD_TILE_SIZE
 
 object RouteSettings : Route
 
@@ -224,8 +214,33 @@ object Settings {
         intPreferenceKey(PREFIX + "_launch_counter", 0)
     val KEY_APP_LOCK_TIME_OUT =
         intPreferenceKey("${PREFIX}_app_lock_time_out", -1)
-
+    val KEY_USE_ACCENT_IN_NAV_BAR =
+        booleanPreferenceKey("use_accent_in_nav_bar", false)
 
     val DefaultFontFamily get() = FontFamily.Default
+
+    val FeedbackIntent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:helpline.prime.zs@gmail.com")
+        putExtra(Intent.EXTRA_SUBJECT, "Feedback/Suggestion for Audiofy")
+    }
+    val PrivacyPolicyIntent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse("https://docs.google.com/document/d/1AWStMw3oPY8H2dmdLgZu_kRFN-A8L6PDShVuY8BAhCw/edit?usp=sharing")
+    }
+    val GitHubIssuesPage = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse("https://github.com/iZakirSheikh/Gallery/issues")
+    }
+    val TelegramIntent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse("https://t.me/audiofy_support")
+    }
+    val GithubIntent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse("https://github.com/iZakirSheikh/Gallery")
+    }
+    val JoinBetaIntent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse("https://play.google.com/apps/testing/com.zs.gallery/join")
+    }
+    val ShareAppIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool app: [app link here]")
+    }
 }
 

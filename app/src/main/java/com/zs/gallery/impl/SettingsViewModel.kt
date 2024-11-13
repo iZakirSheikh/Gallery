@@ -35,7 +35,7 @@ import androidx.lifecycle.viewModelScope
 import com.primex.preferences.Key
 import com.primex.preferences.Preferences
 import com.zs.gallery.R
-import com.zs.gallery.common.NightMode
+import com.zs.foundation.NightMode
 import com.zs.gallery.settings.Preference
 import com.zs.gallery.settings.Settings
 import com.zs.gallery.settings.SettingsViewState

@@ -39,7 +39,6 @@ import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,8 +61,7 @@ import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
-import com.zs.gallery.common.NightMode
-import kotlin.math.roundToInt
+import com.zs.foundation.NightMode
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants

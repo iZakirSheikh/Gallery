@@ -242,7 +242,7 @@ private data class VerticalMeasurePolicy(
             // place fab according to fabPosition.
             val fabSpacingPx = FabSpacing.roundToPx()
             fabPlaceable.placeRelative(
-                y = contentPlaceable.height - fabPlaceable.height - fabSpacingPx,
+                y = contentPlaceable.height - fabPlaceable.height - /*fabSpacingPx*/ 0,
                 x = when (fabPosition) {
                     FabPosition.End -> contentPlaceable.width - fabPlaceable.width - fabSpacingPx
                     FabPosition.Center -> (contentPlaceable.width - fabPlaceable.width) / 2

@@ -35,6 +35,7 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalElevationOverlay
 import androidx.compose.material.NavigationRail
 import androidx.compose.material.icons.Icons
@@ -65,6 +66,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.primex.core.BlueLilac
 import com.primex.core.plus
 import com.primex.core.textResource
 import com.primex.material2.Label
@@ -88,7 +90,7 @@ import com.zs.gallery.bin.Trash
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NavItem
-import com.zs.gallery.common.NightMode
+import com.zs.foundation.NightMode
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.composable
@@ -121,6 +123,9 @@ private const val TAG = "Gallery"
 
 private val NAV_RAIL_MIN_WIDTH = 106.dp
 private val BOTTOM_NAV_MIN_HEIGHT = 56.dp
+
+private val LightAccentColor = Color.BlueLilac
+private val DarkAccentColor = Color(0xFFD8A25E)
 
 /**
  *Navigates to the specified route, managing the back stack for a seamless experience.
@@ -296,7 +301,11 @@ private fun NavigationBar(
     val routes = @Composable {
         // Get the current navigation destination from NavController
         val current by navController.currentBackStackEntryAsState()
-        val colors = NavigationItemDefaults.navigationItemColors()
+        val color = LocalContentColor.current
+        val colors = NavigationItemDefaults.navigationItemColors(
+            selectedContentColor = color,
+            selectedBackgroundColor = color.copy(0.12f)
+        )
         val domain = current?.destination?.domain
         val facade = LocalSystemFacade.current
 
@@ -469,6 +478,7 @@ fun Gallery(
     AppTheme(
         isLight = !isDark,
         fontFamily = Settings.DefaultFontFamily,
+        accent = if (isDark) DarkAccentColor else LightAccentColor,
         content = {
             // Provide the navController, newWindowClass through LocalComposition.
             CompositionLocalProvider(

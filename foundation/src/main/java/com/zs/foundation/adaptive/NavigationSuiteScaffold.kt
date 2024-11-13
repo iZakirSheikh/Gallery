@@ -215,6 +215,8 @@ private class NavHorizontalMeasurePolicy(
         // and report through onNewIntent
         // onNewInsets(PaddingValues(start = navBarPlaceable.width.toDp()))
         // Place the content
+        // reset new insets
+        onNewInsets(EmptyPadding)
         return layout(width, height) {
             var x = 0;
             var y = 0

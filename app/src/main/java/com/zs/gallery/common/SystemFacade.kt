@@ -36,10 +36,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.core.content.res.ResourcesCompat
 import com.primex.preferences.Key
 import com.zs.foundation.WindowStyle
-import com.zs.foundation.toast.Duration
+import com.zs.foundation.toast.Priority
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
@@ -68,7 +67,7 @@ interface SystemFacade {
         message: CharSequence,
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
-        @Duration duration: Int = Toast.DURATION_SHORT,
+        @Priority priority: Int = Toast.PRIORITY_LOW,
     )
 
     /**
@@ -78,7 +77,7 @@ interface SystemFacade {
         @StringRes message: Int,
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
-        @Duration duration: Int = Toast.DURATION_SHORT,
+        @Priority priority: Int = Toast.PRIORITY_LOW,
     )
 
     /**
@@ -207,12 +206,12 @@ interface SystemFacade {
     /**
      * @see com.zs.foundation.showPlatformToast
      */
-    fun showPlatformToast(message: String, @Duration duration: Int = Toast.DURATION_SHORT)
+    fun showPlatformToast(message: String, @Priority priority: Int = Toast.PRIORITY_LOW)
 
     /**
      * @see com.zs.foundation.showPlatformToast
      */
-    fun showPlatformToast(@StringRes message: Int, @Duration duration: Int = Toast.DURATION_SHORT)
+    fun showPlatformToast(@StringRes message: Int, @Priority priority: Int = Toast.PRIORITY_LOW)
 
     /**
      * Returns the handle to a system-level service by name.

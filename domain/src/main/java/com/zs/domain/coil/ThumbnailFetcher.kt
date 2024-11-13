@@ -1,40 +1,16 @@
-/*
- * Copyright 2024 Zakir Sheikh
- *
- * Created by Zakir Sheikh on 15-08-2024.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-@file:OptIn(ExperimentalCoilApi::class)
-
-package com.zs.gallery.common
+package com.zs.domain.coil
 
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.graphics.Bitmap
-import android.graphics.Bitmap.createBitmap
 import android.graphics.Paint
 import android.os.Build
-import android.os.Build.VERSION.SDK_INT
 import android.provider.MediaStore
-import android.provider.MediaStore.Images.Thumbnails.getThumbnail
 import android.util.Log
 import androidx.core.graphics.applyCanvas
 import coil3.Extras
 import coil3.ImageLoader
 import coil3.Uri
-import coil3.annotation.ExperimentalCoilApi
 import coil3.asImage
 import coil3.decode.DataSource
 import coil3.decode.DecodeUtils
@@ -50,11 +26,8 @@ import coil3.size.Size
 import coil3.size.pxOrElse
 import coil3.toAndroidUri
 import kotlin.math.roundToInt
-import android.util.Size as ThumbnailSize
 
 private const val TAG = "ThumbnailFetcher"
-
-
 private val PreferCachedKey = Extras.Key(true)
 
 /**
@@ -79,7 +52,6 @@ fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean) {
  */
 private val Options.preferCachedThumbnail: Boolean
     get() = getExtra(PreferCachedKey)
-
 
 class ThumbnailFetcher(
     private val data: Uri,
@@ -126,7 +98,7 @@ class ThumbnailFetcher(
         bitmap: Bitmap,
         options: Options
     ): Boolean =
-        SDK_INT < 26 || bitmap.config != Bitmap.Config.HARDWARE || options.bitmapConfig == Bitmap.Config.HARDWARE
+        Build.VERSION.SDK_INT < 26 || bitmap.config != Bitmap.Config.HARDWARE || options.bitmapConfig == Bitmap.Config.HARDWARE
 
     private fun isSizeValid(
         bitmap: Bitmap,
@@ -165,12 +137,12 @@ class ThumbnailFetcher(
         val dstWidth = (scale * inBitmap.width).roundToInt()
         val dstHeight = (scale * inBitmap.height).roundToInt()
         val safeConfig = when {
-            SDK_INT >= 26 && options.bitmapConfig == Bitmap.Config.HARDWARE -> Bitmap.Config.ARGB_8888
+            Build.VERSION.SDK_INT >= 26 && options.bitmapConfig == Bitmap.Config.HARDWARE -> Bitmap.Config.ARGB_8888
             else -> options.bitmapConfig
         }
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
-        val outBitmap = createBitmap(dstWidth, dstHeight, safeConfig)
+        val outBitmap = Bitmap.createBitmap(dstWidth, dstHeight, safeConfig)
         outBitmap.applyCanvas {
             scale(scale, scale)
             drawBitmap(inBitmap, 0f, 0f, paint)
@@ -185,10 +157,10 @@ class ThumbnailFetcher(
         val uri = data.toAndroidUri()
         // Fetch the raw bitmap based on Android version
         val rawBitmap = when {
-            SDK_INT >= Build.VERSION_CODES.Q -> {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
                 // On Android Q and above, use loadThumbnail with a ThumbnailSize object
                 val size = options.size.let {
-                    ThumbnailSize(it.width.pxOrElse { 256 },
+                    android.util.Size(it.width.pxOrElse { 256 },
                         it.height.pxOrElse { 256 })
                 }
                 resolver.loadThumbnail(uri, size, null)
@@ -204,7 +176,7 @@ class ThumbnailFetcher(
                     size.first <= 512 && size.second <= 384 -> MediaStore.Images.Thumbnails.MINI_KIND
                     else -> MediaStore.Images.Thumbnails.FULL_SCREEN_KIND
                 }
-                getThumbnail(resolver, id, kind, null)
+                MediaStore.Images.Thumbnails.getThumbnail(resolver, id, kind, null)
             }
         }
         // Ensure the bitmap was successfully decoded

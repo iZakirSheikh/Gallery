@@ -35,6 +35,7 @@ ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.9.0" }
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version = "1.9.1" }
+chrisbanes-haze = {module= "dev.chrisbanes.haze:haze", version = "1.0.1"}
 
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "material_icons" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material_icons" }

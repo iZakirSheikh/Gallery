@@ -14,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 28
-        versionName = "0.0.1"
+        versionCode = 29
+        versionName = "0.1.0-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -37,7 +37,7 @@ android {
             // makes it possible to install both release and debug versions in same device.
             applicationIdSuffix = ".dev"
             resValue("string", "app_name", "Debug")
-            versionNameSuffix = "-dev"
+            versionNameSuffix = "-debug"
         }
     }
     compileOptions {
@@ -68,11 +68,13 @@ dependencies {
     implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.saket.zoomable)
+    implementation(libs.chrisbanes.haze)
+
 
     // bundles
     implementation(libs.bundles.play.services)
     implementation(libs.bundles.material.icons)
-    implementation(libs.bundles.coil)
+
 
     implementation(project(":domain"))
     implementation(project(":foundation"))

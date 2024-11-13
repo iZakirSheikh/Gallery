@@ -255,7 +255,7 @@ abstract class MainViewModel<T>(
                     action = R.string.delete,
                     icon = Icons.Outlined.NearbyError,
                     accent = Color.Rose,
-                    duration = Toast.DURATION_LONG
+                    priority = Toast.PRIORITY_MEDIUM
                 )
                 // Delete the selected items
                 // else return -3 to indicate user cancellation
@@ -339,7 +339,7 @@ abstract class MainViewModel<T>(
                     getText(R.string.report),
                     Icons.Outlined.NearbyError,
                     Color.Rose,
-                    Toast.DURATION_INDEFINITE
+                    Toast.PRIORITY_HIGH
                 )
             }
             .launchIn(viewModelScope)

@@ -62,7 +62,7 @@ import com.zs.foundation.VerticalDivider
 import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.contentInsets
 import com.zs.foundation.sharedElement
-import com.zs.gallery.common.FloatingActionMenu
+import com.zs.foundation.menu.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.MediaFile
 import com.zs.gallery.common.emit

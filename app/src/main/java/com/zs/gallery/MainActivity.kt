@@ -361,7 +361,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                     val res = toastHostState.showToast(
                         message = resources.getText2(R.string.msg_new_update_downloaded),
                         action = resources.getText2(R.string.install),
-                        duration = Toast.DURATION_INDEFINITE,
+                        priority = Toast.PRIORITY_HIGH,
                         accent = Color.MetroGreen,
                         icon = Icons.Outlined.Downloading
                     )
@@ -454,7 +454,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             val savedVersionCode = preferences.value(KEY_APP_VERSION_CODE)
             if (savedVersionCode != versionCode) {
                 preferences[KEY_APP_VERSION_CODE] = versionCode
-                showToast(R.string.what_s_new_latest, duration = Toast.DURATION_INDEFINITE)
+                showToast(R.string.what_s_new_latest, duration = Toast.PRIORITY_HIGH)
             }
 
             // Promote media player on every 5th launch
@@ -466,7 +466,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                     val result = toastHostState.showToast(
                         message = resources.getText2(R.string.msg_media_player_promotion),
                         icon = Icons.Outlined.NewReleases,
-                        duration = Toast.DURATION_INDEFINITE,
+                        priority = Toast.PRIORITY_CRITICAL,
                         action = resources.getText2(R.string.get),
                         accent = Color.Rose
                     )

@@ -36,7 +36,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.primex.preferences.value
 import com.zs.domain.store.MediaProvider
 import com.zs.foundation.toast.ToastHostState
-import com.zs.gallery.common.ThumbnailFetcher
+import com.zs.domain.coil.ThumbnailFetcher
 import com.zs.gallery.settings.Settings
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel

@@ -163,4 +163,8 @@ value class WindowStyle(private val flags: Int = FLAG_STYLE_AUTO) {
             else -> throw IllegalArgumentException("Unknown flag: $flag")
         }
     }
+
+    override fun toString(): String {
+        return flags.toString(2)
+    }
 }

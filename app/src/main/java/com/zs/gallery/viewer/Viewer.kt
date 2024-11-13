@@ -91,7 +91,7 @@ import com.zs.foundation.thenIf
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
-import com.zs.gallery.common.preferCachedThumbnail
+import com.zs.domain.coil.preferCachedThumbnail
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener

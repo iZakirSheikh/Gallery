@@ -20,47 +20,47 @@
 
 package com.zs.gallery.files
 
-import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FabPosition
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HotelClass
 import androidx.compose.material.icons.outlined.NewReleases
-import androidx.compose.material.icons.outlined.Recycling
-import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -68,42 +68,52 @@ import androidx.compose.ui.unit.dp
 import com.primex.core.findActivity
 import com.primex.core.plus
 import com.primex.core.textResource
-import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
 import com.primex.material2.Label
 import com.primex.material2.Text
 import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
-import com.primex.material2.menu.DropDownMenu2
 import com.zs.foundation.AppTheme
+import com.zs.foundation.ContentPadding
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.None
 import com.zs.foundation.VerticalDivider
 import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.menu.FloatingActionMenu
+import com.zs.foundation.renderInSharedTransitionScopeOverlay
 import com.zs.foundation.sharedBounds
-import com.zs.foundation.sharedElement
+import com.zs.foundation.thenIf
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.R
-import com.zs.gallery.bin.RouteTrash
-import com.zs.gallery.common.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.MediaFile
 import com.zs.gallery.common.emit
 import com.zs.gallery.common.items
+import com.zs.gallery.common.mist
+import com.zs.gallery.common.observerBackdrop
 import com.zs.gallery.common.preference
+import com.zs.gallery.common.regular
 import com.zs.gallery.settings.Settings
 import com.zs.gallery.viewer.RouteViewer
+import dev.chrisbanes.haze.HazeStyle
+import com.zs.gallery.common.rememberBackdropProvider as BackdropProvider
 
 private val GridItemsArrangement = Arrangement.spacedBy(2.dp)
+private val FloatingTopBarShape = RoundedCornerShape(20)
 
+
+/**
+ * Represents a Top app bar for this screen.
+ */
 @Composable
-private fun TopAppBar(
+@NonRestartableComposable
+private fun FloatingTopAppBar(
     modifier: Modifier = Modifier,
-    behavior: TopAppBarScrollBehavior? = null,
-    insets: WindowInsets = WindowInsets.None
+    insets: WindowInsets = WindowInsets.None,
+    behaviour: TopAppBarScrollBehavior? = null
 ) {
     LargeTopAppBar(
         navigationIcon = {
@@ -113,56 +123,68 @@ private fun TopAppBar(
                 contentDescription = null,
                 tint = null,
                 onClick = {
-                    facade.showToast(R.string.what_s_new_latest, Icons.Outlined.NewReleases, duration = Toast.DURATION_INDEFINITE)
+                    facade.showToast(
+                        R.string.what_s_new_latest,
+                        Icons.Outlined.NewReleases,
+                        priority = Toast.PRIORITY_HIGH
+                    )
                 }
             )
         },
         title = { Text(text = textResource(id = R.string.timeline)) },
-        scrollBehavior = behavior,
-        windowInsets = insets,
-        modifier = modifier,
+        scrollBehavior = behaviour,
+        windowInsets = WindowInsets.None,
+        modifier = Modifier
+            // Adds a mist to the background of statusBar
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        AppTheme.colors.background(1.dp),
+                        AppTheme.colors.background.copy(alpha = 0.5f),
+                        Color.Transparent
+                    )
+                )
+            )
+            .windowInsetsPadding(insets)
+            .padding(horizontal = ContentPadding.large)
+            // Add a border around the topBar
+            .border(
+                width = 0.5.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        AppTheme.colors.background,
+                        AppTheme.colors.background.copy(alpha = 0.3f),
+                    )
+                ),
+                shape = FloatingTopBarShape
+            )
+            .clip(FloatingTopBarShape)
+            .then(modifier)
+            .widthIn(max = 400.dp),
         style = TopAppBarDefaults.largeAppBarStyle(
-            scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
+            scrolledContainerColor = Color.Transparent,
             containerColor = AppTheme.colors.background,
             scrolledContentColor = AppTheme.colors.onBackground,
             contentColor = AppTheme.colors.onBackground
         ),
         actions = {
-            // Ask for rating here.
             val facade = LocalSystemFacade.current
             IconButton(
                 Icons.Outlined.HotelClass,
                 onClick = facade::launchAppStore
             )
-
-            val navController = LocalNavController.current
-            val (expanded, onToggle) = remember { mutableStateOf(false) }
-            //
-            IconToggleButton(expanded, onToggle) {
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
-
-                DropDownMenu2(
-                    expanded = expanded,
-                    onDismissRequest = { onToggle(false) },
-                    content = {
-                        // Bin
-                        DropDownMenuItem(
-                            title = textResource(id = R.string.recycle_bin),
-                            icon = rememberVectorPainter(image = Icons.Outlined.Recycling),
-                            onClick = { navController.navigate(RouteTrash()) },
-                            // Only enable if R and above
-                            enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                        )
-
-                        // Favourite
-                        DropDownMenuItem(
-                            title = textResource(id = R.string.favourites),
-                            icon = rememberVectorPainter(image = Icons.Outlined.Favorite),
-                            onClick = { navController.navigate(RouteAlbum()) }
-                        )
-                    }
-                )
-            }
+            IconButton(
+                Icons.Outlined.Share,
+                onClick = { facade.launch(Settings.ShareAppIntent) }
+            )
+            IconButton(
+                Icons.Outlined.BugReport,
+                onClick = { facade.launch(Settings.GitHubIssuesPage) }
+            )
+            IconButton(
+                Icons.Outlined.Chat,
+                onClick = { facade.launch(Settings.TelegramIntent) }
+            )
         }
     )
 }
@@ -171,7 +193,7 @@ private fun TopAppBar(
 private fun MainActions(
     state: TimelineViewState,
     modifier: Modifier = Modifier
-) = FloatingActionMenu(modifier = modifier) {
+) = FloatingActionMenu(modifier = modifier, color = Color.Transparent) {
     // Label
     Label(
         text = "${state.selected.size}",
@@ -179,17 +201,11 @@ private fun MainActions(
             start = AppTheme.padding.normal,
             end = AppTheme.padding.medium
         ),
+
         style = AppTheme.typography.titleLarge
     )
     // Divider
     VerticalDivider(modifier = Modifier.height(AppTheme.padding.large))
-
-    // Select/Deselect
-    if (!state.allSelected)
-        IconButton(
-            imageVector = Icons.Outlined.SelectAll,
-            onClick = state::selectAll
-        )
 
     // Favourite
     IconButton(
@@ -200,7 +216,6 @@ private fun MainActions(
         },
         onClick = state::toggleLike
     )
-
     val context = LocalContext.current
     // Delete
     IconButton(
@@ -221,7 +236,6 @@ private fun MainActions(
     )
 }
 
-
 @Composable
 private fun MainContent(
     viewState: TimelineViewState,
@@ -238,7 +252,7 @@ private fun MainContent(
         horizontalArrangement = GridItemsArrangement,
         verticalArrangement = GridItemsArrangement,
         contentPadding = padding,
-        modifier = modifier.padding(WindowInsets.contentInsets)
+        modifier = modifier
     ) {
         // return data or emit state
         val data = emit(values) ?: return@LazyVerticalGrid
@@ -285,27 +299,27 @@ fun Timeline(
         viewState::clear
     )
 
-    val clazz = LocalWindowSize.current
-    val behaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     // The top nav insets
     val navInsets = WindowInsets.contentInsets
+    val clazz = LocalWindowSize.current
+    val portrait = clazz.widthRange < clazz.heightRange
+
+    // Properties
+    val provider = BackdropProvider()
+    val behaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     // The actual layout
     TwoPane(
         fabPosition = FabPosition.Center,
         modifier = Modifier.nestedScroll(behaviour.nestedScrollConnection),
         topBar = {
-            AnimatedVisibility(
-                visible = !viewState.isInSelectionMode,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.animateContentSize(),
-                content = {
-                    TopAppBar(
-                        behavior = behaviour,
-                        insets = WindowInsets.statusBars,
-                    )
-                }
+            FloatingTopAppBar(
+                behaviour = behaviour,
+                insets = WindowInsets.statusBars,
+                modifier = Modifier
+                    .mist(provider, HazeStyle.regular())
+                    .renderInSharedTransitionScopeOverlay(0.12f)
             )
         },
         floatingActionButton = {
@@ -313,16 +327,24 @@ fun Timeline(
                 visible = viewState.isInSelectionMode,
                 enter = fadeIn() + slideInVertically(),
                 exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.padding(navInsets),
+                modifier = Modifier
+                    .padding(navInsets)
+                    .thenIf(!portrait) { navigationBarsPadding() },
                 content = {
-                    MainActions(state = viewState)
+                    MainActions(
+                        state = viewState,
+                        modifier = Modifier.mist(provider, HazeStyle.regular())
+                    )
                 }
             )
         },
         content = {
             MainContent(
                 viewState = viewState,
-                padding = navInsets + PaddingValues(vertical = AppTheme.padding.normal)
+                padding = navInsets + PaddingValues(vertical = AppTheme.padding.normal) + WindowInsets.contentInsets + if (!portrait) {
+                    PaddingValues(end = ContentPadding.large)
+                } else PaddingValues(0.dp),
+                modifier = Modifier.observerBackdrop(provider)
             )
         }
     )
