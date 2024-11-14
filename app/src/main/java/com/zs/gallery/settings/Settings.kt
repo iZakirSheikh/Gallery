@@ -62,6 +62,8 @@ import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.foundation.NightMode
+import com.zs.gallery.common.preference
+import androidx.compose.runtime.getValue
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -258,7 +260,7 @@ private inline fun Appearance(
             viewState.set(Settings.KEY_FONT_SCALE, newValue)
         },
         modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
+            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
         preview = {
             Label(
                 text = if (prefFontScale.value == -1f) "System" else stringResource(
@@ -268,6 +270,16 @@ private inline fun Appearance(
                 fontWeight = FontWeight.Bold
             )
         }
+    )
+
+    val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
+    SwitchPreference(
+        "Color NavBar",
+        checked = useAccent,
+        onCheckedChange = { viewState.set(Settings.KEY_USE_ACCENT_IN_NAV_BAR, it) },
+        modifier = Modifier
+            .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
+        summery = "Use the accent color in the navigation bar."
     )
 }
 

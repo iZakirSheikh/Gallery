@@ -75,7 +75,7 @@ import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.zs.foundation.AppTheme
-import com.zs.foundation.ContentPadding
+import com.zs.foundation.ContentPadding as CP
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.None
 import com.zs.foundation.VerticalDivider
@@ -91,9 +91,10 @@ import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.MediaFile
 import com.zs.gallery.common.emit
+import com.zs.gallery.common.hazeRegular
 import com.zs.gallery.common.items
-import com.zs.gallery.common.mist
-import com.zs.gallery.common.observerBackdrop
+import dev.chrisbanes.haze.haze as observerBackdrop
+import dev.chrisbanes.haze.hazeChild as mist
 import com.zs.gallery.common.preference
 import com.zs.gallery.common.regular
 import com.zs.gallery.settings.Settings
@@ -146,7 +147,7 @@ private fun FloatingTopAppBar(
                 )
             )
             .windowInsetsPadding(insets)
-            .padding(horizontal = ContentPadding.large)
+            .padding(horizontal = CP.large, vertical = CP.small)
             // Add a border around the topBar
             .border(
                 width = 0.5.dp,
@@ -318,8 +319,7 @@ fun Timeline(
                 behaviour = behaviour,
                 insets = WindowInsets.statusBars,
                 modifier = Modifier
-                    .mist(provider, HazeStyle.regular())
-                    .renderInSharedTransitionScopeOverlay(0.12f)
+                    .mist(provider, HazeStyle.hazeRegular())
             )
         },
         floatingActionButton = {
@@ -341,9 +341,8 @@ fun Timeline(
         content = {
             MainContent(
                 viewState = viewState,
-                padding = navInsets + PaddingValues(vertical = AppTheme.padding.normal) + WindowInsets.contentInsets + if (!portrait) {
-                    PaddingValues(end = ContentPadding.large)
-                } else PaddingValues(0.dp),
+                padding = navInsets + WindowInsets.contentInsets +
+                        PaddingValues(end = if (!portrait) CP.large else 0.dp),
                 modifier = Modifier.observerBackdrop(provider)
             )
         }

@@ -321,19 +321,19 @@ inline fun <T> LazyGridScope.items(
     // place the actual items on the screen.
     data.forEach { (header, list) ->
         // GroupHeader as StickyHeader
-        stickyHeader(
+        item(
             key = "key_header_$header",
             contentType = "list_item_header",
+            span = fullLineSpan,
             content = {
                 val groupModifier = Modifier
                     .background(HeaderBgBrush)
                     .animateItem()
-                val selector = tracker ?: return@stickyHeader GroupHeader(header, groupModifier)
+                val selector = tracker ?: return@item GroupHeader(header, groupModifier)
                 val state by remember(header) { selector.isGroupSelected(header) }
                 GroupHeader(
                     label = header, state = state, { selector.select(header) }, groupModifier
                 )
-
             }
         )
 

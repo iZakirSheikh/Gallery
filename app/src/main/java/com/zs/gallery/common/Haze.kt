@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
@@ -31,8 +30,6 @@ import com.zs.foundation.AppTheme
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 
 private const val TAG = "Haze"
 
@@ -45,17 +42,6 @@ typealias BackdropProvider = HazeState
 @NonRestartableComposable
 fun rememberBackdropProvider(): BackdropProvider =
     remember(::HazeState)
-
-/**
- * Applies a modifier that observes backdrop changes from the provided [provider].
- */
-inline fun Modifier.observerBackdrop(provider: BackdropProvider) = haze(provider)
-
-/**
- * Applies a modifier that configures a composable as a backdrop child,
- * using the provided [provider] and [style].
- */
-inline fun Modifier.mist(provider: HazeState, style: HazeStyle) = hazeChild(provider, style)
 
 @ReadOnlyComposable
 @Composable
@@ -96,3 +82,30 @@ fun HazeStyle.Companion.regular(
 )
 
 private fun Color(color: Int, alpha: Float): Color = Color(color).copy(alpha = alpha)
+
+private fun hazeMaterial(
+    containerColor: Color,
+    lightAlpha: Float,
+    darkAlpha: Float,
+): HazeStyle = HazeStyle(
+    blurRadius = 24.dp,
+    backgroundColor = containerColor,
+    noiseFactor = 0.4f,
+    tint = HazeTint(
+        containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) lightAlpha else darkAlpha),
+    ),
+)
+
+/**
+ * A [HazeStyle] which implements a somewhat opaque material. More opaque than [thin],
+ * more translucent than [thick].
+ */
+@Composable
+@ReadOnlyComposable
+fun HazeStyle.Companion.hazeRegular(
+    containerColor: Color = AppTheme.colors.background,
+): HazeStyle = hazeMaterial(
+    containerColor = containerColor,
+    lightAlpha = 0.63f,
+    darkAlpha = 0.7f,
+)

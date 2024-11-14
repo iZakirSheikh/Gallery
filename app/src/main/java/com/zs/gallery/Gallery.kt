@@ -96,6 +96,7 @@ import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.composable
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
+import com.zs.gallery.common.preference
 import com.zs.gallery.files.Album
 import com.zs.gallery.files.Folder
 import com.zs.gallery.files.RouteAlbum
@@ -341,14 +342,15 @@ private fun NavigationBar(
     }
     // Get the current theme colors
     val colors = AppTheme.colors
+    val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
     when (typeRail) {
         true -> NavigationRail(
             modifier = modifier
                 .clip(NavRailShape)
                 .widthIn(NAV_RAIL_MIN_WIDTH),
             windowInsets = WindowInsets.statusBars,
-            contentColor = colors.onBackground,
-            backgroundColor = colors.background(2.dp),
+            contentColor = if (useAccent) colors.onAccent else colors.onBackground,
+            backgroundColor = if (useAccent) colors.accent else colors.background(2.dp),
             elevation = 0.dp,
             content = {
                 // Display routes at the top of the navRail.
@@ -360,8 +362,8 @@ private fun NavigationBar(
 
         else -> BottomAppBar(
             windowInsets = WindowInsets.navigationBars,
-            backgroundColor = colors.background(2.dp),
-            contentColor = AppTheme.colors.onBackground,
+            contentColor = if (useAccent) colors.onAccent else colors.onBackground,
+            backgroundColor = if (useAccent) colors.accent else colors.background(2.dp),
             elevation = 0.dp,
             contentPadding = PaddingValues(
                 horizontal = AppTheme.padding.normal,

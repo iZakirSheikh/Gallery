@@ -20,6 +20,7 @@ package com.zs.gallery.settings
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
@@ -189,7 +190,7 @@ object Settings {
         booleanPreferenceKey(PREFIX + "_dynamic_gallery", defaultValue = true)
     val KEY_FONT_SCALE = floatPreferenceKey(PREFIX + "_font_scale", -1f)
     val KEY_TRANSPARENT_SYSTEM_BARS =
-        booleanPreferenceKey(PREFIX + "_transparent_system_bars", defaultValue = false)
+        booleanPreferenceKey(PREFIX + "_transparent_system_bars", defaultValue = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
     val KEY_IMMERSIVE_VIEW =
         booleanPreferenceKey(PREFIX + "_immersive_view", defaultValue = false)
     val KEY_FAVOURITE_FILES =
@@ -215,7 +216,7 @@ object Settings {
     val KEY_APP_LOCK_TIME_OUT =
         intPreferenceKey("${PREFIX}_app_lock_time_out", -1)
     val KEY_USE_ACCENT_IN_NAV_BAR =
-        booleanPreferenceKey("use_accent_in_nav_bar", false)
+        booleanPreferenceKey("use_accent_in_nav_bar", true)
 
     val DefaultFontFamily get() = FontFamily.Default
 
