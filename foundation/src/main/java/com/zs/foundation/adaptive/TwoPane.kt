@@ -177,7 +177,7 @@ fun TwoPane(
                     .background(scrim)
             )
         },
-        measurePolicy = remember(strategy) {
+        measurePolicy = remember(strategy, fabPosition, spacing) {
             when (strategy) {
                 is VerticalTwoPaneStrategy -> VerticalMeasurePolicy(strategy, fabPosition, spacing, onIndentUpdated)
                 is HorizontalTwoPaneStrategy -> HorizontalMeasurePolicy(strategy, fabPosition, spacing, onIndentUpdated)

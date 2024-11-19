@@ -23,7 +23,9 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -49,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.takeOrElse
@@ -301,7 +304,8 @@ internal fun Toast(
                 footer = composableOrNull(isExpanded) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.thenIf(value.icon != null) { padding(start = 20.dp) },
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.thenIf(value.icon != null) { padding(start = 20.dp) }.fillMaxWidth(),
                         content = {
                             // Action button if available
                             val action = value.action
@@ -344,7 +348,18 @@ internal fun Toast(
                             drawRect(color = actionColor, size = size.copy(width = 3.dp.toPx()))
                         }
                     }
-                    .thenIf(!colors.isLight) { border(0.5.dp, actionColor.copy(0.11f), shape) }
+                    .border(
+                        1.dp,
+                        Brush.linearGradient(
+                            listOf(
+                                Color.Gray.copy(if(!colors.isLight) 0.24f else 0.48f),
+                                Color.Transparent,
+                                Color.Transparent,
+                                Color.Gray.copy(if(!colors.isLight) 0.24f else 0.48f),
+                            )
+                        ),
+                        shape
+                    )
                     .visualEffect(ImageBrush.NoiseBrush, 0.60f, overlay = true)
                     .background(backgroundColor)
                     //.clip(shape)

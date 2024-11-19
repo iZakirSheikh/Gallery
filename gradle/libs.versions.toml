@@ -28,14 +28,14 @@ firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx"
 firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version = "19.2.1" }
 toolkit-core-ktx = { module = "com.github.prime-zs.toolkit:core-ktx", version.ref = "toolkit" }
 toolkit-material2 = { module = "com.github.prime-zs.toolkit:material2", version.ref = "toolkit" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.8.3" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.8.4" }
 toolkit-preferences = { module = "com.github.prime-zs.toolkit:preferences", version.ref = "toolkit" }
 androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.0.0" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version = "1.9.0" }
 androidx-annotation-jvm = { group = "androidx.annotation", name = "annotation-jvm", version = "1.9.1" }
-chrisbanes-haze = {module= "dev.chrisbanes.haze:haze", version = "1.0.1"}
+chrisbanes-haze = {module= "dev.chrisbanes.haze:haze", version = "1.0.2"}
 
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "material_icons" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "material_icons" }
