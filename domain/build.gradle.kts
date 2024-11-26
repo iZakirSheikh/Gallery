@@ -34,4 +34,5 @@ dependencies {
     implementation(libs.androidx.annotation.jvm)
     implementation(libs.androidx.activity.compose)
     implementation (libs.androidx.exifinterface)
+    api(libs.bundles.coil)
 }

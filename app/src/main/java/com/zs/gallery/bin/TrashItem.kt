@@ -48,8 +48,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.primex.material2.Label
 import com.zs.domain.store.Trashed
 import com.zs.domain.store.isImage
@@ -75,7 +75,6 @@ fun TrashItem(
             model = remember(key1 = value.id) {
                 ImageRequest.Builder(ctx).apply {
                     data(value.mediaUri)
-                    crossfade(true)
                 }.build()
             },
             contentDescription = value.name,

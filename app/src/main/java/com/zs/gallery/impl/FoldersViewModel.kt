@@ -91,7 +91,7 @@ class FoldersViewModel(
                 getText(R.string.report),
                 Icons.Outlined.NearbyError,
                 Color.Rose,
-                Toast.DURATION_INDEFINITE
+                Toast.PRIORITY_HIGH
             )
         }
         // Convert to state.

@@ -18,7 +18,6 @@
 
 package com.zs.foundation.toast
 
-import androidx.activity.compose.BackHandler
 import androidx.annotation.IntDef
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -49,11 +48,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.takeOrElse
@@ -62,11 +60,10 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.Label
 import com.primex.core.ImageBrush
-import com.primex.core.MetroGreen
 import com.primex.core.SignalWhite
 import com.primex.core.composableOrNull
+import com.primex.core.thenIf
 import com.primex.core.verticalFadingEdge
 import com.primex.core.visualEffect
 import com.primex.material2.Button
@@ -78,7 +75,6 @@ import com.zs.foundation.AppTheme
 import com.zs.foundation.Colors
 import com.zs.foundation.ContentPadding
 import com.zs.foundation.renderInSharedTransitionScopeOverlay
-import com.zs.foundation.thenIf
 import kotlinx.coroutines.CancellableContinuation
 import kotlin.coroutines.resume
 
@@ -87,38 +83,32 @@ import kotlin.coroutines.resume
  *
  * @property message The text message to be displayed in the Toast.
  * @property action Optional label for an action button to be shown in the Toast.
- * @property duration The duration for which the Toast should be displayed. See [Toast.DURATION_SHORT],
- * [Toast.DURATION_LONG], and [Toast.DURATION_INDEFINITE].
+ * @property priority The duration for which the Toast should be displayed. See [Toast.PRIORITY_LOW],
+ * [Toast.PRIORITY_MEDIUM], [Toast.PRIORITY_HIGH] and [Toast.PRIORITY_CRITICAL].
  * @property accent The accent color to be used for this Toast. Defaults to [Color.Unspecified].
  * @property icon Optional leading icon to be displayed in the Toast.
  */
 interface Toast {
 
+    /**
+     * Companion object containing constants for Toast priorities and action result codes.
+     * @property PRIORITY_LOW Show the Toast for a short period of time.
+     * @property PRIORITY_MEDIUM Show the Toast for a long period of time.
+     * @property PRIORITY_HIGH Show the Toast indefinitely until explicitly dismissed or the action is clicked.
+     * @property PRIORITY_CRITICAL Show the Toast indefinitely until explicitly dismissed or the
+     *                             action is clicked and also the Toast is in expanded state.
+     * @property ACTION_PERFORMED Result code indicating the Toast's action was performed.
+     * @property ACTION_DISMISSED Result code indicating the Toast was dismissed.
+     */
     companion object {
-        /**
-         * Show the Toast for a short period of time.
-         */
-        const val DURATION_SHORT = 0
-
-        /**
-         * Show the Toast for a long period of time.
-         */
-        const val DURATION_LONG = 1
-
-        /*** Show the Toast indefinitely until explicitly dismissed or the action is clicked.
-         */
-        const val DURATION_INDEFINITE = 2
-
-        /**
-         * Result code indicating the Toast's action was performed.
-         */
+        const val PRIORITY_LOW = 0
+        const val PRIORITY_MEDIUM = 1
+        const val PRIORITY_HIGH = 2
+        const val PRIORITY_CRITICAL = 3
         const val ACTION_PERFORMED = 1
-
-        /**
-         * Result code indicating the Toast was dismissed.
-         */
-        const val RESULT_DISMISSED = 2
+        const val ACTION_DISMISSED = 2
     }
+
 
     val accent: Color get() = Color.Unspecified
     val icon: ImageVector?
@@ -126,8 +116,8 @@ interface Toast {
     val message: CharSequence
     val action: CharSequence? get() = null
 
-    @Duration
-    val duration: Int
+    @Priority
+    val priority: Int
 
     /**
      * Callback invoked when the Toast's action button is clicked.
@@ -144,7 +134,7 @@ interface Toast {
 internal data class Data(
     override val icon: ImageVector?,
     override val message: CharSequence,
-    @Duration override val duration: Int,
+    @Priority override val priority: Int,
     override val action: CharSequence?,
     override val accent: Color,
     private val continuation: CancellableContinuation<Int>,
@@ -155,26 +145,26 @@ internal data class Data(
     }
 
     override fun dismiss() {
-        if (continuation.isActive) continuation.resume(Toast.RESULT_DISMISSED)
+        if (continuation.isActive) continuation.resume(Toast.ACTION_DISMISSED)
     }
 }
 
 /**
  * Annotation for properties representing Toast duration values.
  */
-@IntDef(Toast.DURATION_LONG, Toast.DURATION_SHORT, Toast.DURATION_INDEFINITE)
+@IntDef(Toast.PRIORITY_MEDIUM, Toast.PRIORITY_LOW, Toast.PRIORITY_HIGH)
 @Target(
     AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER
 )
 @Retention(AnnotationRetention.SOURCE)
 @MustBeDocumented
-annotation class Duration
+annotation class Priority
 
 /**
  * Annotation for properties representing Toast result codes.
  */
-@IntDef(Toast.ACTION_PERFORMED, Toast.RESULT_DISMISSED)
+@IntDef(Toast.ACTION_PERFORMED, Toast.ACTION_DISMISSED)
 @Target(
     AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY, AnnotationTarget.TYPE
@@ -195,9 +185,9 @@ internal fun Toast.toMillis(
     hasAction: Boolean,
     accessibilityManager: AccessibilityManager?
 ): Long {
-    val original = when (duration) {
-        Toast.DURATION_SHORT -> 4000L
-        Toast.DURATION_LONG -> 10000L
+    val original = when (priority) {
+        Toast.PRIORITY_LOW -> 4000L
+        Toast.PRIORITY_MEDIUM -> 10000L
         else -> Long.MAX_VALUE
     }
     if (accessibilityManager == null) {
@@ -208,7 +198,9 @@ internal fun Toast.toMillis(
     )
 }
 
+
 private val EXPANDED_TOAST_SHAPE = RoundedCornerShape(8)
+
 private inline val Colors.toastBackgroundColor
     @Composable
     get() = if (isLight) Color(0xFF0E0E0F) else AppTheme.colors.background(1.dp)
@@ -235,16 +227,18 @@ internal fun Toast(
     actionColor: Color = value.accent.takeOrElse { AppTheme.colors.accent },
 ) {
     // State to track if Toast is expanded
-    var isExpanded: Boolean by remember { mutableStateOf(false) }
+    val critical = value.priority == Toast.PRIORITY_CRITICAL
+    var isExpanded: Boolean by remember { mutableStateOf(critical) }
     // Handle back press to dismiss expanded Toast or the entire Toast
     // BackHandler(isExpanded) { isExpanded = !isExpanded }
     // State for swipe-to-dismiss gesture
+
     val dismissState = rememberDismissState(
         confirmStateChange = {
-            // Dismiss only if not expanded
-            if (isExpanded) return@rememberDismissState false
+            // Dismiss only if not expanded or critical and expanded
+            if (critical || isExpanded || it == DismissValue.DismissedToEnd) return@rememberDismissState false
             // Execute action if confirmed
-            if (it == DismissValue.DismissedToEnd || it == DismissValue.DismissedToStart) value.dismiss()
+            value.dismiss()
             true
         }
     )
@@ -253,10 +247,10 @@ internal fun Toast(
     SwipeToDismiss(
         dismissState,
         background = { },
-        dismissThresholds = { FractionalThreshold(0.65f) },
+        dismissThresholds = { FractionalThreshold(0.75f) },
         modifier = modifier
             .animateContentSize()
-            .renderInSharedTransitionScopeOverlay(1.0f),
+            .renderInSharedTransitionScopeOverlay(0.3f),
         dismissContent = {
             // Shape of the Toast based on expanded state
             val shape = if (isExpanded) EXPANDED_TOAST_SHAPE else AppTheme.shapes.small
@@ -269,7 +263,8 @@ internal fun Toast(
                     Icon(
                         painter = rememberVectorPainter(image = icon),
                         contentDescription = null,
-                        tint = actionColor
+                        tint = actionColor,
+                        modifier = Modifier.padding(end = ContentPadding.small)
                     )
                 },
                 // Trailing action button if available and not expanded
@@ -282,7 +277,9 @@ internal fun Toast(
                             backgroundColor = Color.Transparent,
                         ),
                         shape = CircleShape,
-                        modifier = Modifier.scale(0.9f)
+                        modifier = Modifier.scale(0.9f),
+                        border = androidx.compose.foundation.BorderStroke(ButtonDefaults.OutlinedBorderSize, contentColor.copy(
+                            ButtonDefaults.OutlinedBorderOpacity))
                     )
                 },
                 // Toast message
@@ -307,7 +304,8 @@ internal fun Toast(
                 footer = composableOrNull(isExpanded) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.thenIf(value.icon != null) { padding(start = 20.dp) },
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.thenIf(value.icon != null) { padding(start = 20.dp) }.fillMaxWidth(),
                         content = {
                             // Action button if available
                             val action = value.action
@@ -340,9 +338,7 @@ internal fun Toast(
                     .padding(horizontal = 18.dp)
                     .shadow(6.dp, shape, clip = true)
                     // Toggle expanded state on click
-                    .clickable(indication = null, interactionSource = null) {
-                        if (value.message.length < 100)
-                            return@clickable
+                    .clickable(indication = null, interactionSource = null, enabled = !critical && value.message.length > 100) {
                         isExpanded = !isExpanded
                     }
                     // Apply border and visual effect if dark theme
@@ -352,7 +348,18 @@ internal fun Toast(
                             drawRect(color = actionColor, size = size.copy(width = 3.dp.toPx()))
                         }
                     }
-                    .thenIf(!colors.isLight) { border(0.5.dp, actionColor.copy(0.10f), shape) }
+                    .border(
+                        1.dp,
+                        Brush.linearGradient(
+                            listOf(
+                                Color.Gray.copy(if(!colors.isLight) 0.24f else 0.48f),
+                                Color.Transparent,
+                                Color.Transparent,
+                                Color.Gray.copy(if(!colors.isLight) 0.24f else 0.48f),
+                            )
+                        ),
+                        shape
+                    )
                     .visualEffect(ImageBrush.NoiseBrush, 0.60f, overlay = true)
                     .background(backgroundColor)
                     //.clip(shape)

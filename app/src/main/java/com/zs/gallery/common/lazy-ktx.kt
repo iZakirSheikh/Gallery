@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -197,7 +198,7 @@ inline fun <K, T> LazyGridScope.emit(
     return data?.takeIf { it.isNotEmpty() }
 }
 
-private val HeaderPadding = PaddingValues(16.dp, 8.dp, 16.dp, 2.dp)
+private val HeaderPadding = PaddingValues(ContentPadding.medium, ContentPadding.xLarge, ContentPadding.medium, ContentPadding.medium)
 
 /**
  * Item header.
@@ -217,8 +218,12 @@ private fun GroupHeader(
         Label(
             text = label,
             maxLines = 2,
-            fontWeight = FontWeight.Normal,
-            style = AppTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold,
+            style = AppTheme.typography.titleMedium,
+            modifier = Modifier
+                .background(AppTheme.colors.background(1.dp), CircleShape)
+                .widthIn(min = 100.dp)
+                .padding(ContentPadding.normal, vertical = ContentPadding.medium)
         )
 
         IconButton(
@@ -316,19 +321,19 @@ inline fun <T> LazyGridScope.items(
     // place the actual items on the screen.
     data.forEach { (header, list) ->
         // GroupHeader as StickyHeader
-        stickyHeader(
+        item(
             key = "key_header_$header",
             contentType = "list_item_header",
+            span = fullLineSpan,
             content = {
                 val groupModifier = Modifier
                     .background(HeaderBgBrush)
                     .animateItem()
-                val selector = tracker ?: return@stickyHeader GroupHeader(header, groupModifier)
+                val selector = tracker ?: return@item GroupHeader(header, groupModifier)
                 val state by remember(header) { selector.isGroupSelected(header) }
                 GroupHeader(
                     label = header, state = state, { selector.select(header) }, groupModifier
                 )
-
             }
         )
 

@@ -72,7 +72,7 @@ import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.VerticalTwoPaneStrategy
 import com.zs.foundation.adaptive.contentInsets
 import com.zs.gallery.R
-import com.zs.gallery.common.FloatingActionMenu
+import com.zs.foundation.menu.FloatingActionMenu
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.emit
 import com.zs.gallery.common.items

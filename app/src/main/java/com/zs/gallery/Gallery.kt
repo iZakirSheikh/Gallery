@@ -18,10 +18,11 @@
 
 package com.zs.gallery
 
+import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.heightIn
@@ -35,9 +36,9 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalElevationOverlay
 import androidx.compose.material.NavigationRail
-import androidx.compose.material.SelectableChipColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -53,7 +54,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -63,43 +63,40 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.primex.core.ImageBrush
-import com.primex.core.blur.legacyBackgroundBlur
-import com.primex.core.blur.newBackgroundBlur
 import com.primex.core.plus
 import com.primex.core.textResource
-import com.primex.core.visualEffect
 import com.primex.material2.Label
 import com.primex.material2.OutlinedButton
 import com.zs.foundation.AppTheme
 import com.zs.foundation.LocalWindowSize
+import com.zs.foundation.NightMode
 import com.zs.foundation.Range
 import com.zs.foundation.WindowSize
 import com.zs.foundation.WindowStyle
-import com.zs.foundation.adaptive.BottomNavItem
-import com.zs.foundation.adaptive.NavRailItem
 import com.zs.foundation.adaptive.NavigationItemDefaults
 import com.zs.foundation.adaptive.NavigationSuiteScaffold
 import com.zs.foundation.calculateWindowSizeClass
 import com.zs.foundation.checkSelfPermissions
 import com.zs.foundation.isAppearanceLightSystemBars
-import com.zs.foundation.renderInSharedTransitionScopeOverlay
 import com.zs.foundation.shapes.EndConcaveShape
 import com.zs.foundation.shapes.TopConcaveShape
+import com.zs.foundation.thenIf
 import com.zs.foundation.toast.ToastHostState
 import com.zs.gallery.bin.RouteTrash
 import com.zs.gallery.bin.Trash
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
-import com.zs.gallery.common.NightMode
+import com.zs.gallery.common.NavItem
+import com.zs.gallery.common.Regular
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.composable
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
+import com.zs.gallery.common.dynamicBackdrop
+import com.zs.gallery.common.preference
+import com.zs.gallery.common.rememberHazeState
 import com.zs.gallery.files.Album
 import com.zs.gallery.files.Folder
 import com.zs.gallery.files.RouteAlbum
@@ -121,27 +118,24 @@ import com.zs.gallery.settings.RouteSettings
 import com.zs.gallery.settings.Settings
 import com.zs.gallery.viewer.RouteViewer
 import com.zs.gallery.viewer.Viewer
+import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.haze
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.layout.PaddingValues as Padding
+import androidx.compose.ui.graphics.Brush.Companion.horizontalGradient as HorizontalGradient
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient as VerticalGradient
+import androidx.navigation.compose.currentBackStackEntryAsState as current
+import com.google.accompanist.permissions.rememberMultiplePermissionsState as Permissions
+import com.primex.core.textResource as stringResource
+import com.zs.foundation.renderInSharedTransitionScopeOverlay as renderInOverlay
 
 private const val TAG = "Gallery"
 
 private val NAV_RAIL_MIN_WIDTH = 106.dp
 private val BOTTOM_NAV_MIN_HEIGHT = 56.dp
 
-/**
- * Adjusts the [WindowSize] by consuming either the navigation rail width or the bottom navigation height.
- *
- * @param rail Boolean indicating whether to consume the navigation rail width.
- * @return [WindowSize] with the specified dimension consumed.
- */
-private fun WindowSize.consume(rail: Boolean) =
-    if (rail) consume(width = NAV_RAIL_MIN_WIDTH) else consume(height = BOTTOM_NAV_MIN_HEIGHT)
-
-/**
- * @return if preferred orientation of layout is portrait
- */
-private inline val WindowSize.portrait
-    get() = widthRange < Range.Medium
+private val LightAccentColor = Color(0xFF514700)
+private val DarkAccentColor = Color(0xFFD8A25E)
 
 /**
  *Navigates to the specified route, managing the back stack for a seamless experience.
@@ -173,30 +167,12 @@ private val DOMAINS_REQUIRING_NAV_BAR =
     arrayOf(RouteTimeline.domain, RouteFolders.domain, RouteSettings.domain)
 
 /**
- * Provides a [Density] object that reflects the user's preferred font scale.
- *
- * This extension function on [Preferences] observes the `KEY_FONT_SCALE` preference
- * and returns a modified [Density] object if the user has set a custom font scale.
- * If the font scale is set to -1 (default), the current [LocalDensity] is returned.
- *
- * @return A [Density] object with the appropriate font scale applied.
- */
-private val SystemFacade.density: Density
-    @NonRestartableComposable
-    @Composable
-    get() {
-        // Observe font scale preference and create a modified Density if necessary
-        val fontScale by observeAsState(key = Settings.KEY_FONT_SCALE)
-        val density = LocalDensity.current
-        return if (fontScale == -1f) density else Density(density.density, fontScale)
-    }
-
-/**
  * List of permissions required to run the app.
  *
  * This list is constructed based on the device's Android version to ensure
  * compatibility with scoped storage and legacy storage access.
  */
+@SuppressLint("BuildListAdds")
 private val REQUIRED_PERMISSIONS = buildList {
     // For Android Tiramisu (33) and above, use media permissions for scoped storage
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -231,8 +207,8 @@ private fun Permission() {
     // Once granted set different route like folders as start.
     // Navigate from here to there.
     val permission =
-        rememberMultiplePermissionsState(permissions = REQUIRED_PERMISSIONS) {
-            if (!it.all { (_, state) -> state }) return@rememberMultiplePermissionsState
+        Permissions(permissions = REQUIRED_PERMISSIONS) {
+            if (!it.all { (_, state) -> state }) return@Permissions
             controller.graph.setStartDestination(RouteTimeline())
             controller.navigate(RouteTimeline()) {
                 popUpTo(RoutePermission()) {
@@ -243,12 +219,12 @@ private fun Permission() {
     // If the permissions are not granted, show the permission screen.
     com.zs.gallery.common.Placeholder(
         iconResId = R.raw.lt_permission,
-        title = stringResource(R.string.permission_screen_title),
+        title = stringResource(R.string.permission_screen_title).toString(),
         message = textResource(R.string.permission_screen_desc),
         vertical = LocalWindowSize.current.widthRange == Range.Compact
     ) {
         OutlinedButton(
-            onClick = { permission.launchMultiplePermissionRequest() },
+            onClick = permission::launchMultiplePermissionRequest,
             modifier = Modifier.size(width = 200.dp, height = 46.dp),
             elevation = null,
             label = stringResource(R.string.allow),
@@ -314,30 +290,13 @@ private val navGraphBuilder: NavGraphBuilder.() -> Unit = {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private inline fun NavItem(
-    noinline onClick: () -> Unit,
-    noinline icon: @Composable () -> Unit,
-    noinline label: @Composable (() -> Unit),
-    modifier: Modifier = Modifier,
-    checked: Boolean = false,
-    typeRail: Boolean = false,
-    colors: SelectableChipColors = NavigationItemDefaults.navigationItemColors(),
-) {
-    when (typeRail) {
-        true -> NavRailItem(onClick, icon, label, modifier, checked, colors = colors)
-        else -> BottomNavItem(onClick, icon, label, modifier, checked, colors = colors)
-    }
-}
-
 private val BottomNavShape = TopConcaveShape(radius = 20.dp)
 private val NavRailShape = EndConcaveShape(16.dp)
 
 /**
  * A composable function that represents a navigation bar, combining both rail and bottom bar elements.
  *
- * @param type Specifies whether the navigation bar includes a [NavigationRail] or [BottomNavigation] component.
+ * @param typeRail Specifies whether the navigation bar includes a [NavigationRail] or [BottomNavigation] component.
  * @param navController The NavController to manage navigation within the navigation bar.
  * @param modifier The modifier for styling and layout customization of the navigation bar.
  */
@@ -346,13 +305,18 @@ private val NavRailShape = EndConcaveShape(16.dp)
 @NonRestartableComposable
 private fun NavigationBar(
     typeRail: Boolean,
+    contentColor: Color,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
     val routes = @Composable {
         // Get the current navigation destination from NavController
-        val current by navController.currentBackStackEntryAsState()
-        val colors = NavigationItemDefaults.navigationItemColors()
+        val current by navController.current()
+        val color = LocalContentColor.current
+        val colors = NavigationItemDefaults.navigationItemColors(
+            selectedContentColor = color,
+            selectedBackgroundColor = color.copy(0.12f)
+        )
         val domain = current?.destination?.domain
         val facade = LocalSystemFacade.current
 
@@ -386,17 +350,30 @@ private fun NavigationBar(
             colors = colors
         )
     }
-
     // Get the current theme colors
     val colors = AppTheme.colors
-    when (typeRail) {
-        true -> NavigationRail(
-            modifier = modifier
+    //
+    when {
+        typeRail -> NavigationRail(
+            modifier = Modifier
+                .border(
+                    0.5.dp,
+                    HorizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.Gray.copy(if (colors.isLight) 0.16f else 0.24f),
+                            Color.Transparent,
+                        )
+                    ),
+                    NavRailShape
+                )
                 .clip(NavRailShape)
+                .then(modifier)
                 .widthIn(NAV_RAIL_MIN_WIDTH),
             windowInsets = WindowInsets.statusBars,
-            contentColor = colors.onBackground,
-            backgroundColor = colors.background(1.dp),
+            contentColor = contentColor,
+            backgroundColor = Color.Transparent,
             elevation = 0.dp,
             content = {
                 // Display routes at the top of the navRail.
@@ -408,25 +385,29 @@ private fun NavigationBar(
 
         else -> BottomAppBar(
             windowInsets = WindowInsets.navigationBars,
+            contentColor = contentColor,
             backgroundColor = Color.Transparent,
-            contentColor = AppTheme.colors.onBackground,
             elevation = 0.dp,
-            contentPadding = PaddingValues(
+            contentPadding = Padding(
                 horizontal = AppTheme.padding.normal,
                 vertical = AppTheme.padding.medium
-            ) + PaddingValues(top = 16.dp),
-            modifier = modifier
-                .heightIn(BOTTOM_NAV_MIN_HEIGHT)
+            ) + Padding(top = 16.dp),
+            modifier = Modifier
+                .border(
+                    0.5.dp,
+                    VerticalGradient(
+                        listOf(
+                            if (colors.isLight) colors.background(2.dp) else Color.Gray.copy(0.24f),
+                            Color.Transparent,
+                            Color.Transparent,
+                            if (colors.isLight) colors.background(2.dp) else Color.Gray.copy(0.24f),
+                        )
+                    ),
+                    BottomNavShape
+                )
                 .clip(BottomNavShape)
-                .background(AppTheme.colors.background.copy(if (AppTheme.colors.isLight) 0.73f else 0.8f))
-                .let {
-                    when(Build.VERSION.SDK_INT){
-                        Build.VERSION_CODES.S -> it.newBackgroundBlur(8.dp, downsample = 0.3f)
-                        else -> it.legacyBackgroundBlur(25f, 0.3f)
-                    }
-                }
-                .visualEffect(ImageBrush.NoiseBrush, if (AppTheme.colors.isLight) 0.5f else 0.3f)
-,
+                .then(modifier)
+                .heightIn(BOTTOM_NAV_MIN_HEIGHT),
             content = {
                 Spacer(modifier = Modifier.weight(1f))
                 // Display routes at the contre of available space
@@ -436,6 +417,34 @@ private fun NavigationBar(
         )
     }
 }
+
+/**
+ * Adjusts the [WindowSize] by consuming either the navigation rail width or the bottom navigation height.
+ *
+ * @param rail Boolean indicating whether to consume the navigation rail width.
+ * @return [WindowSize] with the specified dimension consumed.
+ */
+private fun WindowSize.consume(rail: Boolean) =
+    if (rail) consume(width = NAV_RAIL_MIN_WIDTH) else consume(height = BOTTOM_NAV_MIN_HEIGHT)
+
+/**
+ * Provides a [Density] object that reflects the user's preferred font scale.
+ *
+ * This extension function on [Preferences] observes the `KEY_FONT_SCALE` preference
+ * and returns a modified [Density] object if the user has set a custom font scale.
+ * If the font scale is set to -1 (default), the current [LocalDensity] is returned.
+ *
+ * @return A [Density] object with the appropriate font scale applied.
+ */
+private val SystemFacade.density: Density
+    @NonRestartableComposable
+    @Composable
+    inline get() {
+        // Observe font scale preference and create a modified Density if necessary
+        val fontScale by observeAsState(key = Settings.KEY_FONT_SCALE)
+        val density = LocalDensity.current
+        return if (fontScale == -1f) density else Density(density.density, fontScale)
+    }
 
 /**
  * Represents the entry to the app ui.
@@ -451,15 +460,23 @@ fun Gallery(
     val clazz = calculateWindowSizeClass(activity = activity)
     val current = navController.current
 
-    // variables
+    // properties
     val style = (activity as SystemFacade).style
     val requiresNavBar = when (style.flagAppNavBar) {
         WindowStyle.FLAG_APP_NAV_BAR_HIDDEN -> false
         WindowStyle.FLAG_APP_NAV_BAR_VISIBLE -> true
         else -> current?.domain in DOMAINS_REQUIRING_NAV_BAR  // auto
     }
-    val portrait = clazz.portrait
-
+    // Determine the screen orientation.
+    // This check assesses whether to display NavRail or BottomBar.
+    // BottomBar appears only if the window size suits a mobile screen.
+    // Consider this scenario: a large screen that fits the mobile description, like a desktop screen in portrait mode.
+    // In this case, showing the BottomBar is preferable!
+    val portrait = clazz.widthRange < Range.Medium
+    val provider = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> rememberHazeState()
+        else -> null
+    }
     // content
     val content = @Composable {
         NavigationSuiteScaffold(
@@ -470,10 +487,21 @@ fun Gallery(
             progress = activity.inAppUpdateProgress,
             // Set up the navigation bar using the NavBar composable
             navBar = {
+                val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
+                val colors = AppTheme.colors
                 NavigationBar(
                     !portrait,
+                    if (useAccent) colors.onAccent else colors.onBackground,
                     navController,
-                    Modifier.renderInSharedTransitionScopeOverlay(0.2f)
+                    when {
+                        useAccent -> Modifier.background(colors.accent)
+                        else -> Modifier.dynamicBackdrop(
+                            if (!portrait) null else provider,
+                            HazeStyle.Regular(colors.background, if (colors.isLight) 0.48f else 0.63f),
+                            colors.background,
+                            colors.accent
+                        )
+                    }.renderInOverlay(0.2f),
                 )
             },
             // Display the main content of the app using the NavGraph composable
@@ -483,7 +511,8 @@ fun Gallery(
                 NavHost(
                     navController = navController,
                     startDestination = if (!granted) RoutePermission() else origin(),
-                    builder = navGraphBuilder
+                    builder = navGraphBuilder,
+                    modifier = Modifier.thenIf(provider != null) { haze(provider!!) }
                 )
             }
         )
@@ -502,6 +531,7 @@ fun Gallery(
     AppTheme(
         isLight = !isDark,
         fontFamily = Settings.DefaultFontFamily,
+        accent = if (isDark) DarkAccentColor else LightAccentColor,
         content = {
             // Provide the navController, newWindowClass through LocalComposition.
             CompositionLocalProvider(
@@ -543,7 +573,7 @@ fun Gallery(
             val color = when (style.flagSystemBarBackground) {
                 WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSLUCENT -> Color(0x20000000).toArgb()  // Translucent background
                 WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSPARENT -> Color.Transparent.toArgb()  // Transparent background
-                else ->  (if (translucentBg) Color(0x20000000) else Color.Transparent).toArgb()// automate using the setting
+                else -> (if (translucentBg) Color(0x20000000) else Color.Transparent).toArgb()// automate using the setting
             }
             // Set the status and navigation bar colors
             statusBarColor = color

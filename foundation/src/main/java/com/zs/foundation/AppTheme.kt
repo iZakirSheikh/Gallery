@@ -42,6 +42,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -57,6 +58,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
@@ -64,10 +66,9 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.core.graphics.ColorUtils
-import com.primex.core.BlueLilac
-import com.primex.core.MetroGreen
 import com.primex.core.MetroGreen2
 import com.primex.core.OrientRed
 import com.primex.core.Rose
@@ -113,6 +114,40 @@ import com.zs.foundation.Typography.titleSmall
 import kotlin.math.ln
 
 private const val TAG = "AppTheme"
+
+// Setup animation related default things
+typealias Anim = AnimationConstants
+
+private const val LONG_DURATION_TIME = 500
+
+/**
+ * 500 Mills
+ */
+val Anim.LongDurationMills get() = LONG_DURATION_TIME
+private const val MEDIUM_DURATION_TIME = 400
+
+/**
+ * 400 Mills
+ */
+val Anim.MediumDurationMills get() = MEDIUM_DURATION_TIME
+private const val SHORT_DURATION_TIME = 200
+
+/**
+ * 200 Mills
+ */
+val Anim.ShortDurationMills get() = SHORT_DURATION_TIME
+private const val ACTIVITY_SHORT_DURATION = 150
+
+/**
+ * 150 Mills
+ */
+val Anim.ActivityShortDurationMills get() = ACTIVITY_SHORT_DURATION
+private const val ACTIVITY_LONG_DURATION = 220
+
+/**
+ * 220 Mills
+ */
+val Anim.ActivityLongDurationMills get() = ACTIVITY_LONG_DURATION
 
 /**
  * Provides a [CompositionLocal] to access the current [SharedTransitionScope].
@@ -220,29 +255,29 @@ object Shapes {
  * Material 2 and Material 3 typography styles for a consistent experience.
  *
  * @property displayLarge The largest display style. Use sparingly for short, prominent text.
- *   Corresponds to [androidx.compose.material3.Typography.displayLarge] in Material 3.
- * @property displayMedium A large display style for short, important text.
+ *   Corresponds to [androidx.compose.material3.Typography.displayLarge] in Material 3. h1
+ * @property displayMedium A large display style for short, important text. h2
  *   Corresponds to [androidx.compose.material3.Typography.displayMedium] in Material 3.
- * @property displaySmall A smaller display style for short text elements.
+ * @property displaySmall A smaller display style for short text elements. h3
  *   Corresponds to [androidx.compose.material3.Typography.displaySmall] in Material 3.
  * @property headlineLarge A large headline style for prominent headings.
- *   Corresponds to [androidx.compose.material3.Typography.headlineLarge] inMaterial 3.
+ *   Corresponds to [androidx.compose.material3.Typography.headlineLarge] inMaterial 3. h4
  * @property headlineMedium A medium headline style for section headings.
- *   Corresponds to [androidx.compose.material3.Typography.headlineMedium] in Material 3.
- * @property headlineSmall A smaller headline style for sub-section headings.
+ *   Corresponds to [androidx.compose.material3.Typography.headlineMedium] in Material 3. h4
+ * @property headlineSmall A smaller headline style for sub-section headings. h5
  *   Corresponds to [androidx.compose.material3.Typography.headlineSmall] in Material 3.
  * @property titleLarge A large title style for important titles.
- *   Corresponds to [androidx.compose.material3.Typography.titleLarge] in Material 3.
+ *   Corresponds to [androidx.compose.material3.Typography.titleLarge] in Material 3. h6
  * @property titleMedium A medium title style for less prominent titles.
- *   Corresponds to [androidx.compose.material3.Typography.titleMedium] in Material 3.
+ *   Corresponds to [androidx.compose.material3.Typography.titleMedium] in Material 3. s1
  * @property titleSmall A small title style for short titles.
- *   Corresponds to [androidx.compose.material3.Typography.titleSmall] in Material 3.
+ *   Corresponds to [androidx.compose.material3.Typography.titleSmall] in Material 3. s2
  * @property bodyLarge The default body style for longer text blocks.
- *   Corresponds to [androidx.compose.material3.Typography.bodyLarge] in Material 3.
+ *   Corresponds to [androidx.compose.material3.Typography.bodyLarge] in Material 3. b1
  * @property bodyMedium A smaller body style for less importanttext.
- *   Corresponds to [androidx.compose.material3.Typography.bodyMedium] in Material 3.
+ *   Corresponds to [androidx.compose.material3.Typography.bodyMedium] in Material 3. b2
  * @property caption A small text style for captions and labels.
- *   Corresponds to [androidx.compose.material3.Typography.bodySmall] in Material 3.
+ *   Corresponds to [androidx.compose.material3.Typography.bodySmall] in Material 3. cap
  * @property overline A very small text style for short, subtle text.
  *   Corresponds to [androidx.compose.material3.Typography.labelSmall] in Material 3.
  * @property button The text style to use for buttons.
@@ -267,6 +302,7 @@ object Typography {
     val caption @Composable @ReadOnlyComposable inline get() = MaterialTheme.typography.caption
     val overline @Composable @ReadOnlyComposable inline get() = MaterialTheme.typography.overline
     val button @Composable @ReadOnlyComposable inline get() = MaterialTheme.typography.button
+    val caption2 @Composable @ReadOnlyComposable inline get() = MaterialTheme.typography.overline.copy(letterSpacing = 0.4.sp)
 }
 
 /**
@@ -284,6 +320,8 @@ object ContentPadding {
     val normal: Dp = 16.dp
     val large: Dp = 22.dp
     val xLarge: Dp = 32.dp
+
+    val None = PaddingValues(0.dp)
 }
 
 /**
@@ -317,7 +355,6 @@ val ContentAlpha.Indication
     get() = com.zs.foundation.Indication
 private const val Indication = 0.1f
 
-
 /**
  * Provides a standard interface to interact with the underlying theme, offering a unified and
  * consistent visual experience across the application. Insteadof using [MaterialTheme] directly,
@@ -337,11 +374,17 @@ private const val Indication = 0.1f
  *Internally, it leverages the underlying Material theme, ensuring a streamlined and efficient theming experience.
  */
 object AppTheme {
-    val typography: Typography get() = com.zs.foundation.Typography
-    val shapes: Shapes get() = com.zs.foundation.Shapes
-    val colors: Colors get() = com.zs.foundation.Colors
+    val typography: Typography get() = Typography
+    val shapes: Shapes get() = Shapes
+    val colors: Colors get() = Colors
     val padding get() = ContentPadding
     val elevation get() = ContentElevation
+
+    /**
+     * Represents an empty set of padding values.
+     */
+    @Deprecated("Use ContentPadding.None instead.")
+    val emptyPadding = PaddingValues(0.dp)
 
     @OptIn(ExperimentalSharedTransitionApi::class)
     val sharedTransitionScope
@@ -409,29 +452,30 @@ private val DefaultColorSpec = tween<Color>(AnimationConstants.DefaultDurationMi
  *
  * @param isLight  if true, applies the light theme.
  * @param fontFamily  the font family to be used in the theme.
+ * @param accent  the accent color to be used in the theme.
  * @param content  the composable content to be displayed within the theme.
  */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppTheme(
     isLight: Boolean,
+    accent: Color = if (!isLight) Color.TrafficYellow else Color.SepiaBrown,
     fontFamily: FontFamily = FontFamily.Default,
     content: @Composable () -> Unit
 ) {
-    val accent = if (!isLight) Color.TrafficYellow else Color.SepiaBrown
     val background by animateColorAsState(
-        targetValue = if (!isLight) Color(0xFF0E0E0F) else applyTonalElevation(
-            accent,
-            Color.White,
-            0.8.dp
-        ),
-        animationSpec = DefaultColorSpec, label = ""
+        targetValue = when {
+            !isLight -> Color(0xFF0E0E0F)
+            else -> applyTonalElevation(accent, Color.White, 0.8.dp)
+        },
+        animationSpec = DefaultColorSpec, label = "background"
     )
+    val primary by animateColorAsState(accent, DefaultColorSpec, "accent")
     val colors = Colors(
-        accent = accent,
+        accent = primary,
         background = background,
         onBackground = if (isLight) Color.UmbraGrey else Color.SignalWhite,
-        onAccent = Color.SignalWhite,
+        onAccent = if (primary.luminance() > 0.45f) Color.Black else Color.SignalWhite,
         error = Color.OrientRed,
         onError = Color.SignalWhite,
         isLight = isLight,
@@ -556,7 +600,7 @@ fun Modifier.sharedElement(
     val sharedTransitionScope = LocalSharedTransitionScope.current
     with(sharedTransitionScope) {
         sharedElement(
-            state = sharedContentState,
+            sharedContentState = sharedContentState,
             placeHolderSize = placeHolderSize,
             renderInOverlayDuringTransition = renderInOverlayDuringTransition,
             zIndexInOverlay = zIndexInOverlay,

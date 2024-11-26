@@ -24,306 +24,403 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.FabPosition
-import androidx.compose.material.Icon
-import androidx.compose.material.IconToggleButton
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Chat
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.HotelClass
 import androidx.compose.material.icons.outlined.NewReleases
-import androidx.compose.material.icons.outlined.Recycling
-import androidx.compose.material.icons.outlined.SelectAll
+import androidx.compose.material.icons.outlined.RemoveCircle
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarHalf
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.primex.core.findActivity
 import com.primex.core.plus
-import com.primex.core.textResource
-import com.primex.material2.DropDownMenuItem
 import com.primex.material2.IconButton
 import com.primex.material2.Label
-import com.primex.material2.Text
-import com.primex.material2.appbar.LargeTopAppBar
-import com.primex.material2.appbar.TopAppBarDefaults
-import com.primex.material2.appbar.TopAppBarScrollBehavior
-import com.primex.material2.menu.DropDownMenu2
+import com.zs.domain.store.MediaFile
 import com.zs.foundation.AppTheme
+import com.zs.foundation.ListHeader
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.None
 import com.zs.foundation.VerticalDivider
 import com.zs.foundation.adaptive.TwoPane
 import com.zs.foundation.adaptive.contentInsets
+import com.zs.foundation.menu.FloatingActionMenu
 import com.zs.foundation.sharedBounds
-import com.zs.foundation.sharedElement
+import com.zs.foundation.stickyHeader
+import com.zs.foundation.thenIf
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.R
-import com.zs.gallery.bin.RouteTrash
-import com.zs.gallery.common.FloatingActionMenu
+import com.zs.gallery.common.GroupSelectionLevel
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.MediaFile
+import com.zs.gallery.common.Regular
+import com.zs.gallery.common.SelectionTracker
+import com.zs.gallery.common.dynamicBackdrop
 import com.zs.gallery.common.emit
-import com.zs.gallery.common.items
 import com.zs.gallery.common.preference
 import com.zs.gallery.settings.Settings
 import com.zs.gallery.viewer.RouteViewer
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeStyle
+import androidx.compose.ui.graphics.Brush.Companion.verticalGradient as VerticalGradient
+import com.primex.core.textResource as stringResource
+import com.zs.foundation.ContentPadding as CP
+import com.zs.gallery.common.rememberHazeState as BackdropProvider
+import dev.chrisbanes.haze.haze as observerBackdrop
+
+private const val TAG = "Timeline"
 
 private val GridItemsArrangement = Arrangement.spacedBy(2.dp)
+private val FloatingTopBarShape = RoundedCornerShape(20)
 
+/**
+ * Represents a Top app bar for this screen.
+ */
 @Composable
-private fun TopAppBar(
+@NonRestartableComposable
+private fun FloatingTopAppBar(
     modifier: Modifier = Modifier,
-    behavior: TopAppBarScrollBehavior? = null,
-    insets: WindowInsets = WindowInsets.None
+    backdropProvider: HazeState? = null,
+    insets: WindowInsets = WindowInsets.None,
 ) {
-    LargeTopAppBar(
-        navigationIcon = {
-            val facade = LocalSystemFacade.current
-            IconButton(
-                painter = painterResource(id = R.drawable.ic_app),
-                contentDescription = null,
-                tint = null,
-                onClick = {
-                    facade.showToast(R.string.what_s_new_latest, Icons.Outlined.NewReleases, duration = Toast.DURATION_INDEFINITE)
-                }
-            )
-        },
-        title = { Text(text = textResource(id = R.string.timeline)) },
-        scrollBehavior = behavior,
-        windowInsets = insets,
-        modifier = modifier,
-        style = TopAppBarDefaults.largeAppBarStyle(
-            scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
-            containerColor = AppTheme.colors.background,
-            scrolledContentColor = AppTheme.colors.onBackground,
-            contentColor = AppTheme.colors.onBackground
-        ),
-        actions = {
-            // Ask for rating here.
-            val facade = LocalSystemFacade.current
-            IconButton(
-                Icons.Outlined.HotelClass,
-                onClick = facade::launchAppStore
-            )
-
-            val navController = LocalNavController.current
-            val (expanded, onToggle) = remember { mutableStateOf(false) }
-            //
-            IconToggleButton(expanded, onToggle) {
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
-
-                DropDownMenu2(
-                    expanded = expanded,
-                    onDismissRequest = { onToggle(false) },
-                    content = {
-                        // Bin
-                        DropDownMenuItem(
-                            title = textResource(id = R.string.recycle_bin),
-                            icon = rememberVectorPainter(image = Icons.Outlined.Recycling),
-                            onClick = { navController.navigate(RouteTrash()) },
-                            // Only enable if R and above
-                            enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
-                        )
-
-                        // Favourite
-                        DropDownMenuItem(
-                            title = textResource(id = R.string.favourites),
-                            icon = rememberVectorPainter(image = Icons.Outlined.Favorite),
-                            onClick = { navController.navigate(RouteAlbum()) }
-                        )
-                    }
+    val colors = AppTheme.colors
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                VerticalGradient(
+                    listOf(
+                        colors.background(1.dp),
+                        colors.background.copy(alpha = 0.5f),
+                        Color.Transparent
+                    )
                 )
-            }
+            ),
+        content = {
+            androidx.compose.material.TopAppBar(
+                navigationIcon = {
+                    val facade = LocalSystemFacade.current
+                    IconButton(
+                        painter = painterResource(id = R.drawable.ic_app),
+                        contentDescription = null,
+                        tint = null,
+                        onClick = {
+                            facade.showToast(
+                                R.string.what_s_new_latest,
+                                Icons.Outlined.NewReleases,
+                                priority = Toast.PRIORITY_HIGH
+                            )
+                        }
+                    )
+                },
+                title = {
+                    Label(
+                        text = stringResource(id = R.string.timeline),
+                        style = AppTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                windowInsets = WindowInsets.None,
+                actions = {
+                    val facade = LocalSystemFacade.current
+                    IconButton(
+                        Icons.Outlined.HotelClass,
+                        onClick = facade::launchAppStore
+                    )
+                    IconButton(
+                        Icons.Outlined.Share,
+                        onClick = { facade.launch(Settings.ShareAppIntent) }
+                    )
+                    IconButton(
+                        Icons.Outlined.BugReport,
+                        onClick = { facade.launch(Settings.GitHubIssuesPage) }
+                    )
+                    IconButton(
+                        Icons.Outlined.Chat,
+                        onClick = { facade.launch(Settings.TelegramIntent) }
+                    )
+                },
+                backgroundColor = Color.Transparent,
+                elevation = 0.dp,
+                modifier = Modifier
+                    .widthIn(max = 550.dp)
+                    .windowInsetsPadding(insets)
+                    .padding(horizontal = CP.xLarge, vertical = CP.small)
+                    .clip(FloatingTopBarShape)
+                    .border(
+                        0.5.dp,
+                        VerticalGradient(
+                            listOf(
+                                if (colors.isLight) colors.background else Color.Gray.copy(
+                                    0.24f
+                                ),
+                                if (colors.isLight) colors.background.copy(0.3f) else Color.Gray.copy(
+                                    0.075f
+                                ),
+                            )
+                        ),
+                        FloatingTopBarShape
+                    )
+                    .height(48.dp)
+                    .dynamicBackdrop(
+                        backdropProvider,
+                        HazeStyle.Regular(colors.background),
+                        colors.background,
+                        colors.accent
+                    )
+            )
         }
     )
 }
 
 @Composable
 private fun MainActions(
+    visible: Boolean,
     state: TimelineViewState,
+    backdropProvider: HazeState? = null,
     modifier: Modifier = Modifier
-) = FloatingActionMenu(modifier = modifier) {
-    // Label
-    Label(
-        text = "${state.selected.size}",
-        modifier = Modifier.padding(
-            start = AppTheme.padding.normal,
-            end = AppTheme.padding.medium
-        ),
-        style = AppTheme.typography.titleLarge
-    )
-    // Divider
-    VerticalDivider(modifier = Modifier.height(AppTheme.padding.large))
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn() + slideInVertically(),
+        exit = fadeOut() + slideOutVertically(),
+        modifier = modifier,
+        content = {
+            val colors = AppTheme.colors
+            FloatingActionMenu(
+                modifier = Modifier
+                    .border(
+                        0.5.dp,
+                        VerticalGradient(
+                            listOf(
+                                if (colors.isLight) colors.background else Color.Gray.copy(
+                                    0.24f
+                                ),
+                                if (colors.isLight) colors.background.copy(0.3f) else Color.Gray.copy(
+                                    0.075f
+                                ),
+                            )
+                        ),
+                        CircleShape
+                    )
+                    .dynamicBackdrop(
+                        backdropProvider,
+                        HazeStyle.Regular(colors.background),
+                        colors.background,
+                        colors.accent
+                    ),
+                color = Color.Transparent
+            ) {
+                // Label
+                Label(
+                    text = "${state.selected.size}",
+                    modifier = Modifier.padding(
+                        start = AppTheme.padding.normal,
+                        end = AppTheme.padding.medium
+                    ),
 
-    // Select/Deselect
-    if (!state.allSelected)
-        IconButton(
-            imageVector = Icons.Outlined.SelectAll,
-            onClick = state::selectAll
-        )
+                    style = AppTheme.typography.titleLarge
+                )
+                // Divider
+                VerticalDivider(modifier = Modifier.height(AppTheme.padding.large))
 
-    // Favourite
-    IconButton(
-        imageVector = when (state.allFavourite) {
-            1 -> Icons.Filled.Star
-            0 -> Icons.Outlined.StarOutline
-            else -> Icons.Outlined.StarHalf
-        },
-        onClick = state::toggleLike
-    )
+                // Favourite
+                IconButton(
+                    imageVector = when (state.allFavourite) {
+                        1 -> Icons.Filled.Star
+                        0 -> Icons.Outlined.StarOutline
+                        else -> Icons.Outlined.StarHalf
+                    },
+                    onClick = state::toggleLike
+                )
+                val context = LocalContext.current
+                // Delete
+                IconButton(
+                    imageVector = Icons.Outlined.DeleteOutline,
+                    onClick = { state.remove(context.findActivity()) }
+                )
 
-    val context = LocalContext.current
-    // Delete
-    IconButton(
-        imageVector = Icons.Outlined.DeleteOutline,
-        onClick = { state.remove(context.findActivity()) }
-    )
+                // Share
+                IconButton(
+                    imageVector = Icons.Outlined.Share,
+                    onClick = { state.share(context.findActivity()) }
+                )
 
-    // Share
-    IconButton(
-        imageVector = Icons.Outlined.Share,
-        onClick = { state.share(context.findActivity()) }
-    )
-
-    // close
-    IconButton(
-        imageVector = Icons.Outlined.Close,
-        onClick = state::clear
+                // close
+                IconButton(
+                    imageVector = Icons.Outlined.Close,
+                    onClick = state::clear
+                )
+            }
+        }
     )
 }
 
 
-@Composable
-private fun MainContent(
-    viewState: TimelineViewState,
-    padding: PaddingValues,
-    modifier: Modifier = Modifier,
+private fun LazyGridScope.content(
+    data: Map<String, List<MediaFile>>,
+    state: LazyGridState,
+    tracker: SelectionTracker,
+    navController: NavHostController,
 ) {
-    val values = viewState.data
-    val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
-    val selected = viewState.selected
-    val navController = LocalNavController.current
-    // content
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
-        horizontalArrangement = GridItemsArrangement,
-        verticalArrangement = GridItemsArrangement,
-        contentPadding = padding,
-        modifier = modifier.padding(WindowInsets.contentInsets)
-    ) {
-        // return data or emit state
-        val data = emit(values) ?: return@LazyVerticalGrid
-        // if non-null data is returned
-        items(
-            data = data,
-            key = com.zs.domain.store.MediaFile::id,
-            tracker = viewState,
-            itemContent = { item ->
+    // if non-null data is returned
+    for ((header, children) in data) {
+        stickyHeader(
+            state = state,
+            key = header,
+            contentType = "header",
+            content = {
+                ListHeader(
+                    header,
+                    trailing = {
+                        val state by tracker.isGroupSelected(header)
+                        IconButton(
+                            imageVector = when (state) {
+                                GroupSelectionLevel.NONE -> Icons.Outlined.Circle
+                                GroupSelectionLevel.PARTIAL -> Icons.Outlined.RemoveCircle
+                                GroupSelectionLevel.FULL -> Icons.Filled.CheckCircle
+                            },
+                            tint = if (state == GroupSelectionLevel.FULL) AppTheme.colors.accent else LocalContentColor.current,
+                            onClick = { tracker.select(header) }
+                        )
+                    }
+                )
+            }
+        )
+        // now children
+        val selected = tracker.selected
+        for (child in children) {
+            item(key = child.id, contentType = "item") {
                 MediaFile(
-                    value = item,
+                    value = child,
                     focused = false,
                     checked = when {
                         selected.isEmpty() -> -1
-                        selected.contains(item.id) -> 1
+                        selected.contains(child.id) -> 1
                         else -> 0
                     },
                     modifier = Modifier
-                        .sharedBounds(RouteViewer.buildSharedFrameKey(item.id))
+                        .sharedBounds(RouteViewer.buildSharedFrameKey(child.id))
                         .combinedClickable(
                             // onClick of item
                             onClick = {
                                 if (selected.isNotEmpty())
-                                    viewState.select(item.id)
+                                    tracker.select(child.id)
                                 else
-                                    navController.navigate(RouteViewer(item.id))
+                                    navController.navigate(RouteViewer(child.id))
                             },
                             // onLong Click
-                            onLongClick = { viewState.select(item.id) }
+                            onLongClick = { tracker.select(child.id) }
                         )
                 )
             }
-        )
+        }
     }
 }
 
 @Composable
 fun Timeline(
-    viewState: TimelineViewState
+    viewState: TimelineViewState,
 ) {
     // Handle back
     BackHandler(
         viewState.selected.isNotEmpty(),
         viewState::clear
     )
-
-    val clazz = LocalWindowSize.current
-    val behaviour = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     // The top nav insets
-    val navInsets = WindowInsets.contentInsets
-
+    val inAppNavInsets = WindowInsets.contentInsets
+    val clazz = LocalWindowSize.current
+    val portrait = clazz.widthRange < clazz.heightRange
+    //
+    val observer = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> BackdropProvider()
+        else -> null
+    }
     // The actual layout
     TwoPane(
-        fabPosition = FabPosition.Center,
-        modifier = Modifier.nestedScroll(behaviour.nestedScrollConnection),
+        fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
         topBar = {
-            AnimatedVisibility(
-                visible = !viewState.isInSelectionMode,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.animateContentSize(),
-                content = {
-                    TopAppBar(
-                        behavior = behaviour,
-                        insets = WindowInsets.statusBars,
-                    )
-                }
+            FloatingTopAppBar(
+                insets = WindowInsets.statusBars,
+                backdropProvider = observer
             )
         },
         floatingActionButton = {
-            AnimatedVisibility(
-                visible = viewState.isInSelectionMode,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.padding(navInsets),
-                content = {
-                    MainActions(state = viewState)
-                }
+            MainActions(
+                viewState.isInSelectionMode,
+                modifier = when {
+                    portrait -> Modifier.padding(inAppNavInsets)
+                    else -> Modifier.navigationBarsPadding()
+                },
+                state = viewState,
+                backdropProvider = observer,
             )
         },
         content = {
-            MainContent(
-                viewState = viewState,
-                padding = navInsets + PaddingValues(vertical = AppTheme.padding.normal)
-            )
+            val values = viewState.data
+            val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
+            val navController = LocalNavController.current
+            val lazyGridState = rememberLazyGridState()
+
+            // content
+            LazyVerticalGrid(
+                state = lazyGridState,
+                columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
+                horizontalArrangement = GridItemsArrangement,
+                verticalArrangement = GridItemsArrangement,
+                contentPadding = inAppNavInsets + WindowInsets.contentInsets + PaddingValues(end = if (!portrait) CP.large else 0.dp),
+                modifier = Modifier.thenIf(observer != null) { observerBackdrop(observer!!) }
+            ) {
+                // return data or emit state
+                val data = emit(values) ?: return@LazyVerticalGrid
+                // if non-null data is returned
+                content(data, lazyGridState, viewState, navController)
+            }
         }
     )
 }
