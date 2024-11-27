@@ -414,7 +414,7 @@ fun Timeline(
                 columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
                 horizontalArrangement = GridItemsArrangement,
                 verticalArrangement = GridItemsArrangement,
-                contentPadding = inAppNavInsets + WindowInsets.contentInsets + PaddingValues(end = if (!portrait) CP.large else 0.dp),
+                contentPadding = inAppNavInsets + WindowInsets.contentInsets + PaddingValues(end = if (!portrait) CP.large else 0.dp) + PaddingValues(horizontal = CP.medium),
                 modifier = Modifier.thenIf(observer != null) { observerBackdrop(observer!!) }
             ) {
                 // return data or emit state

@@ -15,6 +15,106 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name">Galería</string>
+    <string name="permission_scr_title">Permiso de Almacenamiento</string>
+    <string name="permission_scr_desc"><b>Galería</b> requiere permiso para acceder al
+        almacenamiento de tu dispositivo para mostrar imágenes y vídeos.
+       <b>\n\nEn Android 14 o superior:</b>
+        <font color="grey">
+            \n  1. Por favor seleccione <b>Permitir todo</b> en el cuadro de diálogo de permisos para que la aplicación funcione correctamente.
+        </font>
+    </string>
+    <string name="photos">Fotos</string>
+    <string name="settings">Ajustes</string>
+    <string name="folders">Carpetas</string>
+    <string name="loading">Cargando</string>
+    <string name="oops_empty">Ups está Vacío!!</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d Archivos - %2$s</string>
+    <string name="size">Tamaño</string>
+    <string name="name">Nombre</string>
+    <string name="recent">Reciente</string>
+    <string name="dark">Oscuro</string>
+    <string name="light">Claro</string>
+    <string name="sync_with_system">Sincronizar con el sistema</string>
+    <string name="general">General</string>
+    <string name="appearance">Apariencia</string>
+    <string name="pref_app_theme">Tema de la App</string>
+    <string name="pref_app_theme_summery">Personaliza la apariencia de la aplicación con las opciones de tema Noche, Día o Sistema.</string>
+    <string name="pref_immersive_view">Vista Inmersiva</string>
+    <string name="pref_immersive_view_summery">Oculte la barra de estado y la barra de navegación para disfrutar de una experiencia de pantalla completa sin distracciones.</string>
+    <string name="pref_trash_enabled">Bote de basura</string>
+    <string name="pref_trash_can_summery">Cuando está habilitado, los archivos eliminados se mueven a una carpeta de papelera en lugar de eliminarse permanentemente.</string>
+    <string name="pref_grid_item_size_multiplier">Tamaño de cuadrícula</string>
+    <string name="pref_grid_item_size_multiplier_summery">Controle cuánto espacio ocupa cada elemento en el diseño de cuadrícula.</string>
+    <string name="pref_live_gallery">Galería en vivo</string>
+    <string name="pref_live_gallery_summery">Habilite animaciones y reproducción automática de videos en la galería.</string>
+    <string name="pref_font_scale">Escala de fuente</string>
+    <string name="pref_font_scale_summery">Ajusta el tamaño del texto en toda la aplicación.</string>
+    <string name="pref_transparent_system_bars">Barras del Sistema</string>
+    <string name="pref_transparent_system_bars_summery">Controle la transparencia de las barras del sistema para personalizar la apariencia de la aplicación</string>
+    <string name="feedback">Comentarios</string>
+    <string name="about_gallery">Sobre Galería</string>
+    <string name="pref_privacy_policy">Política de Privacidad</string>
+    <string name="pref_privacy_policy_summery">Haga clic aquí para ver la política de privacidad</string>
+    <string name="pref_report_an_issue">Informar un problema</string>
+    <string name="pref_report_an_issue_summery">Póngase en contacto con nuestro equipo de soporte para obtener ayuda o informar problemas</string>
+    <string name="pref_app_version_summery">%1$s\nHaga clic para buscar actualizaciones.</string>
+    <string name="msg_unknown_error">Algo salió mal. Ocurrió un error desconocido.</string>
+    <string name="report">Informe</string>
+    <string name="timeline">Cronología</string>
+    <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="select_all">Seleccionar Todo</string>
+    <string name="bin">Papelera</string>
+    <string name="recycle_bin">Papelera de Reciclaje</string>
+    <string name="favourites">Favoritos</string>
+    <string name="pref_secure_mode">Modo Seguro</string>
+    <string name="pref_secure_mode_summery">El modo seguro oculta el contenido de la aplicación en la vista previa de la aplicación,
+        protegiendo la privacidad del usuario cuando la aplicación no está en uso activo.
+    </string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$sx</string>
+    <string name="last_modified">Última modificación</string>
+    <string name="msg_error_sharing_files">Ups, algo salió mal al compartir los archivos. Por favor, inténtelo de nuevo.</string>
+    <string name="msg_files_delete_unknown_error">Ups, algo salió mal al eliminar los archivos. Por favor, inténtelo de nuevo.</string>
+    <string name="msg_files_trash_unknown_error">Ups, algo salió mal al eliminar los archivos. Inténtalo de nuevo.</string>
+    <string name="trash">Basura</string>
+    <string name="msg_files_restore_unknown_error">Ups, algo salió mal al restaurar los archivos. Por favor, inténtelo de nuevo.</string>
+    <string name="share">Compartir</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Borrar</string>
+    <string name="info">Información</string>
+    <string name="edit_in">Editar En</string>
+    <string name="use_as">Usar como</string>
+    <string name="set_as_wallpaper">Establecer como fondo de pantalla</string>
+    <string name="unlike">Quitar de Favoritos</string>
+    <string name="details">Detalles</string>
+    <string name="title">Título</string>
+    <string name="metadata">Metadatos</string>
+    <string name="msg_files_confirm_deletion"><b>Borrar</b>
+        <font color="grey">\n¿Estás seguro de que deseas eliminarlo? No podrás recuperarlo
+        </font>
+    </string>
+    <string name="msg_update_check_error">¡Ups! Algo salió mal al buscar actualizaciones.</string>
+    <string name="msg_update_not_available">¡Ya está todo listo! No hay actualizaciones disponibles.</string>
+    <string name="msg_new_update_downloaded">¡Actualización lista! La instalación puede continuar ahora.</string>
+    <string name="install">Instalar</string>
+    <string name="pref_app_version">Versión de la aplicación</string>
+    <string name="lock_scr_title">Verifica tu identidad</string>
+    <string name="lock_scr_subtitle">Autenticarse con biometría</string>
+    <string name="lock_scr_desc">Autenticación con huella dactilar o reconocimiento facial
+        Para continuar. Este paso es crucial para proteger sus datos.
+    </string>
+    <string name="msg_enroll_biometric">Habilite la autenticación biométrica en la configuración.</string>
+    <string name="pref_app_lock">Bloqueo de aplicación <sup><font color="#ae1c27" size="10"><b>Beta</b></font></sup></string>
+    <string name="pref_app_lock_summery"><b>Desbloqueo con biometría</b>\nCuando esté habilitado, necesitarás
+        utilizar la huella digital, el rostro u otros identificadores únicos para abrir la Galería.
+    </string>
+    <string name="msg_favourites_updated">¡Favoritos actualizados!</string>
+    <string name="msg_media_player_promotion"><b>¡Nueva aplicación de reproductor multimedia!</b>
+        <font color="gray">\n🎶 Echa un vistazo a nuestro nuevo <b>reproductor multimedia!</b> Disfruta de tus canciones favoritas
+            y vídeos sin esfuerzo. ¡Pruébalo! 🎥
+        </font>
+    </string>
+    <string name="get">Conseguir</string>
 </resources>
