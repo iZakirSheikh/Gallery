@@ -208,7 +208,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         Log.d(TAG, "preparing to show authentication dialog.")
         // Build the BiometricPrompt
         val prompt = BiometricPrompt.Builder(this).apply {
-            setTitle(getString(R.string.scr_lock_screen_title))
+            setTitle(getString(R.string.lock_scr_title))
             if (subtitle != null) setSubtitle(subtitle)
             if (desc != null) setDescription(desc)
             // Set allowed authenticators for Android R and above

@@ -78,7 +78,7 @@ private val MistCachedPaint = Paint().apply {
  * @return A Modifier with the applied mist effect.
  */
 private fun Modifier.mist(containerColor: Color, accent: Color) =
-    this then drawBehind {
+    drawBehind {
         // Determine if the container color is light based on its luminance.
         val isLight = containerColor.luminance() >= 0.5f
 

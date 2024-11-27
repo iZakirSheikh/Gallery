@@ -216,7 +216,7 @@ object Settings {
     val KEY_APP_LOCK_TIME_OUT =
         intPreferenceKey("${PREFIX}_app_lock_time_out", -1)
     val KEY_USE_ACCENT_IN_NAV_BAR =
-        booleanPreferenceKey("use_accent_in_nav_bar", true)
+        booleanPreferenceKey("use_accent_in_nav_bar", false)
 
     val DefaultFontFamily get() = FontFamily.Default
 

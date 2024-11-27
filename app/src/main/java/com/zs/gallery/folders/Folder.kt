@@ -142,7 +142,7 @@ fun Folder(
         // More Info
         Label(
             text = textResource(
-                id = R.string.folders_formatted_folder_name_sds, value.count,
+                id = R.string.folders_scr_folder_name_sds, value.count,
                 ctx.formattedFileSize(value.size.toLong())
             ),
             style = AppTheme.typography.caption.copy(fontSize = 10.sp),

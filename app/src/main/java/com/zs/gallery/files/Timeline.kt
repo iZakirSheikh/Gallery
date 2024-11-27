@@ -80,6 +80,7 @@ import com.primex.core.findActivity
 import com.primex.core.plus
 import com.primex.material2.IconButton
 import com.primex.material2.Label
+import com.primex.material2.appbar.TopAppBarDefaults
 import com.zs.domain.store.MediaFile
 import com.zs.foundation.AppTheme
 import com.zs.foundation.ListHeader
@@ -142,7 +143,7 @@ private fun FloatingTopAppBar(
                 )
             ),
         content = {
-            androidx.compose.material.TopAppBar(
+            com.primex.material2.appbar.TopAppBar(
                 navigationIcon = {
                     val facade = LocalSystemFacade.current
                     IconButton(
@@ -185,8 +186,9 @@ private fun FloatingTopAppBar(
                         onClick = { facade.launch(Settings.TelegramIntent) }
                     )
                 },
-                backgroundColor = Color.Transparent,
-                elevation = 0.dp,
+                style = TopAppBarDefaults.topAppBarStyle(
+                    containerColor = Color.Transparent
+                ),
                 modifier = Modifier
                     .widthIn(max = 550.dp)
                     .windowInsetsPadding(insets)
@@ -206,7 +208,6 @@ private fun FloatingTopAppBar(
                         ),
                         FloatingTopBarShape
                     )
-                    .height(48.dp)
                     .dynamicBackdrop(
                         backdropProvider,
                         HazeStyle.Regular(colors.background),
