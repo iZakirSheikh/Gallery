@@ -17,6 +17,7 @@
      -->
     <string name="app_name">Galería</string>
     <string name="permission_scr_title">Permiso de Almacenamiento</string>
+    <string name="allow">Permitir</string>
     <string name="permission_scr_desc"><b>Galería</b> requiere permiso para acceder al
         almacenamiento de tu dispositivo para mostrar imágenes y vídeos.
        <b>\n\nEn Android 14 o superior:</b>
@@ -64,6 +65,7 @@
     <string name="report">Informe</string>
     <string name="timeline">Cronología</string>
     <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="files_selected_d">%1$d Seleccionados</string>
     <string name="select_all">Seleccionar Todo</string>
     <string name="bin">Papelera</string>
     <string name="recycle_bin">Papelera de Reciclaje</string>
@@ -87,9 +89,11 @@
     <string name="edit_in">Editar En</string>
     <string name="use_as">Usar como</string>
     <string name="set_as_wallpaper">Establecer como fondo de pantalla</string>
+    <string name="like">Favorito</string>
     <string name="unlike">Quitar de Favoritos</string>
     <string name="details">Detalles</string>
     <string name="title">Título</string>
+    <string name="path">Ruta</string>
     <string name="metadata">Metadatos</string>
     <string name="msg_files_confirm_deletion"><b>Borrar</b>
         <font color="grey">\n¿Estás seguro de que deseas eliminarlo? No podrás recuperarlo
@@ -117,4 +121,6 @@
         </font>
     </string>
     <string name="get">Conseguir</string>
+    <string name="pref_color_nav_bar">Barra de Navegación de Color</string>
+    <string name="pref_color_nav_bar_summery">Utilice el color de acento en la barra de navegación.</string>
 </resources>

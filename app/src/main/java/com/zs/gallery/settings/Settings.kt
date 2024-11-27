@@ -274,12 +274,12 @@ private inline fun Appearance(
 
     val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
     SwitchPreference(
-        "Color NavBar",
+        stringResource(R.string.pref_color_nav_bar),
         checked = useAccent,
         onCheckedChange = { viewState.set(Settings.KEY_USE_ACCENT_IN_NAV_BAR, it) },
         modifier = Modifier
             .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
-        summery = "Use the accent color in the navigation bar."
+        summery = stringResource(R.string.pref_color_nav_bar_summery)
     )
 }
 

@@ -79,6 +79,20 @@ You can help translate Gallery on [Crowdin](https://crowdin.com/project/gallery-
 
 ![Translation Status](https://badges.awesome-crowdin.com/translation-16583273-718355.png)
 
+## Credits
+
+#### Special Thanks
+
+- Spanish by [@KeXxDumb](https://github.com/KeXxDumb)
+- Thanks to **Crowdin** for providing free hosting for the project.
+
+### Open Source Projects
+
+- [Gallery](https://github.com/IacobIonut01/Gallery)
+- [Simple-Gallery](https://github.com/SimpleMobileTools/Simple-Gallery)
+- [Fossify Gallery](https://github.com/FossifyOrg/Gallery)
+- ...
+
 ## 🔖 License
 
 ```

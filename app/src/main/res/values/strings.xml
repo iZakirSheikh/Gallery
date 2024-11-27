@@ -122,4 +122,6 @@
         </font>
     </string>
     <string name="get">Get</string>
+    <string name="pref_color_nav_bar">Color NavBar</string>
+    <string name="pref_color_nav_bar_summery">Use the accent color in the navigation bar.</string>
 </resources>
