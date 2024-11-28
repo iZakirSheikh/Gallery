@@ -124,4 +124,23 @@
     <string name="get">Get</string>
     <string name="pref_color_nav_bar">Color NavBar</string>
     <string name="pref_color_nav_bar_summery">Use the accent color in the navigation bar.</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="msg_auth_failed">Authentication Failed! Please try again or use an alternative method.</string>
+    <string name="msg_auth_error_s">Authentication Error: %1$s</string>
+    <string name="restore">Restore</string>
+    <string name="empty_bin">Empty Bin</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s Files</string>
+    <string name="viewer_msg_no_wallpaper_app_found">Oops! No wallpaper app detected. Install one to proceed.</string>
+    <string name="viewer_set_as">Set as</string>
+    <string name="today">Today</string>
+    <string name="trash_one_day_left">1 day left</string>
+    <string name="trash_days_left_d">%1$s days left</string>
+    <string name="auth_confirm_biometric">Confirm Biometric</string>
+    <string-array documentation= "returns array[4], disabled, immidiately, 1 min, 30 min"  name="pref_app_lock_options">
+        <item>App Lock Disabled</item>
+        <item>Lock Immediately</item>
+        <item>Lock After 1 Minute</item>
+        <item>Lock After 30 Minutes</item>
+    </string-array>
+
 </resources>

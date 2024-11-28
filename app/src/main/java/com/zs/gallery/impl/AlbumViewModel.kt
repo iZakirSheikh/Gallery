@@ -48,7 +48,7 @@ class AlbumViewModel(
         title = buildAnnotatedString {
             appendLine(getText(R.string.favourites))
             withSpanStyle(fontSize = 10.sp) {
-                append("${favorites.size} Files")
+                append(getText(R.string.files_d, favorites.size))
             }
         }
 

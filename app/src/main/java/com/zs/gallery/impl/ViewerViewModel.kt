@@ -99,12 +99,12 @@ private fun Activity.setWallpaper(uri: Uri) {
             setDataAndType(uri, "image/*");
             putExtra("mimeType", "image/*");
         }
-        startActivity(Intent.createChooser(intent, "Set as:"));
+        startActivity(Intent.createChooser(intent, getString(R.string.viewer_set_as)));
     } catch (e: Exception) {
         // If any other exception occurs, show a toast message to the user
         android.widget.Toast.makeText(
             this,
-            "No wallpaper app found",
+            getString(R.string.viewer_msg_no_wallpaper_app_found),
             android.widget.Toast.LENGTH_SHORT
         ).show()
     }

@@ -1,11 +1,11 @@
 [versions]
 agp = "8.7.2"
-kotlin = "2.0.21"
+kotlin = "2.1.0"
 compose = "1.8.0-alpha06"
-media3 = "1.4.1"
+media3 = "1.5.0"
 toolkit = "2.1.0"
 material_icons = "1.7.5"
-coil = "3.0.2"
+coil = "3.0.4"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -53,7 +53,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.0" }
-saket-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.13.0" }
+saket-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.14.0" }
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }
 play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.1" }
 
