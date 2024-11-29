@@ -123,4 +123,22 @@
     <string name="get">Conseguir</string>
     <string name="pref_color_nav_bar">Barra de Navegación de Color</string>
     <string name="pref_color_nav_bar_summery">Utilice el color de acento en la barra de navegación.</string>
+    <string name="dismiss">Descartar</string>
+    <string name="msg_auth_failed">¡Autenticación Fallida! Inténtelo de nuevo o utilice un método alternativo.</string>
+    <string name="msg_auth_error_s">Error de autenticación: %1$s</string>
+    <string name="restore">Restaurar</string>
+    <string name="empty_bin">Papelera Vacía</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s Archivos</string>
+    <string name="viewer_msg_no_wallpaper_app_found">Ups! No se detectó ninguna aplicación de fondo de pantalla. Instale uno para continuar.</string>
+    <string name="viewer_set_as">Establecer como</string>
+    <string name="today">Hoy</string>
+    <string name="trash_one_day_left">Queda 1 día</string>
+    <string name="trash_days_left_d">%1$s Días restantes</string>
+    <string name="auth_confirm_biometric">Confirmar Datos Biométricos</string>
+    <string-array documentation="returns array[4], disabled, immidiately, 1 min, 30 min" name="pref_app_lock_options">
+        <item>Bloqueo de Aplicación Deshabilitado</item>
+        <item>Bloquear Inmediatamente</item>
+        <item>Bloquear después de 1 minuto</item>
+        <item>Bloquear después de 30 minutos</item>
+    </string-array>
 </resources>
