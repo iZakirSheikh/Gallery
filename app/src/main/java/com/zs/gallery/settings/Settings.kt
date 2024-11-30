@@ -19,6 +19,7 @@
 package com.zs.gallery.settings
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -37,12 +38,14 @@ import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.primex.core.textArrayResource
 import com.primex.core.textResource
 import com.primex.material2.DropDownPreference
 import com.primex.material2.IconButton
@@ -55,15 +58,14 @@ import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.zs.foundation.AppTheme
 import com.zs.foundation.Colors
+import com.zs.foundation.NightMode
 import com.zs.foundation.None
 import com.zs.foundation.adaptive.contentInsets
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
-import com.zs.foundation.NightMode
 import com.zs.gallery.common.preference
-import androidx.compose.runtime.getValue
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -126,8 +128,6 @@ context(ColumnScope)
 private inline fun General(
     viewState: SettingsViewState
 ) {
-
-
     val prefLiveGallery = viewState.liveGallery
     SwitchPreference(
         title = prefLiveGallery.title,
@@ -145,12 +145,14 @@ private inline fun General(
         title = prefAppLock.title,
         defaultValue = prefAppLock.value,
         icon = prefAppLock.vector,
-        entries = listOf(
-            "App Lock Disabled" to -1,
-            "Lock Immediately" to 0,
-            "Lock After 1 Minute" to 1,
-            "Lock After 30 Minutes" to 30
-        ),
+        entries = textArrayResource(R.array.pref_app_lock_options).let {
+            listOf(
+                it[0]. toString()  to -1,
+                it[1]. toString()  to 0,
+                it[2]. toString()  to 1,
+                it[3]. toString()  to 30
+            )
+        },
         modifier = Modifier
             .background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
         onRequestChange = {value ->
@@ -160,7 +162,7 @@ private inline fun General(
                 return@DropDownPreference facade.enroll()
             }
             // Securely make sure that app_lock is set.
-            facade.authenticate("Confirm Biometric") {
+            facade.authenticate((facade as Activity).getString(R.string.auth_confirm_biometric)) {
                 viewState.set(Settings.KEY_APP_LOCK_TIME_OUT, value)
             }
         },
@@ -274,12 +276,12 @@ private inline fun Appearance(
 
     val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
     SwitchPreference(
-        "Color NavBar",
+        stringResource(R.string.pref_color_nav_bar),
         checked = useAccent,
         onCheckedChange = { viewState.set(Settings.KEY_USE_ACCENT_IN_NAV_BAR, it) },
         modifier = Modifier
             .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
-        summery = "Use the accent color in the navigation bar."
+        summery = stringResource(R.string.pref_color_nav_bar_summery)
     )
 }
 

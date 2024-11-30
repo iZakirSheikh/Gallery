@@ -21,18 +21,15 @@ package com.zs.gallery.lockscreen
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.primex.core.findActivity
 import com.primex.core.textResource
 import com.primex.material2.Button
-import com.primex.material2.OutlinedButton
 import com.zs.foundation.AppTheme
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.Range
@@ -54,8 +51,8 @@ fun LockScreen() {
 
     com.zs.gallery.common.Placeholder(
         iconResId = R.raw.lt_app_lock,
-        title = stringResource(R.string.scr_lock_screen_title),
-        message = textResource(R.string.src_lock_screen_desc),
+        title = stringResource(R.string.lock_scr_title),
+        message = textResource(R.string.lock_scr_desc),
         vertical = LocalWindowSize.current.widthRange == Range.Compact,
     ) {
         Button(

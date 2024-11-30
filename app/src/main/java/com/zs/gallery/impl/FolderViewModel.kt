@@ -29,6 +29,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.primex.core.withSpanStyle
 import com.zs.domain.store.MediaProvider
 import com.zs.domain.util.PathUtils
+import com.zs.gallery.R
 import com.zs.gallery.common.get
 import com.zs.gallery.files.FolderViewState
 import com.zs.gallery.files.RouteFolder
@@ -70,7 +71,7 @@ class FolderViewModel(
         title = buildAnnotatedString {
             appendLine(name)
             withSpanStyle(fontSize = 10.sp) {
-                appendLine("$count files, $size")
+                appendLine(getText(R.string.files_d, size))
             }
         }
 

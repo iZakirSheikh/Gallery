@@ -87,7 +87,7 @@ class FoldersViewModel(
             // This might involve logging the exception using Firebase Crashlytics.
             // Display a toast message to the user, indicating something went wrong and suggesting they report the issue.
             val action = showToast(
-                getText(R.string.oops_something_went_wrong_please_report_this_to_developer),
+                exception.message ?: getText(R.string.msg_unknown_error),
                 getText(R.string.report),
                 Icons.Outlined.NearbyError,
                 Color.Rose,

@@ -219,8 +219,8 @@ private fun Permission() {
     // If the permissions are not granted, show the permission screen.
     com.zs.gallery.common.Placeholder(
         iconResId = R.raw.lt_permission,
-        title = stringResource(R.string.permission_screen_title).toString(),
-        message = textResource(R.string.permission_screen_desc),
+        title = stringResource(R.string.permission_scr_title).toString(),
+        message = textResource(R.string.permission_scr_desc),
         vertical = LocalWindowSize.current.widthRange == Range.Compact
     ) {
         OutlinedButton(
@@ -322,7 +322,7 @@ private fun NavigationBar(
 
         // Timeline
         NavItem(
-            label = { Label(text = textResource(R.string.photos)) },
+            label = { Label(text = textResource(R.string.timeline)) },
             icon = { Icon(imageVector = Icons.Filled.PhotoLibrary, contentDescription = null) },
             checked = domain == RouteTimeline.domain,
             onClick = { facade.launchReviewFlow(); navController.toRoute(RouteTimeline) },
@@ -400,7 +400,8 @@ private fun NavigationBar(
                             if (colors.isLight) colors.background(2.dp) else Color.Gray.copy(0.24f),
                             Color.Transparent,
                             Color.Transparent,
-                            if (colors.isLight) colors.background(2.dp) else Color.Gray.copy(0.24f),
+                            Color.Transparent,
+                            Color.Transparent,
                         )
                     ),
                     BottomNavShape

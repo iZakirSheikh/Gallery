@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.zs.domain.store.MediaProvider
 import com.zs.domain.store.Trashed
+import com.zs.gallery.R
 import com.zs.gallery.bin.TrashViewState
 import com.zs.gallery.common.GroupSelectionLevel
 import kotlin.time.Duration.Companion.milliseconds
@@ -80,10 +81,10 @@ class TrashViewModel(
             // Transform the keys to user-friendly labels
             .mapKeys { (daysLeft, _) ->
                 when {
-                    daysLeft <= 0 -> "Today" // Handle expired items
-                    daysLeft == 1L -> "1 day left"
-                    else -> "$daysLeft days left" // Format remaining days
-                }
+                    daysLeft <= 0 -> getText(R.string.today) // Handle expired items
+                    daysLeft == 1L -> getText(R.string.trash_one_day_left)
+                    else -> getText(R.string.trash_days_left_d, daysLeft) // Format remaining days
+                }.toString()
             }
     }
 

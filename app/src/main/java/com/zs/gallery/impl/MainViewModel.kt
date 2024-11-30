@@ -251,7 +251,7 @@ abstract class MainViewModel<T>(
                 // If the user performs the action, proceed with deletion
                 // Otherwise, return -3 to indicate user cancellation
                 val action = showToast(
-                    message = R.string.msg_files_deletion_confirm,
+                    message = R.string.msg_files_confirm_deletion,
                     action = R.string.delete,
                     icon = Icons.Outlined.NearbyError,
                     accent = Color.Rose,

@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.primex.core.findActivity
 import com.primex.core.plus
@@ -113,7 +114,7 @@ private fun TopAppBar(
                 actions = {
                     val context = LocalContext.current
                     Button(
-                        label = "Restore",
+                        label = stringResource(R.string.restore),
                         onClick = { viewState.restoreAll(context.findActivity()) },
                         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.background(2.dp)),
                         shape = CircleShape,
@@ -121,7 +122,7 @@ private fun TopAppBar(
                         modifier = Modifier.scale(0.9f)
                     )
                     Button(
-                        label = "Empty Bin",
+                        label = stringResource(R.string.empty_bin),
                         onClick = { viewState.empty(context.findActivity()) },
                         colors = ButtonDefaults.buttonColors(backgroundColor = AppTheme.colors.background(2.dp)),
                         shape = CircleShape,

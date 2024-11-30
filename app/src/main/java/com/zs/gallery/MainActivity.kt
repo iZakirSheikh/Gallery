@@ -208,7 +208,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         Log.d(TAG, "preparing to show authentication dialog.")
         // Build the BiometricPrompt
         val prompt = BiometricPrompt.Builder(this).apply {
-            setTitle(getString(R.string.scr_lock_screen_title))
+            setTitle(getString(R.string.lock_scr_title))
             if (subtitle != null) setSubtitle(subtitle)
             if (desc != null) setDescription(desc)
             // Set allowed authenticators for Android R and above
@@ -223,7 +223,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             // Future versions might include support for alternative authentication on older Android versions
             // if a compatibility library or API becomes available.
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
-                setNegativeButton("Dismiss", mainExecutor, { _, _ -> })
+                setNegativeButton(getString(R.string.dismiss), mainExecutor, { _, _ -> })
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 setConfirmationRequired(false)
             /*if (Build.VERSION.SDK_INT >= 35) {
@@ -237,18 +237,17 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             object : BiometricPrompt.AuthenticationCallback() {
                 // Implement callback methods for authentication events (success, error, etc.)
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
-                    showPlatformToast("Authentication Successful!")
                     onAuthenticated()
                 }
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    showPlatformToast("Authentication Failed! Please try again or use an alternative method.")
+                    showPlatformToast(getString(R.string.msg_auth_failed))
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                     super.onAuthenticationError(errorCode, errString)
-                    showPlatformToast("Authentication Error: $errString")
+                    showPlatformToast(getString(R.string.msg_auth_error_s, errString))
                 }
             }
         )
