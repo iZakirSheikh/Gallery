@@ -18,68 +18,73 @@
 
 package com.zs.gallery.impl
 
+import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.NearbyError
+import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
 import com.primex.core.Rose
+import com.primex.core.castTo
+import com.zs.domain.store.Folder
 import com.zs.domain.store.MediaProvider
+import com.zs.foundation.menu.Action
 import com.zs.foundation.toast.Toast
 import com.zs.gallery.R
+import com.zs.gallery.common.Filter
+import com.zs.gallery.common.Mapped
 import com.zs.gallery.folders.FoldersViewState
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import java.util.Locale
 
 private const val TAG = "FoldersViewModel"
 
-class FoldersViewModel(
-    private val provider: MediaProvider
-) : KoinViewModel(), FoldersViewState {
-    // Trigger for refreshing the list
-    private val trigger = MutableStateFlow(false)
-    private var _ascending: Boolean by mutableStateOf(false)
-    private var _order: Int by mutableIntStateOf(FoldersViewState.ORDER_BY_DATE_MODIFIED)
+private val Folder.firstTitleChar
+    inline get() = name.uppercase(Locale.ROOT)[0].toString()
 
-    private fun invalidate() {
-        trigger.value = !trigger.value
+private val ORDER_BY_DATE_MODIFIED = Action(R.string.last_modified, Icons.Outlined.DateRange)
+private val ORDER_BY_NAME = Action(R.string.name, Icons.Outlined.TextFields)
+
+class FoldersViewModel(
+    private val provider: MediaProvider,
+) : KoinViewModel(), FoldersViewState {
+
+    override val orders: List<Action> = listOf(ORDER_BY_DATE_MODIFIED, ORDER_BY_NAME)
+
+    override fun filter(ascending: Boolean, order: Action) {
+        if (ascending == filter.first && order == filter.second) return
+        filter = ascending to order
     }
 
-    override var ascending: Boolean
-        get() = _ascending
-        set(value) {
-            _ascending = value
-            invalidate()
-        }
+    override var filter: Filter by mutableStateOf(true to ORDER_BY_NAME)
 
-    override var order: Int
-        get() = _order
-        set(value) {
-            _order = value
-            invalidate()
-        }
+    override val data: StateFlow<Mapped<Folder>?> = combine(
+        snapshotFlow(::filter), provider.observer(MediaProvider.EXTERNAL_CONTENT_URI)
+    ) { (ascending, order), _ ->
+        val folders = provider.fetchFolders()
+        val result = when (order) {
+            ORDER_BY_NAME -> folders.sortedBy { it.firstTitleChar }
+                .let { if (ascending) it else it.reversed() }.groupBy { it.firstTitleChar }
 
-    override val data = provider
-        // Observe the changes in the URI
-        .observer(MediaProvider.EXTERNAL_CONTENT_URI)
-        // Observe the changes in trigger also
-        .combine(trigger) { _, _ ->
-            val folders = provider.fetchFolders()
-            val result = when (_order) {
-                FoldersViewState.ORDER_BY_SIZE -> folders.sortedBy { it.size }
-                FoldersViewState.ORDER_BY_DATE_MODIFIED -> folders.sortedBy { it.lastModified }
-                FoldersViewState.ORDER_BY_NAME -> folders.sortedBy { it.name }
-                else -> error("Oops invalid id passed $_order")
-            }
-            if (ascending) result else result.reversed()
+            ORDER_BY_DATE_MODIFIED -> folders.sortedBy { it.lastModified }
+                .let { if (ascending) it else it.reversed() }
+                .groupBy { DateUtils.getRelativeTimeSpanString(it.lastModified).toString() }
+
+            else -> error("Oops invalid id passed $order")
         }
+        // This should be safe
+        castTo(result) as Mapped<Folder>
+    }
         // Catch any exceptions in upstream flow and emit using the snackbar.
         .catch { exception ->
             Log.e(TAG, "provider: ${exception.message}")
@@ -97,3 +102,4 @@ class FoldersViewModel(
         // Convert to state.
         .stateIn(viewModelScope, started = SharingStarted.Lazily, null)
 }
+

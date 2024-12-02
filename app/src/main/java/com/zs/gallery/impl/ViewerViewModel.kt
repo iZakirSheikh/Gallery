@@ -41,7 +41,7 @@ import com.zs.domain.store.MediaFile
 import com.zs.domain.store.MediaProvider
 import com.zs.domain.store.isImage
 import com.zs.domain.store.mediaUri
-import com.zs.foundation.menu.MenuItem
+import com.zs.foundation.menu.Action
 import com.zs.gallery.R
 import com.zs.gallery.common.get
 import com.zs.gallery.settings.Settings
@@ -54,12 +54,12 @@ import kotlinx.coroutines.flow.onEach
 
 private const val TAG = "ViewerViewModel"
 
-private val DELETE = MenuItem("action_delete", R.string.delete, Icons.Outlined.Delete)
-private val SHARE = MenuItem("action_share", R.string.share, Icons.Outlined.Share)
-private val USE_AS = MenuItem("action_use_as", R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
-private val EDIT_IN = MenuItem("action_edit_in", R.string.edit_in, Icons.Outlined.Edit)
-private val STAR = MenuItem("action_like", R.string.like, Icons.Outlined.StarOutline)
-private val UN_STAR = MenuItem("action_unlike", R.string.unlike, Icons.Outlined.Star)
+private val DELETE = Action(R.string.delete, Icons.Outlined.Delete)
+private val SHARE = Action( R.string.share, Icons.Outlined.Share)
+private val USE_AS = Action( R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
+private val EDIT_IN = Action(R.string.edit_in, Icons.Outlined.Edit)
+private val STAR = Action(R.string.like, Icons.Outlined.StarOutline)
+private val UN_STAR = Action(R.string.unlike, Icons.Outlined.Star)
 
 /**
  * Creates an Intent to edit an image at the given URI.
@@ -133,7 +133,7 @@ class ViewerViewModel(
             details = if (value) current else null
         }
 
-    override val actions: List<MenuItem> by derivedStateOf {
+    override val actions: List<Action> by derivedStateOf {
         buildList {
             Log.d(TAG, "actions: changed ")
             this += if (favourite) UN_STAR else STAR
@@ -147,7 +147,7 @@ class ViewerViewModel(
     }
 
 
-    override fun onAction(item: MenuItem, activity: Activity) {
+    override fun onAction(item: Action, activity: Activity) {
         when (item) {
             STAR, UN_STAR -> toggleLike()
             DELETE -> remove(activity)

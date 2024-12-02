@@ -64,6 +64,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.primex.core.MetroGreen
+import com.primex.core.OrientRed
 import com.primex.core.plus
 import com.primex.core.textResource
 import com.primex.material2.Label
@@ -134,7 +136,7 @@ private const val TAG = "Gallery"
 private val NAV_RAIL_MIN_WIDTH = 106.dp
 private val BOTTOM_NAV_MIN_HEIGHT = 56.dp
 
-private val LightAccentColor = Color(0xFF514700)
+private val LightAccentColor = Color.OrientRed
 private val DarkAccentColor = Color(0xFFD8A25E)
 
 /**
@@ -314,8 +316,8 @@ private fun NavigationBar(
         val current by navController.current()
         val color = LocalContentColor.current
         val colors = NavigationItemDefaults.navigationItemColors(
-            selectedContentColor = color,
-            selectedBackgroundColor = color.copy(0.12f)
+            selectedContentColor = if (AppTheme.colors.isLight) AppTheme.colors.accent else color,
+            selectedBackgroundColor =if (AppTheme.colors.isLight) AppTheme.colors.accent.copy(alpha = 0.12f) else color.copy(alpha = 0.12f),
         )
         val domain = current?.destination?.domain
         val facade = LocalSystemFacade.current
@@ -547,9 +549,10 @@ fun Gallery(
     )
 
     // Observe the state of the IMMERSE_VIEW setting
+    // Observe the state of the IMMERSE_VIEW setting
     val immersiveView by activity.observeAsState(Settings.KEY_IMMERSIVE_VIEW)
-    val translucentBg by activity.observeAsState(Settings.KEY_TRANSPARENT_SYSTEM_BARS)
-    LaunchedEffect(immersiveView, style, isDark, translucentBg) {
+    val transparentSystemBars by activity.observeAsState(Settings.KEY_TRANSPARENT_SYSTEM_BARS)
+    LaunchedEffect(immersiveView, style, isDark, transparentSystemBars) {
         // Get the WindowInsetsController for managing system bars
         val window = activity.window
         val controller = WindowCompat.getInsetsController(window, window.decorView)
@@ -570,11 +573,13 @@ fun Gallery(
             else -> !isDark  // If not explicitly set, use the isDark setting
         }
         // Configure the system bars background color based on the current style settings
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            return@LaunchedEffect // No supported from here.
         window.apply {
             val color = when (style.flagSystemBarBackground) {
                 WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSLUCENT -> Color(0x20000000).toArgb()  // Translucent background
                 WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSPARENT -> Color.Transparent.toArgb()  // Transparent background
-                else -> (if (translucentBg) Color(0x20000000) else Color.Transparent).toArgb()// automate using the setting
+                else -> (if (!transparentSystemBars) Color(0x20000000) else Color.Transparent).toArgb()// automate using the setting
             }
             // Set the status and navigation bar colors
             statusBarColor = color

@@ -15,7 +15,7 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
-    <string name="app_name" >Gallery</string>
+    <string name="app_name">Gallery</string>
     <string name="permission_scr_title">Storage Permission</string>
     <string name="allow">Allow</string>
     <string name="permission_scr_desc"><b>Gallery</b> requires permission to access your
@@ -40,27 +40,9 @@
     <string name="sync_with_system">Sync with System</string>
     <string name="general">General</string>
     <string name="appearance">Appearance</string>
-    <string name="pref_app_theme">App Theme</string>
-    <string name="pref_app_theme_summery">Customize the app\'s look with Night, Day, or System theme options.</string>
-    <string name="pref_immersive_view">Immersive View</string>
-    <string name="pref_immersive_view_summery">Hide the status bar and navigation bar for a distraction-free, full-screen experience.</string>
-    <string name="pref_trash_enabled">Trash Can</string>
-    <string name="pref_trash_can_summery">When enabled, deleted files are moved to a Trash Can folder instead of being permanently deleted.</string>
-    <string name="pref_grid_item_size_multiplier">Grid size</string>
-    <string name="pref_grid_item_size_multiplier_summery">Control how much space each item takes up in the grid layout.</string>
-    <string name="pref_live_gallery">Live gallery</string>
-    <string name="pref_live_gallery_summery">Enable animations and video autoplay in the gallery.</string>
-    <string name="pref_font_scale">Font scale</string>
-    <string name="pref_font_scale_summery">Adjust the size of text throughout the app.</string>
-    <string name="pref_transparent_system_bars">System Bars</string>
-    <string name="pref_transparent_system_bars_summery">Control the transparency of the system bars to customize the app\'s appearance</string>
     <string name="feedback">Feedback</string>
     <string name="about_gallery">About Gallery</string>
-    <string name="pref_privacy_policy">Privacy Policy</string>
-    <string name="pref_privacy_policy_summery">Click here to view the privacy policy</string>
-    <string name="pref_report_an_issue">Report an issue</string>
-    <string name="pref_report_an_issue_summery">Get in touch with our support team for assistance or to report issues</string>
-    <string name="pref_app_version_summery">%1$s\nClick to check for updates.</string>
+
     <string name="msg_unknown_error">Something went wrong. An unknown error occurred.</string>
     <string name="report">Report</string>
     <string name="timeline">Timeline</string>
@@ -70,10 +52,7 @@
     <string name="bin">Bin</string>
     <string name="recycle_bin">Recycle Bin</string>
     <string name="favourites">Favourites</string>
-    <string name="pref_secure_mode">Secure Mode</string>
-    <string name="pref_secure_mode_summery">Secure Mode obscures app content in the app preview,
-        protecting user privacy when the app is not in active use.
-    </string>
+
     <!--returns a string with multiplied x e.g., 1.3x-->
     <string name="times_factor_x_f">%1$sx</string>
     <string name="last_modified">Last modified</string>
@@ -104,17 +83,14 @@
     <string name="msg_update_not_available">You’re all set! No updates available.</string>
     <string name="msg_new_update_downloaded">Update ready! Installation can proceed now.</string>
     <string name="install">Install</string>
-    <string name="pref_app_version">App Version</string>
+
     <string name="lock_scr_title">Verify Your Identity</string>
     <string name="lock_scr_subtitle">Authenticate with Biometrics</string>
     <string name="lock_scr_desc">Authenticate with your fingerprint or facial recognition
         to continue. This step is crucial for safeguarding your data.
     </string>
     <string name="msg_enroll_biometric">Enable biometric authentication in settings.</string>
-    <string name="pref_app_lock">App Lock <sup><font color = '#ae1c27' size= '10'><b>Beta</b></font></sup></string>
-    <string name="pref_app_lock_summery"><b>Unlock with biometrics</b>\nWhen enabled, you\'ll need
-        to use the fingerprint, face or other unique identifiers to open Gallery.
-    </string>
+
     <string name="msg_favourites_updated">Favorites updated!</string>
     <string name="msg_media_player_promotion"><b>New Media Player App!</b>
         <font color='gray'>\n🎶 Check out our new <b>Media Player!</b> Enjoy your favorite tunes
@@ -122,8 +98,7 @@
         </font>
     </string>
     <string name="get">Get</string>
-    <string name="pref_color_nav_bar">Color NavBar</string>
-    <string name="pref_color_nav_bar_summery">Use the accent color in the navigation bar.</string>
+
     <string name="dismiss">Dismiss</string>
     <string name="msg_auth_failed">Authentication Failed! Please try again or use an alternative method.</string>
     <string name="msg_auth_error_s">Authentication Error: %1$s</string>
@@ -136,11 +111,105 @@
     <string name="trash_one_day_left">1 day left</string>
     <string name="trash_days_left_d">%1$s days left</string>
     <string name="auth_confirm_biometric">Confirm Biometric</string>
-    <string-array documentation= "returns array[4], disabled, immidiately, 1 min, 30 min"  name="pref_app_lock_options">
-        <item>App Lock Disabled</item>
-        <item>Lock Immediately</item>
-        <item>Lock After 1 Minute</item>
-        <item>Lock After 30 Minutes</item>
-    </string-array>
 
+    <string name="pref_app_theme_s"><b>App Theme</b>
+        <font color="grey" size="14">
+            <b>\n%1$s</b>
+            \nCustomize the app\'s look with Night, Day, or System theme options.
+        </font>
+    </string>
+
+    <string name="pref_immersive_view"><b>Immersive View</b>
+        <font color="grey" size="14">
+            \nHide the status bar and navigation bar for a distraction-free, full-screen experience.
+        </font>
+    </string>
+
+    <string name="pref_enable_trash_can"><b>Recycle Bin <small>(Android 11+)</small></b>
+          <font color="grey" size="14">
+              \nEnable to move deleted files to the Recycle Bin instead of permanently deleting them.
+          </font>
+    </string>
+
+    <string name="pref_grid_item_size_multiplier"><b>Grid Size Multiplier</b>
+          <font color="grey" size="14">
+              \nAdjust the space each item takes up in the grid layout.
+          </font>
+    </string>
+
+    <string name="pref_colorization_strategy"><b>Auto Colorize <sup><font color='#ae1c27' size='10'><b>Beta</b></font></sup></b>
+         <font color="grey" size="14">
+             \nDynamically generate a theme based on the colors of the currently playing media artwork.
+          </font>
+    </string>
+
+    <string name="pref_privacy_policy"><b>Privacy Policy</b>
+           <font color="grey" size="14">
+               \nClick here to view the privacy policy.
+          </font>
+    </string>
+
+    <string name="pref_live_gallery"><b>Live gallery</b>
+           <font color="grey" size="14">
+               \nEnable animations and video autoplay in the gallery.
+          </font></string>
+    <string name="pref_font_scale"><b>Font Scale</b>
+         <font color="grey" size="14">
+            \nAdjust the font size to make text easier to read. Choose a scale that suits your
+             preference for better readability.
+        </font>
+    </string>
+
+    <string name="pref_transparent_system_bars"><b>System Bars</b>
+        <font color="grey" size="14">
+            \nEnable transparent system bars for an edge-to-edge experience <b><i>\n(Android 6.0+)</i></b>
+        </font>
+    </string>
+
+    <string name="pref_report_an_issue"><b>Report an issue</b>
+        <font color="grey" size="14">
+           \nGet in touch with our support team for assistance or to report issues
+        </font>
+    </string>
+
+    <string-array name="pref_night_mode_entries">
+        <item>Dark</item>
+        <item>Light</item>
+        <item>Sync with System</item>
+    </string-array>
+    <string name="version">Version</string>
+    <string name="version_info_s">Version: %1$s</string>
+    <string name="pref_secure_mode"><b>Secure Mode</b>
+        <font color="grey" size="14">
+           \nSecure Mode obscures app content in the app preview, protecting user privacy when the
+            app is not in active use.
+        </font>
+    </string>
+
+    <string name="pref_app_lock_s"><b>App Lock</b> <sup><font color='#ae1c27' size="10"><b>Beta</b></font></sup>
+          <small>\n%1$s</small>
+          <font color="grey" size="14">
+              \nSecure Gallery with biometric authentication.
+        </font>
+    </string>
+
+    <string name="pref_color_nav_bar"><b>Color NavBar</b>
+        <font color="grey" size="14">
+           Use the accent color in the navigation bar.
+        </font>
+    </string>
+    <string name="about_us">About us</string>
+    <string name="postfix_x_f">%1$.1fx</string>
+    <string name="system">System</string>
+    <string name="join_the_beta">Join the Beta</string>
+    <string name="update_gallery">Update Gallery</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="share_app_label">Share with Friends</string>
+
+    <string-array name="pref_app_lock_options">
+        <item>Disabled</item>
+        <item>Instant</item>
+        <item>1 Min</item>
+        <item>30 Min</item>
+    </string-array>
 </resources>

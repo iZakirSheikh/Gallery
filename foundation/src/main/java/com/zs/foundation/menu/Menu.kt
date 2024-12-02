@@ -29,8 +29,8 @@ import com.primex.material2.menu.DropDownMenu2
  */
 @Composable
 inline fun RowScope.Menu(
-    items: List<MenuItem>,
-    noinline onItemClicked: (item: MenuItem) -> Unit,
+    items: List<Action>,
+    noinline onItemClicked: (item: Action) -> Unit,
     moreIcon: ImageVector = Icons.Outlined.MoreVert,
     collapsed: Int = 4
 ) {

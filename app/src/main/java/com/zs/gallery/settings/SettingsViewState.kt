@@ -87,36 +87,12 @@ private fun FontFamily(name: String): FontFamily {
 }
 
 /**
- * Immutable data class representing a preference.
- *
- * @property value The value of the preference.
- * @property title The title text of the preference.
- * @property vector The optional vector image associated with the preference.
- * @property summery The optional summary text of the preference.
- * @param P The type of the preference value.
+ * Represents the state of the [Settings] screen.
  */
-@Stable
-data class Preference<out P>(
-    val value: P,
-    @JvmField val title: CharSequence,
-    val vector: ImageVector? = null,
-    @JvmField val summery: CharSequence? = null,
-)
-
 interface SettingsViewState {
-    val nightMode: Preference<NightMode>
-    val trashCanEnabled: Preference<Boolean>
-    val gridItemSizeMultiplier: Preference<Float>
-    val liveGallery: Preference<Boolean>
-    val fontScale: Preference<Float>
-
-    val isSystemBarsTransparent: Preference<Boolean>
-    val immersiveView: Preference<Boolean>
-    val secureMode: Preference<Boolean>
-    val applock: Preference<Int>
-
     fun <S, O> set(key: Key<S, O>, value: O)
 }
+
 
 /**
  * ## Settings
@@ -225,7 +201,7 @@ object Settings {
         putExtra(Intent.EXTRA_SUBJECT, "Feedback/Suggestion for Audiofy")
     }
     val PrivacyPolicyIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://docs.google.com/document/d/1AWStMw3oPY8H2dmdLgZu_kRFN-A8L6PDShVuY8BAhCw/edit?usp=sharing")
+        data = Uri.parse("https://docs.google.com/document/d/1D9wswWSrt65ol7h3HLKhk31OVTqDtN4uLJ73_Rk9hT8/edit?usp=sharing")
     }
     val GitHubIssuesPage = Intent(Intent.ACTION_VIEW).apply {
         data = Uri.parse("https://github.com/iZakirSheikh/Gallery/issues")
@@ -241,7 +217,7 @@ object Settings {
     }
     val ShareAppIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool app: [app link here]")
+        putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool app: [https://play.google.com/store/apps/details?id=com.googol.android.apps.photos&pcampaignid=web_share]")
     }
 }
 

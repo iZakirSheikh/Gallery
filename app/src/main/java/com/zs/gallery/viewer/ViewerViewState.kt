@@ -22,7 +22,7 @@ import android.app.Activity
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.zs.domain.store.MediaFile
-import com.zs.foundation.menu.MenuItem
+import com.zs.foundation.menu.Action
 import com.zs.gallery.common.NULL_STRING
 import com.zs.gallery.common.SafeArgs
 
@@ -151,15 +151,15 @@ interface ViewerViewState {
     var showDetails: Boolean
 
     /**
-     * The list of actions supported by the currently displayed file, represented as [MenuItem] objects.
+     * The list of actions supported by the currently displayed file, represented as [Action] objects.
      */
-    val actions: List<MenuItem>
+    val actions: List<Action>
 
     /**
      * Callback function to be invoked when an action is selected.
      *
-     * @param item The [MenuItem] representing the selected action.
+     * @param item The [Action] representing the selected action.
      * @param activity The [Activity] context in which the action is invoked.
      */
-    fun onAction(item: MenuItem, activity: Activity)
+    fun onAction(item: Action, activity: Activity)
 }

@@ -19,6 +19,9 @@
 package com.zs.gallery.folders
 
 import com.zs.domain.store.Folder
+import com.zs.foundation.menu.Action
+import com.zs.gallery.common.Filter
+import com.zs.gallery.common.Mapped
 import com.zs.gallery.common.Route
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,33 +30,28 @@ object RouteFolders : Route
 
 interface FoldersViewState {
 
-    companion object {
-        const val ORDER_BY_NAME = 0
-        const val ORDER_BY_DATE_MODIFIED = 1
-        const val ORDER_BY_SIZE = 2
-    }
-
     /**
-     * Gets or sets the grouping criterion of the list of folders.
-     * A value of [ORDER_BY_NAME] means the list is grouped by the folder name, while a value of [ORDER_BY_DATE_MODIFIED] means the list is grouped by the folder date modified, and a value of [ORDER_BY_SIZE] means the list is grouped by the folder size.
-     * The default value is [ORDER_BY_SIZE].
+     * The list of supported orders.
      */
-    var ascending: Boolean
+    val orders: List<Action>
 
     /**
-     * Gets or sets the grouping criterion of the list of folders.
-     * A value of [ORDER_BY_NAME] means the list is grouped by the folder name, while a value of [ORDER_BY_DATE_MODIFIED] means the list is grouped by the folder date modified, and a value of [ORDER_BY_SIZE] means the list is grouped by the folder size.
-     * The default value is [ORDER_BY_SIZE].
+     * The filter criteria for the list.
      */
-    var order: Int
+    val filter: Filter
 
     /**
-     * A state flow that emits the list of folders in the app.
+     * A state flow that emits the grid of folders in the app.
      * The list can be null, empty, or non-empty depending on the loading status and the availability of data.
      * A null value indicates that the folders are being loaded from the source and the UI should show a loading indicator.
      * An empty list indicates that there are no folders to display and the UI should show an empty state message.
      * A non-empty list indicates that the folders are successfully loaded and the UI should show them in a list view.
      * Any error that occurs during the loading process will be handled by a snackbar that shows the error message and a retry option.
      */
-    val data: StateFlow<List<Folder>?>
+    val data: StateFlow<Mapped<Folder>?>
+
+    /**
+     * Updates the [filter] and triggers the update.
+     */
+    fun filter(ascending: Boolean = this.filter.first, order: Action = this.filter.second)
 }

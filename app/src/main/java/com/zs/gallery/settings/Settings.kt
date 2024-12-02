@@ -16,338 +16,581 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.zs.gallery.settings
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.PrivacyTip
-import androidx.compose.material.icons.outlined.TouchApp
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Recycling
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.outlined.AlternateEmail
+import androidx.compose.material.icons.outlined.AutoAwesomeMotion
+import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.DataObject
+import androidx.compose.material.icons.outlined.FormatSize
+import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.Textsms
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.primex.core.fadeEdge
+import com.primex.core.plus
 import com.primex.core.textArrayResource
-import com.primex.core.textResource
+import com.primex.core.thenIf
+import com.primex.material2.Button
 import com.primex.material2.DropDownPreference
 import com.primex.material2.IconButton
 import com.primex.material2.Label
+import com.primex.material2.ListTile
 import com.primex.material2.Preference
 import com.primex.material2.SliderPreference
 import com.primex.material2.SwitchPreference
+import com.primex.material2.Text
+import com.primex.material2.TextButton
 import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.zs.foundation.AppTheme
 import com.zs.foundation.Colors
+import com.zs.foundation.Header
+import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.NightMode
 import com.zs.foundation.None
+import com.zs.foundation.Range
+import com.zs.foundation.adaptive.HorizontalTwoPaneStrategy
+import com.zs.foundation.adaptive.TwoPane
+import com.zs.foundation.adaptive.VerticalTwoPaneStrategy
 import com.zs.foundation.adaptive.contentInsets
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.preference
+import androidx.compose.foundation.layout.PaddingValues as Padding
+import androidx.compose.ui.graphics.RectangleShape as Rectangle
+import com.primex.core.rememberVectorPainter as painter
+import com.primex.core.textResource as stringResource
+import com.zs.foundation.ContentPadding as CP
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Constants
-// Region: Preference Item Shapes - Used to style individual items within a preference section.
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+private const val TAG = "Settings"
+
+// The max width of the secondary pane
+private val sPaneMaxWidth = 280.dp
+
+// Used to style individual items within a preference section.
 private val TopTileShape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp)
-private val CentreTileShape = RectangleShape
+private val CentreTileShape = Rectangle
 private val BottomTileShape = RoundedCornerShape(0.dp, 0.dp, 24.dp, 24.dp)
 private val SingleTileShape = RoundedCornerShape(24.dp)
 
 private val Colors.tileBackgroundColor
-    @ReadOnlyComposable @Composable get() =
-        background(elevation = 1.dp)
+    @ReadOnlyComposable @Composable inline get() = background(elevation = 1.dp)
 
+// when topBar doesn't fill the screen; this is for that case.
+private val RoundedTopBarShape = RoundedCornerShape(15)
+
+/**
+ * Represents a Top app bar for this screen.
+ *
+ * Handles padding/margins based on shape to ensure proper layout.
+ *
+ * @param modifier [Modifier] to apply to this top app bar.
+ * @param shape [Shape] of the top app bar. Defaults to `null`.
+ * @param behaviour [TopAppBarScrollBehavior] for scroll behavior.
+ */
 @Composable
 @NonRestartableComposable
-private fun Toolbar(
+private fun TopAppBar(
     modifier: Modifier = Modifier,
-    behavior: TopAppBarScrollBehavior? = null
+    insets: WindowInsets = WindowInsets.None,
+    shape: Shape? = null,
+    behaviour: TopAppBarScrollBehavior? = null
 ) {
     LargeTopAppBar(
-        title = { Label(text = textResource(id = R.string.settings)) },
-        scrollBehavior = behavior,
-        modifier = modifier,
+        modifier = modifier.thenIf(shape != null) {
+            windowInsetsPadding(insets)
+                .padding(horizontal = CP.medium)
+                .clip(shape!!)
+        },
+        title = { Label(text = stringResource(id = R.string.settings)) },
         navigationIcon = {
             val navController = LocalNavController.current
             IconButton(
-                imageVector = Icons.Filled.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 onClick = navController::navigateUp
             )
         },
+        scrollBehavior = behaviour,
+        windowInsets = if (shape == null) insets else WindowInsets.None,
         style = TopAppBarDefaults.largeAppBarStyle(
-            scrolledContainerColor = AppTheme.colors.background(elevation = 1.dp),
-            containerColor = AppTheme.colors.background,
+            scrolledContainerColor = AppTheme.colors.background(2.dp),
             scrolledContentColor = AppTheme.colors.onBackground,
+            containerColor = AppTheme.colors.background,
             contentColor = AppTheme.colors.onBackground
-        )
+        ),
+        actions = {
+            val facade = LocalSystemFacade.current
+            // Feedback
+            IconButton(
+                imageVector = Icons.Outlined.AlternateEmail,
+                onClick = { facade.launch(Settings.FeedbackIntent) },
+            )
+            // Star on Github
+            IconButton(
+                imageVector = Icons.Outlined.DataObject,
+                onClick = { facade.launch(Settings.GithubIntent) },
+            )
+            // Report Bugs on Github.
+            IconButton(
+                imageVector = Icons.Outlined.BugReport,
+                onClick = { facade.launch(Settings.GitHubIssuesPage) },
+            )
+            // Join our telegram channel
+            IconButton(
+                imageVector = Icons.Outlined.Textsms,
+                onClick = { facade.launch(Settings.TelegramIntent) },
+            )
+        }
     )
 }
 
-@Suppress("NOTHING_TO_INLINE")
+private val HeaderPadding = PaddingValues(horizontal = CP.large, vertical = CP.xLarge)
+
+/**
+ * Represents the group header of [Preference]s
+ */
 @Composable
 private inline fun GroupHeader(
     text: CharSequence,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    paddingValues: Padding = HeaderPadding,
 ) {
-    com.primex.material2.Text(
+    Text(
         text = text,
         modifier = Modifier
-            .padding(AppTheme.padding.xLarge)
+            .padding(paddingValues)
             .then(modifier),
         color = AppTheme.colors.accent,
         style = AppTheme.typography.titleSmall
     )
 }
 
-context(ColumnScope)
+private val APP_LOCK_VALUES = arrayOf(-1, 0, 1, 30)
+
+private const val CONTENT_TYPE_HEADER = "header"
+private const val CONTENT_TYPE_ITEM = "item"
+
+/**
+ * Represents the settings of General
+ */
 @SuppressLint("NewApi")
-@Composable
-private inline fun General(
+private inline fun LazyListScope.General(
     viewState: SettingsViewState
 ) {
-    val prefLiveGallery = viewState.liveGallery
-    SwitchPreference(
-        title = prefLiveGallery.title,
-        checked = prefLiveGallery.value,
-        summery = prefLiveGallery.summery,
-        icon = prefLiveGallery.vector,
-        onCheckedChange = { viewState.set(Settings.KEY_DYNAMIC_GALLERY, it) },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, TopTileShape)
-    )
+    // Live Gallery
+    item(contentType = CONTENT_TYPE_ITEM) {
+        val prefLiveGallery by preference(Settings.KEY_DYNAMIC_GALLERY)
+        SwitchPreference(
+            text = stringResource(R.string.pref_live_gallery),
+            checked = prefLiveGallery,
+            icon = Icons.Outlined.AutoAwesomeMotion,
+            onCheckedChange = { viewState.set(Settings.KEY_DYNAMIC_GALLERY, it) },
+            modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, TopTileShape)
+        )
+    }
 
-    val prefAppLock = viewState.applock
-    val facade = LocalSystemFacade.current
-    DropDownPreference(
-        title = prefAppLock.title,
-        defaultValue = prefAppLock.value,
-        icon = prefAppLock.vector,
-        entries = textArrayResource(R.array.pref_app_lock_options).let {
-            listOf(
-                it[0]. toString()  to -1,
-                it[1]. toString()  to 0,
-                it[2]. toString()  to 1,
-                it[3]. toString()  to 30
-            )
-        },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
-        onRequestChange = {value ->
-            // User wishes to enable app lock
-            if (!facade.canAuthenticate()) {
-                // If the user cannot authenticate, prompt them to enroll in biometric authentication
-                return@DropDownPreference facade.enroll()
-            }
-            // Securely make sure that app_lock is set.
-            facade.authenticate((facade as Activity).getString(R.string.auth_confirm_biometric)) {
-                viewState.set(Settings.KEY_APP_LOCK_TIME_OUT, value)
-            }
-        },
-    )
+    // AppLock
+    item(contentType = CONTENT_TYPE_ITEM) {
+        val facade = LocalSystemFacade.current
+        //
+        val value by preference(Settings.KEY_APP_LOCK_TIME_OUT)
+        val entries = textArrayResource(R.array.pref_app_lock_options)
+        DropDownPreference(
+            text = stringResource(
+                R.string.pref_app_lock_s,
+                entries[APP_LOCK_VALUES.indexOf(value)]
+            ),
+            value = value,
+            icon = Icons.Default.LightMode,
+            entries = entries,
+            onRequestChange = { value ->
+                // User wishes to enable app lock
+                if (!facade.canAuthenticate()) {
+                    // If the user cannot authenticate, prompt them to enroll in biometric authentication
+                    return@DropDownPreference facade.enroll()
+                }
+                // Securely make sure that app_lock is set.
+                facade.authenticate((facade as Activity).getString(R.string.auth_confirm_biometric)) {
+                    viewState.set(Settings.KEY_APP_LOCK_TIME_OUT, value)
+                }
+            },
+            values = APP_LOCK_VALUES,
+            modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
+        )
+    }
 
-    val prefTrashCan = viewState.trashCanEnabled
-    SwitchPreference(
-        title = prefTrashCan.title,
-        checked = prefTrashCan.value,
-        summery = prefTrashCan.summery,
-        icon = prefTrashCan.vector,
-        onCheckedChange = { viewState.set(Settings.KEY_TRASH_CAN_ENABLED, it) },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
-    )
+    // Recycle Bin
+    item(contentType = CONTENT_TYPE_ITEM) {
+        val value by preference(Settings.KEY_TRASH_CAN_ENABLED)
+        SwitchPreference(
+            text = stringResource(R.string.pref_enable_trash_can),
+            checked = value,
+            icon = Icons.Default.Recycling,
+            onCheckedChange = { viewState.set(Settings.KEY_TRASH_CAN_ENABLED, it) },
+            modifier = Modifier
+                .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
+        )
+    }
 
-    val prefGridSizeMultiplier = viewState.gridItemSizeMultiplier
-    SliderPreference(
-        title = prefGridSizeMultiplier.title,
-        summery = prefGridSizeMultiplier.summery,
-        icon = prefGridSizeMultiplier.vector,
-        valueRange = 0.5f..1.5f,
-        steps = 9,
-        defaultValue = prefGridSizeMultiplier.value,
-        onValueChange = { viewState.set(Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER, it) },
-        modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
-        preview = {
-            Label(text = stringResource(R.string.times_factor_x_f, prefGridSizeMultiplier.value))
-        }
-    )
-
-    val prefSecureMode = viewState.secureMode
-    SwitchPreference(
-        title = prefSecureMode.title,
-        checked = prefSecureMode.value,
-        summery = prefSecureMode.summery,
-        icon = prefSecureMode.vector,
-        onCheckedChange = { viewState.set(Settings.KEY_SECURE_MODE, it) },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, BottomTileShape)
-    )
+    // Secure Mode
+    item(contentType = CONTENT_TYPE_ITEM) {
+        val value by preference(Settings.KEY_SECURE_MODE)
+        SwitchPreference(
+            text = stringResource(R.string.pref_secure_mode),
+            checked = value,
+            icon = Icons.Default.Security,
+            onCheckedChange = { viewState.set(Settings.KEY_SECURE_MODE, it) },
+            modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, BottomTileShape)
+        )
+    }
 }
 
-context(ColumnScope)
-@Composable
-private inline fun Appearance(
+/**
+ * Represents items that are related to appearence of the App.
+ */
+private inline fun LazyListScope.Appearence(
     viewState: SettingsViewState
 ) {
-    val prefNightMode = viewState.nightMode
-    DropDownPreference(
-        title = prefNightMode.title,
-        defaultValue = prefNightMode.value,
-        icon = prefNightMode.vector,
-        onRequestChange = { viewState.set(Settings.KEY_NIGHT_MODE, it) },
-        entries = listOf(
-            stringResource(R.string.dark) to NightMode.YES,
-            stringResource(R.string.light) to NightMode.NO,
-            stringResource(R.string.sync_with_system) to NightMode.FOLLOW_SYSTEM
-        ),
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, TopTileShape)
-    )
+    // Night Mode
+    item(contentType = CONTENT_TYPE_ITEM) {
+        // Night Mode Strategy
+        // The strategy to use for night mode.
+        val value by preference(Settings.KEY_NIGHT_MODE)
+        val entries = textArrayResource(R.array.pref_night_mode_entries)
+        DropDownPreference(
+            text = stringResource(R.string.pref_app_theme_s, entries[value.ordinal]),
+            value = value,
+            icon = Icons.Default.LightMode,
+            entries = entries,
+            onRequestChange = {
+                viewState.set(Settings.KEY_NIGHT_MODE, it)
+            },
+            values = NightMode.values(),
+            modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, TopTileShape)
+        )
+    }
 
-    val isSystemBarsTransparent = viewState.isSystemBarsTransparent
-    SwitchPreference(
-        title = isSystemBarsTransparent.title,
-        checked = isSystemBarsTransparent.value,
-        summery = isSystemBarsTransparent.summery,
-        icon = isSystemBarsTransparent.vector,
-        onCheckedChange = { viewState.set(Settings.KEY_TRANSPARENT_SYSTEM_BARS, it) },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
-    )
+    // Font Scale
+    item(contentType = CONTENT_TYPE_ITEM) {
+        // The font scale to use for the app if -1 is used, the system font scale is used.
+        val scale by preference(Settings.KEY_FONT_SCALE)
+        SliderPreference(
+            value = scale,
+            text = stringResource(R.string.pref_font_scale),
+            valueRange = 0.7f..2f,
+            steps = 13,   // (2.0 - 0.7) / 0.1 = 13 steps
+            icon = Icons.Outlined.FormatSize,
+            preview = {
+                Label(
+                    text = when {
+                        it < 0.76f -> stringResource(R.string.system)
+                        else -> stringResource(R.string.postfix_x_f, it)
+                    },
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            onRequestChange = { value: Float ->
+                val newValue = if (value < 0.76f) -1f else value
+                viewState.set(Settings.KEY_FONT_SCALE, newValue)
+            },
+            modifier = Modifier
+                .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
+        )
+    }
 
-    val prefImmersiveView = viewState.immersiveView
-    SwitchPreference(
-        title = prefImmersiveView.title,
-        checked = prefImmersiveView.value,
-        summery = prefImmersiveView.summery,
-        icon = prefImmersiveView.vector,
-        onCheckedChange = { viewState.set(Settings.KEY_IMMERSIVE_VIEW, it) },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
-    )
+    // Trasnsparent System Bars
+    item(contentType = CONTENT_TYPE_ITEM) {
+        // Translucent System Bars
+        // Whether System Bars are rendered as translucent or Transparent.
+        val value by preference(Settings.KEY_TRANSPARENT_SYSTEM_BARS)
+        SwitchPreference(
+            checked = value,
+            text = stringResource(R.string.pref_transparent_system_bars),
+            onCheckedChange = { should: Boolean ->
+                viewState.set(Settings.KEY_TRANSPARENT_SYSTEM_BARS, should)
+            },
+            modifier = Modifier
+                .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
+        )
+    }
 
-    val prefFontScale = viewState.fontScale
-    SliderPreference(
-        title = prefFontScale.title,
-        summery = prefFontScale.summery,
-        icon = prefFontScale.vector,
-        // (2.0 - 0.7) / 0.1 = 13 steps
-        steps = 13,
-        valueRange = 0.7f..2.0f,
-        defaultValue = prefFontScale.value,
-        onValueChange = { value ->
-            val newValue = if (value < 0.76f) -1f else value
-            viewState.set(Settings.KEY_FONT_SCALE, newValue)
-        },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
-        preview = {
-            Label(
-                text = if (prefFontScale.value == -1f) "System" else stringResource(
-                    R.string.times_factor_x_f,
-                    prefFontScale.value
-                ),
-                fontWeight = FontWeight.Bold
-            )
-        }
-    )
+    // Use Accent in NavBar
+    item(contentType = CONTENT_TYPE_ITEM) {
+        val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
+        SwitchPreference(
+            stringResource(R.string.pref_color_nav_bar),
+            checked = useAccent,
+            onCheckedChange = { viewState.set(Settings.KEY_USE_ACCENT_IN_NAV_BAR, it) },
+            modifier = Modifier
+                .background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
+        )
+    }
 
-    val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
-    SwitchPreference(
-        stringResource(R.string.pref_color_nav_bar),
-        checked = useAccent,
-        onCheckedChange = { viewState.set(Settings.KEY_USE_ACCENT_IN_NAV_BAR, it) },
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, BottomTileShape),
-        summery = stringResource(R.string.pref_color_nav_bar_summery)
-    )
+    // Grid Size Multiplier
+
+    item(contentType = CONTENT_TYPE_ITEM) {
+        // Grid Item Multiplier
+        // The multiplier increases/decreases the size of the grid item from 0.6 to 2f
+        val gridItemSizeMultiplier by preference(Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
+        SliderPreference(
+            value = gridItemSizeMultiplier,
+            text = stringResource(R.string.pref_grid_item_size_multiplier),
+            valueRange = 0.6f..2f,
+            steps = 14, // (2.0 - 0.7) / 0.1 = 13 steps
+            icon = Icons.Outlined.Dashboard,
+            preview = {
+                Label(
+                    text = stringResource(R.string.postfix_x_f, it),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            onRequestChange = { value: Float ->
+                viewState.set(Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER, value)
+            },
+            modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
+        )
+    }
+
+    // Hide/Show SystemBars for Immersive View
+    item(contentType = CONTENT_TYPE_ITEM) {
+        // Whether System Bars are hidden for immersive view or not.
+        val immersiveView by preference(Settings.KEY_IMMERSIVE_VIEW)
+        SwitchPreference(
+            checked = immersiveView,
+            text = stringResource(R.string.pref_immersive_view),
+            onCheckedChange = { should: Boolean ->
+                viewState.set(Settings.KEY_IMMERSIVE_VIEW, should)
+            },
+            modifier = Modifier
+                .background(AppTheme.colors.tileBackgroundColor, BottomTileShape)
+        )
+    }
 }
 
-context(ColumnScope)
 @Composable
-private inline fun AboutUs(
-    viewState: SettingsViewState
-) {
+private inline fun ColumnScope.AboutUs() {
     // The app version and check for updates.
     val facade = LocalSystemFacade.current
-    Preference(
-        title = textResource(id = R.string.pref_app_version),
-        icon = Icons.Outlined.TouchApp,
-        summery = textResource(id = R.string.pref_app_version_summery, BuildConfig.VERSION_NAME),
-        modifier = Modifier
-            .clickable { facade.launchUpdateFlow(true) }
-            .background(AppTheme.colors.tileBackgroundColor, TopTileShape)
+    ListTile(
+        headline = { Label(stringResource(R.string.version), fontWeight = FontWeight.Bold) },
+        subtitle = {
+            Label(
+                stringResource(R.string.version_info_s, BuildConfig.VERSION_NAME)
+            )
+        },
+        footer = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(CP.medium)
+            ) {
+                TextButton(
+                    stringResource(R.string.update_gallery),
+                    onClick = { facade.launchUpdateFlow(true) })
+                TextButton(
+                    stringResource(R.string.join_the_beta),
+                    onClick = { facade.launch(Settings.JoinBetaIntent) },
+                    enabled = false
+                )
+            }
+        },
+        leading = { Icon(imageVector = Icons.Outlined.NewReleases, contentDescription = null) },
     )
 
+    // Privacy Policy
     Preference(
-        title = textResource(id = R.string.pref_privacy_policy),
-        summery = textResource(id = R.string.pref_privacy_policy_summery),
-        icon = Icons.Default.PrivacyTip,
+        text = stringResource(R.string.pref_privacy_policy),
+        icon = Icons.Outlined.PrivacyTip,
         modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
+            .clip(AppTheme.shapes.medium)
+            .clickable { facade.launch(Settings.PrivacyPolicyIntent) },
     )
 
-    Preference(
-        title = textResource(id = R.string.pref_report_an_issue),
-        summery = textResource(id = R.string.pref_report_an_issue_summery),
-        icon = Icons.Default.ErrorOutline,
-        modifier = Modifier
-            .background(AppTheme.colors.tileBackgroundColor, BottomTileShape)
-    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(CP.medium)
+    ) {
+        Button(
+            label = stringResource(R.string.rate_us),
+            icon = painter(Icons.Outlined.Star),
+            onClick = facade::launchAppStore,
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = AppTheme.colors.background(2.dp),
+                contentColor = AppTheme.colors.accent
+            ),
+            elevation = null,
+            shape = AppTheme.shapes.small
+        )
+
+        Button(
+            label = stringResource(R.string.share_app_label),
+            icon = painter(Icons.Outlined.Share),
+            onClick = { facade.launch(Settings.ShareAppIntent) },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = AppTheme.colors.background(2.dp),
+                contentColor = AppTheme.colors.accent
+            ),
+            elevation = null,
+            shape = AppTheme.shapes.small
+        )
+    }
 }
 
+/**
+ * Represents the Settings screen.
+ */
 @Composable
-fun Settings(
-    viewState: SettingsViewState
-) {
-    val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val insets = WindowInsets.contentInsets
-    Scaffold(
-        topBar = { Toolbar(behavior = behavior) },
-        contentWindowInsets = WindowInsets.None,
-        modifier = Modifier.nestedScroll(behavior.nestedScrollConnection),
-        content = {
+fun Settings(viewState: SettingsViewState) {
+    // Retrieve the current window size
+    val (width, _) = LocalWindowSize.current
+    // Determine the two-pane strategy based on window width range
+    // when in mobile portrait; we don't show second pane;
+    val strategy = when {
+        // TODO  -Replace with OnePane Strategy when updating TwoPane Layout.
+        width < Range.Medium -> VerticalTwoPaneStrategy(0.5f) // Use stacked layout with bias to centre for small screens
+        else -> HorizontalTwoPaneStrategy(0.5f) // Use horizontal layout with 50% split for large screens
+    }
+    // Layout Modes:
+    // When the width exceeds the "Compact" threshold, the layout is no longer immersive.
+    // This is because a navigation rail is likely displayed, requiring content to be
+    // indented rather than filling the entire screen width.
+    //
+    // The threshold helps to dynamically adjust the UI for different device form factors
+    // and orientations, ensuring appropriate use of space. In non-compact layouts,
+    // elements like the navigation rail or side panels prevent an immersive, full-width
+    // layout, making the design more suitable for larger screens.
+    val immersive = width < Range.Medium
+    // Define the scroll behavior for the top app bar
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    // obtain the padding of BottomNavBar/NavRail
+    val navBarPadding = WindowInsets.contentInsets
+    // Place the content
+    // FIXME: Width < 650dp then screen is single pane what if navigationBars are at end.
+    TwoPane(
+        spacing = CP.normal,
+        strategy = strategy,
+        topBar = {
+            TopAppBar(
+                behaviour = topAppBarScrollBehavior,
+                insets = WindowInsets.statusBars,
+                shape = if (immersive) null else RoundedTopBarShape,
+            )
+        },
+        details = {
+            // this will not be called when in single pane mode
+            // this is just for decoration
+            if (strategy is VerticalTwoPaneStrategy) return@TwoPane
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(it)
-                    .padding(WindowInsets.contentInsets)
-                    .padding(
-                        horizontal = AppTheme.padding.large,
-                        vertical = AppTheme.padding.normal
-                    ),
+                    .padding(top = CP.medium)
+                    .widthIn(max = sPaneMaxWidth)
+                    .systemBarsPadding()
+                    .padding(navBarPadding),
                 content = {
-                    GroupHeader(text = stringResource(id = R.string.general))
-                    General(viewState = viewState)
-                    GroupHeader(text = stringResource(id = R.string.appearance))
-                    Appearance(viewState = viewState)
-                    GroupHeader(text = stringResource(id = R.string.about_gallery))
-                    AboutUs(viewState = viewState)
+                    Header(
+                        stringResource(R.string.about_us),
+                        color = AppTheme.colors.accent,
+                        // drawDivider = true,
+                        style = AppTheme.typography.titleSmall,
+                        contentPadding = PaddingValues(vertical = CP.normal, horizontal = CP.medium)
+                    )
+                    AboutUs()
                 }
             )
+        },
+        content = {
+            val state = rememberLazyListState()
+            LazyColumn(
+                state = state,
+                // In immersive mode, add horizontal padding to prevent settings from touching the screen edges.
+                // Immersive layouts typically have a bottom app bar, so extra padding improves aesthetics.
+                // Non-immersive layouts only need vertical padding.
+                contentPadding = Padding(if (immersive) CP.large else CP.medium, vertical = CP.normal) + navBarPadding + WindowInsets.contentInsets,
+                modifier = Modifier
+                    .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
+                    .fadeEdge(AppTheme.colors.background(2.dp), state, false)
+                    .thenIf(immersive) { navigationBarsPadding() },
+            ) {
+                // General
+                item(contentType = CONTENT_TYPE_HEADER) {
+                    GroupHeader(
+                        text = stringResource(id = R.string.general),
+                        paddingValues = Padding(CP.normal, CP.small, CP.normal, CP.xLarge)
+                    )
+                }
+                General(viewState)
+
+                // Appearence
+                item(CONTENT_TYPE_HEADER) { GroupHeader(text = stringResource(id = R.string.appearance)) }
+                Appearence(viewState = viewState)
+
+                // AboutUs
+                // Load AboutUs here if this is mobile port
+                if (strategy !is VerticalTwoPaneStrategy)
+                    return@LazyColumn
+
+                item(contentType = CONTENT_TYPE_HEADER) {
+                    Header(
+                        stringResource(R.string.about_us),
+                        color = AppTheme.colors.accent,
+                        //drawDivider = true,
+                        style = AppTheme.typography.titleSmall,
+                        contentPadding = Padding(vertical = CP.normal, horizontal = CP.medium)
+                    )
+                }
+
+                item(contentType = "about_us") {
+                    Column { AboutUs() }
+                }
+            }
         }
     )
 }
-

@@ -269,7 +269,7 @@ internal class MediaProviderImpl(
                 }
                 val id = c.getLong(0)
                 val size = c.getInt(2)
-                val lastModified = c.getLong(3)
+                val lastModified = c.getLong(3) * 1000
                 val index = list.indexOfFirst { it.path == parent }
                 if (index == -1) {
                     list += Folder(id, parent, 1, size, lastModified)

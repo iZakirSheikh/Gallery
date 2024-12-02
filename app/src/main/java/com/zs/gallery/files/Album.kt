@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -147,18 +148,10 @@ fun Album(viewState: AlbumViewState) {
         modifier = Modifier
             .nestedScroll(behaviour.nestedScrollConnection),
         topBar = {
-            AnimatedVisibility(
-                visible = !viewState.isInSelectionMode,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.animateContentSize(),
-                content = {
-                    TopAppBar(
-                        viewState,
-                        behavior = behaviour,
-                        insets = WindowInsets.statusBars,
-                    )
-                }
+            TopAppBar(
+                viewState,
+                behavior = behaviour,
+                insets = WindowInsets.statusBars,
             )
         },
         floatingActionButton = {
@@ -166,7 +159,7 @@ fun Album(viewState: AlbumViewState) {
                 visible = viewState.isInSelectionMode,
                 enter = fadeIn() + slideInVertically(),
                 exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.padding(navInsets),
+                modifier = Modifier.padding(navInsets).navigationBarsPadding(),
                 content = {
                     Actions(viewState)
                 }
