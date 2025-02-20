@@ -1,4 +1,5 @@
 preserve_hierarchy: true
+project_id: 718355
 files:
   - source: "**/values/strings.xml"
     translation: "/values-%android_code%/%original_file_name%" #CORRECT

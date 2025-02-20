@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -65,6 +66,7 @@ import com.primex.material2.appbar.LargeTopAppBar
 import com.primex.material2.appbar.TopAppBarDefaults
 import com.primex.material2.appbar.TopAppBarScrollBehavior
 import com.zs.foundation.AppTheme
+import com.zs.foundation.ContentPadding
 import com.zs.foundation.LocalWindowSize
 import com.zs.foundation.None
 import com.zs.foundation.VerticalDivider
@@ -180,17 +182,10 @@ fun Folder(
         modifier = Modifier
             .nestedScroll(behaviour.nestedScrollConnection),
         topBar = {
-            AnimatedVisibility(
-                visible = !viewState.isInSelectionMode,
-                enter = fadeIn() + slideInVertically(),
-                exit = fadeOut() + slideOutVertically(),
-                content = {
-                    TopAppBar(
-                        viewState,
-                        behavior = behaviour,
-                        insets = WindowInsets.statusBars,
-                    )
-                }
+            TopAppBar(
+                viewState,
+                behavior = behaviour,
+                insets = WindowInsets.statusBars,
             )
         },
         floatingActionButton = {
@@ -198,7 +193,7 @@ fun Folder(
                 visible = viewState.isInSelectionMode,
                 enter = fadeIn() + slideInVertically(),
                 exit = fadeOut() + slideOutVertically(),
-                modifier = Modifier.padding(navInsets),
+                modifier = Modifier.padding(navInsets).navigationBarsPadding(),
                 content = {
                     Actions(state = viewState)
                 }
@@ -213,7 +208,7 @@ fun Folder(
                 columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
                 horizontalArrangement = GridItemsArrangement,
                 verticalArrangement = GridItemsArrangement,
-                contentPadding = navInsets + PaddingValues(vertical = AppTheme.padding.normal),
+                contentPadding = navInsets + PaddingValues(vertical = AppTheme.padding.normal) + PaddingValues(horizontal = ContentPadding.medium),
                 modifier = Modifier.padding(WindowInsets.contentInsets)
             ) {
                 val data = emit(values) ?: return@LazyVerticalGrid

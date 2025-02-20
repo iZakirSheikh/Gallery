@@ -51,7 +51,7 @@ import com.zs.domain.store.isImage
 import com.zs.foundation.AppTheme
 import com.zs.foundation.ContentPadding
 import com.zs.foundation.Header
-import com.zs.foundation.menu.MenuItem
+import com.zs.foundation.menu.Action
 import com.zs.gallery.R
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -65,8 +65,8 @@ private val MediaFile.megapixels
 
 @Composable
 private inline fun MainMenu(
-    actions: List<MenuItem>,
-    crossinline onAction: (action: MenuItem) -> Unit
+    actions: List<Action>,
+    crossinline onAction: (action: Action) -> Unit
 ) {
     val state = rememberScrollState()
     Row(
@@ -121,8 +121,8 @@ private fun Detail(
 @Composable
 fun Details(
     value: MediaFile,
-    actions: List<MenuItem>,
-    onAction: (action: MenuItem) -> Unit,
+    actions: List<Action>,
+    onAction: (action: Action) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     shape: Shape = RoundedCornerShape(topStartPercent = 8, topEndPercent = 8)

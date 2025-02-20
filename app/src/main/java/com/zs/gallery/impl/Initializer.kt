@@ -54,7 +54,7 @@ private val appModules = module {
         // Initialize Preferences
         val preferences = com.primex.preferences.Preferences(get(), "shared_preferences")
         // Retrieve the current launch counter value, defaulting to 0 if not set
-        val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER) ?: 0
+        val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER)
         // Increment the launch counter for cold starts
         preferences[Settings.KEY_LAUNCH_COUNTER] = counter + 1
         Log.d(TAG, "Cold start counter: ${preferences.value(Settings.KEY_LAUNCH_COUNTER)}")

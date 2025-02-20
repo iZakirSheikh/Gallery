@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.pager.HorizontalPager
@@ -42,13 +43,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isUnspecified
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -59,7 +57,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImagePainter
 import coil3.compose.rememberAsyncImagePainter
-import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.primex.core.SignalWhite
 import com.primex.core.findActivity
@@ -85,16 +82,15 @@ import com.zs.foundation.adaptive.margin
 import com.zs.foundation.adaptive.padding
 import com.zs.foundation.adaptive.shape
 import com.zs.foundation.menu.Menu
-import com.zs.foundation.menu.MenuItem
+import com.zs.foundation.menu.Action
 import com.zs.foundation.player.PlayerController
 import com.zs.foundation.player.rememberPlayerController
 import com.zs.foundation.sharedBounds
-import com.zs.foundation.sharedElement
 import com.zs.foundation.thenIf
-import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.domain.coil.preferCachedThumbnail
+import com.zs.foundation.menu.FloatingActionMenu
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
@@ -153,29 +149,6 @@ private fun VideoIntent(uri: Uri) =
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grant read permission
     }
 
-@Composable
-private fun FloatingActionMenu(
-    actions: List<MenuItem>,
-    modifier: Modifier = Modifier,
-    onAction: (action: MenuItem) -> Unit
-) {
-    Surface(
-        modifier = modifier.scale(0.85f),
-        color = AppTheme.colors.background(elevation = 2.dp),
-        contentColor = AppTheme.colors.onBackground,
-        shape = CircleShape,
-        border = BorderStroke(1.dp, AppTheme.colors.background(elevation = 4.dp)),
-        elevation = 12.dp,
-        content = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.animateContentSize()
-            ) {
-                Menu(actions, onItemClicked = onAction, collapsed = 3)
-            }
-        },
-    )
-}
 
 @Composable
 private fun TopAppBar(
@@ -456,13 +429,17 @@ fun Viewer(
                 enter = fadeIn(),
                 exit = slideOutVertically() + fadeOut(),
                 modifier = Modifier
-                    .padding(bottom = AppTheme.padding.normal),
+                    .padding(bottom = ContentPadding.medium)
+                    .navigationBarsPadding(),
                 // .renderInSharedTransitionScopeOverlay(navController.zIndexScr + 0.02f),
                 content = {
-                    FloatingActionMenu(
-                        actions = viewState.actions,
-                        onAction = { viewState.onAction(it, context.findActivity()) },
-                    )
+                    FloatingActionMenu {
+                        Menu(
+                            viewState.actions,
+                            onItemClicked = { viewState.onAction(it, context.findActivity()) },
+                            collapsed = 3
+                        )
+                    }
                 }
             )
         },

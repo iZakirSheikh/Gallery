@@ -38,12 +38,14 @@ import com.primex.material2.Label
 import androidx.compose.foundation.layout.PaddingValues as Padding
 import com.zs.foundation.ContentPadding as CP
 
+
 /**
  * Item header.
  * //TODO: Handle padding in parent composable.
  */
-private val HEADER_MARGIN = Padding(CP.medium, CP.large, CP.medium, CP.normal)
+private val HEADER_MARGIN = Padding(0.dp, CP.normal, 0.dp, CP.medium)
 private val CHAR_HEADER_SHAPE = RoundedCornerShape(50, 25, 25, 25)
+private val NORMAL_HEADER_SHAPE = RoundedCornerShape(16, 50, 16, 16)
 
 /**
  * Represents header for list/grid item groups.
@@ -67,7 +69,7 @@ fun ListHeader(
             style = AppTheme.typography.headlineLarge,
             modifier = modifier
                 .padding(HEADER_MARGIN)
-                .border(0.5.dp, Color.Gray.copy(0.12f), CHAR_HEADER_SHAPE)
+                .border(0.5.dp, AppTheme.colors.background(30.dp), CHAR_HEADER_SHAPE)
                 .background(AppTheme.colors.background(1.dp), CHAR_HEADER_SHAPE)
                 .padding(horizontal = CP.large, vertical = CP.medium),
         )
@@ -77,17 +79,17 @@ fun ListHeader(
         else -> Label(
             text = value,
             maxLines = 2,
-            fontWeight = FontWeight.Normal,
-            style = AppTheme.typography.titleSmall,
+            style = AppTheme.typography.titleMedium,
             modifier = modifier
                 .padding(HEADER_MARGIN)
                 .widthIn(max = 220.dp)
-                .border(0.5.dp, Color.Gray.copy(0.12f), CircleShape)
+                .border(0.5.dp, AppTheme.colors.background(30.dp), CircleShape)
                 .background(AppTheme.colors.background(1.dp), CircleShape)
                 .padding(horizontal = CP.normal, vertical = CP.small)
         )
     }
 }
+
 
 @NonRestartableComposable
 @Composable
@@ -105,7 +107,7 @@ fun ListHeader(
                 style = AppTheme.typography.headlineLarge,
                 modifier = modifier
                     .padding(HEADER_MARGIN)
-                    .border(0.5.dp, AppTheme.colors.background(5.dp), CHAR_HEADER_SHAPE)
+                    .border(0.5.dp, AppTheme.colors.background(30.dp), CHAR_HEADER_SHAPE)
                     .background(AppTheme.colors.background(1.dp), CHAR_HEADER_SHAPE)
                     .padding(horizontal = CP.large, vertical = CP.medium),
             )
@@ -115,12 +117,11 @@ fun ListHeader(
             else -> Label(
                 text = value,
                 maxLines = 2,
-                fontWeight = FontWeight.Normal,
-                style = AppTheme.typography.titleSmall,
+                style = AppTheme.typography.titleMedium,
                 modifier = modifier
                     .padding(HEADER_MARGIN)
                     .widthIn(max = 220.dp)
-                    .border(0.5.dp, AppTheme.colors.background(5.dp), CircleShape)
+                    .border(0.5.dp, AppTheme.colors.background(30.dp), CircleShape)
                     .background(AppTheme.colors.background(1.dp), CircleShape)
                     .padding(horizontal = CP.normal, vertical = CP.medium)
             )
