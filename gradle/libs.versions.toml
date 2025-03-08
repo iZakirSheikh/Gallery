@@ -13,7 +13,7 @@ jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = 
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 google-service = { id = "com.google.gms.google-services", version = "4.4.2" }
-crashanlytics = { id = "com.google.firebase.crashlytics", version = "3.0.2" }
+crashanlytics = { id = "com.google.firebase.crashlytics", version = "3.0.3" }
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.2" }
@@ -55,7 +55,7 @@ androidx-startup-runtime = { module = "androidx.startup:startup-runtime", versio
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.3" }
 saket-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.15.1" }
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }
-play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.2" }
+play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.1" }
 
 #coil3
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
