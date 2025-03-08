@@ -57,7 +57,7 @@ fun HazeStyle.Companion.Regular(
     containerColor: Color,
     tintAlpha: Float = if (containerColor.luminance() >= 0.5) 0.63f else 0.24f
 ) = HazeStyle(
-    blurRadius = if (containerColor.luminance() >= 0.5f) 24.dp else 50.dp,
+    blurRadius = if (containerColor.luminance() >= 0.5f) 38.dp else 50.dp,
     backgroundColor = containerColor,
     noiseFactor = if (containerColor.luminance() >= 0.5f) 0.4f else 0.25f,
     tint = HazeTint(containerColor.copy(alpha = tintAlpha)),

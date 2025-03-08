@@ -193,9 +193,7 @@
         </font>
     </string>
 
-    <string name="pref_color_nav_bar"><b>Color NavBar</b>
-        <font color="grey" size="14">
-           Use the accent color in the navigation bar.
+    <string name="pref_color_nav_bar"><b>Color NavBar</b><font color="grey" size="14">\nUse the accent color in the navigation bar.
         </font>
     </string>
     <string name="about_us">About us</string>
@@ -205,6 +203,9 @@
     <string name="update_gallery">Update Gallery</string>
     <string name="rate_us">Rate Us</string>
     <string name="share_app_label">Share with Friends</string>
+    <string name="pref_dynamic_colors"><b>Dynamic Colors</b>\n<font color="grey" size="14">Toggle the usage of dynamic colors. This feature is available only on <b>Android 12</b> or higher.
+        </font>
+    </string>
 
     <string-array name="pref_app_lock_options">
         <item>Disabled</item>

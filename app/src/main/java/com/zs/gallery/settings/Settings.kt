@@ -318,6 +318,21 @@ private inline fun LazyListScope.Appearence(
         )
     }
 
+    // Dynamic Colors
+    item(contentType = CONTENT_TYPE_ITEM) {
+        // Translucent System Bars
+        // Whether System Bars are rendered as translucent or Transparent.
+        val value by preference(Settings.KEY_DYNAMIC_COLORS)
+        SwitchPreference(
+            checked = value,
+            text = stringResource(R.string.pref_dynamic_colors),
+            onCheckedChange = { should: Boolean ->
+                viewState.set(Settings.KEY_DYNAMIC_COLORS, should)
+            },
+            modifier = Modifier
+                .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
+        )
+    }
     // Font Scale
     item(contentType = CONTENT_TYPE_ITEM) {
         // The font scale to use for the app if -1 is used, the system font scale is used.

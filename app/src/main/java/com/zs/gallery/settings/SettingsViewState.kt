@@ -193,6 +193,8 @@ object Settings {
         intPreferenceKey("${PREFIX}_app_lock_time_out", -1)
     val KEY_USE_ACCENT_IN_NAV_BAR =
         booleanPreferenceKey("use_accent_in_nav_bar", false)
+    val KEY_DYNAMIC_COLORS =
+        booleanPreferenceKey(PREFIX + "_dynamic_colors", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
     val DefaultFontFamily get() = FontFamily.Default
 

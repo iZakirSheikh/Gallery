@@ -80,6 +80,7 @@ import com.zs.foundation.adaptive.NavigationItemDefaults
 import com.zs.foundation.adaptive.NavigationSuiteScaffold
 import com.zs.foundation.calculateWindowSizeClass
 import com.zs.foundation.checkSelfPermissions
+import com.zs.foundation.dynamicAccentColor
 import com.zs.foundation.isAppearanceLightSystemBars
 import com.zs.foundation.shapes.EndConcaveShape
 import com.zs.foundation.shapes.TopConcaveShape
@@ -316,8 +317,8 @@ private fun NavigationBar(
         val current by navController.current()
         val color = LocalContentColor.current
         val colors = NavigationItemDefaults.navigationItemColors(
-            selectedContentColor = if (AppTheme.colors.isLight) AppTheme.colors.accent else color,
-            selectedBackgroundColor =if (AppTheme.colors.isLight) AppTheme.colors.accent.copy(alpha = 0.12f) else color.copy(alpha = 0.12f),
+            selectedContentColor = color,
+            selectedBackgroundColor = color.copy(0.12f)
         )
         val domain = current?.destination?.domain
         val facade = LocalSystemFacade.current
@@ -500,7 +501,10 @@ fun Gallery(
                         useAccent -> Modifier.background(colors.accent)
                         else -> Modifier.dynamicBackdrop(
                             if (!portrait) null else provider,
-                            HazeStyle.Regular(colors.background, if (colors.isLight) 0.48f else 0.63f),
+                            HazeStyle.Regular(
+                                colors.background(if (colors.isLight) 15.dp else 0.dp),
+                                if (colors.isLight) 0.24f else 0.63f
+                            ),
                             colors.background,
                             colors.accent
                         )
@@ -531,10 +535,15 @@ fun Gallery(
     }
     // Setup App Theme and provide necessary dependencies.
     // Provide the navController and window size class to child composable.
+    val useDynamicColors by activity.observeAsState(Settings.KEY_DYNAMIC_COLORS)
     AppTheme(
         isLight = !isDark,
         fontFamily = Settings.DefaultFontFamily,
-        accent = if (isDark) DarkAccentColor else LightAccentColor,
+        accent = when {
+            useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(activity, isDark)
+            isDark -> DarkAccentColor
+            else -> LightAccentColor
+        },
         content = {
             // Provide the navController, newWindowClass through LocalComposition.
             CompositionLocalProvider(
