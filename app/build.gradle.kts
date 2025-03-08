@@ -14,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 37
-        versionName = "0.2.5-dev"
+        versionCode = 38
+        versionName = "0.2.6-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -49,7 +49,9 @@ android {
         freeCompilerArgs = listOf(
             "-Xopt-in=kotlin.RequiresOptIn",
             "-Xcontext-receivers",
-            "-Xopt-in=com.primex.core.ExperimentalToolkitApi"
+            "-Xopt-in=com.primex.core.ExperimentalToolkitApi",
+            "-Xwhen-guards",
+            "-Xnon-local-break-continue"
         )
     }
     buildFeatures { compose = true; buildConfig = true  }
