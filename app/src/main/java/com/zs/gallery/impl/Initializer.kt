@@ -23,27 +23,26 @@ package com.zs.gallery.impl
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.core.AnimationConstants
-import androidx.appcompat.content.res.AppCompatResources.getDrawable as Drawable
-import androidx.lifecycle.SavedStateHandle
 import androidx.startup.Initializer
-import coil3.SingletonImageLoader.setUnsafe as Coil
-import coil3.ImageLoader.Builder as ImageLoader
 import coil3.annotation.DelicateCoilApi
 import coil3.asImage
 import coil3.request.crossfade
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.primex.preferences.value
-import com.zs.domain.store.MediaProvider
-import com.zs.foundation.toast.ToastHostState
-import com.zs.domain.coil.ThumbnailFetcher
+import com.zs.compose.theme.snackbar.SnackbarHostState
+import com.zs.core.coil.ThumbnailFetcher
+import com.zs.core.store.MediaProvider
+import com.zs.gallery.R
 import com.zs.gallery.settings.Settings
+import com.zs.preferences.Preferences
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
-import com.zs.gallery.R
+import androidx.appcompat.content.res.AppCompatResources.getDrawable as Drawable
+import coil3.ImageLoader.Builder as ImageLoader
+import coil3.SingletonImageLoader.setUnsafe as Coil
 
 private const val TAG = "Initializer"
 
@@ -52,28 +51,25 @@ private val appModules = module {
     // Declare a singleton instance of Preferences.
     single {
         // Initialize Preferences
-        val preferences = com.primex.preferences.Preferences(get(), "shared_preferences")
+        val preferences = Preferences(get(), "shared_preferences")
         // Retrieve the current launch counter value, defaulting to 0 if not set
-        val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER)
+        val counter = preferences[Settings.KEY_LAUNCH_COUNTER]
         // Increment the launch counter for cold starts
         preferences[Settings.KEY_LAUNCH_COUNTER] = counter + 1
-        Log.d(TAG, "Cold start counter: ${preferences.value(Settings.KEY_LAUNCH_COUNTER)}")
+        Log.d(TAG, "Cold start counter: ${preferences[Settings.KEY_LAUNCH_COUNTER]}")
         // Return the preferences instance
         preferences
     }
     // Declare a ViewModel dependency (lifecycle managed by Koin).
     // viewModel { BatteryViewModel(get()) }
-    singleOf(::ToastHostState)
+    singleOf(::SnackbarHostState)
     factory { MediaProvider(get()) }
     factory { androidContext().resources }
     // ViewModels
-    viewModel { SettingsViewModel() }
-    viewModel { TimelineViewModel(get()) }
-    viewModel { FoldersViewModel(get()) }
-    viewModel { (handle: SavedStateHandle) -> ViewerViewModel(handle, get()) }
-    viewModel { (handle: SavedStateHandle) -> FolderViewModel(handle, get()) }
-    viewModel { AlbumViewModel(get()) }
-    viewModel { TrashViewModel(get()) }
+    viewModelOf(::SettingsViewModel)
+    viewModelOf(::FilesViewModel)
+    viewModelOf(::FoldersViewModel)
+    viewModelOf(::MediaViewerViewModel)
 }
 
 class KoinInitializer : Initializer<Unit> {

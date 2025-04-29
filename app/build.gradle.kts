@@ -15,7 +15,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = 38
-        versionName = "0.2.6-dev"
+        versionName = "0.3.0-dev01"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -41,26 +41,24 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs = listOf(
             "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xcontext-receivers",
-            "-Xopt-in=com.primex.core.ExperimentalToolkitApi",
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",
             "-Xwhen-guards",
             "-Xnon-local-break-continue"
         )
     }
-    buildFeatures { compose = true; buildConfig = true  }
+    buildFeatures { compose = true; buildConfig = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 dependencies {
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.navigation.compose)
     implementation(libs.androidx.koin)
     implementation(libs.toolkit.preferences)
     implementation(libs.androidx.startup.runtime)
@@ -71,13 +69,23 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.saket.zoomable)
     implementation(libs.chrisbanes.haze)
+    implementation(libs.play.app.update.ktx)
+    implementation(libs.play.app.review.ktx)
 
-
-    // bundles
-    implementation(libs.bundles.play.services)
-    implementation(libs.bundles.material.icons)
+    // ui
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.navigation.compose)
+    implementation(libs.lottie.compose)
+    implementation(libs.toolkit.theme)
+    implementation(libs.toolkit.foundation)
 
     // local
-    implementation(project(":domain"))
-    implementation(project(":foundation"))
+    implementation(project(":core"))
+
+    // bundles
+    implementation(libs.bundles.icons)
+    implementation(libs.bundles.compose.ui)
+
+    implementation(libs.bundles.compose.ui.tooling)
+    //implementation("dev.chrisbanes.haze:haze-materials:1.5.3")
 }

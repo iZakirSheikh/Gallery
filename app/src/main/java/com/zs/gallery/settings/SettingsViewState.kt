@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 sheik
  *
- * Created by Zakir Sheikh on 23-07-2024.
+ * Created by sheik on 03-04-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,35 @@
 package com.zs.gallery.settings
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
-import com.primex.preferences.Key
-import com.primex.preferences.StringSaver
-import com.primex.preferences.booleanPreferenceKey
-import com.primex.preferences.floatPreferenceKey
-import com.primex.preferences.intPreferenceKey
-import com.primex.preferences.stringPreferenceKey
-import com.zs.foundation.NightMode
+import androidx.core.net.toUri
 import com.zs.gallery.R
+import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
+import com.zs.gallery.settings.Settings.KEY_APP_LOCK_TIME_OUT
+import com.zs.gallery.settings.Settings.KEY_DYNAMIC_GALLERY
+import com.zs.gallery.settings.Settings.KEY_FAVOURITE_FILES
+import com.zs.gallery.settings.Settings.KEY_FONT_SCALE
+import com.zs.gallery.settings.Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER
+import com.zs.gallery.settings.Settings.KEY_IMMERSIVE_VIEW
+import com.zs.gallery.settings.Settings.KEY_LAUNCH_COUNTER
+import com.zs.gallery.settings.Settings.KEY_NIGHT_MODE
+import com.zs.gallery.settings.Settings.KEY_SECURE_MODE
+import com.zs.gallery.settings.Settings.KEY_TRANSPARENT_SYSTEM_BARS
+import com.zs.gallery.settings.Settings.KEY_TRASH_CAN_ENABLED
+import com.zs.gallery.settings.Settings.STANDARD_TILE_SIZE
+import com.zs.preferences.Key
+import com.zs.preferences.StringSaver
+import com.zs.preferences.booleanPreferenceKey
+import com.zs.preferences.floatPreferenceKey
+import com.zs.preferences.intPreferenceKey
+import com.zs.preferences.stringPreferenceKey
 
 object RouteSettings : Route
 
@@ -92,7 +103,6 @@ private fun FontFamily(name: String): FontFamily {
 interface SettingsViewState {
     fun <S, O> set(key: Key<S, O>, value: O)
 }
-
 
 /**
  * ## Settings
@@ -199,27 +209,27 @@ object Settings {
     val DefaultFontFamily get() = FontFamily.Default
 
     val FeedbackIntent = Intent(Intent.ACTION_SENDTO).apply {
-        data = Uri.parse("mailto:helpline.prime.zs@gmail.com")
+        data = "mailto:helpline.prime.zs@gmail.com".toUri()
         putExtra(Intent.EXTRA_SUBJECT, "Feedback/Suggestion for Audiofy")
     }
     val PrivacyPolicyIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://docs.google.com/document/d/1D9wswWSrt65ol7h3HLKhk31OVTqDtN4uLJ73_Rk9hT8/edit?usp=sharing")
+        data =
+            "https://docs.google.com/document/d/1D9wswWSrt65ol7h3HLKhk31OVTqDtN4uLJ73_Rk9hT8/edit?usp=sharing".toUri()
     }
     val GitHubIssuesPage = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://github.com/iZakirSheikh/Gallery/issues")
+        data = "https://github.com/iZakirSheikh/Gallery/issues".toUri()
     }
     val TelegramIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://t.me/audiofy_support")
+        data = "https://t.me/audiofy_support".toUri()
     }
     val GithubIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://github.com/iZakirSheikh/Gallery")
+        data = "https://github.com/iZakirSheikh/Gallery".toUri()
     }
     val JoinBetaIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://play.google.com/apps/testing/com.zs.gallery/join")
+        data = "https://play.google.com/apps/testing/com.zs.gallery/join".toUri()
     }
     val ShareAppIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
         putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool app: [https://play.google.com/store/apps/details?id=com.googol.android.apps.photos&pcampaignid=web_share]")
     }
 }
-

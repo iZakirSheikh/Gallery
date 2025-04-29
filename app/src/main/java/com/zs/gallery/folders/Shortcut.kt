@@ -19,14 +19,10 @@
 package com.zs.gallery.folders
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,21 +30,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
-import com.primex.material2.Label
-import com.zs.foundation.AppTheme
-import com.zs.foundation.shapes.Folder as FolderShape
+import com.zs.compose.theme.AppTheme
+import com.zs.compose.theme.Icon
+import com.zs.compose.theme.ripple
+import com.zs.compose.theme.text.Label
+import com.zs.gallery.common.shapes.Folder as FolderShape
 
 
 private val Folder = FolderShape(radius = 16.dp)
 
 /**
-* Composable function to create a clickable shortcut with an icon and label.
-*
-* @param icon: The ImageVector representing the shortcut's icon.
-* @param label: The CharSequence representing the shortcut's label.
-* @param onAction: The action to perform when the shortcut is clicked.
-* @param modifier: Optional modifier to apply to the shortcut's layout.
-*/
+ * Composable function to create a clickable shortcut with an icon and label.
+ *
+ * @param icon: The ImageVector representing the shortcut's icon.
+ * @param label: The CharSequence representing the shortcut's label.
+ * @param onAction: The action to perform when the shortcut is clicked.
+ * @param modifier: Optional modifier to apply to the shortcut's layout.
+ */
 @Composable
 fun Shortcut(
     icon: ImageVector,
@@ -62,10 +60,10 @@ fun Shortcut(
     val accent = colors.onBackground
     Box(
         modifier = modifier
-            .aspectRatio(16/11f)
+            .aspectRatio(16 / 11f)
             .clip(Folder) // Shape the shortcut like a folder
             .background(colors.background(1.5.dp), Folder)
-           // .border(1.dp, accent.copy(0.5f), Folder) // Light border
+            // .border(1.dp, accent.copy(0.5f), Folder) // Light border
             //  .background(colors.backgroundColorAtElevation(0.4.dp), FolderShape)
             .clickable(
                 null,
@@ -88,7 +86,7 @@ fun Shortcut(
         // Label at the bottom
         Label(
             text = label,
-            style = AppTheme.typography.caption,
+            style = AppTheme.typography.label3,
             color = accent,
             modifier = Modifier.align(Alignment.BottomStart)
         )

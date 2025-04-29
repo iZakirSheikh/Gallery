@@ -206,6 +206,7 @@
     <string name="pref_dynamic_colors"><b>Dynamic Colors</b>\n<font color="grey" size="14">Toggle the usage of dynamic colors. This feature is available only on <b>Android 12</b> or higher.
         </font>
     </string>
+    <string name="error">Error</string>
 
     <string-array name="pref_app_lock_options">
         <item>Disabled</item>
