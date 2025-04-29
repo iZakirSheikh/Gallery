@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
@@ -98,7 +99,17 @@ fun Modifier.background(
     this.noiseFactor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) noiseFactor else 0f
     this.tints = listOf(HazeTint(tint, blendMode = blendMode))
     // For now progressive only works in android 12 and up. -1 means disbaled 0f means bottom to top 1f means top to bottom
-    if (progressive != -1f)
-        this.progressive = HazeProgressive.verticalGradient(startIntensity = progressive, endIntensity =  0f)
+    if (progressive != -1f){
+        this.progressive = HazeProgressive.verticalGradient(
+            startIntensity = progressive,
+            endIntensity = 0f,
+            preferPerformance = true
+        )
+        mask = Brush.verticalGradient(
+            0.5f to Color.Black,
+            0.8f to Color.Black.copy(0.5f),
+            1.0f to Color.Transparent,
+        )
+    }
 }
 

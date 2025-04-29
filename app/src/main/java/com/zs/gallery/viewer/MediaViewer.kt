@@ -341,18 +341,14 @@ fun AppBar(
                     contentColor = Color.SignalWhite,
                     scrolledContentColor = Color.SignalWhite
                 ),
-                modifier = modifier.let() {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        it.background(
-                            provider = state,
-                            Color.Transparent,
-                            progressive = 1f,
-                            tint = Color.Black.copy(0.3f),
-                            blendMode = BlendMode.Multiply
-                        )
-                    else
-                        it.background(AppBarOverlay)
-                },
+                modifier = modifier.background(
+                    provider = state,
+                    Color.Transparent,
+                    progressive = 1f,
+                    blurRadius = 60.dp,
+                    tint = Color.Black.copy(0.3f),
+                    blendMode = BlendMode.Multiply
+                ),
             )
         }
     )
