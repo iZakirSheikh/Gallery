@@ -25,6 +25,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -69,6 +70,7 @@ import com.zs.compose.foundation.UmbraGrey
 import com.zs.compose.foundation.findActivity
 import com.zs.compose.foundation.plus
 import com.zs.compose.foundation.thenIf
+import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.adaptive.FabPosition
@@ -82,6 +84,7 @@ import com.zs.compose.theme.text.Label
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.player.PlayerController
 import com.zs.core.store.MediaProvider
+import com.zs.gallery.common.DefaultBoundsTransform
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.WindowStyle
@@ -158,7 +161,10 @@ private fun Carousel(
                     .data(MediaProvider.contentUri(viewState.focused))
                     .build(),
             ),
-            modifier = modifier.sharedElement(RouteFiles.buildSharedFrameKey(viewState.focused)),
+            modifier = modifier.sharedBounds(
+                RouteFiles.buildSharedFrameKey(viewState.focused),
+                boundsTransform = AppTheme.DefaultBoundsTransform
+            ),
         )
 
     // else load real data- wtih current being the focused one.
@@ -295,7 +301,8 @@ private fun Carousel(
                             } then Modifier.sharedBounds(
                                 RouteFiles.buildSharedFrameKey(
                                     item.id
-                                )
+                                ),
+                                boundsTransform = AppTheme.DefaultBoundsTransform
                             )
                         }
                         .fillMaxSize()

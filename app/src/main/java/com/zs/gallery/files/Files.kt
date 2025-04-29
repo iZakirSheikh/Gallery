@@ -22,6 +22,7 @@ package com.zs.gallery.files
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -63,8 +64,10 @@ import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.sharedBounds
+import com.zs.compose.theme.sharedElement
 import com.zs.compose.theme.text.Label
 import com.zs.core.store.MediaFile
+import com.zs.gallery.common.DefaultBoundsTransform
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.common.compose.FloatingActionMenu
@@ -174,7 +177,7 @@ fun Files(viewState: FilesViewState) {
                                     else -> 0
                                 },
                                 modifier = Modifier
-                                    .sharedBounds(RouteFiles.buildSharedFrameKey(item.id))
+                                    .sharedElement(RouteFiles.buildSharedFrameKey(item.id), boundsTransform = AppTheme.DefaultBoundsTransform)
                                     .clickable(
                                         // onClick of item
                                         onClick = {

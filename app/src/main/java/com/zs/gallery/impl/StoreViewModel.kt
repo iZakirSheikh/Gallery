@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
@@ -70,6 +71,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "StoreViewModel"
@@ -164,7 +166,7 @@ class FilesViewModel(
             SOURCE_FAV -> Icons.Outlined.HotelClass to getText(R.string.favourites)
             SOURCE_TIMELINE -> ImageVector(R.drawable.ic_app) to getText(R.string.timeline)
             else -> Icons.TwoTone.FolderCopy to buildAnnotatedString {
-                append(PathUtils.name(key!!))
+                append(PathUtils.name(key!!).ellipsize(15))
                 withStyle(ParagraphStyle(lineHeight = 12.sp)) {
                     withStyle(SpanStyle(fontSize = 11.sp, color = Color.DarkGray)) {
                         appendLine(PathUtils.parent(key))
@@ -308,7 +310,9 @@ class FilesViewModel(
     override fun buildRouteViewer(id: Long) = RouteViewer(id)
 
     override fun onAction(value: Action, activity: Activity) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            showSnackbar("This feature is not yet implemented. We are actively working on it and expect to include it in a next update.")
+        }
     }
 }
 
@@ -324,7 +328,7 @@ class MediaViewerViewModel(
     override var details: MediaFile? by mutableStateOf(null)
 
     override suspend fun emit(values: List<MediaFile>) {
-        delay(500) // necessary for shared animation to work effectively.
+        delay(1000) // necessary for shared animation to work effectively.
         // experiment for optimal value
         data = values
     }
@@ -332,10 +336,19 @@ class MediaViewerViewModel(
     override val title: CharSequence by derivedStateOf {
         buildAnnotatedString {
             val current = current ?: return@buildAnnotatedString
-            appendLine(current.name.ellipsize(15))
+            withStyle(SpanStyle(fontSize = 12.sp)) {
+                append(current.name.ellipsize(20))
+            }
+            append("\n")
             val modified =
-                DateUtils.formatDateTime(null, current.dateModified, DateUtils.FORMAT_SHOW_DATE)
-            append(modified)
+                DateUtils.formatDateTime(
+                    null,
+                    current.dateModified,
+                    DateUtils.FORMAT_SHOW_DATE
+                )
+            withStyle(SpanStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal)) {
+                append(modified)
+            }
         }
     }
 
@@ -385,6 +398,8 @@ class MediaViewerViewModel(
         }
 
     override fun onAction(item: Action, activity: Activity) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            showSnackbar("This feature is not yet implemented. We are actively working on it and expect to include it in a next update.")
+        }
     }
 }

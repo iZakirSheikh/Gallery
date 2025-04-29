@@ -3,7 +3,7 @@ agp = "8.9.2"
 kotlin = "2.1.20"
 compose = "1.9.0-alpha01"
 media3 = "1.6.1"
-toolkit = "3.0.0-dev08"
+toolkit = "v3.0.0-dev10"
 material_icons = "1.7.8"
 coil = "3.1.0"
 

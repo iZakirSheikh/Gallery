@@ -21,10 +21,14 @@ package com.zs.gallery.common
 import android.content.pm.PackageManager
 import android.os.Build
 import android.view.Window
+import androidx.compose.animation.BoundsTransform
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowInsetsControllerCompat
 import com.zs.compose.foundation.runCatching
+import com.zs.compose.theme.AppTheme
 
 private const val TAG = "Common-Utils"
 
@@ -102,3 +106,7 @@ private const val ELLIPSIS_NORMAL = "\u2026"; // HORIZONTAL ELLIPSIS (…)
 fun CharSequence.ellipsize(after: Int): CharSequence =
     if (this.length > after) this.substring(0, after) + ELLIPSIS_NORMAL else this
 
+@OptIn(ExperimentalSharedTransitionApi::class)
+private val DEFULT_BOUNDS_TRANSFORM =  BoundsTransform   { _, _ -> tween(250) }
+@OptIn(ExperimentalSharedTransitionApi::class)
+val AppTheme.DefaultBoundsTransform get() =  DEFULT_BOUNDS_TRANSFORM
