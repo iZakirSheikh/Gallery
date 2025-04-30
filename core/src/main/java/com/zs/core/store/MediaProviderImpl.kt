@@ -142,11 +142,14 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         if (count == 0) return -1 // error
 
         // Iterate over the file paths and attempt to delete them from the file system.
+        Log.d(TAG, "delete: $count")
         paths.forEach {
+            val file = File(it)
             // Decrement count if file deletion fails
-            if (!File(it).delete())
+            if (file.exists() && !File(it).delete())
                 count--
         }
+        Log.d(TAG, "delete: $count")
 
         // Return the number of successfully deleted items
         return count

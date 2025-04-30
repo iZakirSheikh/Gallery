@@ -162,12 +162,12 @@ abstract class StoreViewModel(
             val selected = id.toList()
             // show rationale if items are in bulk
             if (selected.size > 1) {
-             val res =   showSnackbar(
-                 "Modify ${selected.size} items in Favorites?",
-                 "Confirm",
-                 Icons.Outlined.FavoriteBorder,
-                 duration = SnackbarDuration.Long
-             )
+                val res = showSnackbar(
+                    "Modify ${selected.size} items in Favorites?",
+                    "Confirm",
+                    Icons.Outlined.FavoriteBorder,
+                    duration = SnackbarDuration.Long
+                )
                 if (res != SnackbarResult.ActionPerformed)
                     return@launch
             }
@@ -494,11 +494,11 @@ class FilesViewModel(
             }
             when (value) {
                 RESTORE -> restore(resolver = activity, *focused)
-                DELETE if(source == SOURCE_BIN) -> delete( activity, *focused)
-                DELETE -> remove( activity, *focused)
+                DELETE if(source == SOURCE_BIN) -> delete(activity, *focused)
+                DELETE -> remove(activity, *focused)
                 STAR -> toggleLike(*focused)
                 UN_STAR -> toggleLike(*focused)
-                SHARE -> share( activity, *focused)
+                SHARE -> share(activity, *focused)
                 EMPTY_BIN -> trash(resolver = activity, *focused)
                 STAR_APP -> (activity as MainActivity).launchAppStore()
                 SELECT_ALL -> selectAll()
@@ -641,7 +641,7 @@ class MediaViewerViewModel(
 
     override fun onAction(value: Action, activity: Activity) {
         if (data.isEmpty()) return
-        when(value){
+        when (value) {
             RESTORE -> restore(activity, focused)
             DELETE if (source == SOURCE_BIN) -> delete(activity, focused)
             DELETE -> remove(activity, focused)

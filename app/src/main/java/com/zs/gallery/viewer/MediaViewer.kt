@@ -411,6 +411,10 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         rememberPlayerController(true, true)
     val observer = rememberBackgroundProvider()
 
+    Details(viewState.details, observer) {
+        viewState.showDetails = false
+    }
+
     // Actual content
     Scaffold(
         fabPosition = if (portrait) FabPosition.Center else FabPosition.End,

@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
@@ -119,7 +120,7 @@ fun FloatingLargeTopAppBar(
     backdrop: @Composable() TopAppBarScope.() -> Unit = {
         Spacer(
             modifier = Modifier
-                .shadow(lerp(12.dp, 0.dp, fraction / .05f), AppTheme.shapes.medium)
+                .shadow(lerp(12.dp, 0.dp, fraction / .05f), FloatingTopBarShape)
                 .thenIf(!AppTheme.colors.isLight && fraction == 0f) {
                     border(
                         0.1.dp,
@@ -130,7 +131,7 @@ fun FloatingLargeTopAppBar(
                                 fraction
                             )
                         ),
-                        AppTheme.shapes.medium
+                        FloatingTopBarShape
                     )
                 }
                 .background(style.containerColor(1 - fraction))
@@ -210,7 +211,7 @@ private val Colors.border
             )
         )
     )
-
+private val FloatingTopBarShape = RoundedCornerShape(20)
 /**
  * A floating large top app bar that can collapse and expand based on scroll behavior and takes
  * [HazeState] as backdrop.
@@ -236,9 +237,9 @@ fun FloatingLargeTopAppBar(
         val colors = AppTheme.colors
         Spacer(
             modifier = Modifier
-                .shadow(lerp(100.dp, 0.dp, fraction / .05f), AppTheme.shapes.medium)
+                .shadow(lerp(100.dp, 0.dp, fraction / .05f), FloatingTopBarShape)
                 .thenIf(fraction == 0f) {
-                    border(AppTheme.colors.border, AppTheme.shapes.medium)
+                    border(AppTheme.colors.border, FloatingTopBarShape)
                 }
                 .background(backdrop, AppTheme.colors.background)
                 .layoutId(AppBarDefaults.LayoutIdBackground)

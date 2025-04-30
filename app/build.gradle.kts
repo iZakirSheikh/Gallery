@@ -14,7 +14,7 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 41
+        versionCode = 42
         versionName = "0.3.0-dev03"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
