@@ -107,6 +107,6 @@ fun CharSequence.ellipsize(after: Int): CharSequence =
     if (this.length > after) this.substring(0, after) + ELLIPSIS_NORMAL else this
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-private val DEFULT_BOUNDS_TRANSFORM =  BoundsTransform   { _, _ -> tween(250) }
+private val DEFULT_BOUNDS_TRANSFORM =  BoundsTransform   { _, _ -> tween(180) }
 @OptIn(ExperimentalSharedTransitionApi::class)
 val AppTheme.DefaultBoundsTransform get() =  DEFULT_BOUNDS_TRANSFORM

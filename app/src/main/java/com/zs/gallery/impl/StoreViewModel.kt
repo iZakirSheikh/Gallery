@@ -20,17 +20,24 @@ package com.zs.gallery.impl
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.ContentUris
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.HotelClass
+import androidx.compose.material.icons.outlined.NearbyError
 import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.Restore
 import androidx.compose.material.icons.outlined.SelectAll
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material.icons.outlined.Wallpaper
 import androidx.compose.material.icons.twotone.Delete
 import androidx.compose.material.icons.twotone.FolderCopy
@@ -47,14 +54,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.zs.compose.foundation.Rose
+import com.zs.compose.foundation.runCatching
+import com.zs.compose.theme.snackbar.SnackbarDuration
+import com.zs.compose.theme.snackbar.SnackbarResult
 import com.zs.core.common.PathUtils
 import com.zs.core.store.MediaFile
 import com.zs.core.store.MediaProvider
+import com.zs.gallery.MainActivity
 import com.zs.gallery.R
 import com.zs.gallery.common.Action
 import com.zs.gallery.common.Mapped
@@ -83,7 +94,7 @@ private const val SOURCE_FAV = 3
 
 abstract class StoreViewModel(
     handle: SavedStateHandle,
-    provider: MediaProvider,
+    private val provider: MediaProvider,
 ) : KoinViewModel() {
 
     //  Represent the key and source of the data
@@ -94,6 +105,7 @@ abstract class StoreViewModel(
         RouteFiles.ALBUM_FAV -> SOURCE_FAV
         else -> SOURCE_FOLDER
     }
+
 
     abstract suspend fun emit(values: List<MediaFile>)
 
@@ -136,6 +148,161 @@ abstract class StoreViewModel(
             val action = report(exception.message ?: getText(R.string.msg_unknown_error))
         }
 
+    /**
+     * Toggles the favorite status of the selected items.
+     *
+     * This function checks the current favorite status of the selected items and performs the following actions:
+     * - If `all` selected items are already favorite, it `removes` them from favorites.
+     * - If `some` selected items are favorite, it `adds the remaining` unfavored items to favorites.
+     * - If `none` of the selected items are favorite, it `adds all` of them favorites.
+     */
+    fun toggleLike(vararg id: Long) {
+        viewModelScope.launch {
+            // Get the selected items and clear the selection.
+            val selected = id.toList()
+            // show rationale if items are in bulk
+            if (selected.size > 1) {
+             val res =   showSnackbar(
+                 "Modify ${selected.size} items in Favorites?",
+                 "Confirm",
+                 Icons.Outlined.FavoriteBorder,
+                 duration = SnackbarDuration.Long
+             )
+                if (res != SnackbarResult.ActionPerformed)
+                    return@launch
+            }
+            // Get a mutable list of favorite items.
+            val favourites = preferences[Settings.KEY_FAVOURITE_FILES].toMutableList()
+
+            // Determine the action and message based on whether all selected items are already favorites.
+            when {
+                // Remove all selected items from favorites.
+                favourites.containsAll(selected) -> favourites.removeAll(selected)
+                // Add the un-favorite selected items to favorites.
+                selected.any { it in favourites } -> {
+                    val filtered = selected.filterNot { it in favourites }
+                    favourites.addAll(filtered)
+                }
+                // Add the un-favorite selected items to favorites.
+                else -> favourites.addAll(selected)
+            }
+
+            // Update the favorite items in preferences.
+            preferences[Settings.KEY_FAVOURITE_FILES] = favourites
+            // Display a message to the user.
+            showPlatformToast(R.string.msg_favourites_updated)
+        }
+    }
+
+    /** Deletes file[s] represented by id[s]. */
+    fun delete(resolver: Activity, vararg id: Long) {
+        viewModelScope.launch {
+            val result = runCatching(TAG) {
+                // Get the selected items for deletion
+                val consumed = id
+                // For Android R and above, use the provider's delete function directly
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                    return@runCatching provider.delete(resolver, *consumed)
+                // For versions below Android R, show a confirmation toast
+                // If the user performs the action, proceed with deletion
+                // Otherwise, return -3 to indicate user cancellation
+                val action = showSnackbar(
+                    message = R.string.msg_files_confirm_deletion,
+                    action = R.string.delete,
+                    icon = Icons.Outlined.NearbyError,
+                    accent = Color.Rose,
+                    duration = SnackbarDuration.Indefinite
+                )
+                // Delete the selected items
+                // else return -3 to indicate user cancellation
+                if (action == SnackbarResult.ActionPerformed)
+                    return@runCatching provider.delete(*consumed)
+                // else return user cancelled
+                -3
+            }
+            // Display a message based on the result of the deletion operation.
+            if (result == null || result == 0 || result == -1)
+                showPlatformToast(R.string.msg_files_delete_unknown_error)// General error
+        }
+    }
+
+    @Suppress("NewApi")
+    fun trash(resolver: Activity, vararg id: Long) {
+        viewModelScope.launch {
+            // Ensure this is called on Android 10 or higher (API level 29).
+            val result = runCatching(TAG) {
+                // consume selected
+                val selected = id
+                provider.trash(resolver, *selected)
+            }
+            // General error
+            if (result == null || result == 0 || result == -1)
+                showPlatformToast(R.string.msg_files_trash_unknown_error)
+        }
+    }
+
+    /** Deletes or Trashes file(s) represented by id(s).*/
+    fun remove(resolver: Activity, vararg id: Long) {
+        val isTrashEnabled = preferences[Settings.KEY_TRASH_CAN_ENABLED]
+        if (isTrashEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            trash(resolver = resolver, *id)
+        else {
+            Log.d(TAG, "remove: ${id.size}")
+            delete(resolver = resolver, *id)
+        }
+    }
+
+    /** Shares file(s) represented by id(s).*/
+    fun share(resolver: Activity, vararg id: Long) {
+        viewModelScope.launch {
+            // Get the list of selected items to share.
+            val selected = id
+            // Create an intent to share the selected items
+            val intent = Intent().apply {
+                // Map selected IDs to content URIs.
+                // TODO - Construct custom content uri.
+                val uri = selected.map {
+                    ContentUris.withAppendedId(MediaProvider.EXTERNAL_CONTENT_URI, it)
+                }
+                // Set the action to send multiple items.
+                action = Intent.ACTION_SEND_MULTIPLE
+                // Add the URIs as extras.
+                putParcelableArrayListExtra(
+                    Intent.EXTRA_STREAM,
+                    uri.toMutableList() as ArrayList<Uri>
+                )
+                // Grant read permission to the receiving app.
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                // Set the MIME type to allow sharing of various file types.
+                type = "*/*"
+                // Specify supported MIME types.
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+            }
+            // Start the sharing activity with a chooser.
+            try {
+                resolver.startActivity(Intent.createChooser(intent, "Share Photos & Video"))
+            } catch (e: Exception) {
+                // Handle exceptions and display an error message.
+                showPlatformToast(R.string.msg_error_sharing_files)
+                Log.d(TAG, "share: ${e.message}")
+            }
+        }
+    }
+
+    @Suppress("NewApi")
+    fun restore(resolver: Activity, vararg id: Long) {
+        viewModelScope.launch {
+            val selected = id
+            val result = runCatching(TAG) {
+                provider.restore(resolver, *selected)
+            }
+            // Display a message based on the result of the deletion operation.
+            // General error
+            if (result == null || result == 0 || result == -1)
+                showPlatformToast(R.string.msg_files_restore_unknown_error)
+        }
+    }
+
     init {
         flow.launchIn(viewModelScope)
     }
@@ -145,16 +312,16 @@ abstract class StoreViewModel(
 //        and what will happen when these are changed by some instance.
 private val DELETE = Action(R.string.delete, Icons.TwoTone.Delete)
 private val SHARE = Action(R.string.share, Icons.Outlined.Share)
-private val EDIT_IN = Action(R.string.edit_in, Icons.Outlined.Edit)
-private val STAR = Action(R.string.like, Icons.Outlined.Star)
-private val UN_STAR = Action(R.string.like, Icons.TwoTone.Star)
+private val STAR = Action(R.string.like, Icons.Outlined.StarBorder)
+private val UN_STAR = Action(R.string.unlike, Icons.TwoTone.Star)
 private val SELECT_ALL = Action(R.string.select_all, Icons.Outlined.SelectAll)
 private val RESTORE = Action(R.string.restore, Icons.Outlined.Restore)
 private val EMPTY_BIN = Action(R.string.empty_bin, Icons.Outlined.PlaylistRemove)
 private val STAR_APP = Action(R.string.rate_us, Icons.TwoTone.WorkspacePremium)
-private val USE_AS = Action(R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
 
-
+/**
+ * Represents the state of the files screen.
+ */
 class FilesViewModel(
     handle: SavedStateHandle,
     provider: MediaProvider,
@@ -307,14 +474,90 @@ class FilesViewModel(
                 }
     }
 
-    override fun buildRouteViewer(id: Long) = RouteViewer(id)
+    override fun buildRouteViewer(id: Long) = RouteViewer(id, key ?: "")
 
     override fun onAction(value: Action, activity: Activity) {
         viewModelScope.launch {
-            showSnackbar("This feature is not yet implemented. We are actively working on it and expect to include it in a next update.")
+            val focused = when {
+                // first pref is given to selected;
+                // otherwise whole collection is considered selected.
+                // these options will not be present in screen if no items are selected.
+                selected.isNotEmpty() -> consume()
+                else -> {
+                    val data = data ?: return@launch
+                    buildList {
+                        data.forEach { _, items ->
+                            this.addAll(items.map { it.id })
+                        }
+                    }.toLongArray()
+                }
+            }
+            when (value) {
+                RESTORE -> restore(resolver = activity, *focused)
+                DELETE if(source == SOURCE_BIN) -> delete( activity, *focused)
+                DELETE -> remove( activity, *focused)
+                STAR -> toggleLike(*focused)
+                UN_STAR -> toggleLike(*focused)
+                SHARE -> share( activity, *focused)
+                EMPTY_BIN -> trash(resolver = activity, *focused)
+                STAR_APP -> (activity as MainActivity).launchAppStore()
+                SELECT_ALL -> selectAll()
+                else -> error("Action not supported")
+            }
         }
     }
 }
+
+/**
+ * Creates an Intent to edit an image at the given URI.
+ *
+ * @param uri The URI of the image to edit.
+ * @return An Intent configured for image editing.
+ */
+private fun EditIn(uri: Uri) =
+    Intent(Intent.ACTION_EDIT).apply {
+        setDataAndType(uri, "image/*")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the editing app
+    }
+
+/**
+ * Sets the wallpaper using the provided URI.
+ *
+ * @param uri The URI of the image to be set as wallpaper.
+ */
+private fun Activity.setWallpaper(uri: Uri) {
+    try {
+        // first try to set the wallpaper through offcial way
+        val intent = Intent("android.service.wallpaper.CROP_AND_SET_WALLPAPER").apply {
+            setDataAndType(uri, "image/*")
+            putExtra("mimeType", "image/*") // Specifies the MIME type of the image
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the wallpaper app
+            addCategory(Intent.CATEGORY_DEFAULT)
+            startActivity(intent)
+        }
+        startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        // If the official intent is not supported, try using ACTION_ATTACH_DATA
+        val intent = Intent(Intent.ACTION_ATTACH_DATA).apply {
+            addCategory(Intent.CATEGORY_DEFAULT);
+            // Grant read permission to the wallpaper app
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//add this if your targetVersion is more than Android 7.0+
+            setDataAndType(uri, "image/*");
+            putExtra("mimeType", "image/*");
+        }
+        startActivity(Intent.createChooser(intent, getString(R.string.viewer_set_as)));
+    } catch (e: Exception) {
+        // If any other exception occurs, show a toast message to the user
+        android.widget.Toast.makeText(
+            this,
+            getString(R.string.viewer_msg_no_wallpaper_app_found),
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+}
+
+private val EDIT_IN = Action(R.string.edit_in, Icons.Outlined.Edit)
+private val USE_AS = Action(R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
 
 class MediaViewerViewModel(
     handle: SavedStateHandle,
@@ -327,11 +570,24 @@ class MediaViewerViewModel(
     override var data: List<MediaFile> by mutableStateOf(emptyList())
     override var details: MediaFile? by mutableStateOf(null)
 
+    override var showDetails: Boolean
+        get() = details != null
+        set(value) {
+            details = when {
+                value -> current
+                else -> null
+            }
+        }
+
+
     override suspend fun emit(values: List<MediaFile>) {
         delay(1000) // necessary for shared animation to work effectively.
         // experiment for optimal value
         data = values
     }
+
+    override val favourite: Boolean by derivedStateOf { favourites.contains(focused) }
+    val current inline get() = data.find { it.id == focused }
 
     override val title: CharSequence by derivedStateOf {
         buildAnnotatedString {
@@ -344,11 +600,9 @@ class MediaViewerViewModel(
                 DateUtils.formatDateTime(
                     null,
                     current.dateModified,
-                    DateUtils.FORMAT_SHOW_DATE
+                    DateUtils.FORMAT_ABBREV_MONTH
                 )
-            withStyle(SpanStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal)) {
-                append(modified)
-            }
+            append(modified)
         }
     }
 
@@ -363,11 +617,9 @@ class MediaViewerViewModel(
                 // Update the favorites list with the calculated changes
                 favourites.addAll(toAdd)
                 favourites.removeAll(toRemove)
-            }.launchIn(viewModelScope)
+            }
+            .launchIn(viewModelScope)
     }
-    override val favourite: Boolean by derivedStateOf { favourites.contains(focused) }
-
-    val current inline get() = data.find { it.id == focused }
 
     @Suppress("BuildListAdds")
     override val actions: List<Action> by derivedStateOf {
@@ -387,19 +639,18 @@ class MediaViewerViewModel(
         }
     }
 
-
-    override var showDetails: Boolean
-        get() = details != null
-        set(value) {
-            details = when {
-                value -> current
-                else -> null
-            }
-        }
-
-    override fun onAction(item: Action, activity: Activity) {
-        viewModelScope.launch {
-            showSnackbar("This feature is not yet implemented. We are actively working on it and expect to include it in a next update.")
+    override fun onAction(value: Action, activity: Activity) {
+        if (data.isEmpty()) return
+        when(value){
+            RESTORE -> restore(activity, focused)
+            DELETE if (source == SOURCE_BIN) -> delete(activity, focused)
+            DELETE -> remove(activity, focused)
+            STAR -> toggleLike(focused)
+            UN_STAR -> toggleLike(focused)
+            SHARE -> share(activity, focused)
+            USE_AS -> activity.setWallpaper(current!!.mediaUri)
+            EDIT_IN -> activity.startActivity(EditIn(current!!.mediaUri))
+            else -> error("Action not supported")
         }
     }
 }

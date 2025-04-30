@@ -440,12 +440,22 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             offset,
             limit,
             transform = { c ->
-                List(c.count) {
+                val list = MutableList(c.count) {
                     c.moveToPosition(it);
                     MediaFile(c)
                 }
+                // This section filters the results to include only files that are direct members of the specified folder,
+                // excluding files from subfolders. An exception is made for "img" subfolders, which are considered as part of the parent folder,
+                // to accommodate common camera storage patterns.
+                list.removeAll {
+                    var parent = PathUtils.parent(it.path)
+                    val folderName = PathUtils.name(parent)
+                    if (folderName.startsWith("img", true))
+                        parent = PathUtils.parent(parent)
+                    parent != path
+                }
+                list
             },
         )
     }
-
 }

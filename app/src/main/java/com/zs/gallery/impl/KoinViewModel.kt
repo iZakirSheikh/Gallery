@@ -76,7 +76,7 @@ abstract class KoinViewModel : ScopeViewModel() {
         duration: SnackbarDuration = if (action == null) SnackbarDuration.Short else SnackbarDuration.Long,
     ): SnackbarResult = toastHostState.showSnackbar(message, action, icon, accent, duration)
 
-    suspend fun showToast(
+    suspend fun showSnackbar(
         @StringRes message: Int,
         @StringRes action: Int = ResourcesCompat.ID_NULL,
         icon: ImageVector? = null,

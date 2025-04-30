@@ -14,8 +14,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 40
-        versionName = "0.3.0-dev02"
+        versionCode = 41
+        versionName = "0.3.0-dev03"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

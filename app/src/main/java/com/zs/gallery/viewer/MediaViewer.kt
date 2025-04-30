@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -348,7 +349,7 @@ fun AppBar(
                     contentColor = Color.SignalWhite,
                     scrolledContentColor = Color.SignalWhite
                 ),
-                modifier = modifier.background(
+                modifier = modifier.pointerInput(Unit, {}).background(
                     provider = state,
                     Color.Transparent,
                     progressive = 1f,
@@ -357,7 +358,7 @@ fun AppBar(
                     blendMode = BlendMode.Multiply
                 ),
             )
-        }
+        },
     )
 }
 
