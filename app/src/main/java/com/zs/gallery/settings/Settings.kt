@@ -27,10 +27,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,6 +57,7 @@ import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.FormatSize
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.RateReview
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Textsms
@@ -59,12 +65,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zs.compose.foundation.plus
@@ -72,15 +81,22 @@ import com.zs.compose.foundation.textArrayResource
 import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.BaseListItem
+import com.zs.compose.theme.Button
+import com.zs.compose.theme.ButtonColors
+import com.zs.compose.theme.ButtonDefaults
 import com.zs.compose.theme.Chip
 import com.zs.compose.theme.ChipDefaults
 import com.zs.compose.theme.Colors
+import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.DropDownPreference
+import com.zs.compose.theme.FilledTonalButton
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.IconButton
+import com.zs.compose.theme.ListItem
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.Preference
 import com.zs.compose.theme.SliderPreference
+import com.zs.compose.theme.Surface
 import com.zs.compose.theme.SwitchPreference
 import com.zs.compose.theme.TextButton
 import com.zs.compose.theme.WindowSize.Category
@@ -93,8 +109,10 @@ import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.Text
+import com.zs.core.billing.Paymaster
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
+import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.compose.FloatingLargeTopAppBar
@@ -363,6 +381,83 @@ private inline fun LazyListScope.Appearence(
 }
 
 @Composable
+private fun Sponsor(modifier: Modifier = Modifier) {
+    BaseListItem(
+        modifier = modifier
+            .offset(y = -CP.normal)
+            .background(AppTheme.colors.tileBackgroundColor, SingleTileShape),
+        centerAlign = true,
+        contentColor = AppTheme.colors.onBackground,
+        // App name.
+        overline = {
+            Text(
+                text = stringResource(R.string.app_name),
+                style = AppTheme.typography.display3,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.DancingScriptFontFamily,
+                color = AppTheme.colors.onBackground
+            )
+        },
+        // Build version info.
+        heading = {
+            Text(
+                text = textResource(
+                    R.string.pref_scr_version_by_author_s,
+                    BuildConfig.VERSION_NAME
+                ),
+                style = AppTheme.typography.label3,
+                fontWeight = FontWeight.Normal
+            )
+        },
+        // app icon
+        leading = {
+            Surface(
+                color = AppTheme.colors.background(4.dp),
+                shape = AppTheme.shapes.large,
+                modifier = Modifier.size(64.dp),
+                content = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = null,
+                        tint = Color.Unspecified
+                    )
+                }
+            )
+        },
+        // RateUs + Buy me a Coffee Button.
+        footer = {
+            Row(
+                modifier = Modifier.padding(top = CP.normal),
+                horizontalArrangement = Arrangement.spacedBy(CP.normal),
+                verticalAlignment = Alignment.CenterVertically,
+                content = {
+                    val facade = LocalSystemFacade.current
+
+                    // RateUs
+                    FilledTonalButton(
+                        stringResource(R.string.rate_us),
+                        icon = Icons.Outlined.RateReview,
+                        onClick = facade::launchAppStore,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            backgroundColor = AppTheme.colors.background(
+                                4.dp
+                            )
+                        )
+                    )
+
+                    // Coffee
+                    Button(
+                        stringResource(R.string.buy_me_a_coffee),
+                        icon = Icons.Outlined.DataObject,
+                        onClick = { facade.initiatePurchaseFlow(Paymaster.IAP_BUY_ME_COFFEE) },
+                    )
+                }
+            )
+        }
+    )
+}
+
+@Composable
 @NonRestartableComposable
 private fun ColumnScope.AboutUs() {
     // The app version and check for updates.
@@ -390,7 +485,12 @@ private fun ColumnScope.AboutUs() {
                 }
             )
         },
-        leading = { Icon(imageVector = Icons.Outlined.NewReleases, contentDescription = null) },
+        leading = {
+            Icon(
+                imageVector = Icons.Outlined.NewReleases,
+                contentDescription = null
+            )
+        },
     )
 
     // Privacy Policy
@@ -460,6 +560,7 @@ fun Settings(viewState: SettingsViewState) {
                 title = { Label(textResource(R.string.settings)) },
                 behavior = topAppBarScrollBehavior,
                 backdrop = provier,
+                insets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
                 navigationIcon = {
                     Icon(
                         Icons.Default.Settings,
@@ -513,7 +614,10 @@ fun Settings(viewState: SettingsViewState) {
                         color = AppTheme.colors.accent,
                         // drawDivider = true,
                         style = AppTheme.typography.title3,
-                        contentPadding = Padding(vertical = CP.normal, horizontal = CP.medium)
+                        contentPadding = Padding(
+                            vertical = CP.normal,
+                            horizontal = CP.medium
+                        )
                     )
                     AboutUs()
                 }
@@ -521,6 +625,7 @@ fun Settings(viewState: SettingsViewState) {
         },
         primary = {
             val state = rememberLazyListState()
+            val safeInsets = WindowInsets.systemBars.only(WindowInsetsSides.Vertical)
             LazyColumn(
                 state = state,
                 // In immersive mode, add horizontal padding to prevent settings from touching the screen edges.
@@ -529,7 +634,7 @@ fun Settings(viewState: SettingsViewState) {
                 contentPadding = Padding(
                     if (isPhoneLayout) CP.large else CP.medium,
                     vertical = CP.normal
-                ) + navBarPadding + WindowInsets.contentInsets + WindowInsets.navigationBars.asPaddingValues(),
+                ) + navBarPadding + WindowInsets.contentInsets + safeInsets.asPaddingValues(),
                 modifier = Modifier
                     .observe(provier)
                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
@@ -542,6 +647,11 @@ fun Settings(viewState: SettingsViewState) {
                         length = 56.dp
                     ),
                 content = {
+                    //Sponsor
+                    item(contentType = "sponsor") {
+                        Sponsor()
+                    }
+
                     // General
                     item(contentType = CONTENT_TYPE_HEADER) {
                         GroupHeader(
@@ -566,7 +676,10 @@ fun Settings(viewState: SettingsViewState) {
                             color = AppTheme.colors.accent,
                             //drawDivider = true,
                             style = AppTheme.typography.title3,
-                            contentPadding = Padding(vertical = CP.normal, horizontal = CP.medium)
+                            contentPadding = Padding(
+                                vertical = CP.normal,
+                                horizontal = CP.medium
+                            )
                         )
                     }
 

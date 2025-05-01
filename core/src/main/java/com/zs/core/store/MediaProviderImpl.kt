@@ -56,12 +56,13 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
      * @return The number of media items.
      */
     private suspend fun count(trashed: Boolean = false): Int {
-        val noTrashSelection =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "$COLUMN_IS_TRASHED != 1" else ""
+        /*val noTrashSelection =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "$COLUMN_IS_TRASHED != 1" else ""*/
+        // count all weather trashed or not.
         return resolver.query2(
             EXTERNAL_CONTENT_URI,
             arrayOf(COLUMN_ID),
-            selection = if (!trashed) noTrashSelection else "$COLUMN_IS_TRASHED == 1",
+            selection =  "${MediaStore.Audio.Media._ID} != 0"/*if (!trashed) noTrashSelection else "$COLUMN_IS_TRASHED == 1"*/,
             transform = { c ->
                 c.count
             },

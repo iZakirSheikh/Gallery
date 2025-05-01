@@ -56,6 +56,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.zs.compose.foundation.ClaretViolet
 import com.zs.compose.foundation.textResource
 import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
@@ -81,9 +82,11 @@ import com.zs.gallery.common.Route
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.composable
+import com.zs.gallery.common.compose.ContentPadding
 import com.zs.gallery.common.compose.FloatingBottomNavigationBar
 import com.zs.gallery.common.compose.NavItem
 import com.zs.gallery.common.compose.background
+import com.zs.gallery.common.compose.dynamicAccentColor
 import com.zs.gallery.common.compose.rememberBackgroundProvider
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
@@ -114,7 +117,7 @@ private const val TAG = "Home"
 private val NAV_RAIL_MIN_WIDTH = 106.dp
 private val BOTTOM_NAV_MIN_HEIGHT = 56.dp
 
-private val LightAccentColor = Color(0xFF514700)
+private val LightAccentColor = /*Color(0xFF514700)*/ Color.ClaretViolet
 private val DarkAccentColor = Color(0xFFD8A25E)
 
 private val NavRailShape = EndConcaveShape(16.dp)
@@ -451,6 +454,7 @@ fun Home(
                     navController,
                     when {
                         useAccent -> Modifier.background(colors.accent)
+                        !portrait -> Modifier.background(colors.background(2.dp))
                         else -> Modifier.background(provider, colors.background)
                     }.renderInSharedTransitionScopeOverlay(0.3f),
                 )
@@ -486,7 +490,7 @@ fun Home(
         isLight = !isDark,
         fontFamily = Settings.DefaultFontFamily,
         accent = when {
-            useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> LightAccentColor
+            useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(activity, isDark)
             isDark -> DarkAccentColor
             else -> LightAccentColor
         },

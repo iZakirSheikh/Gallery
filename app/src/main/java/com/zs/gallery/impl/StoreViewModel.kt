@@ -83,6 +83,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
 
 private const val TAG = "StoreViewModel"
@@ -499,7 +502,7 @@ class FilesViewModel(
                 STAR -> toggleLike(*focused)
                 UN_STAR -> toggleLike(*focused)
                 SHARE -> share(activity, *focused)
-                EMPTY_BIN -> trash(resolver = activity, *focused)
+                EMPTY_BIN -> delete(resolver = activity, *focused)
                 STAR_APP -> (activity as MainActivity).launchAppStore()
                 SELECT_ALL -> selectAll()
                 else -> error("Action not supported")
@@ -589,21 +592,9 @@ class MediaViewerViewModel(
     override val favourite: Boolean by derivedStateOf { favourites.contains(focused) }
     val current inline get() = data.find { it.id == focused }
 
+    private val sdf = SimpleDateFormat("MMMM d, yyyy\nh:mm a", Locale.getDefault())
     override val title: CharSequence by derivedStateOf {
-        buildAnnotatedString {
-            val current = current ?: return@buildAnnotatedString
-            withStyle(SpanStyle(fontSize = 12.sp)) {
-                append(current.name.ellipsize(20))
-            }
-            append("\n")
-            val modified =
-                DateUtils.formatDateTime(
-                    null,
-                    current.dateModified,
-                    DateUtils.FORMAT_ABBREV_MONTH
-                )
-            append(modified)
-        }
+        sdf.format(Date(current?.dateModified ?: return@derivedStateOf ""))
     }
 
     val favourites = mutableStateListOf<Long>().also { favourites ->

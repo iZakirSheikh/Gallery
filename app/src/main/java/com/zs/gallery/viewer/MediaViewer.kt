@@ -20,18 +20,15 @@
 
 package com.zs.gallery.viewer
 
-import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -63,6 +60,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
@@ -80,8 +78,7 @@ import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.appbar.TopAppBar
 import com.zs.compose.theme.sharedBounds
-import com.zs.compose.theme.sharedElement
-import com.zs.compose.theme.text.Label
+import com.zs.compose.theme.text.Text
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.player.PlayerController
 import com.zs.core.store.MediaProvider
@@ -335,7 +332,14 @@ fun AppBar(
                         onClick = { onRequest(EVENT_BACK_PRESS) }
                     )
                 },
-                title = { Label(title, maxLines = 2) },
+                title = {
+                    Text(
+                        title,
+                        maxLines = 2,
+                        fontFamily = FontFamily.Monospace,
+                        style = AppTheme.typography.title3
+                    )
+                },
                 actions = {
                     IconButton(
                         icon = Icons.Default.Info,

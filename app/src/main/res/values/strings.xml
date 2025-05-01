@@ -214,4 +214,7 @@
         <item>1 Min</item>
         <item>30 Min</item>
     </string-array>
+    <string name="pref_scr_version_by_author_s">"v%1$s by <b><i>Zakir Sheikh</i></b>"</string>
+    <string name="buy_me_a_coffee">Buy me a coffee</string>
+
 </resources>

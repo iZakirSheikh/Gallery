@@ -61,6 +61,8 @@ private val provider by lazy {
 
 private val OutfitFontFamily = FontFamily("Outfit")
 val FontFamily.Companion.OutfitFontFamily get() = com.zs.gallery.settings.OutfitFontFamily
+val DancingScriptFontFamily = FontFamily("Dancing Script")
+val FontFamily.Companion.DancingScriptFontFamily get() = com.zs.gallery.settings.DancingScriptFontFamily
 
 /**
  * Creates a [FontFamily] from the given Google Font name.
