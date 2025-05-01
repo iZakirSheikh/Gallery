@@ -45,6 +45,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
@@ -73,11 +74,15 @@ import com.zs.compose.foundation.runCatching
 import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.compose.theme.snackbar.SnackbarResult
+import com.zs.core.billing.Paymaster
+import com.zs.core.billing.Product
+import com.zs.core.billing.Purchase
 import com.zs.core.common.showPlatformToast
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.getPackageInfoCompat
+import com.zs.gallery.common.products
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
@@ -91,6 +96,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -98,6 +104,7 @@ import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen as configSplashScreen
+import androidx.navigation.NavController.OnDestinationChangedListener as NavDestListener
 
 private const val TAG = "MainActivity"
 
@@ -140,14 +147,16 @@ private inline fun <S, O> Preferences.observeAsState(key: Key<S, O>): State<O?> 
  * @property timeAppWentToBackground The time in mills until the app was in background state. default value -1L
  * @property isAuthenticationRequired A boolean flag indicating whether authentication is required.
  */
-class MainActivity :
-    ComponentActivity(),
-    SystemFacade,
-    NavController.OnDestinationChangedListener {
+class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
 
     private val snackbarHostState: SnackbarHostState by inject()
     private val preferences: Preferences by inject()
     private var navController: NavHostController? = null
+
+    private val paymaster by lazy {
+        Paymaster(this, BuildConfig.PLAY_CONSOLE_APP_RSA_KEY, Paymaster.products)
+    }
+
 
     override var style: WindowStyle by mutableStateOf(WindowStyle())
     var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
@@ -207,6 +216,7 @@ class MainActivity :
     @SuppressLint("NewApi")
     override fun onResume() {
         super.onResume()
+        paymaster.sync()
         Log.d(TAG, "onStart")
         // Only navigate to the lock screen if authentication is required and
         // this is not a fresh app start.
@@ -221,6 +231,11 @@ class MainActivity :
             }
             unlock()
         }
+    }
+
+    override fun onDestroy() {
+        paymaster.release()
+        super.onDestroy()
     }
 
     override fun showToast(message: String, duration: Int) =
@@ -348,6 +363,16 @@ class MainActivity :
     override fun <S, O> observeAsState(key: Key2<S, O>) =
         preferences.observeAsState(key = key) as State<O>
 
+    @Composable
+    @NonRestartableComposable
+    override fun observePurchaseAsState(id: String): State<Purchase?> {
+        return produceState(remember(id) { paymaster.purchases.value.find { it.id == id } }) {
+            paymaster.purchases.map { it.find { it.id == id } }.collect {
+                value = it  // updating purchase
+            }
+        }
+    }
+
     override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
 
     override fun launchUpdateFlow(report: Boolean) {
@@ -445,6 +470,12 @@ class MainActivity :
             }
         }
     }
+
+    override fun initiatePurchaseFlow(id: String) =
+        paymaster.initiatePurchaseFlow(this, id)
+
+    override fun getProductInfo(id: String): Product? =
+        paymaster.details.value.find { it.id == id }
 
     override fun onDestinationChanged(cont: NavController, dest: NavDestination, args: Bundle?) {
         Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {  // Log the event.

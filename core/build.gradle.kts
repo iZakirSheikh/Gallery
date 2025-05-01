@@ -44,4 +44,5 @@ dependencies {
     api(libs.bundles.coil)
     implementation(libs.androidx.activity.compose)
     implementation(libs.bundles.media3)
+    implementation(libs.google.billing.ktx)
 }

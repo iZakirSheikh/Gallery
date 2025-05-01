@@ -60,6 +60,7 @@ firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-
 # Play app-review
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }
 play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.1" }
+google-billing-ktx = { module = "com.android.billingclient:billing-ktx", version = "7.1.1" }
 
 # Icons
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "material_icons" }

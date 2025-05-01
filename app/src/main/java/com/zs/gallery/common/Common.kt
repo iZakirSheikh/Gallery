@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowInsetsControllerCompat
 import com.zs.compose.foundation.runCatching
 import com.zs.compose.theme.AppTheme
+import com.zs.core.billing.Paymaster
 
 private const val TAG = "Common-Utils"
 
@@ -88,7 +89,7 @@ var WindowInsetsControllerCompat.isAppearanceLightSystemBars: Boolean
  * @see android.content.pm.PackageManager.getPackageInfo
  */
 fun PackageManager.getPackageInfoCompat(pkgName: String) =
-    runCatching (TAG + "_review") {
+    runCatching(TAG + "_review") {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             getPackageInfo(pkgName, PackageManager.PackageInfoFlags.of(0))
         else
@@ -107,6 +108,7 @@ fun CharSequence.ellipsize(after: Int): CharSequence =
     if (this.length > after) this.substring(0, after) + ELLIPSIS_NORMAL else this
 
 @OptIn(ExperimentalSharedTransitionApi::class)
-private val DEFULT_BOUNDS_TRANSFORM =  BoundsTransform   { _, _ -> tween(180) }
+private val DEFULT_BOUNDS_TRANSFORM = BoundsTransform { _, _ -> tween(180) }
+
 @OptIn(ExperimentalSharedTransitionApi::class)
-val AppTheme.DefaultBoundsTransform get() =  DEFULT_BOUNDS_TRANSFORM
+val AppTheme.DefaultBoundsTransform get() = DEFULT_BOUNDS_TRANSFORM

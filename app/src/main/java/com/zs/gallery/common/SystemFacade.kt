@@ -32,12 +32,16 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.net.toUri
 import com.zs.compose.theme.snackbar.SnackbarDuration
+import com.zs.core.billing.Product
+import com.zs.core.billing.Purchase
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.preferences.Key
@@ -245,6 +249,23 @@ interface SystemFacade {
             manager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
         }
     }
+
+
+    /** Launches billing flow for the provided product [id]. */
+    fun initiatePurchaseFlow(id: String): Boolean
+
+    /**/
+    @Composable
+    @NonRestartableComposable
+    fun observePurchaseAsState(id: String): State<Purchase?>
+
+    /**
+     * Retrieves information about a product with the given [id].
+     */
+    // FIX_ME - Using Product as nullable make it lost the performance that might have been gained
+    //          through value class; instead make unspecified case of these.
+    // This will be null when the lib has not been represhed otherwise this must not be null.
+    fun getProductInfo(id: String): Product?
 }
 
 /**
@@ -282,3 +303,21 @@ inline fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
     val provider = LocalSystemFacade.current
     return provider.observeAsState(key = key)
 }
+
+/**
+ * A composable function that retrieves the purchase state of a product using the [LocalSystemFacade].
+ *
+ * This function leverages the `LocalSystemFacade` to access the purchase information for a given product ID.
+ * In preview mode, it returns a `null` purchase state as the activity context is unavailable.
+ *
+ * @param id The ID of the product to check the purchase state for.
+ * @return A [State] object representing the current purchase state of the product.
+ * The state value can be `null` if there is no purchase associated with the given product ID or if the function
+ * is called in preview mode.
+ */
+@Composable
+@NonRestartableComposable
+@Stable
+fun purchase(id: String): State<Purchase?> = LocalSystemFacade.current.observePurchaseAsState(id)
+
+

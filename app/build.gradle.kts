@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ApplicationDefaultConfig
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,6 +7,20 @@ plugins {
     alias(libs.plugins.google.service)
     alias(libs.plugins.crashanlytics)
 }
+
+/**
+ * Adds a string BuildConfig field to the project.
+ */
+private fun ApplicationDefaultConfig.buildConfigField(name: String, value: String) =
+    buildConfigField("String", name, "\"" + value + "\"")
+
+/**
+ * The secrets that needs to be added to BuildConfig at runtime.
+ */
+val secrets = arrayOf(
+//    "ADS_APP_ID",
+    "PLAY_CONSOLE_APP_RSA_KEY",
+)
 
 android {
     namespace = "com.zs.gallery"
@@ -14,12 +30,18 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 43
-        versionName = "0.3.1-dev"
+        versionCode = 44
+        versionName = "0.4.0-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        // Load secrets into BuildConfig
+        // These are passed through env of github.
+        secrets.forEach { secret ->
+            buildConfigField(secret, System.getenv(secret) ?: "")
         }
     }
     buildTypes {
