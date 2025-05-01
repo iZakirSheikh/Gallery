@@ -61,7 +61,7 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
         return resolver.query2(
             EXTERNAL_CONTENT_URI,
             arrayOf(COLUMN_ID),
-            selection = if (!trashed) noTrashSelection else "",
+            selection = if (!trashed) noTrashSelection else "$COLUMN_IS_TRASHED == 1",
             transform = { c ->
                 c.count
             },
@@ -251,10 +251,10 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             if (Activity.RESULT_CANCELED == result.resultCode) return -3
             // Count items after deletion (including trashed)
             val after = count(true)
-            // Return the number of deleted items
-            if (Activity.RESULT_OK == result.resultCode) return after - before
             // Log for debugging if result is unexpected
-            Log.d(TAG, "delete: before: $before, after: $after")
+            Log.d(TAG, "restored: before: $before, after: $after")
+            // Return the number of deleted items
+            if (Activity.RESULT_OK == result.resultCode) return before - after
             // Deletion failed for an unknown reason
             return -1
         }

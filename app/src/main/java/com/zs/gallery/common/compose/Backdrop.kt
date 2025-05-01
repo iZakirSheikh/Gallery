@@ -29,6 +29,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.zs.compose.foundation.ImageBrush
+import com.zs.compose.foundation.thenIf
+import com.zs.compose.foundation.visualEffect
 import dev.chrisbanes.haze.HazeInputScale
 import dev.chrisbanes.haze.HazeProgressive
 import dev.chrisbanes.haze.HazeState
@@ -38,18 +41,18 @@ import dev.chrisbanes.haze.hazeSource
 
 private const val TAG = "BlurBackground"
 
-/**
- * Creates and [remember] s the instance of [HazeState]
- */
+/** Creates and [remember] s the instance of [HazeState] */
 @Composable
 @NonRestartableComposable
 fun rememberBackgroundProvider() = remember(::HazeState)
 
+// Reusable mask
 private val PROGRESSIVE_MASK = Brush.verticalGradient(
     0.5f to Color.Black,
     0.8f to Color.Black.copy(0.5f),
     1.0f to Color.Transparent,
 )
+
 
 fun Modifier.observe(provider: HazeState) = hazeSource(state = provider)
 
@@ -82,9 +85,9 @@ fun Modifier.observe(provider: HazeState) = hazeSource(state = provider)
 fun Modifier.background(
     provider: HazeState,
     containerColor: Color,
-    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 70.dp,
-    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.25f,
-    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.45f else 0.56f),
+    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 60.dp,
+    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.28f,
+    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.35f),
     blendMode: BlendMode = BlendMode.SrcOver,
     progressive: Float = -1f,
 ) = hazeEffect(state = provider) {
@@ -103,8 +106,9 @@ fun Modifier.background(
             preferPerformance = true
         )
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-            inputScale = HazeInputScale.Fixed(1.0f)
+            inputScale = HazeInputScale.Fixed(0.5f)
         mask = PROGRESSIVE_MASK
     }
+}.thenIf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S && noiseFactor != 0f && progressive == -1f){
+    visualEffect(ImageBrush.NoiseBrush, noiseFactor * 0.4f, blendMode = BlendMode.Exclusion)
 }
-
