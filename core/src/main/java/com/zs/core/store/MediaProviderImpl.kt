@@ -50,24 +50,35 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
     override fun observer(uri: Uri): Flow<Boolean> = resolver.observe(uri)
 
     /**
-     * Counts the number of media items in the MediaStore.
+     * Counts media items in the MediaStore based on trash state.
      *
-     * @param trashed Whether to include trashed items in the count. Defaults to false.
-     * @return The number of media items.
+     * @param type The filter type for counting:
+     *  - 0 = all items (both trashed and non-trashed)
+     *  - 1 = only trashed items
+     *  - 2 = only non-trashed items
+     *
+     * @return The number of matching media items.
      */
-    private suspend fun count(trashed: Boolean = false): Int {
-        /*val noTrashSelection =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) "$COLUMN_IS_TRASHED != 1" else ""*/
-        // count all weather trashed or not.
+    private suspend fun count(type: Int): Int {
+        // Build selection condition based on the type:
+        // - API 29+ supports IS_TRASHED column
+        // - Pre-API 29 falls back to basic non-zero ID check
+        val selection = when  {
+            type == 0 ||  Build.VERSION.SDK_INT < Build.VERSION_CODES.Q -> "$COLUMN_ID != 0"   // Count all media items
+            type == 1 -> "$COLUMN_IS_TRASHED = 1"          // Count only trashed items
+            else -> "$COLUMN_IS_TRASHED != 1"      // Count only non-trashed items
+        }
+
+        // Perform the query with the appropriate selection.
+        // Fallback for pre-Android 10 (no IS_TRASHED support)
         return resolver.query2(
             EXTERNAL_CONTENT_URI,
-            arrayOf(COLUMN_ID),
-            selection =  "${MediaStore.Audio.Media._ID} != 0"/*if (!trashed) noTrashSelection else "$COLUMN_IS_TRASHED == 1"*/,
-            transform = { c ->
-                c.count
-            },
+            arrayOf(COLUMN_ID), // Just need IDs to count rows
+            selection = selection,
+            transform = { it.count } // Return row count
         )
     }
+
 
     /**
      * Fetches the content URIs for the given media IDs.
@@ -170,7 +181,7 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             // If the activity is a ComponentActivity, use Activity Result
             // APIs for detailed feedback.
             // Count items before deletion (including trashed)
-            val before = count(true)
+            val before = count(0)
             // Launch the delete request and get the result.
             val result = activity.launchForResult(
                 request.intentSender
@@ -179,11 +190,11 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             // Deletion was canceled by the user
             if (Activity.RESULT_CANCELED == result.resultCode) return -3
             // Count items after deletion (including trashed)
-            val after = count(true)
-            // Return the number of deleted items
-            if (Activity.RESULT_OK == result.resultCode) return after - before
+            val after = count(0)
             // Log for debugging if result is unexpected
             Log.d(TAG, "delete: before: $before, after: $after")
+            // Return the number of deleted items
+            if (Activity.RESULT_OK == result.resultCode) return before - after
             // Deletion failed for an unknown reason
             return -1
         }
@@ -206,7 +217,7 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             // If the activity is a ComponentActivity, use Activity Result
             // APIs for detailed feedback.
             // Count items before deletion (including trashed)
-            val before = count(false)
+            val before = count(1)
             // Launch the delete request and get the result.
             val result = activity.launchForResult(
                 request.intentSender
@@ -215,11 +226,11 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             // Deletion was canceled by the user
             if (Activity.RESULT_CANCELED == result.resultCode) return -3
             // Count items after deletion (including trashed)
-            val after = count(false)
-            // Return the number of deleted items
-            if (Activity.RESULT_OK == result.resultCode) return before - after
+            val after = count(1)
             // Log for debugging if result is unexpected
-            Log.d(TAG, "delete: before: $before, after: $after")
+            Log.d(TAG, "trash: before: $before, after: $after")
+            // Return the number of deleted items
+            if (Activity.RESULT_OK == result.resultCode) return after - before
             // Deletion failed for an unknown reason
             return -1
         }
@@ -242,7 +253,7 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             // If the activity is a ComponentActivity, use Activity Result
             // APIs for detailed feedback.
             // Count items before deletion (including trashed)
-            val before = count(true)
+            val before = count(1)
             // Launch the delete request and get the result.
             val result = activity.launchForResult(
                 request.intentSender
@@ -251,7 +262,7 @@ internal class MediaProviderImpl(context: Context) : MediaProvider {
             // Deletion was canceled by the user
             if (Activity.RESULT_CANCELED == result.resultCode) return -3
             // Count items after deletion (including trashed)
-            val after = count(true)
+            val after = count(1)
             // Log for debugging if result is unexpected
             Log.d(TAG, "restored: before: $before, after: $after")
             // Return the number of deleted items
