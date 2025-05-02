@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.SdStorage
 import androidx.compose.runtime.Composable
@@ -37,21 +35,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.primex.core.textResource
-import com.primex.material2.Label
-import com.zs.domain.store.Folder
-import com.zs.foundation.AppTheme
-import com.zs.foundation.Divider
+import com.zs.compose.foundation.runCatching
+import com.zs.compose.foundation.textResource
+import com.zs.compose.theme.AppTheme
+import com.zs.compose.theme.ContentAlpha
+import com.zs.compose.theme.Icon
+import com.zs.compose.theme.text.Label
+import com.zs.core.store.Folder
 import com.zs.gallery.R
 import java.io.File
+import com.zs.gallery.common.compose.ContentPadding as CP
 
 private const val TAG = "Folder"
 
@@ -63,7 +62,7 @@ private val DEFAULT_SHAPE = RoundedCornerShape(16)
 /**
  * Formats a file size in bytes to a human-readable string.
  *
- * @param bytes Thefile size in bytes.
+ * @param bytes The file size in bytes.
  * @return The formatted file size string.
  */
 private fun Context.formattedFileSize(bytes: Long) =
@@ -75,14 +74,13 @@ private fun Context.formattedFileSize(bytes: Long) =
  * @param path The path to check.
  * @return True if the path is on removable storage, false otherwise.
  */
-private fun isRemovableStorage(path: String): Boolean {
-    val externalStorageDirectory = Environment.getExternalStorageDirectory().absolutePath
-    return !path.startsWith(externalStorageDirectory) && Environment.isExternalStorageRemovable(
-        File(
-            path
+private fun isRemovableStorage(path: String): Boolean =
+    runCatching(TAG) {
+        val externalStorageDirectory = Environment.getExternalStorageDirectory().absolutePath
+        !path.startsWith(externalStorageDirectory) && Environment.isExternalStorageRemovable(
+            File(path)
         )
-    )
-}
+    } == true
 
 @Composable
 fun Folder(
@@ -103,13 +101,9 @@ fun Folder(
                     contentDescription = value.name,
                     modifier = Modifier
                         .aspectRatio(1.0f)
-                        .padding(AppTheme.padding.small)
+                        .padding(CP.small)
                         .clip(DEFAULT_SHAPE)
                         .background(AppTheme.colors.background(elevation = elevation)),
-                    error = com.primex.core.rememberVectorPainter(
-                        image = ImageVector.vectorResource(id = R.drawable.ic_error_image_placeholder),
-                        tintColor = AppTheme.colors.onBackground.copy(alpha = ContentAlpha.Divider)
-                    ),
                     contentScale = ContentScale.Crop
                 )
 
@@ -131,10 +125,10 @@ fun Folder(
         // TextLabel
         Label(
             modifier = Modifier.padding(
-                top = AppTheme.padding.medium,
-                start = AppTheme.padding.medium
+                top = CP.medium,
+                start = CP.medium
             ),
-            style = AppTheme.typography.bodyMedium,
+            style = AppTheme.typography.body2,
             fontWeight = FontWeight.Normal,
             text = value.name
         )
@@ -145,12 +139,9 @@ fun Folder(
                 id = R.string.folders_scr_folder_name_sds, value.count,
                 ctx.formattedFileSize(value.size.toLong())
             ),
-            style = AppTheme.typography.caption.copy(fontSize = 10.sp),
+            style = AppTheme.typography.label3.copy(fontSize = 10.sp),
             color = AppTheme.colors.onBackground.copy(ContentAlpha.medium),
-            modifier = Modifier.padding(start = AppTheme.padding.medium),
+            modifier = Modifier.padding(start = CP.medium),
         )
     }
 )
-
-
-

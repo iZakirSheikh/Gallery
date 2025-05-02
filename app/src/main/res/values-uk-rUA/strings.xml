@@ -15,6 +15,182 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name">Галерея</string>
+    <string name="permission_scr_title">Доступ до сховища</string>
+    <string name="allow">Дозволити</string>
+    <string name="permission_scr_desc"><b>Галерея</b> вимагає дозволу на доступ до сховища вашого 
+        пристрою для показу зображень і відео.
+        <b>\n\nНа Android 14 чи вище:</b>
+        <font color="grey">
+            \n  1. Оберіть <b>Дозволити все</b> у діалоговому вікні дозволів для коректної роботи застосунку.
+        </font>
+    </string>
+    <string name="photos">Фото</string>
+    <string name="settings">Налаштування</string>
+    <string name="folders">Теки</string>
+    <string name="loading">Завантаження</string>
+    <string name="oops_empty">Ой-йой, пусто!!</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d Файлів: %2$s</string>
+    <string name="size">Розмір</string>
+    <string name="name">Назва</string>
+    <string name="recent">Останні</string>
+    <string name="dark">Темна</string>
+    <string name="light">Світла</string>
+    <string name="sync_with_system">Як у системі</string>
+    <string name="general">Загальні</string>
+    <string name="appearance">Вигляд</string>
+    <string name="feedback">Відгук</string>
+    <string name="about_gallery">Про Галерею</string>
+    <string name="msg_unknown_error">Щось пішло не так. Сталася невідома помилка.</string>
+    <string name="report">Повідомити</string>
+    <string name="timeline">Хронологія</string>
+    <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="files_selected_d">%1$d вибрано</string>
+    <string name="select_all">Вибрати все</string>
+    <string name="bin">Смітник</string>
+    <string name="recycle_bin">Сміттєвий кошик</string>
+    <string name="favourites">Улюблені</string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$s р.</string>
+    <string name="last_modified">Остання зміна</string>
+    <string name="msg_error_sharing_files">Йой, щось пішло не так під час обміну файлами. Спробуйте ще раз.</string>
+    <string name="msg_files_delete_unknown_error">Йой, щось пішло не так під час видалення файлів. Спробуйте ще раз.</string>
+    <string name="msg_files_trash_unknown_error">Йой, щось пішло не так при видаленні файлів. Спробуйте ще раз.</string>
+    <string name="trash">Смітник</string>
+    <string name="msg_files_restore_unknown_error">Йой, щось пішло не так під час відновлення файлів. Спробуйте ще раз.</string>
+    <string name="share">Поділитися</string>
+    <string name="edit">Редагувати</string>
+    <string name="delete">Видалити</string>
+    <string name="info">Інформація</string>
+    <string name="edit_in">Редагувати в</string>
+    <string name="use_as">Використовувати як</string>
+    <string name="set_as_wallpaper">Встановити як шпалери</string>
+    <string name="like">Додати в Улюблене</string>
+    <string name="unlike">Вилучити з Улюбленого</string>
+    <string name="details">Подробиці</string>
+    <string name="title">Назва</string>
+    <string name="path">Шлях</string>
+    <string name="metadata">Метадані</string>
+    <string name="msg_files_confirm_deletion"><b>Видалити</b>
+        <font color="grey">\nВи впевнені, що хочете видалити це? Ви не зможете повернути його назад.
+        </font>
+    </string>
+    <string name="msg_update_check_error">Йой! Під час перевірки оновлень щось пішло не так.</string>
+    <string name="msg_update_not_available">Все готово! Оновлень не знайдено.</string>
+    <string name="msg_new_update_downloaded">Оновлення готове! Тепер можна продовжити встановлення.</string>
+    <string name="install">Встановити</string>
+    <string name="lock_scr_title">Підтвердьте свою особистість</string>
+    <string name="lock_scr_subtitle">Авторизуватись біометрикою</string>
+    <string name="lock_scr_desc">Автентифікуйтеся за допомогою відбитка пальця або розпізнавання обличчя, 
+        щоби продовжити. Цей крок має вирішальне значення для захисту ваших даних.
+    </string>
+    <string name="msg_enroll_biometric">Увімкніть біометричну автентифікацію в налаштуваннях.</string>
+    <string name="msg_favourites_updated">Улюблені оновлено!</string>
+    <string name="msg_media_player_promotion"><b>Новий застосунок медіапрогравача!</b>
+        <font color="gray">\n🎶Ознайомтеся з нашим новим <b>медіапрогравачем!</b> Насолоджуйтесь улюбленими мелодіями
+            та відео без зайвих зусиль. Лише спробуйте! 🎥
+        </font>
+    </string>
+    <string name="get">Отримати</string>
+    <string name="dismiss">Відхилити</string>
+    <string name="msg_auth_failed">Помилка авторизації! Спробуйте ще раз або використайте альтернативний метод.</string>
+    <string name="msg_auth_error_s">Помилка автентифікації: %1$s</string>
+    <string name="restore">Відновити</string>
+    <string name="empty_bin">Очистити смітник</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s файлів</string>
+    <string name="viewer_msg_no_wallpaper_app_found">Йой! Не виявлено жодного застосунку для шпалер. Встановіть, щоби продовжити.</string>
+    <string name="viewer_set_as">Встановити як</string>
+    <string name="today">Сьогодні</string>
+    <string name="trash_one_day_left">Лишився 1 день</string>
+    <string name="trash_days_left_d">%1$s днів лишилося</string>
+    <string name="auth_confirm_biometric">Підтвердити біометрику</string>
+    <string name="pref_app_theme_s"><b>Тема застосунку</b>
+        <font color="grey" size="14">
+            <b>\n%1$s</b>
+            \nНалаштуйте вигляд застосунку за допомогою темної, світлої або системної тем.
+        </font>
+    </string>
+    <string name="pref_immersive_view"><b>На весь екран</b>
+        <font color="grey" size="14">
+            \nПриховати рядок стану та панель навігації, щоби не відволікатися.
+        </font>
+    </string>
+    <string name="pref_enable_trash_can"><b>Смітник <small>(Android 11+)</small></b>
+          <font color="grey" size="14">
+              \nУвімкніть, щоби перемістити видалені файли до смітника замість остаточного видалення.
+          </font>
+    </string>
+    <string name="pref_grid_item_size_multiplier"><b>Коефіцієнт розміру сітки</b>
+          <font color="grey" size="14">
+              \nНалаштувати простір, який займає кожен елемент у макеті сітки.
+          </font>
+    </string>
+    <string name="pref_colorization_strategy"><b>Авторозфарбування<sup><font color="#ae1c27" size="10"><b>Бета</b></font></sup></b>
+         <font color="grey" size="14">
+             \nДинамічне генерування тему на основі кольорів медіаарту, що наразі відтворюється.
+          </font>
+    </string>
+    <string name="pref_privacy_policy"><b>Політика приватності</b>
+           <font color="grey" size="14">
+               \nНатисніть тут, щоби переглянути політику приватності.
+          </font>
+    </string>
+    <string name="pref_live_gallery"><b>Жива галерея</b>
+           <font color="grey" size="14">
+               \nУвімкнути анімацію та автовідтворення відео в галереї.
+          </font></string>
+    <string name="pref_font_scale"><b>Розмір шрифту</b>
+         <font color="grey" size="14">
+            \nВідрегулювати розмір шрифту, щоби текст було легше читати. Виберіть розмір, який відповідає вашим
+             вподобанням для кращої читабельності.
+        </font>
+    </string>
+    <string name="pref_transparent_system_bars"><b>Системні панелі</b>
+        <font color="grey" size="14">
+            \nУвімкнути прозорі системні панелі для приємнішого вигляду <b><i>\n(Android 6.0+)</i></b>
+        </font>
+    </string>
+    <string name="pref_report_an_issue"><b>Повідомити проблему</b>
+        <font color="grey" size="14">
+           \nЗв\'язатися з нашою командою підтримки, щоб отримати допомогу або повідомити про проблеми
+        </font>
+    </string>
+    <string-array name="pref_night_mode_entries">
+        <item>Темна</item>
+        <item>Світла</item>
+        <item>Як у системі</item>
+    </string-array>
+    <string name="version">Версія</string>
+    <string name="version_info_s">Версія: %1$s</string>
+    <string name="pref_secure_mode"><b>Безпечний режим</b>
+        <font color="grey" size="14">
+           \nБезпечний режим приховує вміст програми у вікні передперегляду, захищаючи приватність користувача, коли
+            коли застосунок не використовується.
+        </font>
+    </string>
+    <string name="pref_app_lock_s"><b>Блокування застосунку</b> <sup><font color="#ae1c27" size="10"><b>Бета</b></font></sup>
+          <small>\n%1$s</small>
+          <font color="grey" size="14">
+              \nЗахист галереї за допомогою біометричною автентифікацією.
+        </font>
+    </string>
+    <string name="pref_color_nav_bar"><b>Кольорова навігаційна панель</b>
+        <font color="grey" size="14">
+           Використовувати акцентний колір у навігаційній панелі.
+        </font>
+    </string>
+    <string name="about_us">Про нас</string>
+    <string name="postfix_x_f">%1$.1f р.</string>
+    <string name="system">Системні</string>
+    <string name="join_the_beta">Приєднатися до бети</string>
+    <string name="update_gallery">Оновити Галерею</string>
+    <string name="rate_us">Оцінити нас</string>
+    <string name="share_app_label">Поділитися з друзями</string>
+    <string-array name="pref_app_lock_options">
+        <item>Вимкнено</item>
+        <item>Миттєво</item>
+        <item>1 хв</item>
+        <item>30 хв</item>
+    </string-array>
 </resources>

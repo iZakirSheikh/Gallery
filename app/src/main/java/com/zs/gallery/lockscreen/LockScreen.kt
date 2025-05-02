@@ -21,21 +21,22 @@ package com.zs.gallery.lockscreen
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.primex.core.findActivity
-import com.primex.core.textResource
-import com.primex.material2.Button
-import com.zs.foundation.AppTheme
-import com.zs.foundation.LocalWindowSize
-import com.zs.foundation.Range
+import com.zs.compose.foundation.findActivity
+import com.zs.compose.foundation.textResource
+import com.zs.compose.theme.AppTheme
+import com.zs.compose.theme.Button
+import com.zs.compose.theme.ButtonDefaults
+import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.WindowSize.Category
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.Route
+import com.zs.gallery.common.compose.Placeholder
 
 object RouteLockScreen: Route
 
@@ -49,17 +50,17 @@ fun LockScreen() {
     val context = LocalContext.current
     BackHandler { context.findActivity().moveTaskToBack(true) }
 
-    com.zs.gallery.common.Placeholder(
+    Placeholder(
         iconResId = R.raw.lt_app_lock,
         title = stringResource(R.string.lock_scr_title),
         message = textResource(R.string.lock_scr_desc),
-        vertical = LocalWindowSize.current.widthRange == Range.Compact,
+        vertical = LocalWindowSize.current.width == Category.Small,
     ) {
         Button(
             onClick = facade::unlock,
             modifier = Modifier.size(width = 200.dp, height = 46.dp),
             elevation = null,
-            label = "Authenticate",
+            text = "Authenticate",
             border = ButtonDefaults.outlinedBorder,
             shape = AppTheme.shapes.medium,
         )

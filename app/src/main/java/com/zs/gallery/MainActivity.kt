@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.zs.gallery
 
 import android.annotation.SuppressLint
@@ -31,15 +33,20 @@ import android.view.WindowManager.LayoutParams
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,40 +67,48 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
 import com.google.firebase.crashlytics.crashlytics
-import com.primex.core.MetroGreen
-import com.primex.core.Rose
-import com.primex.core.getText2
-import com.primex.core.runCatching
-import com.primex.preferences.Key
-import com.primex.preferences.Preferences
-import com.primex.preferences.intPreferenceKey
-import com.primex.preferences.longPreferenceKey
-import com.primex.preferences.observeAsState
-import com.primex.preferences.value
-import com.zs.foundation.WindowStyle
-import com.zs.foundation.toast.Toast
-import com.zs.foundation.toast.ToastHostState
+import com.zs.compose.foundation.MetroGreen
+import com.zs.compose.foundation.Rose
+import com.zs.compose.foundation.getText2
+import com.zs.compose.foundation.runCatching
+import com.zs.compose.theme.snackbar.SnackbarDuration
+import com.zs.compose.theme.snackbar.SnackbarHostState
+import com.zs.compose.theme.snackbar.SnackbarResult
+import com.zs.core.billing.Paymaster
+import com.zs.core.billing.Product
+import com.zs.core.billing.Purchase
+import com.zs.core.common.showPlatformToast
 import com.zs.gallery.common.SystemFacade
+import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.getPackageInfoCompat
+import com.zs.gallery.common.products
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
+import com.zs.preferences.Key
+import com.zs.preferences.Key.Key1
+import com.zs.preferences.Key.Key2
+import com.zs.preferences.Preferences
+import com.zs.preferences.intPreferenceKey
+import com.zs.preferences.longPreferenceKey
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen as configSplashScreen
-import com.zs.foundation.showPlatformToast as showAndroidToast
+import androidx.navigation.NavController.OnDestinationChangedListener as NavDestListener
 
 private const val TAG = "MainActivity"
 
 // In-app update and review settings
-
 // Maximum staleness days allowed for a flexible update.
 // If the app is older than this, an immediate update will be enforced.
 private const val FLEXIBLE_UPDATE_MAX_STALENESS_DAYS = 2
@@ -108,13 +123,21 @@ private val INITIAL_REVIEW_DELAY = 3.days
 // Since we cannot confirm if the user actually left a review, we use this interval
 // to avoid prompting too frequently.
 private val STANDARD_REVIEW_DELAY = 5.days
+private val KEY_LAST_REVIEW_TIME = longPreferenceKey(TAG + "_last_review_time", 0)
+private val KEY_APP_VERSION_CODE = intPreferenceKey(TAG + "_app_version_code", -1)
 
-private val KEY_LAST_REVIEW_TIME =
-    longPreferenceKey(TAG + "_last_review_time", 0)
+@Composable
+private inline fun <S, O> Preferences.observeAsState(key: Key<S, O>): State<O?> {
+    val flow = when (key) {
+        is Key1 -> observe(key)
+        is Key2 -> observe(key)
+    }
 
-private val KEY_APP_VERSION_CODE =
-    intPreferenceKey(TAG + "_app_version_code", -1)
-
+    val first = remember(key.name) {
+        runBlocking { flow.first() }
+    }
+    return flow.collectAsState(initial = first)
+}
 
 /**
  * @property inAppUpdateProgress A simple property that represents the progress of the in-app update.
@@ -124,10 +147,17 @@ private val KEY_APP_VERSION_CODE =
  * @property timeAppWentToBackground The time in mills until the app was in background state. default value -1L
  * @property isAuthenticationRequired A boolean flag indicating whether authentication is required.
  */
-class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinationChangedListener {
-    private val toastHostState: ToastHostState by inject()
+class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
+
+    private val snackbarHostState: SnackbarHostState by inject()
     private val preferences: Preferences by inject()
     private var navController: NavHostController? = null
+
+    private val paymaster by lazy {
+        Paymaster(this, BuildConfig.PLAY_CONSOLE_APP_RSA_KEY, Paymaster.products)
+    }
+
+
     override var style: WindowStyle by mutableStateOf(WindowStyle())
     var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
         private set
@@ -163,7 +193,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             }
 
             // Check the app lock timeout setting.
-            return when (val timeoutValue = preferences.value(Settings.KEY_APP_LOCK_TIME_OUT)) {
+            return when (val timeoutValue = preferences[Settings.KEY_APP_LOCK_TIME_OUT]) {
                 -1 -> false // App lock is disabled (timeout value of -1)
                 0 -> true // Immediate authentication required (timeout value of 0)
                 else -> {
@@ -173,7 +203,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                     timeSinceBackground >= timeoutValue.minutes.inWholeMilliseconds
                 }
             }
-
         }
 
     override fun onPause() {
@@ -187,6 +216,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
     @SuppressLint("NewApi")
     override fun onResume() {
         super.onResume()
+        paymaster.sync()
         Log.d(TAG, "onStart")
         // Only navigate to the lock screen if authentication is required and
         // this is not a fresh app start.
@@ -203,8 +233,26 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         }
     }
 
+    override fun onDestroy() {
+        paymaster.release()
+        super.onDestroy()
+    }
+
+    override fun showToast(message: String, duration: Int) =
+        showPlatformToast(message, duration)
+
+    override fun showToast(message: Int, duration: Int) =
+        showPlatformToast(message, duration)
+
+    override fun <T> getDeviceService(name: String): T =
+        getSystemService(name) as T
+
     @RequiresApi(Build.VERSION_CODES.P)
-    override fun authenticate(subtitle: String?, desc: String?, onAuthenticated: () -> Unit) {
+    override fun authenticate(
+        subtitle: String?,
+        desc: String?,
+        onAuthenticated: () -> Unit,
+    ) {
         Log.d(TAG, "preparing to show authentication dialog.")
         // Build the BiometricPrompt
         val prompt = BiometricPrompt.Builder(this).apply {
@@ -242,25 +290,16 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    showPlatformToast(getString(R.string.msg_auth_failed))
+                    showToast(getString(R.string.msg_auth_failed))
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                     super.onAuthenticationError(errorCode, errString)
-                    showPlatformToast(getString(R.string.msg_auth_error_s, errString))
+                    showToast(getString(R.string.msg_auth_error_s, errString))
                 }
             }
         )
     }
-
-    override fun showPlatformToast(message: String, duration: Int) =
-        showAndroidToast(message, duration)
-
-    override fun showPlatformToast(message: Int, duration: Int) =
-        showAndroidToast(message, duration)
-
-    override fun <T> getDeviceService(name: String): T =
-        getSystemService(name) as T
 
     @SuppressLint("NewApi")
     override fun unlock() = authenticate() {
@@ -286,43 +325,53 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         navController.popBackStack()
     }
 
-    override fun showToast(
+    override fun showSnackbar(
         message: CharSequence,
         icon: ImageVector?,
         accent: Color,
-        duration: Int
+        duration: SnackbarDuration,
     ) {
         lifecycleScope.launch {
-            toastHostState.showToast(message, null, icon, accent, duration)
-        }
-    }
-
-    override fun showToast(
-        message: Int,
-        icon: ImageVector?,
-        accent: Color,
-        duration: Int
-    ) {
-        lifecycleScope.launch {
-            toastHostState.showToast(
-                resources.getText2(id = message),
-                null,
-                icon,
-                accent,
-                duration
+            snackbarHostState.showSnackbar(
+                message = message,
+                icon = icon,
+                accent = accent,
+                duration = duration
             )
         }
     }
 
+    override fun showSnackbar(
+        message: Int,
+        icon: ImageVector?,
+        accent: Color,
+        duration: SnackbarDuration,
+    ) = showSnackbar(
+        resources.getText2(id = message),
+        icon = icon,
+        accent = accent,
+        duration = duration
+    )
+
     @Composable
     @NonRestartableComposable
-    override fun <S, O> observeAsState(key: Key.Key1<S, O>) =
+    override fun <S, O> observeAsState(key: Key1<S, O>) =
         preferences.observeAsState(key = key)
 
     @Composable
     @NonRestartableComposable
-    override fun <S, O> observeAsState(key: Key.Key2<S, O>) =
-        preferences.observeAsState(key = key)
+    override fun <S, O> observeAsState(key: Key2<S, O>) =
+        preferences.observeAsState(key = key) as State<O>
+
+    @Composable
+    @NonRestartableComposable
+    override fun observePurchaseAsState(id: String): State<Purchase?> {
+        return produceState(remember(id) { paymaster.purchases.value.find { it.id == id } }) {
+            paymaster.purchases.map { it.find { it.id == id } }.collect {
+                value = it  // updating purchase
+            }
+        }
+    }
 
     override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
 
@@ -357,15 +406,15 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                         return@onEach
                     }
                     // else show the toast.
-                    val res = toastHostState.showToast(
+                    val res = snackbarHostState.showSnackbar(
                         message = resources.getText2(R.string.msg_new_update_downloaded),
                         action = resources.getText2(R.string.install),
-                        priority = Toast.PRIORITY_HIGH,
+                        duration = SnackbarDuration.Long,
                         accent = Color.MetroGreen,
                         icon = Icons.Outlined.Downloading
                     )
                     // complete update when ever user clicks on action.
-                    if (res == Toast.ACTION_PERFORMED) manager.completeUpdate()
+                    if (res == SnackbarResult.ActionPerformed) manager.completeUpdate()
                 }
 
                 is AppUpdateResult.Available -> {
@@ -391,7 +440,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
     override fun launchReviewFlow() {
         lifecycleScope.launch {
             // Get the app launch count from preferences.
-            val count = preferences.value(Settings.KEY_LAUNCH_COUNTER)
+            val count = preferences[Settings.KEY_LAUNCH_COUNTER]
             // Check if the minimum launch count has been reached.
             if (count < MIN_LAUNCHES_BEFORE_REVIEW)
                 return@launch
@@ -405,7 +454,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
                 return@launch
             // Get the last time the review prompt was shown.
             // Check if enough time has passed since the last review prompt.
-            val lastAskedTime = preferences.value(KEY_LAST_REVIEW_TIME)
+            val lastAskedTime = preferences[KEY_LAST_REVIEW_TIME]
             if (currentTime - lastAskedTime <= STANDARD_REVIEW_DELAY.inWholeMilliseconds)
                 return@launch
 
@@ -421,6 +470,12 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
             }
         }
     }
+
+    override fun initiatePurchaseFlow(id: String) =
+        paymaster.initiatePurchaseFlow(this, id)
+
+    override fun getProductInfo(id: String): Product? =
+        paymaster.details.value.find { it.id == id }
 
     override fun onDestinationChanged(cont: NavController, dest: NavDestination, args: Bundle?) {
         Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {  // Log the event.
@@ -440,36 +495,36 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         // Configure the splash screen for the app
         configSplashScreen()
         // Initialize
-        if (isColdStart){
+        if (isColdStart) {
             // Trigger update flow
             launchUpdateFlow()
 
             // Enable secure mode if required by user settings
-            if (preferences.value(Settings.KEY_SECURE_MODE))
+            if (preferences[Settings.KEY_SECURE_MODE])
                 window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
 
             // Show "What's New" message if the app version has changed
             val versionCode = BuildConfig.VERSION_CODE
-            val savedVersionCode = preferences.value(KEY_APP_VERSION_CODE)
+            val savedVersionCode = preferences[KEY_APP_VERSION_CODE]
             if (savedVersionCode != versionCode) {
                 preferences[KEY_APP_VERSION_CODE] = versionCode
-                showToast(R.string.what_s_new_latest, duration = Toast.PRIORITY_HIGH)
+                showSnackbar(R.string.what_s_new_latest, duration = SnackbarDuration.Indefinite)
             }
 
             // Promote media player on every 5th launch
             // TODO - properly handle promotional content.
             lifecycleScope.launch {
-                val counter = preferences.value(Settings.KEY_LAUNCH_COUNTER)
+                val counter = preferences[Settings.KEY_LAUNCH_COUNTER]
                 if (counter > 0 && counter % 5 == 0) {
                     delay(3000)
-                    val result = toastHostState.showToast(
+                    val result = snackbarHostState.showSnackbar(
                         message = resources.getText2(R.string.msg_media_player_promotion),
                         icon = Icons.Outlined.NewReleases,
-                        priority = Toast.PRIORITY_CRITICAL,
+                        duration = SnackbarDuration.Indefinite,
                         action = resources.getText2(R.string.get),
                         accent = Color.Rose
                     )
-                    if (result == Toast.ACTION_PERFORMED)
+                    if (result == SnackbarResult.ActionPerformed)
                         launchAppStore("com.prime.player")
                 }
             }
@@ -481,9 +536,9 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         setContent {
             val navController = rememberNavController()
             // If authentication is required, move to the lock screen
-            Gallery(
+            Home(
                 if (isAuthenticationRequired) RouteLockScreen else RouteTimeline,
-                toastHostState,
+                snackbarHostState,
                 navController
             )
             // Manage lifecycle-related events and listeners
@@ -502,3 +557,4 @@ class MainActivity : ComponentActivity(), SystemFacade, NavController.OnDestinat
         }
     }
 }
+

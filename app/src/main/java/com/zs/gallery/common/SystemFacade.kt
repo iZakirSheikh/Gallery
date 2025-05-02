@@ -24,24 +24,27 @@ import android.content.Context
 import android.content.Intent
 import android.hardware.biometrics.BiometricManager
 import android.hardware.fingerprint.FingerprintManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.primex.preferences.Key
-import com.zs.foundation.WindowStyle
-import com.zs.foundation.toast.Priority
-import com.zs.foundation.toast.Toast
+import androidx.core.net.toUri
+import com.zs.compose.theme.snackbar.SnackbarDuration
+import com.zs.core.billing.Product
+import com.zs.core.billing.Purchase
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
+import com.zs.preferences.Key
 
 private const val PREFIX_MARKET_URL = "market://details?id="
 private const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
@@ -61,28 +64,35 @@ interface SystemFacade {
     var style: WindowStyle
 
     /**
-     * @see com.zs.foundation.toast.ToastHostState.showToast
+     * @see Context.showToast
      */
-    fun showToast(
+    fun showToast(message: String, duration: Int = Toast.LENGTH_SHORT)
+
+    /**
+     * @see Context.showToast
+     */
+    fun showToast(@StringRes message: Int, duration: Int = Toast.LENGTH_SHORT)
+
+    /**
+     * @see com.zs.compose.theme.snackbar.SnackbarHostState.showSnackbar
+     */
+    fun showSnackbar(
         message: CharSequence,
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
-        @Priority priority: Int = Toast.PRIORITY_LOW,
+        duration: SnackbarDuration = SnackbarDuration.Short,
     )
 
     /**
-     * @see com.zs.foundation.toast.ToastHostState.showToast
+     * @see com.zs.compose.theme.snackbar.SnackbarHostState.showSnackbar
      */
-    fun showToast(
+    fun showSnackbar(
         @StringRes message: Int,
         icon: ImageVector? = null,
         accent: Color = Color.Unspecified,
-        @Priority priority: Int = Toast.PRIORITY_LOW,
+        duration: SnackbarDuration = SnackbarDuration.Short,
     )
 
-    /**
-     * @see com.primex.preferences.Preferences.observeAsState
-     */
     @Composable
     @NonRestartableComposable
     fun <S, O> observeAsState(key: Key.Key1<S, O>): State<O?>
@@ -107,7 +117,7 @@ interface SystemFacade {
     fun launchAppStore(pkg: String = BuildConfig.APPLICATION_ID) {
         val url = "$PREFIX_MARKET_URL$pkg"
         // Create an Intent to open the Play Store app.
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             // Set the package to explicitly target the Play Store app.
             // Don't add this activity to the history stack.
             // Open in a new document (tab or window).
@@ -124,7 +134,7 @@ interface SystemFacade {
         // If launching the app fails, use the fallback URL to open in a web browser.
         if (res.isFailure) {
             val fallback = "${PREFIX_MARKET_FALLBACK}$pkg"
-            launch(Intent(Intent.ACTION_VIEW, Uri.parse(fallback)))
+            launch(Intent(Intent.ACTION_VIEW, fallback.toUri()))
         }
     }
 
@@ -193,7 +203,7 @@ interface SystemFacade {
             else -> Intent(Settings.ACTION_SECURITY_SETTINGS)
         }
         // Show a toast message to inform the user to enable biometric authentication
-        showPlatformToast(R.string.msg_enroll_biometric)
+        showToast(R.string.msg_enroll_biometric)
         // Attempt to launch the intent and handle any potential failures
         val result = kotlin.runCatching {
             launch(intent)
@@ -202,16 +212,6 @@ interface SystemFacade {
         if (result.isFailure)
             launch(Intent(Settings.ACTION_SETTINGS))
     }
-
-    /**
-     * @see com.zs.foundation.showPlatformToast
-     */
-    fun showPlatformToast(message: String, @Priority priority: Int = Toast.PRIORITY_LOW)
-
-    /**
-     * @see com.zs.foundation.showPlatformToast
-     */
-    fun showPlatformToast(@StringRes message: Int, @Priority priority: Int = Toast.PRIORITY_LOW)
 
     /**
      * Returns the handle to a system-level service by name.
@@ -249,6 +249,23 @@ interface SystemFacade {
             manager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
         }
     }
+
+
+    /** Launches billing flow for the provided product [id]. */
+    fun initiatePurchaseFlow(id: String): Boolean
+
+    /**/
+    @Composable
+    @NonRestartableComposable
+    fun observePurchaseAsState(id: String): State<Purchase?>
+
+    /**
+     * Retrieves information about a product with the given [id].
+     */
+    // FIX_ME - Using Product as nullable make it lost the performance that might have been gained
+    //          through value class; instead make unspecified case of these.
+    // This will be null when the lib has not been represhed otherwise this must not be null.
+    fun getProductInfo(id: String): Product?
 }
 
 /**
@@ -286,3 +303,21 @@ inline fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
     val provider = LocalSystemFacade.current
     return provider.observeAsState(key = key)
 }
+
+/**
+ * A composable function that retrieves the purchase state of a product using the [LocalSystemFacade].
+ *
+ * This function leverages the `LocalSystemFacade` to access the purchase information for a given product ID.
+ * In preview mode, it returns a `null` purchase state as the activity context is unavailable.
+ *
+ * @param id The ID of the product to check the purchase state for.
+ * @return A [State] object representing the current purchase state of the product.
+ * The state value can be `null` if there is no purchase associated with the given product ID or if the function
+ * is called in preview mode.
+ */
+@Composable
+@NonRestartableComposable
+@Stable
+fun purchase(id: String): State<Purchase?> = LocalSystemFacade.current.observePurchaseAsState(id)
+
+

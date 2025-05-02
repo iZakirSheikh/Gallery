@@ -18,8 +18,8 @@
 
 package com.zs.gallery.impl
 
-import com.primex.preferences.Key
 import com.zs.gallery.settings.SettingsViewState
+import com.zs.preferences.Key
 
 
 class SettingsViewModel() : KoinViewModel(), SettingsViewState {

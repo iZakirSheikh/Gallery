@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 sheik
  *
- * Created by Zakir Sheikh on 21-07-2024.
+ * Created by sheik on 04-04-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,30 +18,26 @@
 
 package com.zs.gallery.impl
 
+
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.NearbyError
 import androidx.compose.material.icons.outlined.TextFields
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewModelScope
-import com.primex.core.Rose
-import com.primex.core.castTo
-import com.zs.domain.store.Folder
-import com.zs.domain.store.MediaProvider
-import com.zs.foundation.menu.Action
-import com.zs.foundation.toast.Toast
+import com.zs.compose.foundation.castTo
+import com.zs.core.store.Folder
+import com.zs.core.store.MediaProvider
 import com.zs.gallery.R
+import com.zs.gallery.common.Action
 import com.zs.gallery.common.Filter
 import com.zs.gallery.common.Mapped
 import com.zs.gallery.folders.FoldersViewState
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -68,7 +64,7 @@ class FoldersViewModel(
 
     override var filter: Filter by mutableStateOf(true to ORDER_BY_NAME)
 
-    override val data: StateFlow<Mapped<Folder>?> = combine(
+    override val data = combine(
         snapshotFlow(::filter), provider.observer(MediaProvider.EXTERNAL_CONTENT_URI)
     ) { (ascending, order), _ ->
         val folders = provider.fetchFolders()
@@ -91,15 +87,10 @@ class FoldersViewModel(
             // Handle any exceptions that occur during the flow.
             // This might involve logging the exception using Firebase Crashlytics.
             // Display a toast message to the user, indicating something went wrong and suggesting they report the issue.
-            val action = showToast(
+            report(
                 exception.message ?: getText(R.string.msg_unknown_error),
-                getText(R.string.report),
-                Icons.Outlined.NearbyError,
-                Color.Rose,
-                Toast.PRIORITY_HIGH
             )
         }
         // Convert to state.
         .stateIn(viewModelScope, started = SharingStarted.Lazily, null)
 }
-

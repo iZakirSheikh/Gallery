@@ -19,17 +19,14 @@
 package com.zs.gallery.common
 
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
-
-enum class GroupSelectionLevel {
-    NONE, PARTIAL, FULL
-}
 
 /**
  * Each property is observable.
  */
 interface SelectionTracker {
+
+    /** Represents the selection level of a group.*/
+    enum class Level { NONE, PARTIAL, FULL }
 
     val selected: List<Long>
 
@@ -47,7 +44,7 @@ interface SelectionTracker {
      * @return 0 if not; 1 if partially, 2 if fully selected.
      */
 
-    fun isGroupSelected(key: String): State<GroupSelectionLevel> {
+    fun isGroupSelected(key: String): State<Level> {
        throw UnsupportedOperationException("This function is not supported by ${this::class.java.simpleName}")
     }
 

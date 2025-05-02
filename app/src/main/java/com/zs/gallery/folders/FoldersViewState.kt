@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 sheik
  *
- * Created by Zakir Sheikh on 20-07-2024.
+ * Created by sheik on 04-04-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,16 @@
 
 package com.zs.gallery.folders
 
-import com.zs.domain.store.Folder
-import com.zs.foundation.menu.Action
+import com.zs.core.store.Folder
+import com.zs.gallery.common.Action
 import com.zs.gallery.common.Filter
 import com.zs.gallery.common.Mapped
 import com.zs.gallery.common.Route
 import kotlinx.coroutines.flow.StateFlow
 
-
-object RouteFolders : Route
+object RouteFolders: Route
 
 interface FoldersViewState {
-
     /**
      * The list of supported orders.
      */

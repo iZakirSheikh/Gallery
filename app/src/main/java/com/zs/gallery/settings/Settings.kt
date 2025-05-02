@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 sheik
  *
- * Created by Zakir Sheikh on 23-07-2024.
+ * Created by sheik on 03-04-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
  * limitations under the License.
  */
 
-@file:Suppress("NOTHING_TO_INLINE")
-
 package com.zs.gallery.settings
 
 import android.annotation.SuppressLint
@@ -27,29 +25,30 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Recycling
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.AlternateEmail
 import androidx.compose.material.icons.outlined.AutoAwesomeMotion
 import androidx.compose.material.icons.outlined.BugReport
@@ -58,6 +57,7 @@ import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.FormatSize
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.outlined.PrivacyTip
+import androidx.compose.material.icons.outlined.RateReview
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Textsms
@@ -65,50 +65,63 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.primex.core.fadeEdge
-import com.primex.core.plus
-import com.primex.core.textArrayResource
-import com.primex.core.thenIf
-import com.primex.material2.Button
-import com.primex.material2.DropDownPreference
-import com.primex.material2.IconButton
-import com.primex.material2.Label
-import com.primex.material2.ListTile
-import com.primex.material2.Preference
-import com.primex.material2.SliderPreference
-import com.primex.material2.SwitchPreference
-import com.primex.material2.Text
-import com.primex.material2.TextButton
-import com.primex.material2.appbar.LargeTopAppBar
-import com.primex.material2.appbar.TopAppBarDefaults
-import com.primex.material2.appbar.TopAppBarScrollBehavior
-import com.zs.foundation.AppTheme
-import com.zs.foundation.Colors
-import com.zs.foundation.Header
-import com.zs.foundation.LocalWindowSize
-import com.zs.foundation.NightMode
-import com.zs.foundation.None
-import com.zs.foundation.Range
-import com.zs.foundation.adaptive.HorizontalTwoPaneStrategy
-import com.zs.foundation.adaptive.TwoPane
-import com.zs.foundation.adaptive.VerticalTwoPaneStrategy
-import com.zs.foundation.adaptive.contentInsets
+import com.zs.compose.foundation.plus
+import com.zs.compose.foundation.textArrayResource
+import com.zs.compose.foundation.textResource
+import com.zs.compose.theme.AppTheme
+import com.zs.compose.theme.BaseListItem
+import com.zs.compose.theme.Button
+import com.zs.compose.theme.ButtonColors
+import com.zs.compose.theme.ButtonDefaults
+import com.zs.compose.theme.Chip
+import com.zs.compose.theme.ChipDefaults
+import com.zs.compose.theme.Colors
+import com.zs.compose.theme.ContentAlpha
+import com.zs.compose.theme.DropDownPreference
+import com.zs.compose.theme.FilledTonalButton
+import com.zs.compose.theme.Icon
+import com.zs.compose.theme.IconButton
+import com.zs.compose.theme.ListItem
+import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.Preference
+import com.zs.compose.theme.SliderPreference
+import com.zs.compose.theme.Surface
+import com.zs.compose.theme.SwitchPreference
+import com.zs.compose.theme.TextButton
+import com.zs.compose.theme.WindowSize.Category
+import com.zs.compose.theme.adaptive.HorizontalTwoPaneStrategy
+import com.zs.compose.theme.adaptive.Scaffold
+import com.zs.compose.theme.adaptive.SinglePaneStrategy
+import com.zs.compose.theme.adaptive.contentInsets
+import com.zs.compose.theme.appbar.AppBarDefaults
+import com.zs.compose.theme.minimumInteractiveComponentSize
+import com.zs.compose.theme.text.Header
+import com.zs.compose.theme.text.Label
+import com.zs.compose.theme.text.Text
+import com.zs.core.billing.Paymaster
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
-import com.zs.gallery.common.LocalNavController
+import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.LocalSystemFacade
+import com.zs.gallery.common.NightMode
+import com.zs.gallery.common.compose.FloatingLargeTopAppBar
+import com.zs.gallery.common.compose.fadingEdge2
+import com.zs.gallery.common.compose.observe
+import com.zs.gallery.common.compose.rememberBackgroundProvider
 import com.zs.gallery.common.preference
 import androidx.compose.foundation.layout.PaddingValues as Padding
-import androidx.compose.ui.graphics.RectangleShape as Rectangle
-import com.primex.core.rememberVectorPainter as painter
-import com.primex.core.textResource as stringResource
-import com.zs.foundation.ContentPadding as CP
+import com.zs.gallery.common.compose.ContentPadding as CP
 
 private const val TAG = "Settings"
 
@@ -117,101 +130,35 @@ private val sPaneMaxWidth = 280.dp
 
 // Used to style individual items within a preference section.
 private val TopTileShape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp)
-private val CentreTileShape = Rectangle
+private val CentreTileShape = RectangleShape
 private val BottomTileShape = RoundedCornerShape(0.dp, 0.dp, 24.dp, 24.dp)
 private val SingleTileShape = RoundedCornerShape(24.dp)
 
 private val Colors.tileBackgroundColor
     @ReadOnlyComposable @Composable inline get() = background(elevation = 1.dp)
 
-// when topBar doesn't fill the screen; this is for that case.
-private val RoundedTopBarShape = RoundedCornerShape(15)
-
-/**
- * Represents a Top app bar for this screen.
- *
- * Handles padding/margins based on shape to ensure proper layout.
- *
- * @param modifier [Modifier] to apply to this top app bar.
- * @param shape [Shape] of the top app bar. Defaults to `null`.
- * @param behaviour [TopAppBarScrollBehavior] for scroll behavior.
- */
-@Composable
-@NonRestartableComposable
-private fun TopAppBar(
-    modifier: Modifier = Modifier,
-    insets: WindowInsets = WindowInsets.None,
-    shape: Shape? = null,
-    behaviour: TopAppBarScrollBehavior? = null
-) {
-    LargeTopAppBar(
-        modifier = modifier.thenIf(shape != null) {
-            windowInsetsPadding(insets)
-                .padding(horizontal = CP.medium)
-                .clip(shape!!)
-        },
-        title = { Label(text = stringResource(id = R.string.settings)) },
-        navigationIcon = {
-            val navController = LocalNavController.current
-            IconButton(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                onClick = navController::navigateUp
-            )
-        },
-        scrollBehavior = behaviour,
-        windowInsets = if (shape == null) insets else WindowInsets.None,
-        style = TopAppBarDefaults.largeAppBarStyle(
-            scrolledContainerColor = AppTheme.colors.background(2.dp),
-            scrolledContentColor = AppTheme.colors.onBackground,
-            containerColor = AppTheme.colors.background,
-            contentColor = AppTheme.colors.onBackground
-        ),
-        actions = {
-            val facade = LocalSystemFacade.current
-            // Feedback
-            IconButton(
-                imageVector = Icons.Outlined.AlternateEmail,
-                onClick = { facade.launch(Settings.FeedbackIntent) },
-            )
-            // Star on Github
-            IconButton(
-                imageVector = Icons.Outlined.DataObject,
-                onClick = { facade.launch(Settings.GithubIntent) },
-            )
-            // Report Bugs on Github.
-            IconButton(
-                imageVector = Icons.Outlined.BugReport,
-                onClick = { facade.launch(Settings.GitHubIssuesPage) },
-            )
-            // Join our telegram channel
-            IconButton(
-                imageVector = Icons.Outlined.Textsms,
-                onClick = { facade.launch(Settings.TelegramIntent) },
-            )
-        }
-    )
-}
-
-private val HeaderPadding = PaddingValues(horizontal = CP.large, vertical = CP.xLarge)
-
 /**
  * Represents the group header of [Preference]s
  */
 @Composable
-private inline fun GroupHeader(
+@NonRestartableComposable
+private fun GroupHeader(
     text: CharSequence,
     modifier: Modifier = Modifier,
-    paddingValues: Padding = HeaderPadding,
-) {
-    Text(
-        text = text,
-        modifier = Modifier
-            .padding(paddingValues)
-            .then(modifier),
-        color = AppTheme.colors.accent,
-        style = AppTheme.typography.titleSmall
-    )
-}
+    padding: Padding? = null,
+) = Text(
+    text = text,
+    modifier = Modifier
+        .let() {
+            if (padding == null)
+                it.padding(horizontal = CP.large, vertical = CP.xLarge)
+            else
+                it.padding(padding)
+        }
+        .then(modifier),
+    color = AppTheme.colors.accent,
+    style = AppTheme.typography.title3
+)
 
 private val APP_LOCK_VALUES = arrayOf(-1, 0, 1, 30)
 
@@ -223,13 +170,13 @@ private const val CONTENT_TYPE_ITEM = "item"
  */
 @SuppressLint("NewApi")
 private inline fun LazyListScope.General(
-    viewState: SettingsViewState
+    viewState: SettingsViewState,
 ) {
     // Live Gallery
     item(contentType = CONTENT_TYPE_ITEM) {
         val prefLiveGallery by preference(Settings.KEY_DYNAMIC_GALLERY)
         SwitchPreference(
-            text = stringResource(R.string.pref_live_gallery),
+            text = textResource(R.string.pref_live_gallery),
             checked = prefLiveGallery,
             icon = Icons.Outlined.AutoAwesomeMotion,
             onCheckedChange = { viewState.set(Settings.KEY_DYNAMIC_GALLERY, it) },
@@ -244,7 +191,7 @@ private inline fun LazyListScope.General(
         val value by preference(Settings.KEY_APP_LOCK_TIME_OUT)
         val entries = textArrayResource(R.array.pref_app_lock_options)
         DropDownPreference(
-            text = stringResource(
+            text = textResource(
                 R.string.pref_app_lock_s,
                 entries[APP_LOCK_VALUES.indexOf(value)]
             ),
@@ -263,7 +210,10 @@ private inline fun LazyListScope.General(
                 }
             },
             values = APP_LOCK_VALUES,
-            modifier = Modifier.background(AppTheme.colors.tileBackgroundColor, CentreTileShape),
+            modifier = Modifier.background(
+                color = AppTheme.colors.tileBackgroundColor,
+                CentreTileShape
+            ),
         )
     }
 
@@ -271,7 +221,7 @@ private inline fun LazyListScope.General(
     item(contentType = CONTENT_TYPE_ITEM) {
         val value by preference(Settings.KEY_TRASH_CAN_ENABLED)
         SwitchPreference(
-            text = stringResource(R.string.pref_enable_trash_can),
+            text = textResource(R.string.pref_enable_trash_can),
             checked = value,
             icon = Icons.Default.Recycling,
             onCheckedChange = { viewState.set(Settings.KEY_TRASH_CAN_ENABLED, it) },
@@ -284,7 +234,7 @@ private inline fun LazyListScope.General(
     item(contentType = CONTENT_TYPE_ITEM) {
         val value by preference(Settings.KEY_SECURE_MODE)
         SwitchPreference(
-            text = stringResource(R.string.pref_secure_mode),
+            text = textResource(R.string.pref_secure_mode),
             checked = value,
             icon = Icons.Default.Security,
             onCheckedChange = { viewState.set(Settings.KEY_SECURE_MODE, it) },
@@ -297,7 +247,7 @@ private inline fun LazyListScope.General(
  * Represents items that are related to appearence of the App.
  */
 private inline fun LazyListScope.Appearence(
-    viewState: SettingsViewState
+    viewState: SettingsViewState,
 ) {
     // Night Mode
     item(contentType = CONTENT_TYPE_ITEM) {
@@ -306,7 +256,7 @@ private inline fun LazyListScope.Appearence(
         val value by preference(Settings.KEY_NIGHT_MODE)
         val entries = textArrayResource(R.array.pref_night_mode_entries)
         DropDownPreference(
-            text = stringResource(R.string.pref_app_theme_s, entries[value.ordinal]),
+            text = textResource(R.string.pref_app_theme_s, entries[value.ordinal]),
             value = value,
             icon = Icons.Default.LightMode,
             entries = entries,
@@ -325,7 +275,7 @@ private inline fun LazyListScope.Appearence(
         val value by preference(Settings.KEY_DYNAMIC_COLORS)
         SwitchPreference(
             checked = value,
-            text = stringResource(R.string.pref_dynamic_colors),
+            text = textResource(R.string.pref_dynamic_colors),
             onCheckedChange = { should: Boolean ->
                 viewState.set(Settings.KEY_DYNAMIC_COLORS, should)
             },
@@ -333,21 +283,22 @@ private inline fun LazyListScope.Appearence(
                 .background(AppTheme.colors.tileBackgroundColor, CentreTileShape)
         )
     }
+
     // Font Scale
     item(contentType = CONTENT_TYPE_ITEM) {
         // The font scale to use for the app if -1 is used, the system font scale is used.
         val scale by preference(Settings.KEY_FONT_SCALE)
         SliderPreference(
             value = scale,
-            text = stringResource(R.string.pref_font_scale),
+            text = textResource(R.string.pref_font_scale),
             valueRange = 0.7f..2f,
             steps = 13,   // (2.0 - 0.7) / 0.1 = 13 steps
             icon = Icons.Outlined.FormatSize,
             preview = {
                 Label(
                     text = when {
-                        it < 0.76f -> stringResource(R.string.system)
-                        else -> stringResource(R.string.postfix_x_f, it)
+                        it < 0.76f -> textResource(R.string.system)
+                        else -> textResource(R.string.postfix_x_f, it)
                     },
                     fontWeight = FontWeight.Bold
                 )
@@ -361,14 +312,14 @@ private inline fun LazyListScope.Appearence(
         )
     }
 
-    // Trasnsparent System Bars
+    // Transparent System Bars
     item(contentType = CONTENT_TYPE_ITEM) {
         // Translucent System Bars
         // Whether System Bars are rendered as translucent or Transparent.
         val value by preference(Settings.KEY_TRANSPARENT_SYSTEM_BARS)
         SwitchPreference(
             checked = value,
-            text = stringResource(R.string.pref_transparent_system_bars),
+            text = textResource(R.string.pref_transparent_system_bars),
             onCheckedChange = { should: Boolean ->
                 viewState.set(Settings.KEY_TRANSPARENT_SYSTEM_BARS, should)
             },
@@ -381,7 +332,7 @@ private inline fun LazyListScope.Appearence(
     item(contentType = CONTENT_TYPE_ITEM) {
         val useAccent by preference(Settings.KEY_USE_ACCENT_IN_NAV_BAR)
         SwitchPreference(
-            stringResource(R.string.pref_color_nav_bar),
+            textResource(R.string.pref_color_nav_bar),
             checked = useAccent,
             onCheckedChange = { viewState.set(Settings.KEY_USE_ACCENT_IN_NAV_BAR, it) },
             modifier = Modifier
@@ -390,20 +341,19 @@ private inline fun LazyListScope.Appearence(
     }
 
     // Grid Size Multiplier
-
     item(contentType = CONTENT_TYPE_ITEM) {
         // Grid Item Multiplier
         // The multiplier increases/decreases the size of the grid item from 0.6 to 2f
         val gridItemSizeMultiplier by preference(Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
         SliderPreference(
             value = gridItemSizeMultiplier,
-            text = stringResource(R.string.pref_grid_item_size_multiplier),
+            text = textResource(R.string.pref_grid_item_size_multiplier),
             valueRange = 0.6f..2f,
             steps = 14, // (2.0 - 0.7) / 0.1 = 13 steps
             icon = Icons.Outlined.Dashboard,
             preview = {
                 Label(
-                    text = stringResource(R.string.postfix_x_f, it),
+                    text = textResource(R.string.postfix_x_f, it),
                     fontWeight = FontWeight.Bold
                 )
             },
@@ -420,7 +370,7 @@ private inline fun LazyListScope.Appearence(
         val immersiveView by preference(Settings.KEY_IMMERSIVE_VIEW)
         SwitchPreference(
             checked = immersiveView,
-            text = stringResource(R.string.pref_immersive_view),
+            text = textResource(R.string.pref_immersive_view),
             onCheckedChange = { should: Boolean ->
                 viewState.set(Settings.KEY_IMMERSIVE_VIEW, should)
             },
@@ -431,37 +381,121 @@ private inline fun LazyListScope.Appearence(
 }
 
 @Composable
-private inline fun ColumnScope.AboutUs() {
+private fun Sponsor(modifier: Modifier = Modifier) {
+    BaseListItem(
+        modifier = modifier
+            .offset(y = -CP.normal)
+            .background(AppTheme.colors.tileBackgroundColor, SingleTileShape),
+        centerAlign = true,
+        contentColor = AppTheme.colors.onBackground,
+        // App name.
+        overline = {
+            Text(
+                text = stringResource(R.string.app_name),
+                style = AppTheme.typography.display3,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.DancingScriptFontFamily,
+                color = AppTheme.colors.onBackground
+            )
+        },
+        // Build version info.
+        heading = {
+            Text(
+                text = textResource(
+                    R.string.pref_scr_version_by_author_s,
+                    BuildConfig.VERSION_NAME
+                ),
+                style = AppTheme.typography.label3,
+                fontWeight = FontWeight.Normal
+            )
+        },
+        // app icon
+        leading = {
+            Surface(
+                color = AppTheme.colors.background(4.dp),
+                shape = AppTheme.shapes.large,
+                modifier = Modifier.size(64.dp),
+                content = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = null,
+                        tint = Color.Unspecified
+                    )
+                }
+            )
+        },
+        // RateUs + Buy me a Coffee Button.
+        footer = {
+            Row(
+                modifier = Modifier.padding(top = CP.normal),
+                horizontalArrangement = Arrangement.spacedBy(CP.normal),
+                verticalAlignment = Alignment.CenterVertically,
+                content = {
+                    val facade = LocalSystemFacade.current
+
+                    // RateUs
+                    FilledTonalButton(
+                        stringResource(R.string.rate_us),
+                        icon = Icons.Outlined.RateReview,
+                        onClick = facade::launchAppStore,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            backgroundColor = AppTheme.colors.background(
+                                4.dp
+                            )
+                        )
+                    )
+
+                    // Coffee
+                    Button(
+                        stringResource(R.string.buy_me_a_coffee),
+                        icon = Icons.Outlined.DataObject,
+                        onClick = { facade.initiatePurchaseFlow(Paymaster.IAP_BUY_ME_COFFEE) },
+                    )
+                }
+            )
+        }
+    )
+}
+
+@Composable
+@NonRestartableComposable
+private fun ColumnScope.AboutUs() {
     // The app version and check for updates.
     val facade = LocalSystemFacade.current
-    ListTile(
-        headline = { Label(stringResource(R.string.version), fontWeight = FontWeight.Bold) },
-        subtitle = {
+    BaseListItem(
+        heading = { Label(textResource(R.string.version), fontWeight = FontWeight.Bold) },
+        subheading = {
             Label(
-                stringResource(R.string.version_info_s, BuildConfig.VERSION_NAME)
+                textResource(R.string.version_info_s, BuildConfig.VERSION_NAME)
             )
         },
         footer = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(CP.medium)
-            ) {
-                TextButton(
-                    stringResource(R.string.update_gallery),
-                    onClick = { facade.launchUpdateFlow(true) })
-                TextButton(
-                    stringResource(R.string.join_the_beta),
-                    onClick = { facade.launch(Settings.JoinBetaIntent) },
-                    enabled = false
-                )
-            }
+                horizontalArrangement = Arrangement.spacedBy(CP.medium),
+                content = {
+                    TextButton(
+                        textResource(R.string.update_gallery),
+                        onClick = { facade.launchUpdateFlow(true) })
+                    TextButton(
+                        textResource(R.string.join_the_beta),
+                        onClick = { facade.launch(Settings.JoinBetaIntent) },
+                        enabled = false
+                    )
+                }
+            )
         },
-        leading = { Icon(imageVector = Icons.Outlined.NewReleases, contentDescription = null) },
+        leading = {
+            Icon(
+                imageVector = Icons.Outlined.NewReleases,
+                contentDescription = null
+            )
+        },
     )
 
     // Privacy Policy
     Preference(
-        text = stringResource(R.string.pref_privacy_policy),
+        text = textResource(R.string.pref_privacy_policy),
         icon = Icons.Outlined.PrivacyTip,
         modifier = Modifier
             .clip(AppTheme.shapes.medium)
@@ -469,37 +503,35 @@ private inline fun ColumnScope.AboutUs() {
     )
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(CP.medium)
     ) {
-        Button(
-            label = stringResource(R.string.rate_us),
-            icon = painter(Icons.Outlined.Star),
+        val colors = ChipDefaults.chipColors(
+            backgroundColor = AppTheme.colors.background(1.dp),
+            contentColor = AppTheme.colors.accent
+        )
+        Chip(
+            content = { Label(textResource(R.string.rate_us)) },
+            leadingIcon = { Icon(Icons.Outlined.Star, null) },
             onClick = facade::launchAppStore,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = AppTheme.colors.background(2.dp),
-                contentColor = AppTheme.colors.accent
-            ),
-            elevation = null,
-            shape = AppTheme.shapes.small
+            colors = colors,
+            shape = AppTheme.shapes.xSmall
         )
 
-        Button(
-            label = stringResource(R.string.share_app_label),
-            icon = painter(Icons.Outlined.Share),
+        Chip(
+            content = { Label(textResource(R.string.share_app_label)) },
+            leadingIcon = { Icon(Icons.Outlined.Share, null) },
             onClick = { facade.launch(Settings.ShareAppIntent) },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = AppTheme.colors.background(2.dp),
-                contentColor = AppTheme.colors.accent
-            ),
-            elevation = null,
-            shape = AppTheme.shapes.small
+            colors = colors,
+            shape = AppTheme.shapes.xSmall
         )
     }
 }
 
 /**
- * Represents the Settings screen.
+ * Represents the settings screen.
  */
 @Composable
 fun Settings(viewState: SettingsViewState) {
@@ -509,39 +541,66 @@ fun Settings(viewState: SettingsViewState) {
     // when in mobile portrait; we don't show second pane;
     val strategy = when {
         // TODO  -Replace with OnePane Strategy when updating TwoPane Layout.
-        width < Range.Medium -> VerticalTwoPaneStrategy(0.5f) // Use stacked layout with bias to centre for small screens
+        width < Category.Medium -> SinglePaneStrategy
         else -> HorizontalTwoPaneStrategy(0.5f) // Use horizontal layout with 50% split for large screens
     }
-    // Layout Modes:
-    // When the width exceeds the "Compact" threshold, the layout is no longer immersive.
-    // This is because a navigation rail is likely displayed, requiring content to be
-    // indented rather than filling the entire screen width.
-    //
-    // The threshold helps to dynamically adjust the UI for different device form factors
-    // and orientations, ensuring appropriate use of space. In non-compact layouts,
-    // elements like the navigation rail or side panels prevent an immersive, full-width
-    // layout, making the design more suitable for larger screens.
-    val immersive = width < Range.Medium
     // Define the scroll behavior for the top app bar
-    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val topAppBarScrollBehavior = AppBarDefaults.exitUntilCollapsedScrollBehavior()
     // obtain the padding of BottomNavBar/NavRail
     val navBarPadding = WindowInsets.contentInsets
+    val isPhoneLayout = width < Category.Medium
+    val provier = rememberBackgroundProvider()
     // Place the content
     // FIXME: Width < 650dp then screen is single pane what if navigationBars are at end.
-    TwoPane(
+    Scaffold(
         spacing = CP.normal,
         strategy = strategy,
         topBar = {
-            TopAppBar(
-                behaviour = topAppBarScrollBehavior,
-                insets = WindowInsets.statusBars,
-                shape = if (immersive) null else RoundedTopBarShape,
+            FloatingLargeTopAppBar(
+                title = { Label(textResource(R.string.settings)) },
+                behavior = topAppBarScrollBehavior,
+                backdrop = provier,
+                insets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
+                navigationIcon = {
+                    Icon(
+                        Icons.Default.Settings,
+                        null,
+                        modifier = Modifier.minimumInteractiveComponentSize()
+                    )
+                },
+                actions = {
+                    val facade = LocalSystemFacade.current
+                    // Feedback
+                    IconButton(
+                        icon = Icons.Outlined.AlternateEmail,
+                        contentDescription = null,
+                        onClick = { facade.launch(Settings.FeedbackIntent) },
+                    )
+                    // Star on Github
+                    IconButton(
+                        icon = Icons.Outlined.DataObject,
+                        contentDescription = null,
+                        onClick = { facade.launch(Settings.GithubIntent) },
+                    )
+                    // Report Bugs on Github.
+                    IconButton(
+                        icon = Icons.Outlined.BugReport,
+                        contentDescription = null,
+                        onClick = { facade.launch(Settings.GitHubIssuesPage) },
+                    )
+                    // Join our telegram channel
+                    IconButton(
+                        icon = Icons.Outlined.Textsms,
+                        contentDescription = null,
+                        onClick = { facade.launch(Settings.TelegramIntent) },
+                    )
+                }
             )
         },
-        details = {
+        secondary = {
             // this will not be called when in single pane mode
             // this is just for decoration
-            if (strategy is VerticalTwoPaneStrategy) return@TwoPane
+            if (strategy is SinglePaneStrategy) return@Scaffold
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
@@ -554,58 +613,81 @@ fun Settings(viewState: SettingsViewState) {
                         stringResource(R.string.about_us),
                         color = AppTheme.colors.accent,
                         // drawDivider = true,
-                        style = AppTheme.typography.titleSmall,
-                        contentPadding = PaddingValues(vertical = CP.normal, horizontal = CP.medium)
+                        style = AppTheme.typography.title3,
+                        contentPadding = Padding(
+                            vertical = CP.normal,
+                            horizontal = CP.medium
+                        )
                     )
                     AboutUs()
                 }
             )
         },
-        content = {
+        primary = {
             val state = rememberLazyListState()
+            val safeInsets = WindowInsets.systemBars.only(WindowInsetsSides.Vertical)
             LazyColumn(
                 state = state,
                 // In immersive mode, add horizontal padding to prevent settings from touching the screen edges.
                 // Immersive layouts typically have a bottom app bar, so extra padding improves aesthetics.
                 // Non-immersive layouts only need vertical padding.
-                contentPadding = Padding(if (immersive) CP.large else CP.medium, vertical = CP.normal) + navBarPadding + WindowInsets.contentInsets,
+                contentPadding = Padding(
+                    if (isPhoneLayout) CP.large else CP.medium,
+                    vertical = CP.normal
+                ) + navBarPadding + WindowInsets.contentInsets + safeInsets.asPaddingValues(),
                 modifier = Modifier
+                    .observe(provier)
                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                    .fadeEdge(AppTheme.colors.background(2.dp), state, false)
-                    .thenIf(immersive) { navigationBarsPadding() },
-            ) {
-                // General
-                item(contentType = CONTENT_TYPE_HEADER) {
-                    GroupHeader(
-                        text = stringResource(id = R.string.general),
-                        paddingValues = Padding(CP.normal, CP.small, CP.normal, CP.xLarge)
-                    )
+                    .fadingEdge2(
+                        listOf(
+                            AppTheme.colors.background(1.dp),
+                            AppTheme.colors.background.copy(alpha = 0.5f),
+                            Color.Transparent
+                        ),
+                        length = 56.dp
+                    ),
+                content = {
+                    //Sponsor
+                    item(contentType = "sponsor") {
+                        Sponsor()
+                    }
+
+                    // General
+                    item(contentType = CONTENT_TYPE_HEADER) {
+                        GroupHeader(
+                            text = stringResource(id = R.string.general),
+                            padding = Padding(CP.normal, CP.small, CP.normal, CP.xLarge)
+                        )
+                    }
+                    General(viewState)
+
+                    // Appearance
+                    item(CONTENT_TYPE_HEADER) { GroupHeader(text = stringResource(id = R.string.appearance)) }
+                    Appearence(viewState = viewState)
+
+                    // AboutUs
+                    // Load AboutUs here if this is mobile port
+                    if (strategy !is SinglePaneStrategy)
+                        return@LazyColumn
+
+                    item(contentType = CONTENT_TYPE_HEADER) {
+                        Header(
+                            stringResource(R.string.about_us),
+                            color = AppTheme.colors.accent,
+                            //drawDivider = true,
+                            style = AppTheme.typography.title3,
+                            contentPadding = Padding(
+                                vertical = CP.normal,
+                                horizontal = CP.medium
+                            )
+                        )
+                    }
+
+                    item(contentType = "about_us") {
+                        Column { AboutUs() }
+                    }
                 }
-                General(viewState)
-
-                // Appearence
-                item(CONTENT_TYPE_HEADER) { GroupHeader(text = stringResource(id = R.string.appearance)) }
-                Appearence(viewState = viewState)
-
-                // AboutUs
-                // Load AboutUs here if this is mobile port
-                if (strategy !is VerticalTwoPaneStrategy)
-                    return@LazyColumn
-
-                item(contentType = CONTENT_TYPE_HEADER) {
-                    Header(
-                        stringResource(R.string.about_us),
-                        color = AppTheme.colors.accent,
-                        //drawDivider = true,
-                        style = AppTheme.typography.titleSmall,
-                        contentPadding = Padding(vertical = CP.normal, horizontal = CP.medium)
-                    )
-                }
-
-                item(contentType = "about_us") {
-                    Column { AboutUs() }
-                }
-            }
+            )
         }
     )
 }

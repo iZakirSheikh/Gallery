@@ -1,3 +1,5 @@
+import com.android.build.api.dsl.ApplicationDefaultConfig
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -5,6 +7,20 @@ plugins {
     alias(libs.plugins.google.service)
     alias(libs.plugins.crashanlytics)
 }
+
+/**
+ * Adds a string BuildConfig field to the project.
+ */
+private fun ApplicationDefaultConfig.buildConfigField(name: String, value: String) =
+    buildConfigField("String", name, "\"" + value + "\"")
+
+/**
+ * The secrets that needs to be added to BuildConfig at runtime.
+ */
+val secrets = arrayOf(
+//    "ADS_APP_ID",
+    "PLAY_CONSOLE_APP_RSA_KEY",
+)
 
 android {
     namespace = "com.zs.gallery"
@@ -14,12 +30,18 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 38
-        versionName = "0.2.6-dev"
+        versionCode = 46
+        versionName = "0.4.2-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        // Load secrets into BuildConfig
+        // These are passed through env of github.
+        secrets.forEach { secret ->
+            buildConfigField(secret, System.getenv(secret) ?: "")
         }
     }
     buildTypes {
@@ -41,26 +63,24 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs = listOf(
             "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xcontext-receivers",
-            "-Xopt-in=com.primex.core.ExperimentalToolkitApi",
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
+            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",
             "-Xwhen-guards",
             "-Xnon-local-break-continue"
         )
     }
-    buildFeatures { compose = true; buildConfig = true  }
+    buildFeatures { compose = true; buildConfig = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 dependencies {
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.navigation.compose)
     implementation(libs.androidx.koin)
     implementation(libs.toolkit.preferences)
     implementation(libs.androidx.startup.runtime)
@@ -71,13 +91,23 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.saket.zoomable)
     implementation(libs.chrisbanes.haze)
+    implementation(libs.play.app.update.ktx)
+    implementation(libs.play.app.review.ktx)
 
-
-    // bundles
-    implementation(libs.bundles.play.services)
-    implementation(libs.bundles.material.icons)
+    // ui
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.navigation.compose)
+    implementation(libs.lottie.compose)
+    implementation(libs.toolkit.theme)
+    implementation(libs.toolkit.foundation)
 
     // local
-    implementation(project(":domain"))
-    implementation(project(":foundation"))
+    implementation(project(":core"))
+
+    // bundles
+    implementation(libs.bundles.icons)
+    implementation(libs.bundles.compose.ui)
+
+    implementation(libs.bundles.compose.ui.tooling)
+    //implementation("dev.chrisbanes.haze:haze-materials:1.5.3")
 }
