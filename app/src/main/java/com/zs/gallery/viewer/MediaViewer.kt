@@ -57,7 +57,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -73,9 +72,8 @@ import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.adaptive.FabPosition
-import com.zs.compose.theme.adaptive.Scaffold
+import com.zs.compose.theme.adaptive.TwoPane
 import com.zs.compose.theme.adaptive.contentInsets
-import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.appbar.TopAppBar
 import com.zs.compose.theme.sharedBounds
 import com.zs.compose.theme.text.Text
@@ -311,10 +309,10 @@ private fun Carousel(
 }
 
 @Composable
-fun AppBar(
+private fun MediaViewerAppBar(
     visible: Boolean,
     title: CharSequence,
-    state: HazeState,
+    provider: HazeState,
     onRequest: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -324,7 +322,6 @@ fun AppBar(
         exit = slideOutVertically() + fadeOut(),
         content = {
             TopAppBar(
-                null,
                 navigationIcon = {
                     IconButton(
                         icon = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -347,20 +344,16 @@ fun AppBar(
                         onClick = { onRequest(EVENT_SHOW_INFO) }
                     )
                 },
-                style = AppBarDefaults.topAppBarStyle(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = Color.Transparent,
-                    contentColor = Color.SignalWhite,
-                    scrolledContentColor = Color.SignalWhite
-                ),
-                modifier = modifier.pointerInput(Unit, {}).background(
-                    provider = state,
+                background = AppTheme.colors.background(
+                    provider,
                     Color.Transparent,
                     progressive = 1f,
                     blurRadius = 60.dp,
                     tint = Color.Black.copy(0.3f),
                     blendMode = BlendMode.Multiply
                 ),
+                contentColor = Color.SignalWhite,
+                elevation = 0.dp,
             )
         },
     )
@@ -407,24 +400,31 @@ fun MediaViewer(viewState: MediaViewerViewState) {
     }
 
     val portrait = clazz.width < clazz.height
-    val ctx = LocalContext.current
 
     // The player controller
     // initialized here because we can destroy it once the view is destroyed.
     val controller =
         rememberPlayerController(true, true)
     val observer = rememberBackgroundProvider()
-
-    Details(viewState.details, observer) {
-        viewState.showDetails = false
-    }
+    val colors = AppTheme.colors
+    Details(
+        viewState.details,
+        colors.background(
+            observer,
+            Color.White,
+            blurRadius = 70.dp,
+        ),
+        onDismissRequest = {
+            viewState.showDetails = false
+        }
+    )
 
     // Actual content
-    Scaffold(
+    TwoPane(
         fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
-        onColor = Color.SignalWhite,
-        background = Color.Black,
-        topBar = { AppBar(!immersive, viewState.title, observer, onRequest) },
+        contentColor = Color.SignalWhite,
+        containerColor = Color.Black,
+        topBar = { MediaViewerAppBar(!immersive, viewState.title, observer, onRequest) },
         primary = {
             Carousel(
                 viewState = viewState,
@@ -439,10 +439,13 @@ fun MediaViewer(viewState: MediaViewerViewState) {
             val actions = viewState.actions
             FloatingActionMenu(
                 visible = !immersive && !actions.isEmpty(),
-                background = Color.Transparent,
+                background = colors.background(
+                    observer,
+                    Color.White,
+                    blurRadius = 70.dp,
+                ),
                 contentColor = Color.UmbraGrey,
                 insets = WindowInsets.contentInsets + WindowInsets.safeContent.asPaddingValues(),
-                modifier = Modifier.background(observer, Color.SignalWhite),
                 content = {
                     val ctx = LocalContext.current
                     OverflowMenu(

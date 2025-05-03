@@ -25,7 +25,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,6 +48,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zs.compose.foundation.Background
+import com.zs.compose.foundation.background
 import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Icon
@@ -64,8 +65,8 @@ private val DefaultItemSpace = Arrangement.spacedBy(ContentPadding.small)
 @Composable
 fun FloatingActionMenu(
     visible: Boolean,
+    background: Background,
     modifier: Modifier = Modifier,
-    background: Color = AppTheme.colors.background(elevation = 2.dp),
     contentColor: Color = AppTheme.colors.onBackground,
     insets: PaddingValues?= null,
     border: BorderStroke? = BorderStroke(
@@ -95,9 +96,9 @@ fun FloatingActionMenu(
                             .pointerInput(Unit) {}
                             .thenIf(insets != null) { padding(insets!!) }
                             .scale(0.85f)
-                            .background(background, CircleShape)
                             .shadow(12.dp, shape = CircleShape)
                             .thenIf(border != null) { border(border!!, CircleShape) }
+                            .background(background)
                             .then(modifier)
                             .animateContentSize()
                     )

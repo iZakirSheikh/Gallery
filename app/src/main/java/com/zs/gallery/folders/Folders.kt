@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -42,9 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.zs.compose.foundation.fullLineSpan
 import com.zs.compose.foundation.plus
 import com.zs.compose.foundation.stickyHeader
-import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.LocalWindowSize
@@ -53,23 +54,22 @@ import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Label
+import com.zs.compose.theme.text.TonalHeader
 import com.zs.core.store.Folder
 import com.zs.gallery.R
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.compose.Filters
-import com.zs.gallery.common.compose.FloatingLargeTopAppBar
-import com.zs.gallery.common.compose.TonalCharHeader
-import com.zs.gallery.common.compose.TonalHeader
+import com.zs.gallery.common.compose.GalleryTopAppBar
+import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.emit
 import com.zs.gallery.common.compose.fadingEdge2
-import com.zs.gallery.common.compose.fullLineSpan
+import com.zs.gallery.common.compose.observe
 import com.zs.gallery.common.compose.rememberBackgroundProvider
 import com.zs.gallery.common.preference
 import com.zs.gallery.files.RouteBin
 import com.zs.gallery.files.RouteFiles
 import com.zs.gallery.files.RouteLiked
 import com.zs.gallery.settings.Settings
-import dev.chrisbanes.haze.haze
 import com.zs.gallery.common.compose.ContentPadding as CP
 
 private val TileArrangement = Arrangement.spacedBy(4.dp)
@@ -89,38 +89,35 @@ fun Folders(viewState: FoldersViewState) {
     // Define the scroll behavior for the top app bar
     val topAppBarScrollBehavior = AppBarDefaults.exitUntilCollapsedScrollBehavior()
     val observer = rememberBackgroundProvider()
+    val navController = LocalNavController.current
+    // Actual composable
+    val colors = AppTheme.colors
 
-    // primary content
-    val primary = @Composable {
-        val data by viewState.data.collectAsState()
-        val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
-        val navController = LocalNavController.current
-        val lazyGridState = rememberLazyGridState()
-        // content
-        val colors = AppTheme.colors
-        // The complete screen insets.
-        LazyVerticalGrid(
-            state = lazyGridState,
-            columns = GridCells.Adaptive(DEF_MIN_TILE_SIZE * multiplier.coerceAtLeast(0.9f)),
-            horizontalArrangement = TileArrangement,
-            verticalArrangement = TileArrangement,
-            contentPadding = inAppNavInsets + WindowInsets.contentInsets +
-                    PaddingValues(end = if (!portrait) CP.large else 0.dp) +
-                    PaddingValues(horizontal = CP.medium),
-            modifier = Modifier
-                .fadingEdge2(
-                    listOf(
-                        colors.background(1.dp),
-                        colors.background.copy(alpha = 0.5f),
-                        Color.Transparent
-                    ),
-                    length = 56.dp
-                )
-                .thenIf(observer != null) { haze(observer!!) }
-                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
-            content = {
+    Scaffold(
+        topBar = {
+            GalleryTopAppBar(
+                immersive = false,
+                title = { Label(stringResource(R.string.folders)) },
+                backdrop = colors.background(observer),
+                behavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.FolderCopy,
+                        null,
+                        modifier = Modifier.minimumInteractiveComponentSize()
+                    )
+                },
+            )
+        },
+        content = {
+            val data by viewState.data.collectAsState()
+            val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
+            val lazyGridState = rememberLazyGridState()
+
+            //
+            val content: LazyGridScope.() -> Unit = content@{
                 // emit state or return non-null | non empty data points
-                val data = emit(data) ?: return@LazyVerticalGrid
+                val data = emit(data) ?: return@content
 
                 // only show other content; if data is available.
                 // Filters: Display the filters section.
@@ -174,10 +171,7 @@ fun Folders(viewState: FoldersViewState) {
                                     .animateItem()
                                     .padding(horizontal = 6.dp),
                                 content = {
-                                    when {
-                                        header.length == 1 -> TonalCharHeader(header)
-                                        else -> TonalHeader(header)
-                                    }
+                                    TonalHeader(header)
                                 }
                             )
                         }
@@ -203,27 +197,31 @@ fun Folders(viewState: FoldersViewState) {
                         Spacer(modifier = Modifier.padding(top = CP.large))
                     }
                 }
-
             }
-        )
-    }
 
-    // Actual composable
-    Scaffold(
-        primary = primary,
-        topBar = {
-            FloatingLargeTopAppBar(
-                title = { Label(stringResource(R.string.folders)) },
-                backdrop = observer,
-                behavior = topAppBarScrollBehavior,
-                navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.FolderCopy,
-                        null,
-                        modifier = Modifier.minimumInteractiveComponentSize()
+            // The complete screen insets.
+            LazyVerticalGrid(
+                state = lazyGridState,
+                columns = GridCells.Adaptive(DEF_MIN_TILE_SIZE * multiplier.coerceAtLeast(0.9f)),
+                horizontalArrangement = TileArrangement,
+                verticalArrangement = TileArrangement,
+                contentPadding = inAppNavInsets + WindowInsets.contentInsets +
+                        PaddingValues(end = if (!portrait) CP.large else 0.dp) +
+                        PaddingValues(horizontal = CP.medium),
+                modifier = Modifier
+                    .fadingEdge2(
+                        listOf(
+                            colors.background(1.dp),
+                            colors.background.copy(alpha = 0.5f),
+                            Color.Transparent
+                        ),
+                        length = 56.dp
                     )
-                },
+                    .observe(observer)
+                    .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
+                content = content
             )
         }
     )
 }
+
