@@ -157,7 +157,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         Paymaster(this, BuildConfig.PLAY_CONSOLE_APP_RSA_KEY, Paymaster.products)
     }
 
-
     override var style: WindowStyle by mutableStateOf(WindowStyle())
     var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
         private set
@@ -229,7 +228,6 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
             navController?.navigate(RouteLockScreen()) {
                 launchSingleTop = true
             }
-            unlock()
         }
     }
 
@@ -373,7 +371,8 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         }
     }
 
-    override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
+    override fun launch(intent: Intent, options: Bundle?) =
+        startActivity(intent, options)
 
     override fun launchUpdateFlow(report: Boolean) {
         val manager = AppUpdateManagerFactory.create(this@MainActivity)
@@ -477,7 +476,11 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
     override fun getProductInfo(id: String): Product? =
         paymaster.details.value.find { it.id == id }
 
-    override fun onDestinationChanged(cont: NavController, dest: NavDestination, args: Bundle?) {
+    override fun onDestinationChanged(
+        cont: NavController,
+        dest: NavDestination,
+        args: Bundle?,
+    ) {
         Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {  // Log the event.
             // create params for the event.
             val domain = dest.domain ?: "unknown"
@@ -485,6 +488,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
             param(FirebaseAnalytics.Param.SCREEN_NAME, domain)
         }
     }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -557,4 +561,3 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         }
     }
 }
-

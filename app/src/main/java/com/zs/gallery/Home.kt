@@ -21,10 +21,9 @@ package com.zs.gallery
 import android.annotation.SuppressLint
 import android.os.Build
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -56,9 +55,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.zs.compose.foundation.Background
 import com.zs.compose.foundation.ClaretViolet
 import com.zs.compose.foundation.textResource
-import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.Icon
@@ -68,9 +67,11 @@ import com.zs.compose.theme.WindowSize
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.NavigationSuiteScaffold
 import com.zs.compose.theme.appbar.AppBarDefaults
+import com.zs.compose.theme.appbar.FloatingBottomNavigationBar
 import com.zs.compose.theme.appbar.NavigationItemDefaults
 import com.zs.compose.theme.appbar.SideBar
 import com.zs.compose.theme.calculateWindowSizeClass
+import com.zs.compose.theme.dynamicAccentColor
 import com.zs.compose.theme.renderInSharedTransitionScopeOverlay
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.compose.theme.text.Label
@@ -83,10 +84,9 @@ import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.composable
 import com.zs.gallery.common.compose.ContentPadding
-import com.zs.gallery.common.compose.FloatingBottomNavigationBar
 import com.zs.gallery.common.compose.NavItem
 import com.zs.gallery.common.compose.background
-import com.zs.gallery.common.compose.dynamicAccentColor
+import com.zs.gallery.common.compose.observe
 import com.zs.gallery.common.compose.rememberBackgroundProvider
 import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
@@ -108,7 +108,6 @@ import com.zs.gallery.settings.RouteSettings
 import com.zs.gallery.settings.Settings
 import com.zs.gallery.viewer.MediaViewer
 import com.zs.gallery.viewer.RouteViewer
-import dev.chrisbanes.haze.haze
 import org.koin.androidx.compose.koinViewModel
 import com.google.accompanist.permissions.rememberMultiplePermissionsState as Permissions
 
@@ -300,6 +299,7 @@ private val navGraphBuilder: NavGraphBuilder.() -> Unit = {
     }
 }
 
+
 /**
  * A composable function that represents a navigation bar, combining both rail and bottom bar elements.
  *
@@ -311,6 +311,7 @@ private val navGraphBuilder: NavGraphBuilder.() -> Unit = {
 @NonRestartableComposable
 private fun NavigationBar(
     typeRail: Boolean,
+    background: Background,
     contentColor: Color,
     navController: NavController,
     modifier: Modifier = Modifier,
@@ -364,7 +365,7 @@ private fun NavigationBar(
         )
     }
 
-    //
+    // Load appropriate navigation bar.
     when {
         typeRail -> SideBar(
             modifier = Modifier
@@ -375,7 +376,7 @@ private fun NavigationBar(
             contentColor = contentColor,
             border = RailBorder,
             shape = NavRailShape,
-            backgroundColor = Color.Transparent,
+            background = background,
             elevation = 0.dp,
             content = {
                 // Display routes at the top of the navRail.
@@ -387,7 +388,7 @@ private fun NavigationBar(
 
         else -> FloatingBottomNavigationBar(
             contentColor = contentColor,
-            backgroundColor = Color.Transparent,
+            background = background,
             elevation = 12.dp,
             border = BorderStroke(
                 0.5.dp,
@@ -399,17 +400,16 @@ private fun NavigationBar(
                 )
             ),
             shape = CircleShape,
-            modifier = Modifier
-                .height(64.dp)
-                .then(modifier),
-            content = {
-                // Display routes at the contre of available space
-                routes()
-            }
+            modifier = modifier.padding(bottom = ContentPadding.medium),
+            // Display routes at the contre of available space
+            content = { routes() }
         )
     }
 }
 
+/**
+ * The main navigation host for the app.
+ */
 @Composable
 fun Home(
     origin: Route,
@@ -442,7 +442,7 @@ fun Home(
             vertical = portrait,
             snackbarHostState = snackbarHostState,
             hideNavigationBar = !requiresNavBar,
-            background = AppTheme.colors.background,
+            containerColor = AppTheme.colors.background,
             progress = activity.inAppUpdateProgress,
             // Set up the navigation bar using the NavBar composable
             navBar = {
@@ -450,13 +450,14 @@ fun Home(
                 val colors = AppTheme.colors
                 NavigationBar(
                     !portrait,
+                    when {
+                        useAccent -> Background(colors.accent)
+                        !portrait -> Background(colors.background(2.dp))
+                        else -> colors.background(provider)
+                    },
                     if (useAccent) colors.onAccent else colors.onBackground,
                     navController,
-                    when {
-                        useAccent -> Modifier.background(colors.accent)
-                        !portrait -> Modifier.background(colors.background(2.dp))
-                        else -> Modifier.background(provider, colors.background)
-                    }.renderInSharedTransitionScopeOverlay(0.3f),
+                    Modifier.renderInSharedTransitionScopeOverlay(0.3f),
                 )
             },
             // Display the main content of the app using the NavGraph composable
@@ -467,7 +468,7 @@ fun Home(
                     navController = navController,
                     startDestination = if (!granted) RoutePermission() else origin(),
                     builder = navGraphBuilder,
-                    modifier = Modifier.thenIf(provider != null) { haze(provider!!) }
+                    modifier = Modifier.observe(provider)
                 )
             }
         )
@@ -490,7 +491,11 @@ fun Home(
         isLight = !isDark,
         fontFamily = Settings.DefaultFontFamily,
         accent = when {
-            useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(activity, isDark)
+            useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(
+                activity,
+                isDark
+            )
+
             isDark -> DarkAccentColor
             else -> LightAccentColor
         },
@@ -545,3 +550,4 @@ fun Home(
         }
     }
 }
+

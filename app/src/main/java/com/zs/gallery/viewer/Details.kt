@@ -20,7 +20,6 @@ package com.zs.gallery.viewer
 
 import android.text.format.DateUtils
 import android.text.format.Formatter
-import android.view.Gravity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -39,10 +38,8 @@ import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,18 +48,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
 import coil3.compose.AsyncImage
+import com.zs.compose.foundation.Background
+import com.zs.compose.foundation.Dialog
 import com.zs.compose.foundation.SignalWhite
 import com.zs.compose.foundation.UmbraGrey
+import com.zs.compose.foundation.background
 import com.zs.compose.foundation.fadingEdge
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.ContentAlpha
@@ -71,15 +65,12 @@ import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.ListItem
 import com.zs.compose.theme.LocalContentColor
 import com.zs.compose.theme.LocalWindowSize
-import com.zs.compose.theme.Surface
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
 import com.zs.core.store.MediaFile
 import com.zs.gallery.R
 import com.zs.gallery.common.compose.ContentPadding
-import com.zs.gallery.common.compose.background
-import dev.chrisbanes.haze.HazeState
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -118,9 +109,9 @@ private fun Info(
 )
 
 @Composable
-@NonRestartableComposable
-fun Details(
+private fun Details(
     value: MediaFile,
+    background: Background,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -131,6 +122,7 @@ fun Details(
             .verticalScroll(state)
             .padding(horizontal = ContentPadding.medium)
             .clip(AppTheme.shapes.large)
+            .background(background)
             .then(modifier),
         content = {
 
@@ -231,18 +223,13 @@ fun Details(
 @NonRestartableComposable
 fun Details(
     of: MediaFile?,
-    effect: HazeState,
+    background: Background,
     onDismissRequest: () -> Unit,
 ) {
-    val file = of ?: return
-    val density = LocalDensity.current
     val (wClass, hClazz) = LocalWindowSize.current
     Dialog(
-        onDismissRequest,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = true,
-            decorFitsSystemWindows = true
-        ),
+        expanded = of != null,
+        onDismissRequest = onDismissRequest,
         content = {
 
 //            val view = LocalView.current
@@ -256,17 +243,11 @@ fun Details(
 //            }
 
             CompositionLocalProvider(
-                LocalDensity provides density,
                 LocalContentColor provides Color.UmbraGrey,
                 content = {
                     Details(
-                        value = file,
-                        modifier = Modifier.background(
-                            effect,
-                            Color.SignalWhite,
-                            blurRadius = 70.dp,
-                            noiseFactor = 0f
-                        ),
+                        value = of ?: return@CompositionLocalProvider,
+                        background = background,
                         onDismissRequest = onDismissRequest
                     )
                 }

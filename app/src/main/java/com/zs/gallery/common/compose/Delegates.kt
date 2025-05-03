@@ -21,11 +21,9 @@
 package com.zs.gallery.common.compose
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RawRes
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -34,18 +32,23 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.LazyGridItemSpanScope
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
@@ -54,9 +57,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -64,26 +70,47 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottiePainter
+import com.zs.compose.foundation.Background
+import com.zs.compose.foundation.ImageBrush
+import com.zs.compose.foundation.background
 import com.zs.compose.foundation.composableIf
 import com.zs.compose.foundation.effects.shimmer
+import com.zs.compose.foundation.fullLineSpan
+import com.zs.compose.foundation.thenIf
+import com.zs.compose.foundation.visualEffect
 import com.zs.compose.theme.AppTheme
+import com.zs.compose.theme.Colors
 import com.zs.compose.theme.ExperimentalThemeApi
 import com.zs.compose.theme.Placeholder
+import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.appbar.BottomNavigationItem
+import com.zs.compose.theme.appbar.FloatingLargeTopAppBar
+import com.zs.compose.theme.appbar.LargeTopAppBar
 import com.zs.compose.theme.appbar.NavigationItemColors
 import com.zs.compose.theme.appbar.NavigationItemDefaults
 import com.zs.compose.theme.appbar.SideNavigationItem
+import com.zs.compose.theme.appbar.TopAppBar
+import com.zs.compose.theme.appbar.TopAppBarScrollBehavior
+import com.zs.compose.theme.appbar.TopAppBarStyle
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.Text
 import com.zs.core.player.PlayerController
 import com.zs.core.player.PlayerView
 import com.zs.gallery.R
 import com.zs.gallery.common.Mapped
+import dev.chrisbanes.haze.ExperimentalHazeApi
+import dev.chrisbanes.haze.HazeInputScale
+import dev.chrisbanes.haze.HazeProgressive
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.HazeTint
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
 import kotlin.math.roundToInt
 
 private const val TAG = "Delegates"
@@ -186,7 +213,7 @@ inline fun Placeholder(
             )
         },
         icon = {
-            androidx.compose.foundation.Image(
+            Image(
                 painter = lottieAnimationPainter(id = iconResId),
                 contentDescription = null
             )
@@ -223,12 +250,6 @@ inline fun NavItem(
     true -> SideNavigationItem(checked, onClick, icon, label, modifier, colors = colors)
     else -> BottomNavigationItem(checked, onClick, icon, label, modifier, colors = colors)
 }
-
-
-private val fullLineSpan: (LazyGridItemSpanScope.() -> GridItemSpan) = { GridItemSpan(maxLineSpan) }
-val LazyGridScope.fullLineSpan
-    get() = com.zs.gallery.common.compose.fullLineSpan
-
 
 /**
  * A simple utility fun for loading animation header index
@@ -404,24 +425,150 @@ fun PlayerView(
     }
 )
 
+
+/** Creates and [remember] s the instance of [HazeState] */
+@Composable
+@NonRestartableComposable
+fun rememberBackgroundProvider() = remember(::HazeState)
+
+fun Modifier.observe(provider: HazeState) = hazeSource(state = provider)
+
+// Reusable mask
+private val PROGRESSIVE_MASK = Brush.verticalGradient(
+    0.5f to Color.Black,
+    0.8f to Color.Black.copy(0.5f),
+    1.0f to Color.Transparent,
+)
+
 /**
- * Retrieves a dynamic accent color based on the device's API level and the current theme (light or dark).
+ * Applies a hazy effect to the background based on the provided [HazeState].
  *
- * On Android 14 (API level 34) and above, it uses the system's primary light or dark color.
- * On older devices, it uses system_accent1_600 for light themes and system_accent1_200 for dark themes.
+ * This function creates a blurred background with optional noise and tint effects. It provides customization options
+ * for blur radius, noise factor, tint color, blend mode, and progressive blurring.
  *
- * @param context The application context.
- * @param darkTheme `true` if the current theme is dark, `false` if it's light.
- * @return A [Color] object representing the dynamic accent color.
+ * @param provider The [HazeState] instance that manages the haze effect.
+ * @param containerColor The background color of the container. Defaults to [Colors.background].
+ * @param blurRadius The radius of the blur effect. Defaults to 38.dp for light backgrounds (luminance >= 0.5) and 60.dp for dark backgrounds.
+ * @param noiseFactor The factor for the noise effect. Defaults to 0.4f for light backgrounds and 0.28f for dark backgrounds. Noise effect is disabled on Android versions below 12.
+ * @param tint The color to tint the blurred background with. Defaults to a semi-transparent version of [containerColor].
+ * @param blendMode The blend mode to use for the tint. Defaults to [BlendMode.SrcOver].
+ * @param progressive A float value to control progressive blurring:
+ *   - -1f: Progressive blurring is disabled.
+ *   - 0f: Bottom to top gradient.
+ *   - 1f: Top to bottom gradient.
+ *   - Values between 0f and 1f: Intermediate gradient positions.
+ *   Progressive blurring is only available on Android 12 and above.
+ * @return A [Background] composable with the specified haze effect.
  */
-@RequiresApi(Build.VERSION_CODES.S)
-fun dynamicAccentColor(context: Context, darkTheme: Boolean): Color {
-    val res = context.resources
-    val color = when{
-        Build.VERSION.SDK_INT >= 34 && !darkTheme -> res.getColor(android.R.color.system_primary_light, context.theme)
-        Build.VERSION.SDK_INT >= 34 && !darkTheme -> res.getColor(android.R.color.system_primary_dark, context.theme)
-        !darkTheme ->  res.getColor(android.R.color.system_accent1_600, context.theme)// light, tonalPalette.primary40, // dark tonalPalette.primary80
-        else -> res.getColor(android.R.color.system_accent1_200, context.theme)
+@SuppressLint("ModifierFactoryExtensionFunction")
+@OptIn(ExperimentalHazeApi::class)
+fun Colors.background(
+    provider: HazeState,
+    containerColor: Color = background,
+    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 60.dp,
+    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.18f,
+    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.35f),
+    blendMode: BlendMode = BlendMode.SrcOver,
+    progressive: Float = -1f,
+) = Background(
+    {
+        hazeEffect(state = provider) {
+            this.blurEnabled = true
+            this.blurRadius = blurRadius
+            this.backgroundColor = containerColor
+            // Disable noise factor on Android versions below 12.
+            this.noiseFactor =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) noiseFactor else 0f
+            this.tints = listOf(HazeTint(tint, blendMode = blendMode))
+            // Configure progressive blurring (if enabled).
+            if (progressive != -1f) {
+                this.progressive = HazeProgressive.verticalGradient(
+                    startIntensity = progressive,
+                    endIntensity = 0f,
+                    // Adjust endY based on Android version:
+                    // - Below Android 12: use a fixed value (40f) to apply the mask.
+                    // - Android 12 and above: use Float.POSITIVE_INFINITY to apply the mask to the
+                    //   entire container.
+                    endY = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) 40f else Float.POSITIVE_INFINITY,
+                    preferPerformance = true
+                )
+                // Adjust input scale for Android versions below 12 for better visuals.
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    inputScale = HazeInputScale.Fixed(0.5f)
+                mask = PROGRESSIVE_MASK
+            }
+            // Apply a visual noise effect if the noiseFactor is enabled and progressive is
+            // disabled (and device is below Android 12).
+        }.thenIf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S && noiseFactor != 0f && progressive == -1f) {
+            // Use noise brush and exclusion blend mode for the noise effect.
+            visualEffect(ImageBrush.NoiseBrush, noiseFactor * 0.4f, blendMode = BlendMode.Exclusion)
+        }
     }
-    return Color(color)
+)
+
+private val FloatingTopBarShape = RoundedCornerShape(20)
+
+private val Colors.border
+    get() = BorderStroke(
+        0.5.dp,
+        Brush.verticalGradient(
+            listOf(
+                if (isLight) background else Color.Gray.copy(0.24f),
+                if (isLight) background.copy(0.3f) else Color.Gray.copy(0.075f),
+            )
+        )
+    )
+
+@Composable
+@NonRestartableComposable
+fun GalleryTopAppBar(
+    immersive: Boolean,
+    title: @Composable () -> Unit,
+    backdrop: Background,
+    modifier: Modifier = Modifier,
+    navigationIcon: @Composable () -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
+    behavior: TopAppBarScrollBehavior,
+    style: TopAppBarStyle = if (immersive) AppBarDefaults.largeAppBarStyle() else AppBarDefaults.floatingLargeAppBarStyle(),
+    insets: WindowInsets = AppBarDefaults.topAppBarWindowInsets,
+) = when{
+    !immersive -> FloatingLargeTopAppBar(
+        title = title,
+        scrollBehavior = behavior,
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        windowInsets = insets,
+        style = style,
+        background = {
+            if (fraction > 0.1f) return@FloatingLargeTopAppBar Spacer(Modifier)
+            val colors = AppTheme.colors
+            Spacer(
+                modifier = Modifier
+                    .shadow(lerp(100.dp, 0.dp, fraction / .05f), FloatingTopBarShape)
+                    .thenIf(fraction == 0f) {
+                        border(colors.border, FloatingTopBarShape)
+                    }
+                    .background(backdrop)
+                    .fillMaxSize()
+            )
+        }
+    )
+    else -> LargeTopAppBar(
+        scrollBehavior = behavior,
+        title = title,
+        modifier = modifier,
+        navigationIcon = navigationIcon,
+        actions = actions,
+        windowInsets = insets,
+        style = style,
+        background = {
+            if (fraction > 0.1f) return@LargeTopAppBar Spacer(Modifier)
+            Spacer(
+                modifier = Modifier
+                    .background(backdrop)
+                    .fillMaxSize()
+            )
+        }
+    )
 }

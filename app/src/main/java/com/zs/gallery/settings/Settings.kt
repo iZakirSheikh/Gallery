@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -82,17 +81,14 @@ import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.BaseListItem
 import com.zs.compose.theme.Button
-import com.zs.compose.theme.ButtonColors
 import com.zs.compose.theme.ButtonDefaults
 import com.zs.compose.theme.Chip
 import com.zs.compose.theme.ChipDefaults
 import com.zs.compose.theme.Colors
-import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.DropDownPreference
 import com.zs.compose.theme.FilledTonalButton
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.IconButton
-import com.zs.compose.theme.ListItem
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.Preference
 import com.zs.compose.theme.SliderPreference
@@ -101,8 +97,8 @@ import com.zs.compose.theme.SwitchPreference
 import com.zs.compose.theme.TextButton
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.HorizontalTwoPaneStrategy
-import com.zs.compose.theme.adaptive.Scaffold
 import com.zs.compose.theme.adaptive.SinglePaneStrategy
+import com.zs.compose.theme.adaptive.TwoPane
 import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
@@ -115,7 +111,8 @@ import com.zs.gallery.R
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
-import com.zs.gallery.common.compose.FloatingLargeTopAppBar
+import com.zs.gallery.common.compose.GalleryTopAppBar
+import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.fadingEdge2
 import com.zs.gallery.common.compose.observe
 import com.zs.gallery.common.compose.rememberBackgroundProvider
@@ -544,22 +541,24 @@ fun Settings(viewState: SettingsViewState) {
         width < Category.Medium -> SinglePaneStrategy
         else -> HorizontalTwoPaneStrategy(0.5f) // Use horizontal layout with 50% split for large screens
     }
-    // Define the scroll behavior for the top app bar
-    val topAppBarScrollBehavior = AppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     // obtain the padding of BottomNavBar/NavRail
     val navBarPadding = WindowInsets.contentInsets
     val isPhoneLayout = width < Category.Medium
-    val provier = rememberBackgroundProvider()
+    val provider = rememberBackgroundProvider()
+    val topAppBarScrollBehavior = AppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val colors = AppTheme.colors
     // Place the content
     // FIXME: Width < 650dp then screen is single pane what if navigationBars are at end.
-    Scaffold(
+    TwoPane(
         spacing = CP.normal,
         strategy = strategy,
         topBar = {
-            FloatingLargeTopAppBar(
+            GalleryTopAppBar(
+                immersive = false,
                 title = { Label(textResource(R.string.settings)) },
                 behavior = topAppBarScrollBehavior,
-                backdrop = provier,
+                backdrop = colors.background(provider),
                 insets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
                 navigationIcon = {
                     Icon(
@@ -600,7 +599,7 @@ fun Settings(viewState: SettingsViewState) {
         secondary = {
             // this will not be called when in single pane mode
             // this is just for decoration
-            if (strategy is SinglePaneStrategy) return@Scaffold
+            if (strategy is SinglePaneStrategy) return@TwoPane
             Column(
                 modifier = Modifier
                     .verticalScroll(rememberScrollState())
@@ -636,7 +635,7 @@ fun Settings(viewState: SettingsViewState) {
                     vertical = CP.normal
                 ) + navBarPadding + WindowInsets.contentInsets + safeInsets.asPaddingValues(),
                 modifier = Modifier
-                    .observe(provier)
+                    .observe(provider)
                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                     .fadingEdge2(
                         listOf(
