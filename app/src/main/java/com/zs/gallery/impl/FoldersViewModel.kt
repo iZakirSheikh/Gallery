@@ -37,6 +37,9 @@ import com.zs.gallery.common.Action
 import com.zs.gallery.common.Filter
 import com.zs.gallery.common.Mapped
 import com.zs.gallery.folders.FoldersViewState
+import com.zs.preferences.Key
+import com.zs.preferences.StringSaver
+import com.zs.preferences.stringPreferenceKey
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
@@ -50,25 +53,59 @@ private val Folder.firstTitleChar
 
 private val ORDER_BY_DATE_MODIFIED = Action(R.string.last_modified, Icons.Outlined.DateRange)
 private val ORDER_BY_NAME = Action(R.string.name, Icons.Outlined.TextFields)
+private val ORDER_BY_NONE = Action(R.string.none)
+
+private val PrefFilter: Key.Key2<String, Filter?> = stringPreferenceKey(
+    "folders_filter",
+    null,
+    object : StringSaver<Filter?> {
+        val delimiter = " | "
+        override fun restore(value: String): Filter? {
+            if (value.isEmpty()) return null
+            val (first, second) = value.split(delimiter, limit = 2)
+            val order = when (second) {
+                ORDER_BY_DATE_MODIFIED.id -> ORDER_BY_DATE_MODIFIED
+                ORDER_BY_NAME.id -> ORDER_BY_NAME
+                else -> ORDER_BY_NONE
+            }
+            return (first == "0") to order
+
+        }
+
+        override fun save(value: Filter?): String {
+            if (value == null) return ""
+            val first = if (value.first == true) "1" else "0"
+            val second = value.second.id
+            return "$first$delimiter$second"
+        }
+    }
+)
 
 class FoldersViewModel(
     private val provider: MediaProvider,
 ) : KoinViewModel(), FoldersViewState {
 
-    override val orders: List<Action> = listOf(ORDER_BY_DATE_MODIFIED, ORDER_BY_NAME)
+    override val orders: List<Action> = listOf(ORDER_BY_NONE, ORDER_BY_DATE_MODIFIED, ORDER_BY_NAME)
 
     override fun filter(ascending: Boolean, order: Action) {
         if (ascending == filter.first && order == filter.second) return
-        filter = ascending to order
+        // means only change in ascending happened
+        // we don't support that, in order none.
+        if (order == filter.second && order == ORDER_BY_NONE && filter.first != ascending)
+            return
+        val newFilter = ascending to order
+        preferences[PrefFilter] = newFilter
+        filter = newFilter
     }
 
-    override var filter: Filter by mutableStateOf(true to ORDER_BY_NAME)
+    override var filter: Filter by mutableStateOf(preferences[PrefFilter] ?: (true to ORDER_BY_NAME))
 
     override val data = combine(
         snapshotFlow(::filter), provider.observer(MediaProvider.EXTERNAL_CONTENT_URI)
     ) { (ascending, order), _ ->
-        val folders = provider.fetchFolders()
+        val folders = provider.fetchFolders(ascending = false)
         val result = when (order) {
+            ORDER_BY_NONE -> folders.groupBy { "" }
             ORDER_BY_NAME -> folders.sortedBy { it.firstTitleChar }
                 .let { if (ascending) it else it.reversed() }.groupBy { it.firstTitleChar }
 

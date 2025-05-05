@@ -53,6 +53,7 @@ import com.zs.compose.theme.adaptive.Scaffold
 import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
+import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.TonalHeader
 import com.zs.core.store.Folder
@@ -161,21 +162,31 @@ fun Folders(viewState: FoldersViewState) {
 
                 // Actual content
                 for ((header, items) in data) {
-                    stickyHeader(
-                        lazyGridState,
-                        header,
-                        contentType = "header",
-                        content = {
-                            Box(
-                                modifier = Modifier
-                                    .animateItem()
-                                    .padding(horizontal = 6.dp),
-                                content = {
-                                    TonalHeader(header)
-                                }
+                    if (header.isNotEmpty())
+                        stickyHeader(
+                            lazyGridState,
+                            header,
+                            contentType = "header",
+                            content = {
+                                Box(
+                                    modifier = Modifier
+                                        .animateItem()
+                                        .padding(horizontal = 6.dp),
+                                    content = {
+                                        TonalHeader(header)
+                                    }
+                                )
+                            }
+                        )
+                    else
+                        item(contentType = "group-space", span = fullLineSpan) {
+                            Header(
+                                stringResource(R.string.folders),
+                                Modifier.padding(horizontal = 6.dp, vertical = CP.normal),
+                                color = AppTheme.colors.accent,
+                                style = AppTheme.typography.label2
                             )
                         }
-                    )
 
                     // rest of the items
                     items(

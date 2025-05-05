@@ -21,6 +21,7 @@ package com.zs.gallery.impl
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.ContentUris
 import android.content.Intent
 import android.net.Uri
@@ -28,6 +29,7 @@ import android.os.Build
 import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DocumentScanner
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.HotelClass
@@ -71,6 +73,7 @@ import com.zs.gallery.common.Action
 import com.zs.gallery.common.Mapped
 import com.zs.gallery.common.SelectionTracker.Level
 import com.zs.gallery.common.ellipsize
+import com.zs.gallery.common.icons.NearbyShare
 import com.zs.gallery.files.FilesViewState
 import com.zs.gallery.files.RouteFiles
 import com.zs.gallery.settings.Settings
@@ -94,6 +97,102 @@ private const val SOURCE_TIMELINE = 0
 private const val SOURCE_FOLDER = 1
 private const val SOURCE_BIN = 2
 private const val SOURCE_FAV = 3
+
+private fun NearByShare(): Intent {
+    return Intent()
+}
+
+private fun GoogleLens(file: Uri): Intent {
+    return com.zs.core.Intent(Intent.ACTION_SEND) {
+        // Extracted from manifest of Google App
+//        <activity android:theme="resourceId:0x7f160e0a" android:name="com.google.android.apps.search.lens.LensShareEntryPointActivity" android:exported="true" android:process=":search">
+//        <intent-filter android:label="Search image">
+//        <action android:name="android.intent.action.SEND" />
+//        <category android:name="android.intent.category.DEFAULT" />
+//        <data android:mimeType="image/jpeg" />
+//        <data android:mimeType="image/png" />
+//        </intent-filter>
+//        </activity>
+        component = ComponentName(
+            "com.google.android.googlequicksearchbox",
+            "com.google.android.apps.search.lens.LensShareEntryPointActivity"
+        )
+        type = "image/*"
+        putExtra(Intent.EXTRA_STREAM, file)
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//        addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK) // Important: Start in a new activity record
+//        //addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT) // Important: Move to the calling task if it exists
+//        addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+    }
+}
+
+private fun NearByShare(vararg id: Long) = com.zs.core.Intent("com.google.android.gms.SHARE_NEARBY") {
+    //    setClassName(
+//        "com.google.android.gms",
+//        "com.google.android.gms.nearby.sharing.ReceiveSurfaceActivity"
+//    )
+    // Extracted from manifest of QuickShare
+    // Keep an eye on it.
+//    <activity android:theme="resourceId:0x7f160c16" android:label="Quick Share" android:icon="res/782.xml" android:name="com.google.android.gms.nearby.sharing.send.SendActivity" android:enabled="true" android:exported="true" android:process="com.google.android.gms.ui" android:taskAffinity="" android:documentLaunchMode="2" android:maxRecents="1" android:resizeableActivity="true">
+//    <intent-filter>
+//    <action android:name="android.intent.action.SEND"/>
+//    <action android:name="android.intent.action.SEND_MULTIPLE"/>
+//    <action android:name="com.google.android.gms.SHARE_NEARBY"/>
+//    <category android:name="android.intent.category.DEFAULT"/>
+//    <data android:mimeType="*/*"/>
+//    </intent-filter>
+//    <intent-filter>
+//    <action android:name="com.google.android.gms.nearby.SEND_FOLDER"/>
+//    <category android:name="android.intent.category.DEFAULT"/>
+//    </intent-filter>
+//    <meta-data android:name="android.service.chooser.chip_label" android:resource="Quick Share"/>
+//    <meta-data android:name="android.service.chooser.chip_icon" android:resource="res/H2T.xml"/>
+//    <meta-data android:name="android.service.chooser.chooser_target_service" android:value=".nearby.sharing.DirectShareService"/>
+//    </activity>
+    component = ComponentName(
+        "com.google.android.gms",
+        "com.google.android.gms.nearby.sharing.send.SendActivity"
+    )
+    // Map selected IDs to content URIs.
+    // TODO - Construct custom content uri.
+    val uri = id.map {
+        ContentUris.withAppendedId(MediaProvider.EXTERNAL_CONTENT_URI, it)
+    }
+    // Add the URIs as extras.
+    putParcelableArrayListExtra(
+        Intent.EXTRA_STREAM,
+        uri.toMutableList() as ArrayList<Uri>
+    )
+    // Set the MIME type to allow sharing of various file types.
+    type = "*/*"
+    // Specify supported MIME types.
+    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+}
+
+private fun Share(vararg id: Long) = Intent.createChooser(
+    com.zs.core.Intent(Intent.ACTION_SEND_MULTIPLE){
+        // Map selected IDs to content URIs.
+        // TODO - Construct custom content uri.
+        val uri = id.map {
+            ContentUris.withAppendedId(MediaProvider.EXTERNAL_CONTENT_URI, it)
+        }
+        // Set the action to send multiple items.
+        action = Intent.ACTION_SEND_MULTIPLE
+        // Add the URIs as extras.
+        putParcelableArrayListExtra(
+            Intent.EXTRA_STREAM,
+            uri.toMutableList() as ArrayList<Uri>
+        )
+        // Grant read permission to the receiving app.
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // Set the MIME type to allow sharing of various file types.
+        type = "*/*"
+        // Specify supported MIME types.
+        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+
+    },
+    "Share files..."
+)
 
 abstract class StoreViewModel(
     handle: SavedStateHandle,
@@ -255,43 +354,6 @@ abstract class StoreViewModel(
         }
     }
 
-    /** Shares file(s) represented by id(s).*/
-    fun share(resolver: Activity, vararg id: Long) {
-        viewModelScope.launch {
-            // Get the list of selected items to share.
-            val selected = id
-            // Create an intent to share the selected items
-            val intent = Intent().apply {
-                // Map selected IDs to content URIs.
-                // TODO - Construct custom content uri.
-                val uri = selected.map {
-                    ContentUris.withAppendedId(MediaProvider.EXTERNAL_CONTENT_URI, it)
-                }
-                // Set the action to send multiple items.
-                action = Intent.ACTION_SEND_MULTIPLE
-                // Add the URIs as extras.
-                putParcelableArrayListExtra(
-                    Intent.EXTRA_STREAM,
-                    uri.toMutableList() as ArrayList<Uri>
-                )
-                // Grant read permission to the receiving app.
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                // Set the MIME type to allow sharing of various file types.
-                type = "*/*"
-                // Specify supported MIME types.
-                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
-            }
-            // Start the sharing activity with a chooser.
-            try {
-                resolver.startActivity(Intent.createChooser(intent, "Share Photos & Video"))
-            } catch (e: Exception) {
-                // Handle exceptions and display an error message.
-                showPlatformToast(R.string.msg_error_sharing_files)
-                Log.d(TAG, "share: ${e.message}")
-            }
-        }
-    }
-
     @Suppress("NewApi")
     fun restore(resolver: Activity, vararg id: Long) {
         viewModelScope.launch {
@@ -321,6 +383,7 @@ private val SELECT_ALL = Action(R.string.select_all, Icons.Outlined.SelectAll)
 private val RESTORE = Action(R.string.restore, Icons.Outlined.Restore)
 private val EMPTY_BIN = Action(R.string.empty_bin, Icons.Outlined.PlaylistRemove)
 private val STAR_APP = Action(R.string.rate_us, Icons.TwoTone.WorkspacePremium)
+private val QUICK_SHARE = Action(R.string.quick_share, Icons.Filled.NearbyShare)
 
 /**
  * Represents the state of the files screen.
@@ -376,7 +439,7 @@ class FilesViewModel(
                 }
 
                 else -> {
-                    this += STAR; this += DELETE; this += SHARE
+                    this += QUICK_SHARE; this += STAR; this += DELETE; this += SHARE
                 }
             }
         }
@@ -501,7 +564,20 @@ class FilesViewModel(
                 DELETE -> remove(activity, *focused)
                 STAR -> toggleLike(*focused)
                 UN_STAR -> toggleLike(*focused)
-                SHARE -> share(activity, *focused)
+                SHARE -> {
+                    val res = runCatching {
+                       activity.startActivity( Share(*focused))
+                    }
+                    if (res.isFailure)
+                        showPlatformToast(R.string.msg_error_sharing_files)
+                }
+                QUICK_SHARE -> {
+                    val res = runCatching {
+                        activity.startActivity(NearByShare(*focused))
+                    }
+                    if (res.isFailure)
+                        showPlatformToast(R.string.msg_files_quick_share_error)
+                }
                 EMPTY_BIN -> delete(resolver = activity, *focused)
                 STAR_APP -> (activity as MainActivity).launchAppStore()
                 SELECT_ALL -> selectAll()
@@ -561,6 +637,7 @@ private fun Activity.setWallpaper(uri: Uri) {
 
 private val EDIT_IN = Action(R.string.edit_in, Icons.Outlined.Edit)
 private val USE_AS = Action(R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
+private val GOOGLE_LENS = Action(R.string.viewer_scr_open_in_lens, Icons.Outlined.DocumentScanner)
 
 class MediaViewerViewModel(
     handle: SavedStateHandle,
@@ -621,12 +698,15 @@ class MediaViewerViewModel(
             }
             Log.d(TAG, "actions: changed ")
             this += if (favourite) UN_STAR else STAR
+            this += GOOGLE_LENS
+            this += QUICK_SHARE
+            // if this is video currently return otherwise editing can be called for video also
+            if (current?.isImage == true) {
+                this += USE_AS
+                this += EDIT_IN
+            }
             this += SHARE
             this += DELETE
-            // if this is video currently return otherwise editing can be called for video also
-            if (current?.isImage == false) return@buildList
-            this += USE_AS
-            this += EDIT_IN
         }
     }
 
@@ -638,7 +718,27 @@ class MediaViewerViewModel(
             DELETE -> remove(activity, focused)
             STAR -> toggleLike(focused)
             UN_STAR -> toggleLike(focused)
-            SHARE -> share(activity, focused)
+            GOOGLE_LENS -> {
+                val result = runCatching {
+                    activity.startActivity(GoogleLens(current!!.mediaUri))
+                }
+                if (result.isFailure)
+                    showPlatformToast(R.string.msg_viewer_scr_no_g_lens)
+            }
+            SHARE -> {
+                val res = runCatching {
+                    activity.startActivity( Share(focused))
+                }
+                if (res.isFailure)
+                    showPlatformToast(R.string.msg_error_sharing_files)
+            }
+            QUICK_SHARE -> {
+                val res = runCatching {
+                    activity.startActivity(NearByShare(focused))
+                }
+                if (res.isFailure)
+                    showPlatformToast(R.string.msg_files_quick_share_error)
+            }
             USE_AS -> activity.setWallpaper(current!!.mediaUri)
             EDIT_IN -> activity.startActivity(EditIn(current!!.mediaUri))
             else -> error("Action not supported")
