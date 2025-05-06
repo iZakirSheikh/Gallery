@@ -31,30 +31,6 @@
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
-              <option name="versions">
-                <list>
-                  <VersionSetting>
-                    <option name="buildVersion" value="49" />
-                    <option name="displayName" value="0.5.1-dev (49)" />
-                    <option name="displayVersion" value="0.5.1-dev" />
-                  </VersionSetting>
-                  <VersionSetting>
-                    <option name="buildVersion" value="47" />
-                    <option name="displayName" value="0.5.0-dev (47)" />
-                    <option name="displayVersion" value="0.5.0-dev" />
-                  </VersionSetting>
-                  <VersionSetting>
-                    <option name="buildVersion" value="46" />
-                    <option name="displayName" value="0.4.2-dev (46)" />
-                    <option name="displayVersion" value="0.4.2-dev" />
-                  </VersionSetting>
-                  <VersionSetting>
-                    <option name="buildVersion" value="45" />
-                    <option name="displayName" value="0.4.1-dev (45)" />
-                    <option name="displayVersion" value="0.4.1-dev" />
-                  </VersionSetting>
-                </list>
-              </option>
               <option name="visibilityType" value="ALL" />
             </InsightsFilterSettings>
           </value>

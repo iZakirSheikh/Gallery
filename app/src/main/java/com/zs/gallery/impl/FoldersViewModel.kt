@@ -51,9 +51,9 @@ private const val TAG = "FoldersViewModel"
 private val Folder.firstTitleChar
     inline get() = name.uppercase(Locale.ROOT)[0].toString()
 
-private val ORDER_BY_DATE_MODIFIED = Action(R.string.last_modified, Icons.Outlined.DateRange)
-private val ORDER_BY_NAME = Action(R.string.name, Icons.Outlined.TextFields)
-private val ORDER_BY_NONE = Action(R.string.none)
+private val ORDER_BY_DATE_MODIFIED = Action(R.string.last_modified, Icons.Outlined.DateRange, id = "date_modified")
+private val ORDER_BY_NAME = Action(R.string.name, Icons.Outlined.TextFields, id = "name")
+private val ORDER_BY_NONE = Action(R.string.none, id = "none")
 
 private val PrefFilter: Key.Key2<String, Filter?> = stringPreferenceKey(
     "folders_filter",
