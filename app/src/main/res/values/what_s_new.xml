@@ -4,9 +4,10 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟 This is an internal test release; nothing working is expected; please manually
-            revert back to old version, if you are not a test user.
-            \n🌟 Remade whole app.
+            \n🌟 Now you can <b>Instantly share</b> with nearby devices.
+            \n🌟 Search with Google Lens! Explore images like never before.
+            \n🌟 <b>New Look &amp; Feel!</b> The app has been completely redesigned.
+            \n🌟 Removed annoying messages at the start of the app.
         </font>
     </string>
 

@@ -77,13 +77,11 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottiePainter
 import com.zs.compose.foundation.Background
-import com.zs.compose.foundation.ImageBrush
 import com.zs.compose.foundation.background
 import com.zs.compose.foundation.composableIf
 import com.zs.compose.foundation.effects.shimmer
 import com.zs.compose.foundation.fullLineSpan
 import com.zs.compose.foundation.thenIf
-import com.zs.compose.foundation.visualEffect
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Colors
 import com.zs.compose.theme.ExperimentalThemeApi
@@ -434,11 +432,20 @@ fun rememberBackgroundProvider() = remember(::HazeState)
 fun Modifier.observe(provider: HazeState) = hazeSource(state = provider)
 
 // Reusable mask
-private val PROGRESSIVE_MASK = Brush.verticalGradient(
-    0.5f to Color.Black,
-    0.8f to Color.Black.copy(0.5f),
-    1.0f to Color.Transparent,
-)
+private val PROGRESSIVE_MASK = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+    Brush.verticalGradient(
+        listOf(
+            Color.Black,
+            Color.Black,
+            Color.Transparent
+        )
+    )
+else
+    Brush.verticalGradient(
+        0.5f to Color.Black,
+        0.8f to Color.Black.copy(0.5f),
+        1.0f to Color.Transparent,
+    )
 
 /**
  * Applies a hazy effect to the background based on the provided [HazeState].
@@ -464,32 +471,30 @@ private val PROGRESSIVE_MASK = Brush.verticalGradient(
 @OptIn(ExperimentalHazeApi::class)
 fun Colors.background(
     provider: HazeState,
-    containerColor: Color = background,
-    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 60.dp,
-    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.18f,
-    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.35f),
+    containerColor: Color = background(1.dp),
+    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 80.dp,
+    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.45f,
+    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.65f),
     blendMode: BlendMode = BlendMode.SrcOver,
     progressive: Float = -1f,
 ) = Background(
-    {
-        hazeEffect(state = provider) {
+    Modifier
+        .hazeEffect(state = provider) {
             this.blurEnabled = true
             this.blurRadius = blurRadius
             this.backgroundColor = containerColor
             // Disable noise factor on Android versions below 12.
-            this.noiseFactor =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) noiseFactor else 0f
-            this.tints = listOf(HazeTint(tint, blendMode = blendMode))
+            this.noiseFactor = noiseFactor
+            this.tints = listOf(
+                // apply luminosity just like in Microsoft Acrylic.
+                HazeTint(Color.White.copy(0.07f), BlendMode.Luminosity),
+                HazeTint(tint, blendMode = blendMode)
+            )
             // Configure progressive blurring (if enabled).
             if (progressive != -1f) {
                 this.progressive = HazeProgressive.verticalGradient(
                     startIntensity = progressive,
                     endIntensity = 0f,
-                    // Adjust endY based on Android version:
-                    // - Below Android 12: use a fixed value (40f) to apply the mask.
-                    // - Android 12 and above: use Float.POSITIVE_INFINITY to apply the mask to the
-                    //   entire container.
-                    endY = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) 40f else Float.POSITIVE_INFINITY,
                     preferPerformance = true
                 )
                 // Adjust input scale for Android versions below 12 for better visuals.
@@ -497,13 +502,7 @@ fun Colors.background(
                     inputScale = HazeInputScale.Fixed(0.5f)
                 mask = PROGRESSIVE_MASK
             }
-            // Apply a visual noise effect if the noiseFactor is enabled and progressive is
-            // disabled (and device is below Android 12).
-        }.thenIf(Build.VERSION.SDK_INT < Build.VERSION_CODES.S && noiseFactor != 0f && progressive == -1f) {
-            // Use noise brush and exclusion blend mode for the noise effect.
-            visualEffect(ImageBrush.NoiseBrush, noiseFactor * 0.4f, blendMode = BlendMode.Exclusion)
         }
-    }
 )
 
 private val FloatingTopBarShape = RoundedCornerShape(20)
@@ -519,6 +518,10 @@ private val Colors.border
         )
     )
 
+/**
+ * Represents the general purpose [TopAppBar] for screens.
+ * @param immersive weather to load a topBar tha is end to end or floating.
+ */
 @Composable
 @NonRestartableComposable
 fun GalleryTopAppBar(
@@ -531,7 +534,7 @@ fun GalleryTopAppBar(
     behavior: TopAppBarScrollBehavior,
     style: TopAppBarStyle = if (immersive) AppBarDefaults.largeAppBarStyle() else AppBarDefaults.floatingLargeAppBarStyle(),
     insets: WindowInsets = AppBarDefaults.topAppBarWindowInsets,
-) = when{
+) = when {
     !immersive -> FloatingLargeTopAppBar(
         title = title,
         scrollBehavior = behavior,
@@ -554,6 +557,7 @@ fun GalleryTopAppBar(
             )
         }
     )
+
     else -> LargeTopAppBar(
         scrollBehavior = behavior,
         title = title,

@@ -35,6 +35,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Coffee
 import androidx.compose.material.icons.outlined.Downloading
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.runtime.Composable
@@ -77,7 +78,9 @@ import com.zs.compose.theme.snackbar.SnackbarResult
 import com.zs.core.billing.Paymaster
 import com.zs.core.billing.Product
 import com.zs.core.billing.Purchase
+import com.zs.core.billing.purchased
 import com.zs.core.common.showPlatformToast
+import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.domain
@@ -118,6 +121,15 @@ private const val MIN_LAUNCHES_BEFORE_REVIEW = 5
 
 // Number of days to wait before showing the first review prompt.
 private val INITIAL_REVIEW_DELAY = 3.days
+
+// The maximum number of distinct promotional messages to display to the user.
+private val MAX_PROMO_MESSAGES = 2
+
+// The number of app launches to skip between showing consecutive promotional messages.
+// After each promotional message is shown, the app will skip this many launches before
+// potentially showing another promotional message.
+private val PROMO_SKIP_LAUNCHES = 10
+
 
 // Minimum number of days between subsequent review prompts.
 // Since we cannot confirm if the user actually left a review, we use this interval
@@ -489,6 +501,54 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         }
     }
 
+    private fun showPromoToast(
+        index: Int,
+        delay: Long = 5_000,
+    ) {
+        // This function is designed to display promotional messages identified by index.
+        // - An index of 0 indicates the "What's New" message.
+        // - An index of 1 is used to promote the media player.
+        // - An index of 2 prompts the user to buy a coffee.
+        // If a message cannot be displayed for any reason, the index is incremented by 1 until the
+        // maximum index is reached.
+        lifecycleScope.launch {
+            if (delay > 0) delay(delay) // delay at least some
+            when (index) {
+                // What's new
+                0 -> showSnackbar(
+                    R.string.what_s_new_latest,
+                    duration = SnackbarDuration.Indefinite
+                )
+                // Media player
+                1 -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = resources.getText2(R.string.msg_media_player_promotion),
+                        icon = Icons.Outlined.NewReleases,
+                        duration = SnackbarDuration.Indefinite,
+                        action = resources.getText2(R.string.get),
+                        accent = Color.Rose
+                    )
+                    if (result == SnackbarResult.ActionPerformed)
+                        launchAppStore("com.prime.player")
+                }
+                // Buy me a coffee.
+                2 -> {
+                    val purchase =
+                        paymaster.purchases.value.find() { it.id == Paymaster.IAP_BUY_ME_COFFEE }
+                    if (purchase.purchased)
+                        return@launch
+                    val result = snackbarHostState.showSnackbar(
+                        resources.getText2(R.string.msg_support_gallery),
+                        duration = SnackbarDuration.Indefinite,
+                        icon = Icons.Outlined.Coffee,
+                        action = getString(R.string.fuel)
+                    )
+                    if (result == SnackbarResult.ActionPerformed)
+                        initiatePurchaseFlow(Paymaster.IAP_BUY_ME_COFFEE)
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -507,29 +567,43 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
             if (preferences[Settings.KEY_SECURE_MODE])
                 window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
 
-            // Show "What's New" message if the app version has changed
-            val versionCode = BuildConfig.VERSION_CODE
-            val savedVersionCode = preferences[KEY_APP_VERSION_CODE]
-            if (savedVersionCode != versionCode) {
-                preferences[KEY_APP_VERSION_CODE] = versionCode
-                showSnackbar(R.string.what_s_new_latest, duration = SnackbarDuration.Indefinite)
-            }
-
             // Promote media player on every 5th launch
             // TODO - properly handle promotional content.
             lifecycleScope.launch {
+                // Show "What's New" message if the app version has changed
+                val versionCode = BuildConfig.VERSION_CODE
+                val savedVersionCode = preferences[KEY_APP_VERSION_CODE]
+                if (savedVersionCode != versionCode) {
+                    preferences[KEY_APP_VERSION_CODE] = versionCode
+                    showPromoToast(0) // What's new
+                    return@launch
+                }
+                // Promotional messages are displayed only after the app has been launched
+                // more than 5 times (MIN_LAUNCHES_BEFORE_REVIEW).
+                // This ensures that users have had a chance to familiarize themselves with the app
+                // before being presented with these messages.
+                // An index of 0 is reserved for the "What's New" message and is handled separately.
+                // Promotional messages start with index 1.
+                // The index is calculated using the formula: (counter % MAX_PROMO_MESSAGES).coerceAtLeast(1).
+                // Each message is skipped by PROMO_SKIP_LAUNCHES number of launches.
                 val counter = preferences[Settings.KEY_LAUNCH_COUNTER]
-                if (counter > 0 && counter % 5 == 0) {
-                    delay(3000)
-                    val result = snackbarHostState.showSnackbar(
-                        message = resources.getText2(R.string.msg_media_player_promotion),
-                        icon = Icons.Outlined.NewReleases,
-                        duration = SnackbarDuration.Indefinite,
-                        action = resources.getText2(R.string.get),
-                        accent = Color.Rose
-                    )
-                    if (result == SnackbarResult.ActionPerformed)
-                        launchAppStore("com.prime.player")
+                if (counter < MIN_LAUNCHES_BEFORE_REVIEW)
+                    return@launch
+                val newCounter = counter - MIN_LAUNCHES_BEFORE_REVIEW
+                val interval = PROMO_SKIP_LAUNCHES + 1
+                // This line calculates which promotional message to show from a rotating set.
+                Log.d(
+                    TAG,
+                    "Promo(counter=$counter," +
+                            " interval=$interval," +
+                            " newCounter=$newCounter," +
+                            " skip = ${newCounter % interval}," +
+                            " index = ${(newCounter / interval) % MAX_PROMO_MESSAGES + 1} ) "
+                )
+                if (newCounter % interval == 0) {
+                    val index = (newCounter / interval) % MAX_PROMO_MESSAGES + 1
+                    Log.d(TAG, "onCreate: $index")
+                    showPromoToast(index)
                 }
             }
         }

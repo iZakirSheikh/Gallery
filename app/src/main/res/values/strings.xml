@@ -216,5 +216,17 @@
     </string-array>
     <string name="pref_scr_version_by_author_s">"v%1$s by <b><i>Zakir Sheikh</i></b>"</string>
     <string name="buy_me_a_coffee">Buy me a coffee</string>
+    <string name="msg_support_gallery"><b>Gallery is just getting started — and it\'s only getting better.</b>
+    \nGallery is open source, beautifully designed, and growing fast. You can keep me going by
+        \n1. 🌍 Spread the word
+        \n2. 🔧 Report bugs
+        \n3. ☕ Keep me motivated with a small gesture, like buying me a coffee or treating me to a meal. 😊
+    </string>
+    <string name="fuel">Fuel</string>
+    <string name="viewer_scr_open_in_lens">Open in Lens</string>
+    <string name="quick_share">Quick Share</string>
+    <string name="msg_viewer_scr_no_g_lens">Install the Google app to use lens</string>
+    <string name="msg_files_quick_share_error">Install the Quick Share app to use this feature.</string>
+    <string name="none">None</string>
 
 </resources>
