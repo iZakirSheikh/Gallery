@@ -473,7 +473,7 @@ fun Colors.background(
     provider: HazeState,
     containerColor: Color = background(1.dp),
     blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 80.dp,
-    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.45f,
+    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.5f else 0.25f,
     tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.65f),
     blendMode: BlendMode = BlendMode.SrcOver,
     progressive: Float = -1f,

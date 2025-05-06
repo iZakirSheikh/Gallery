@@ -19,6 +19,7 @@
 package com.zs.gallery.common
 
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.view.Window
 import androidx.compose.animation.BoundsTransform
@@ -26,10 +27,11 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.net.toUri
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.SavedStateHandle
 import com.zs.compose.foundation.runCatching
 import com.zs.compose.theme.AppTheme
-import com.zs.core.billing.Paymaster
 
 private const val TAG = "Common-Utils"
 
@@ -112,3 +114,34 @@ private val DEFULT_BOUNDS_TRANSFORM = BoundsTransform { _, _ -> tween(180) }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 val AppTheme.DefaultBoundsTransform get() = DEFULT_BOUNDS_TRANSFORM
+
+
+/**
+ * Operator function to retrieve a value from [SavedStateHandle] using a specified key.
+ * It supports type-safe retrieval for common types such as String, Int, Long, Float, Boolean, and Uri.
+ *
+ * This function uses [SavedStateHandle.get] to retrieve the value and then casts or converts it
+ * to the specified type [T]. If the value cannot be converted, it returns null.
+ *
+ * @param T The reified type to which the retrieved value should be converted.
+ * @param key The key under which the value is stored in [SavedStateHandle].
+ * @return The value associated with the key, cast to type [T], or null if the value is not found or cannot be cast.
+ * @throws IllegalArgumentException if an unsupported type is requested.
+ */
+inline operator fun <reified T : Any> SavedStateHandle.invoke(key: String): T? {
+    // Retrieve the value from SavedStateHandle as String.
+    val value = get<String>(key) ?: return null
+    // Check the requested type.
+    val result = when (T::class) {
+        // If String, return the value directly.
+        String::class -> value
+        Int::class -> value.toInt()
+        Long::class -> value.toLong()
+        Float::class -> value.toFloat()
+        Boolean::class -> value.toBoolean()
+        Uri::class -> value.toUri()
+        else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
+    }
+    // Safely cast the result to the requested type.
+    return result as T
+}
