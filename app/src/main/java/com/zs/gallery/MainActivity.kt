@@ -83,12 +83,14 @@ import com.zs.core.common.showPlatformToast
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
+import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.getPackageInfoCompat
 import com.zs.gallery.common.products
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
+import com.zs.gallery.viewer.RouteIntentViewer
 import com.zs.preferences.Key
 import com.zs.preferences.Key.Key1
 import com.zs.preferences.Key.Key2
@@ -237,6 +239,11 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         // automatically navigated to the lock screen in onCreate().
         if (timeAppWentToBackground != -1L && isAuthenticationRequired) {
             Log.d(TAG, "onResume: navigating -> RouteLockScreen.")
+            // since navController doesn't support adding new dest at the bottom of topMost dest;
+            // remove current destination to insert lock screen below
+            if (navController?.currentDestination?.domain == RouteIntentViewer.domain) {
+                navController?.popBackStack()
+            }
             navController?.navigate(RouteLockScreen()) {
                 launchSingleTop = true
             }
@@ -550,6 +557,18 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        lifecycleScope.launch {
+            // we delay it here because on resume loads lockscreen.
+            // we want this to overlay over lockscreen; hence this.
+            delay(200)
+            navController?.navigate(RouteIntentViewer(intent.data!!, intent.type ?: "image/*")) {
+                launchSingleTop = true
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate")
@@ -613,9 +632,16 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         // Set the content of the activity
         setContent {
             val navController = rememberNavController()
-            // If authentication is required, move to the lock screen
+            // If the action is VIEW, load the content first, regardless
+            // of whether the app is currently locked or not. This allows
+            // users to view shared media directly.
+            // else If authentication is required, move to the lock screen
             Home(
-                if (isAuthenticationRequired) RouteLockScreen else RouteTimeline,
+                when {
+                    intent.action == Intent.ACTION_VIEW -> RouteIntentViewer
+                    isAuthenticationRequired -> RouteLockScreen
+                    else -> RouteTimeline
+                },
                 snackbarHostState,
                 navController
             )
@@ -625,7 +651,8 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 navController.addOnDestinationChangedListener(this@MainActivity)
                 // Cover the screen with lock_screen if authentication is required
                 // Only remove this veil when the user authenticates
-                if (isAuthenticationRequired) unlock()
+                // don't show lock screen because their is dedicated button
+                // if (isAuthenticationRequired) unlock();
                 this@MainActivity.navController = navController
                 onDispose {
                     navController.removeOnDestinationChangedListener(this@MainActivity)

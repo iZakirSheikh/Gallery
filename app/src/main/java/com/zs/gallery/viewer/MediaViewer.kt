@@ -42,7 +42,6 @@ import androidx.compose.material.icons.outlined.PlayCircleFilled
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,7 +77,6 @@ import com.zs.compose.theme.appbar.TopAppBar
 import com.zs.compose.theme.sharedBounds
 import com.zs.compose.theme.text.Text
 import com.zs.core.coil.preferCachedThumbnail
-import com.zs.core.player.PlayerController
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.common.DefaultBoundsTransform
 import com.zs.gallery.common.LocalNavController
@@ -86,10 +84,8 @@ import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.compose.FloatingActionMenu
 import com.zs.gallery.common.compose.OverflowMenu
-import com.zs.gallery.common.compose.PlayerView
 import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.rememberBackgroundProvider
-import com.zs.gallery.common.compose.rememberPlayerController
 import com.zs.gallery.files.RouteFiles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
@@ -139,7 +135,6 @@ private fun ZoomableState.scaledInsideAndCenterAlignedFrom(size: Size) {
 @Composable
 private fun Carousel(
     viewState: MediaViewerViewState,
-    controller: PlayerController,
     onRequest: (request: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -163,12 +158,12 @@ private fun Carousel(
             ),
         )
 
-    // else load real data- wtih current being the focused one.
+    // else load real data- with current being the focused one.
     // Construct the state variables for pager.
     val pager = PagerState(initialPage = viewState.index, pageCount = { data.size })
     val scope = rememberCoroutineScope()
     val zoomable =
-        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
+        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.Fit }
 
     // Modifier for zoomable images,
     // triggering immersive mode on click and handling double-tap zoom
@@ -194,34 +189,9 @@ private fun Carousel(
         }
     }
 
-    // State to control the visibility of the PlayerView
-    // Lazily create the PlayerView content
-    var showVideoView by remember { mutableStateOf(false) }
-    val videoView by remember {
-        lazy {
-            movableContentOf {
-                PlayerView(
-                    controller,
-                    Modifier.fillMaxSize(),
-                    Color.Transparent,
-                    true,
-                    true
-                )
-            }
-        }
-    }
-
     // Handle BackPress
     BackHandler {
         when {
-            // pause if playing
-            controller.isPlaying -> controller.pause()
-            // hide videoView
-            showVideoView -> {
-                onRequest(EVENT_IMMERSIVE_VIEW) // reset immersive-view
-                controller.pause()
-                showVideoView = false // hide video-view.
-            }
             // reset zoom
             !zoomable.isZoomedOut -> scope.launch { zoomable.resetZoom() }
             // else ask parent to handle back-press
@@ -233,12 +203,13 @@ private fun Carousel(
     // Disable swipe when zoomed in
     // Preload adjacent pages for smoother transitions
     Log.d(TAG, "MainContent - ZoomFraction: ${zoomable.zoomFraction}")
+    val navController = LocalNavController.current
     HorizontalPager(
         state = pager,
         key = { data[it].id },
         pageSpacing = 16.dp,
         modifier = modifier,
-        userScrollEnabled = zoomable.isZoomedOut && !showVideoView,
+        userScrollEnabled = zoomable.isZoomedOut,
         beyondViewportPageCount = 1,
         pageContent = { index ->
             val item = data[index]
@@ -255,55 +226,45 @@ private fun Carousel(
                 zoomable.scaledInsideAndCenterAlignedFrom(
                     Size(item.width.toFloat(), item.height.toFloat())
                 )
-                controller.clear()
-                if (!item.isImage) {
-                    controller.setMediaItem(item.mediaUri)
-                    controller.prepare()
-                }
             }
             // The content
-            when {
-                isFocused && showVideoView -> videoView()
-                else -> AsyncImage(
-                    model = ImageRequest(ctx).apply {
-                        memoryCacheKey("${item.id}")
-                        data(item.mediaUri)
-                        if (item.isImage)  // Make sure that image is not loaded from Thumbnail repo.
-                            preferCachedThumbnail(false)
-                    }.build(),
-                    onSuccess = {
-                        val size = it.painter.intrinsicSize
-                        if (isFocused)
-                            scope.launch { zoomable.scaledInsideAndCenterAlignedFrom(size) }
-                    },
-                    placeholder = rememberAsyncImagePainter(
-                        model = ImageRequest(ctx)
-                            .apply {
-                                data(MediaProvider.contentUri(item.id))
-                            }.build(),
-                    ),
-                    contentDescription = item.name,
-                    alignment = Alignment.Center,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .thenIf(isFocused) {
-                            when {
-                                item.isImage -> zModifier
-                                else -> playIconModifier.clickable(null, null) {
-                                    onRequest(EVENT_IMMERSIVE_VIEW)
-                                    controller.play(true)
-                                    showVideoView = true
-                                }
-                            } then Modifier.sharedBounds(
-                                RouteFiles.buildSharedFrameKey(
-                                    item.id
-                                ),
-                                boundsTransform = AppTheme.DefaultBoundsTransform
-                            )
-                        }
-                        .fillMaxSize()
-                )
-            }
+            AsyncImage(
+                model = ImageRequest(ctx).apply {
+                    memoryCacheKey("${item.id}")
+                    data(item.mediaUri)
+                    if (item.isImage)  // Make sure that image is not loaded from Thumbnail repo.
+                        preferCachedThumbnail(false)
+                }.build(),
+                onSuccess = {
+                    val size = it.painter.intrinsicSize
+                    if (isFocused)
+                        scope.launch { zoomable.scaledInsideAndCenterAlignedFrom(size) }
+                },
+                placeholder = rememberAsyncImagePainter(
+                    model = ImageRequest(ctx)
+                        .apply {
+                            data(MediaProvider.contentUri(item.id))
+                        }.build(),
+                ),
+                contentDescription = item.name,
+                alignment = Alignment.Center,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .thenIf(isFocused) {
+                        when {
+                            item.isImage -> zModifier
+                            else -> playIconModifier.clickable(null, null) {
+                                navController.navigate(RouteIntentViewer(item.mediaUri, item.mimeType))
+                            }
+                        } then Modifier.sharedBounds(
+                            RouteFiles.buildSharedFrameKey(
+                                item.id
+                            ),
+                            boundsTransform = AppTheme.DefaultBoundsTransform
+                        )
+                    }
+                    .fillMaxSize()
+            )
         }
     )
 }
@@ -356,6 +317,7 @@ private fun MediaViewerAppBar(
                 elevation = 0.dp,
             )
         },
+        modifier = modifier
     )
 }
 
@@ -400,11 +362,6 @@ fun MediaViewer(viewState: MediaViewerViewState) {
     }
 
     val portrait = clazz.width < clazz.height
-
-    // The player controller
-    // initialized here because we can destroy it once the view is destroyed.
-    val controller =
-        rememberPlayerController(true, true)
     val observer = rememberBackgroundProvider()
     val colors = AppTheme.colors
     Details(
@@ -428,7 +385,6 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         primary = {
             Carousel(
                 viewState = viewState,
-                controller = controller,
                 onRequest = onRequest,
                 modifier = Modifier
                     .hazeSource(observer)
@@ -467,7 +423,6 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         onDispose {
             // Reset to default on disposal
             facade.style = original
-            controller.release()
         }
     }
 }

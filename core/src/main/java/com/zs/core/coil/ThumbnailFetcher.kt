@@ -59,8 +59,9 @@ private val PreferCachedKey = Extras.Key(true)
  *
  * @param value True to use cached thumbnails if available, false otherwise.
  */
-fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean) {
+fun ImageRequest.Builder.preferCachedThumbnail(value: Boolean): ImageRequest.Builder  {
     extras[PreferCachedKey] = value
+    return this
 }
 
 /**

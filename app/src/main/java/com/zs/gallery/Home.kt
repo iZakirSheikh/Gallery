@@ -19,6 +19,7 @@
 package com.zs.gallery
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -106,7 +107,9 @@ import com.zs.gallery.lockscreen.LockScreen
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.RouteSettings
 import com.zs.gallery.settings.Settings
+import com.zs.gallery.viewer.IntentViewer
 import com.zs.gallery.viewer.MediaViewer
+import com.zs.gallery.viewer.RouteIntentViewer
 import com.zs.gallery.viewer.RouteViewer
 import org.koin.androidx.compose.koinViewModel
 import com.google.accompanist.permissions.rememberMultiplePermissionsState as Permissions
@@ -296,6 +299,21 @@ private val navGraphBuilder: NavGraphBuilder.() -> Unit = {
     composable(RouteViewer) {
         val state = koinViewModel<MediaViewerViewModel>()
         MediaViewer(viewState = state)
+    }
+
+    // IntentViewer
+    composable(RouteIntentViewer) {
+        val args = it.arguments
+        val intent = when {
+            args != null -> RouteIntentViewer.buildArgs(args)
+            else -> {
+                // TODO - Find actual way to do this;
+                val activity = (LocalSystemFacade.current as Activity)
+                val i = activity.intent
+                i.data!! to (i.type ?: "image/*")
+            }
+        }
+        IntentViewer(intent)
     }
 }
 
