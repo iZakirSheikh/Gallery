@@ -18,6 +18,8 @@
 
 package com.zs.gallery.common
 
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -32,6 +34,9 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.SavedStateHandle
 import com.zs.compose.foundation.runCatching
 import com.zs.compose.theme.AppTheme
+import com.zs.core.common.showPlatformToast
+import com.zs.gallery.R
+import com.zs.gallery.settings.Settings
 
 private const val TAG = "Common-Utils"
 
@@ -144,4 +149,30 @@ inline operator fun <reified T : Any> SavedStateHandle.invoke(key: String): T? {
     }
     // Safely cast the result to the requested type.
     return result as T
+}
+
+/**
+ * Sets the wallpaper using the provided URI.
+ *
+ * @param uri The URI of the image to be set as wallpaper.
+ */
+fun Activity.setAsWallpaper(uri: Uri) {
+    val result = runCatching {
+        startActivity(Settings.Wallpaper(uri = uri))
+    }
+    if (!result.isFailure)
+        return
+    val result2 = runCatching {
+        // If the official intent is not supported, try using ACTION_ATTACH_DATA
+        val intent = com.zs.core.Intent(Intent.ACTION_ATTACH_DATA) {
+            addCategory(Intent.CATEGORY_DEFAULT);
+            // Grant read permission to the wallpaper app
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);//add this if your targetVersion is more than Android 7.0+
+            setDataAndType(uri, "image/*");
+            putExtra("mimeType", "image/*");
+        }
+        startActivity(Intent.createChooser(intent, getString(R.string.viewer_set_as)));
+    }
+    if (result2.isFailure)
+        showPlatformToast(R.string.viewer_msg_no_wallpaper_app_found)
 }

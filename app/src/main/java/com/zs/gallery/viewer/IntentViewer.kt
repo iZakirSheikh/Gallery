@@ -18,28 +18,30 @@
 
 package com.zs.gallery.viewer
 
+import android.app.Activity
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Spacer
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ReplyAll
+import androidx.compose.material.icons.filled.DocumentScanner
+import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isUnspecified
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -47,26 +49,37 @@ import androidx.compose.ui.unit.dp
 import androidx.core.bundle.Bundle
 import androidx.core.net.toUri
 import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import com.zs.compose.foundation.SignalWhite
+import coil3.compose.rememberAsyncImagePainter
+import com.zs.compose.foundation.UmbraGrey
+import com.zs.compose.foundation.plus
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
+import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
-import com.zs.compose.theme.appbar.TopAppBar
+import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.WindowStyle
+import com.zs.gallery.common.compose.FloatingActionMenu
 import com.zs.gallery.common.compose.PlayerView
 import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.observe
 import com.zs.gallery.common.compose.rememberBackgroundProvider
+import com.zs.gallery.common.icons.NearbyShare
+import com.zs.gallery.common.setAsWallpaper
+import com.zs.gallery.settings.Settings.GoogleLens
+import com.zs.gallery.settings.Settings.NearByShare
+import com.zs.gallery.settings.Settings.Share
+import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.zoomable
+import coil3.request.ImageRequest.Builder as ImageRequest
 import com.zs.gallery.common.compose.rememberPlayerController as Controller
 import me.saket.telephoto.zoomable.rememberZoomableState as ZoomableState
 
@@ -87,6 +100,16 @@ object RouteIntentViewer : Route {
         val uri = bundle.getString(PARAM_URI)!!.toUri()
         val mime = bundle.getString(PARAM_MIME)
         return uri to (mime ?: "image/*")
+    }
+}
+
+@Composable
+@NonRestartableComposable
+fun IntentViewer(value: Pair<Uri, String>) {
+    val (contentUri, mime) = value
+    when {
+        mime.startsWith("video/") -> MediaPlayer(contentUri)
+        else -> ImageViewer(contentUri)
     }
 }
 
@@ -151,59 +174,44 @@ private fun ZoomableState.scaledInsideAndCenterAlignedFrom(size: Size) {
 }
 
 @Composable
-@NonRestartableComposable
-fun IntentViewer(value: Pair<Uri, String>) {
-    val (contentUri, mime) = value
-    when {
-        mime.startsWith("video/") -> MediaPlayer(contentUri)
-        else -> ImageViewer(contentUri)
-    }
-}
-
-@Composable
 private fun ImageViewer(uri: Uri) {
-
     // Obtain the system facade for interacting with window properties.
     val facade = LocalSystemFacade.current
-    val zoomable = ZoomableState(DEFAULT_ZOOM_SPECS)
-        .apply { contentScale = ContentScale.Fit }
-    // Remember the background provider for potential background effects.
+    val zoomable =
+        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
     val observer = rememberBackgroundProvider()
+    val navController = LocalNavController.current
+    val scope = rememberCoroutineScope()
 
-    // State variable to track immersive mode.
+    // Handle back presses
     var immersive by remember { mutableStateOf(false) }
+    val onBackClick: () -> Unit = {
+        when {
+            !zoomable.isZoomedOut -> scope.launch { zoomable.resetZoom() }
+            immersive -> immersive = false
+            navController.previousBackStackEntry == null -> (facade as? Activity)?.finish()
+            else -> navController.navigateUp()
+        }
+    }
+
+    BackHandler(immersive || !zoomable.isZoomedOut, onBack = onBackClick)
 
     // Scaffold for basic screen structure.
+    val (width, height) = LocalWindowSize.current
+    val portrait = width < height
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
         containerColor = Color.Black,
         topBar = {
-            AnimatedVisibility(
-                visible = !immersive, // Animations for the top app bar visibility.
-                enter = slideInVertically() + fadeIn(),
-                exit = slideOutVertically() + fadeOut(),
-                content = {
-                    // Top app bar for navigation and potential actions.
-                    TopAppBar(
-                        background = AppTheme.colors.background(
-                            observer,
-                            Color.Transparent,
-                            progressive = 1f,
-                            blurRadius = 60.dp,
-                            tint = Color.Black.copy(0.3f),
-                            blendMode = BlendMode.Multiply
-                        ),
-                        contentColor = Color.SignalWhite,
-                        elevation = 0.dp,
-                        navigationIcon = {
-                            val navController = LocalNavController.current
-                            IconButton(
-                                icon = Icons.AutoMirrored.Outlined.ArrowBack, // Back icon.
-                                contentDescription = null,
-                                onClick = navController::navigateUp
-                            )
-                        },
-                        title = { Spacer(Modifier) }
+            MediaViewerTopAppBar(
+                !immersive,
+                "",
+                observer,
+                navigationIcon = {
+                    IconButton(
+                        icon = Icons.AutoMirrored.Outlined.ReplyAll, // Back icon.
+                        contentDescription = null,
+                        onClick = onBackClick
                     )
                 }
             )
@@ -212,13 +220,19 @@ private fun ImageViewer(uri: Uri) {
             // AsyncImage for loading and displaying the image from the URI.
             val context = LocalContext.current
             AsyncImage(
-                model = ImageRequest.Builder(context)
+                model = ImageRequest(context)
                     .data(uri)
+                    .size(coil3.size.Size.ORIGINAL)
                     .preferCachedThumbnail(false)
                     .build(),
                 contentDescription = null,
                 // Scale and center the image after it's loaded.
                 onSuccess = { zoomable.scaledInsideAndCenterAlignedFrom(it.painter.intrinsicSize) },
+                placeholder = rememberAsyncImagePainter(
+                    model = ImageRequest(context)
+                        .data(uri)
+                        .build(),
+                ),
                 alignment = Alignment.Center,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
@@ -233,17 +247,49 @@ private fun ImageViewer(uri: Uri) {
                         onDoubleClick = DoubleClickToZoomListener.cycle(2f)
                     )
             )
-        }
+
+        },
+        floatingActionButton = {
+            val colors = AppTheme.colors
+            val activity = facade as? Activity
+            FloatingActionMenu(
+                visible = !immersive,
+                background = colors.background(
+                    observer,
+                    Color.White,
+                    blurRadius = 70.dp,
+                    luminance = -1f,
+                ),
+                contentColor = Color.UmbraGrey,
+                insets = WindowInsets.contentInsets + WindowInsets.safeContent.asPaddingValues(),
+                content = {
+                    // Nearby share
+                    IconButton(
+                        Icons.Default.NearbyShare,
+                        contentDescription = "share",
+                        onClick = { facade.launch(NearByShare(uri)) }
+                    )
+                    // wallpaper
+                    IconButton(
+                        Icons.Default.Wallpaper,
+                        contentDescription = "Use as",
+                        onClick = { activity?.setAsWallpaper(uri) }
+                    )
+                    // scan
+                    IconButton(
+                        Icons.Default.DocumentScanner,
+                        contentDescription = "Visual search",
+                        onClick = { facade.launch(GoogleLens(uri)) }
+                    )
+
+                    //share
+                    IconButton(
+                        Icons.Outlined.Share,
+                        contentDescription = "Share",
+                        onClick = { facade.launch(Share(uri)) }
+                    )
+                }
+            )
+        },
     )
-    // DisposableEffect for managing side effects, like changing window styles.
-    // This effect runs once when the composable enters the composition and cleans up when it leaves.
-    DisposableEffect(Unit) {
-        val original = facade.style
-        facade.style =
-            original + WindowStyle.FLAG_SYSTEM_BARS_APPEARANCE_DARK + WindowStyle.FLAG_SYSTEM_BARS_BG_TRANSPARENT
-        onDispose {
-            // Reset to default on disposal
-            facade.style = original
-        }
-    }
 }

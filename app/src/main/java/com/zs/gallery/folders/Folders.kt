@@ -197,8 +197,8 @@ fun Folders(viewState: FoldersViewState) {
                             Folder(
                                 value = it,
                                 modifier = Modifier
-                                    .clickable() { navController.navigate(RouteFiles(it.path)) }
                                     .animateItem()
+                                    .clickable() { navController.navigate(RouteFiles(it.path)) }
                             )
                         }
                     )
@@ -235,4 +235,3 @@ fun Folders(viewState: FoldersViewState) {
         }
     )
 }
-

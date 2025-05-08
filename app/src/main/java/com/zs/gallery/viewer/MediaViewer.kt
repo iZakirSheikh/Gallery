@@ -22,12 +22,7 @@ package com.zs.gallery.viewer
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
@@ -36,9 +31,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.PlayCircleFilled
+import androidx.compose.material.icons.outlined.ReplyAll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -51,14 +46,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.isUnspecified
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
@@ -73,9 +66,7 @@ import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.TwoPane
 import com.zs.compose.theme.adaptive.contentInsets
-import com.zs.compose.theme.appbar.TopAppBar
 import com.zs.compose.theme.sharedBounds
-import com.zs.compose.theme.text.Text
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.common.DefaultBoundsTransform
@@ -87,7 +78,6 @@ import com.zs.gallery.common.compose.OverflowMenu
 import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.rememberBackgroundProvider
 import com.zs.gallery.files.RouteFiles
-import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
@@ -254,7 +244,12 @@ private fun Carousel(
                         when {
                             item.isImage -> zModifier
                             else -> playIconModifier.clickable(null, null) {
-                                navController.navigate(RouteIntentViewer(item.mediaUri, item.mimeType))
+                                navController.navigate(
+                                    RouteIntentViewer(
+                                        item.mediaUri,
+                                        item.mimeType
+                                    )
+                                )
                             }
                         } then Modifier.sharedBounds(
                             RouteFiles.buildSharedFrameKey(
@@ -266,58 +261,6 @@ private fun Carousel(
                     .fillMaxSize()
             )
         }
-    )
-}
-
-@Composable
-private fun MediaViewerAppBar(
-    visible: Boolean,
-    title: CharSequence,
-    provider: HazeState,
-    onRequest: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = slideInVertically() + fadeIn(),
-        exit = slideOutVertically() + fadeOut(),
-        content = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(
-                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = null,
-                        onClick = { onRequest(EVENT_BACK_PRESS) }
-                    )
-                },
-                title = {
-                    Text(
-                        title,
-                        maxLines = 2,
-                        fontFamily = FontFamily.Monospace,
-                        style = AppTheme.typography.title3
-                    )
-                },
-                actions = {
-                    IconButton(
-                        icon = Icons.Default.Info,
-                        contentDescription = null,
-                        onClick = { onRequest(EVENT_SHOW_INFO) }
-                    )
-                },
-                background = AppTheme.colors.background(
-                    provider,
-                    Color.Transparent,
-                    progressive = 1f,
-                    blurRadius = 60.dp,
-                    tint = Color.Black.copy(0.3f),
-                    blendMode = BlendMode.Multiply
-                ),
-                contentColor = Color.SignalWhite,
-                elevation = 0.dp,
-            )
-        },
-        modifier = modifier
     )
 }
 
@@ -370,6 +313,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
             observer,
             Color.White,
             blurRadius = 70.dp,
+            luminance = -1f,
         ),
         onDismissRequest = {
             viewState.showDetails = false
@@ -381,7 +325,27 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
         contentColor = Color.SignalWhite,
         containerColor = Color.Black,
-        topBar = { MediaViewerAppBar(!immersive, viewState.title, observer, onRequest) },
+        topBar = {
+            MediaViewerTopAppBar(
+                !immersive,
+                viewState.title,
+                observer,
+                navigationIcon = {
+                    IconButton(
+                        Icons.Outlined.ReplyAll,
+                        contentDescription = "Back",
+                        onClick = { onRequest(EVENT_BACK_PRESS) }
+                    )
+                },
+                actions = {
+                    IconButton(
+                        icon = Icons.Default.Info,
+                        contentDescription = null,
+                        onClick = { onRequest(EVENT_SHOW_INFO) }
+                    )
+                }
+            )
+        },
         primary = {
             Carousel(
                 viewState = viewState,
@@ -399,7 +363,9 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                     observer,
                     Color.White,
                     blurRadius = 70.dp,
+                    luminance = -1f,
                 ),
+
                 contentColor = Color.UmbraGrey,
                 insets = WindowInsets.contentInsets + WindowInsets.safeContent.asPaddingValues(),
                 content = {

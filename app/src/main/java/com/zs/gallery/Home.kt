@@ -484,7 +484,7 @@ fun Home(
                 val granted = activity.checkSelfPermissions(REQUIRED_PERMISSIONS)
                 NavHost(
                     navController = navController,
-                    startDestination = if (!granted) RoutePermission() else origin(),
+                    startDestination = if (origin != RouteIntentViewer && !granted) RoutePermission() else origin(),
                     builder = navGraphBuilder,
                     modifier = Modifier.observe(provider)
                 )

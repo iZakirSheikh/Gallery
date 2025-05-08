@@ -109,6 +109,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeTint
 import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import org.checkerframework.checker.units.qual.Luminance
 import kotlin.math.roundToInt
 
 private const val TAG = "Delegates"
@@ -459,6 +460,7 @@ else
  * @param noiseFactor The factor for the noise effect. Defaults to 0.4f for light backgrounds and 0.28f for dark backgrounds. Noise effect is disabled on Android versions below 12.
  * @param tint The color to tint the blurred background with. Defaults to a semi-transparent version of [containerColor].
  * @param blendMode The blend mode to use for the tint. Defaults to [BlendMode.SrcOver].
+ * @param luminance controls the luminosity of the blured layer defaults to 0.07f. -1 disables it.
  * @param progressive A float value to control progressive blurring:
  *   - -1f: Progressive blurring is disabled.
  *   - 0f: Bottom to top gradient.
@@ -475,21 +477,22 @@ fun Colors.background(
     blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 80.dp,
     noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.5f else 0.25f,
     tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.65f),
+    luminance: Float = 0.07f,
     blendMode: BlendMode = BlendMode.SrcOver,
     progressive: Float = -1f,
 ) = Background(
-    Modifier
-        .hazeEffect(state = provider) {
+    Modifier.hazeEffect(state = provider) {
             this.blurEnabled = true
             this.blurRadius = blurRadius
             this.backgroundColor = containerColor
             // Disable noise factor on Android versions below 12.
             this.noiseFactor = noiseFactor
-            this.tints = listOf(
+            this.tints = buildList {
                 // apply luminosity just like in Microsoft Acrylic.
-                HazeTint(Color.White.copy(0.07f), BlendMode.Luminosity),
-                HazeTint(tint, blendMode = blendMode)
-            )
+                if (luminance != -1f)
+                   this += HazeTint(Color.White.copy(0.07f), BlendMode.Luminosity)
+                this += HazeTint(tint, blendMode = blendMode)
+            }
             // Configure progressive blurring (if enabled).
             if (progressive != -1f) {
                 this.progressive = HazeProgressive.verticalGradient(

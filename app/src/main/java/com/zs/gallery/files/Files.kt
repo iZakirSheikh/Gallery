@@ -214,6 +214,7 @@ fun Files(viewState: FilesViewState) {
                                     else -> 0
                                 },
                                 modifier = Modifier
+                                    .animateItem()
                                     .sharedElement(
                                         RouteFiles.buildSharedFrameKey(item.id),
                                         boundsTransform = AppTheme.DefaultBoundsTransform

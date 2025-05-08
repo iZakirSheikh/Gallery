@@ -98,10 +98,6 @@ private const val SOURCE_FOLDER = 1
 private const val SOURCE_BIN = 2
 private const val SOURCE_FAV = 3
 
-private fun NearByShare(): Intent {
-    return Intent()
-}
-
 private fun GoogleLens(file: Uri): Intent {
     return com.zs.core.Intent(Intent.ACTION_SEND) {
         // Extracted from manifest of Google App
@@ -120,6 +116,7 @@ private fun GoogleLens(file: Uri): Intent {
         type = "image/*"
         putExtra(Intent.EXTRA_STREAM, file)
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
 //        addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT or Intent.FLAG_ACTIVITY_MULTIPLE_TASK) // Important: Start in a new activity record
 //        //addFlags(Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT) // Important: Move to the calling task if it exists
 //        addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
@@ -167,6 +164,7 @@ private fun NearByShare(vararg id: Long) = com.zs.core.Intent("com.google.androi
     type = "*/*"
     // Specify supported MIME types.
     putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
+    addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
 }
 
 private fun Share(vararg id: Long) = Intent.createChooser(
@@ -189,7 +187,7 @@ private fun Share(vararg id: Long) = Intent.createChooser(
         type = "*/*"
         // Specify supported MIME types.
         putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
-
+        addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
     },
     "Share files..."
 )
@@ -661,7 +659,7 @@ class MediaViewerViewModel(
 
 
     override suspend fun emit(values: List<MediaFile>) {
-        delay(1000) // necessary for shared animation to work effectively.
+        delay(350) // necessary for shared animation to work effectively.
         // experiment for optimal value
         data = values
     }
