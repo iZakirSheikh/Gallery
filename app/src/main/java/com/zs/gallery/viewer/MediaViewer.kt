@@ -67,6 +67,7 @@ import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.TwoPane
 import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.sharedBounds
+import com.zs.compose.theme.sharedElement
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.common.DefaultBoundsTransform
@@ -142,10 +143,11 @@ private fun Carousel(
                     .data(MediaProvider.contentUri(viewState.focused))
                     .build(),
             ),
-            modifier = modifier.sharedBounds(
+            modifier = Modifier
+                .sharedElement(
                 RouteFiles.buildSharedFrameKey(viewState.focused),
                 boundsTransform = AppTheme.DefaultBoundsTransform
-            ),
+            ).then(modifier),
         )
 
     // else load real data- with current being the focused one.
@@ -153,7 +155,7 @@ private fun Carousel(
     val pager = PagerState(initialPage = viewState.index, pageCount = { data.size })
     val scope = rememberCoroutineScope()
     val zoomable =
-        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.Fit }
+        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
 
     // Modifier for zoomable images,
     // triggering immersive mode on click and handling double-tap zoom

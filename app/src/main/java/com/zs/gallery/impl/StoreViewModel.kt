@@ -659,7 +659,7 @@ class MediaViewerViewModel(
 
 
     override suspend fun emit(values: List<MediaFile>) {
-        delay(350) // necessary for shared animation to work effectively.
+        delay(1000) // necessary for shared animation to work effectively.
         // experiment for optimal value
         data = values
     }

@@ -63,6 +63,7 @@ import com.zs.compose.theme.adaptive.Scaffold
 import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
+import com.zs.compose.theme.sharedBounds
 import com.zs.compose.theme.sharedElement
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.TonalHeader

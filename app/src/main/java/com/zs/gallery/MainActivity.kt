@@ -559,9 +559,12 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (intent.action != Intent.ACTION_VIEW)
+            return
         lifecycleScope.launch {
             // we delay it here because on resume loads lockscreen.
             // we want this to overlay over lockscreen; hence this.
+
             delay(200)
             navController?.navigate(RouteIntentViewer(intent.data!!, intent.type ?: "image/*")) {
                 launchSingleTop = true
