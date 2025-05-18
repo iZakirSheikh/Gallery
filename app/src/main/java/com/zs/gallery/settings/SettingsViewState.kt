@@ -222,6 +222,11 @@ object Settings {
             PREFIX + "_dynamic_colors",
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         )
+    // TODO: Use an integer instead of a boolean to allow for multiple background effects in the future.
+    // 0 - represents 0ff state; 1 ambient
+    val KEY_VISUAL_EFFECT_MODE =
+        intPreferenceKey("${PREFIX}_visual_effect_mode", 0)
+
 
     val DefaultFontFamily get() = FontFamily.Default
 

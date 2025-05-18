@@ -20,8 +20,10 @@
 
 package com.zs.gallery.viewer
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -48,22 +50,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import coil3.request.transformations
+import com.zs.compose.foundation.ImageBrush
 import com.zs.compose.foundation.SignalWhite
 import com.zs.compose.foundation.findActivity
+import com.zs.compose.foundation.foreground
 import com.zs.compose.foundation.thenIf
+import com.zs.compose.foundation.visualEffect
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
+import com.zs.core.coil.ReBlurTransformation
+import com.zs.core.coil.RsBlurTransformation
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.common.WindowStyle
@@ -73,11 +83,13 @@ import com.zs.gallery.common.compose.LocalNavController
 import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.OverflowMenu
 import com.zs.gallery.common.compose.background
+import com.zs.gallery.common.compose.preference
 import com.zs.gallery.common.compose.rememberAcrylicSurface
 import com.zs.gallery.common.compose.shine
 import com.zs.gallery.common.compose.source
 import com.zs.gallery.common.scaledInsideAndCenterAlignedFrom
 import com.zs.gallery.files.RouteFiles
+import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -306,9 +318,41 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         },
         // Carousal
         content = {
-            val modifier = Modifier
-                .source(surface)
-                .fillMaxSize()
+            // Ambient mode: applies a blur effect and noise overlay for an immersive background.
+            // since content in placed inside of Box; so doing this is pretty normal
+            val isAmbientModeEnabled by preference(Settings.KEY_VISUAL_EFFECT_MODE)
+            if (isAmbientModeEnabled == 1) {
+                // Transformation for blur effect, chosen based on Android version.
+                val transformation = remember {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        ReBlurTransformation(25f, 12f)
+                    else
+                        RsBlurTransformation(ctx, 25f, 12f)
+                }
+                Crossfade(
+                    // Crossfade animation for the ambient background when the focused item changes.
+                    viewState.focused,
+                    modifier = Modifier
+                        .foreground(Color.Black.copy(0.92f))
+                        .visualEffect(ImageBrush.NoiseBrush, 0.04f, true, BlendMode.Luminosity),
+                    // Content of the Crossfade: an AsyncImage with blur and noise effects.
+                    content = {
+                        AsyncImage(
+                            ImageRequest(ctx)
+                                .data(MediaProvider.buildContentUri(it))
+                                .size(256)
+                                .transformations(transformation).build(),
+                            null,
+                            contentScale = ContentScale.Crop,
+                            filterQuality = FilterQuality.None,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                )
+            }
+            // Modifier for the main content, applying surface properties and filling the maximum size.
+            val modifier = Modifier.source(surface).fillMaxSize()
+            // If data is loading, display a placeholder image with shared element transition.
             if (isLoading)
                 AsyncImage(
                     contentDescription = null,
@@ -316,16 +360,17 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                     contentScale = ContentScale.Fit,
                     model = ImageRequest(ctx)
                         .memoryCacheKey("${viewState.focused}")
-                        .data(MediaProvider.contentUri(viewState.focused))
+                        .data(MediaProvider.buildContentUri(viewState.focused))
                         .preferCachedThumbnail(false)
                         .build(),
                     placeholder = Painter(
                         model = ImageRequest(ctx)
-                            .data(MediaProvider.contentUri(viewState.focused))
+                            .data(MediaProvider.buildContentUri(viewState.focused))
                             .build(),
                     ),
                     modifier = modifier.then(RouteFiles.sharedElement(viewState.focused)),
                 )
+            // If data is loaded, display the Carousel with the media items.
             else Carousel(viewState, onRequest, modifier = modifier)
         }
     )
