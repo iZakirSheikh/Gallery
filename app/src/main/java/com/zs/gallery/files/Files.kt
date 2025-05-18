@@ -70,7 +70,6 @@ import com.zs.compose.theme.adaptive.Scaffold
 import com.zs.compose.theme.adaptive.content
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
-import com.zs.compose.theme.sharedElement
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.TonalHeader
 import com.zs.core.store.MediaFile
@@ -242,7 +241,7 @@ fun Files(viewState: FilesViewState) {
                                 },
                                 modifier = Modifier
                                     .animateItem()
-                                    .sharedElement(RouteFiles.buildSharedFrameKey(item.id))
+                                    .then(RouteFiles.sharedElement(item.id))
                                     .then(clickable)
                             )
                         }

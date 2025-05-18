@@ -64,7 +64,6 @@ import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
-import com.zs.compose.theme.sharedElement
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.common.WindowStyle
@@ -78,6 +77,7 @@ import com.zs.gallery.common.compose.rememberAcrylicSurface
 import com.zs.gallery.common.compose.shine
 import com.zs.gallery.common.compose.source
 import com.zs.gallery.common.scaledInsideAndCenterAlignedFrom
+import com.zs.gallery.files.RouteFiles
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -87,7 +87,6 @@ import androidx.compose.foundation.pager.rememberPagerState as PagerState
 import androidx.compose.ui.graphics.vector.rememberVectorPainter as VectorPainter
 import coil3.compose.rememberAsyncImagePainter as Painter
 import coil3.request.ImageRequest.Builder as ImageRequest
-import com.zs.gallery.files.RouteFiles.buildSharedFrameKey as Key
 import me.saket.telephoto.zoomable.rememberZoomableState as ZoomableState
 
 private const val TAG = "MediaViewer"
@@ -114,8 +113,9 @@ private fun Carousel(
     val data = viewState.data
     val state = PagerState(initialPage = viewState.index, pageCount = { data.size })
     val scope = rememberCoroutineScope()
+    //
     val zoomable =
-        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.Fit }
+        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
     // Modifier for zoomable images,
     // triggering immersive mode on click and handling double-tap zoom
     val zModifier = Modifier.zoomable(
@@ -195,7 +195,7 @@ private fun Carousel(
                 painter = painter,
                 contentDescription = item.name,
                 alignment = Alignment.Center,
-                contentScale = if(isFocused) ContentScale.None else ContentScale.Fit,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()
                     .thenIf(isFocused) {
@@ -209,7 +209,7 @@ private fun Carousel(
                                     )
                                 )
                             }
-                        } then Modifier.sharedElement(Key(viewState.focused))
+                        } then RouteFiles.sharedElement(viewState.focused)
                     }
             )
         }
@@ -306,7 +306,9 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         },
         // Carousal
         content = {
-            val modifier = Modifier.source(surface).fillMaxSize()
+            val modifier = Modifier
+                .source(surface)
+                .fillMaxSize()
             if (isLoading)
                 AsyncImage(
                     contentDescription = null,
@@ -322,7 +324,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                             .data(MediaProvider.contentUri(viewState.focused))
                             .build(),
                     ),
-                    modifier = modifier.sharedElement(Key(viewState.focused)),
+                    modifier = modifier.then(RouteFiles.sharedElement(viewState.focused)),
                 )
             else Carousel(viewState, onRequest, modifier = modifier)
         }

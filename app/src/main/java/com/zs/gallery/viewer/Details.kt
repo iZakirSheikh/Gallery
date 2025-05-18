@@ -44,6 +44,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import com.zs.compose.foundation.Background
 import com.zs.compose.theme.AlertDialog
@@ -110,6 +111,7 @@ fun DetailsViewDialog(
         onDismissRequest = onDismissRequest,
         contentColor = AppTheme.colors.onBackground,
         shape = AppTheme.shapes.xLarge,
+        properties = DialogProperties(usePlatformDefaultWidth = !compact),
         background = background,
         topBar = {
             TopAppBar(

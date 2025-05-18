@@ -20,8 +20,13 @@ package com.zs.gallery.files
 
 import android.app.Activity
 import android.net.Uri
+import androidx.compose.animation.BoundsTransform
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.SavedStateHandle
+import com.zs.compose.theme.sharedElement
 import com.zs.core.store.MediaFile
 import com.zs.gallery.common.Action
 import com.zs.gallery.common.Mapped
@@ -31,6 +36,7 @@ import com.zs.gallery.files.RouteFiles.SOURCE_TIMELINE
 
 // Some special cases
 object RouteTimeline : Route
+
 fun RouteFolder(path: String) = RouteFiles(RouteFiles.SOURCE_FOLDER, path)
 fun RouteLiked() = RouteFiles(RouteFiles.SOURCE_FAV)
 fun RouteBin() = RouteFiles(RouteFiles.SOURCE_BIN)
@@ -53,16 +59,22 @@ object RouteFiles : Route {
     operator fun invoke(source: String, key: String = ""): String =
         "$domain/${source}/${Uri.encode(key)}"
 
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    private val DefaultBoundsTransform = BoundsTransform { _, _ -> tween(200) }
+
     /**
      * Generates a unique key for shared element transitions based on the given ID.
      * @param id ID to generate the key from.
      * @return The generated shared frame key.
      */
-    fun buildSharedFrameKey(id: Long) = "shared_frame_$id"
+    @ExperimentalSharedTransitionApi
+    fun sharedElement(id: Long) =
+        Modifier.sharedElement("shared_frame_$id", boundsTransform = DefaultBoundsTransform, zIndexInOverlay = 0.1f)
 }
 
 operator fun SavedStateHandle.get(route: RouteFiles) =
-    (get<String>(PARAM_SOURCE) ?: SOURCE_TIMELINE) to get<String>(PARAM_ARG).takeIf { !it.isNullOrEmpty() }
+    (get<String>(PARAM_SOURCE)
+        ?: SOURCE_TIMELINE) to get<String>(PARAM_ARG).takeIf { !it.isNullOrEmpty() }
 
 /**
  * Represents the state of the files screen.

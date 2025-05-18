@@ -132,7 +132,7 @@ private fun ImageViewer(uri: Uri) {
     // Obtain the system facade for interacting with window properties.
     val facade = LocalSystemFacade.current
     val zoomable =
-        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.Fit }
+        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
     val surface = rememberAcrylicSurface()
     val navController = LocalNavController.current
     val scope = rememberCoroutineScope()
@@ -189,7 +189,7 @@ private fun ImageViewer(uri: Uri) {
                         .build(),
                 ),
                 alignment = Alignment.Center,
-                contentScale = ContentScale.None,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()
                     .source(surface)
