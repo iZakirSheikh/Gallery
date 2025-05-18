@@ -112,9 +112,8 @@
     <string name="trash_days_left_d">%1$s days left</string>
     <string name="auth_confirm_biometric">Confirm Biometric</string>
 
-    <string name="pref_app_theme_s"><b>App Theme</b>
+    <string name="pref_app_theme_s"><b>App Theme (%1$s)</b>
         <font color="grey" size="14">
-            <b>\n%1$s</b>
             \nCustomize the app\'s look with Night, Day, or System theme options.
         </font>
     </string>
@@ -125,7 +124,7 @@
         </font>
     </string>
 
-    <string name="pref_enable_trash_can"><b>Recycle Bin <small>(Android 11+)</small></b>
+    <string name="pref_enable_trash_can"><b>Recycle Bin (Android 11+)</b>
           <font color="grey" size="14">
               \nEnable to move deleted files to the Recycle Bin instead of permanently deleting them.
           </font>
@@ -186,8 +185,7 @@
         </font>
     </string>
 
-    <string name="pref_app_lock_s"><b>App Lock</b> <sup><font color='#ae1c27' size="10"><b>Beta</b></font></sup>
-          <small>\n%1$s</small>
+    <string name="pref_app_lock_s"><b>App Lock</b> (<small>%1$s</small>)<sup><font color='#ae1c27' size='10'><b> Beta</b></font></sup>
           <font color="grey" size="14">
               \nSecure Gallery with biometric authentication.
         </font>
@@ -228,5 +226,6 @@
     <string name="msg_viewer_scr_no_g_lens">Install the Google app to use lens</string>
     <string name="msg_files_quick_share_error">Install the Quick Share app to use this feature.</string>
     <string name="none">None</string>
+    <string name="properties">Properties</string>
 
 </resources>

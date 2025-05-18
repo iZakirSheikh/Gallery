@@ -35,8 +35,9 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -48,7 +49,6 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Recycling
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.AlternateEmail
 import androidx.compose.material.icons.outlined.AutoAwesomeMotion
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Dashboard
@@ -99,7 +99,7 @@ import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.HorizontalTwoPaneStrategy
 import com.zs.compose.theme.adaptive.SinglePaneStrategy
 import com.zs.compose.theme.adaptive.TwoPane
-import com.zs.compose.theme.adaptive.contentInsets
+import com.zs.compose.theme.adaptive.content
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Header
@@ -109,14 +109,14 @@ import com.zs.core.billing.Paymaster
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
-import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NightMode
-import com.zs.gallery.common.compose.GalleryTopAppBar
+import com.zs.gallery.common.compose.FloatingLargeTopAppBar
+import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.fadingEdge2
-import com.zs.gallery.common.compose.observe
-import com.zs.gallery.common.compose.rememberBackgroundProvider
-import com.zs.gallery.common.preference
+import com.zs.gallery.common.compose.preference
+import com.zs.gallery.common.compose.rememberAcrylicSurface
+import com.zs.gallery.common.compose.source
 import androidx.compose.foundation.layout.PaddingValues as Padding
 import com.zs.gallery.common.compose.ContentPadding as CP
 
@@ -143,7 +143,7 @@ private fun GroupHeader(
     text: CharSequence,
     modifier: Modifier = Modifier,
     padding: Padding? = null,
-) = Text(
+) = Label(
     text = text,
     modifier = Modifier
         .let() {
@@ -156,6 +156,7 @@ private fun GroupHeader(
     color = AppTheme.colors.accent,
     style = AppTheme.typography.title3
 )
+
 
 private val APP_LOCK_VALUES = arrayOf(-1, 0, 1, 30)
 
@@ -473,7 +474,7 @@ private fun ColumnScope.AboutUs() {
                 content = {
                     TextButton(
                         textResource(R.string.update_gallery),
-                        onClick = { facade.launchUpdateFlow(true) })
+                        onClick = { facade.initiateUpdateFlow(true) })
                     TextButton(
                         textResource(R.string.join_the_beta),
                         onClick = { facade.launch(Settings.JoinBetaIntent) },
@@ -541,24 +542,21 @@ fun Settings(viewState: SettingsViewState) {
         width < Category.Medium -> SinglePaneStrategy
         else -> HorizontalTwoPaneStrategy(0.5f) // Use horizontal layout with 50% split for large screens
     }
-
     // obtain the padding of BottomNavBar/NavRail
-    val navBarPadding = WindowInsets.contentInsets
-    val isPhoneLayout = width < Category.Medium
-    val provider = rememberBackgroundProvider()
+    val inAppNavBarInsets = WindowInsets.content
+    val surface = rememberAcrylicSurface()
     val topAppBarScrollBehavior = AppBarDefaults.exitUntilCollapsedScrollBehavior()
     val colors = AppTheme.colors
+
     // Place the content
-    // FIXME: Width < 650dp then screen is single pane what if navigationBars are at end.
     TwoPane(
         spacing = CP.normal,
         strategy = strategy,
         topBar = {
-            GalleryTopAppBar(
-                immersive = false,
+            FloatingLargeTopAppBar(
                 title = { Label(textResource(R.string.settings)) },
-                behavior = topAppBarScrollBehavior,
-                backdrop = colors.background(provider),
+                scrollBehavior = topAppBarScrollBehavior,
+                background = colors.background(surface),
                 insets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
                 navigationIcon = {
                     Icon(
@@ -568,30 +566,18 @@ fun Settings(viewState: SettingsViewState) {
                     )
                 },
                 actions = {
+                    // Join our telegram channel
                     val facade = LocalSystemFacade.current
-                    // Feedback
                     IconButton(
-                        icon = Icons.Outlined.AlternateEmail,
+                        icon = Icons.Outlined.Textsms,
                         contentDescription = null,
-                        onClick = { facade.launch(Settings.FeedbackIntent) },
-                    )
-                    // Star on Github
-                    IconButton(
-                        icon = Icons.Outlined.DataObject,
-                        contentDescription = null,
-                        onClick = { facade.launch(Settings.GithubIntent) },
+                        onClick = { facade.launch(Settings.TelegramIntent) },
                     )
                     // Report Bugs on Github.
                     IconButton(
                         icon = Icons.Outlined.BugReport,
                         contentDescription = null,
                         onClick = { facade.launch(Settings.GitHubIssuesPage) },
-                    )
-                    // Join our telegram channel
-                    IconButton(
-                        icon = Icons.Outlined.Textsms,
-                        contentDescription = null,
-                        onClick = { facade.launch(Settings.TelegramIntent) },
                     )
                 }
             )
@@ -605,8 +591,11 @@ fun Settings(viewState: SettingsViewState) {
                     .verticalScroll(rememberScrollState())
                     .padding(top = CP.medium)
                     .widthIn(max = sPaneMaxWidth)
-                    .systemBarsPadding()
-                    .padding(navBarPadding),
+                    .windowInsetsPadding(
+                        WindowInsets.systemBars.union(inAppNavBarInsets).only(
+                            WindowInsetsSides.Vertical + WindowInsetsSides.End
+                        )
+                    ),
                 content = {
                     Header(
                         stringResource(R.string.about_us),
@@ -621,30 +610,25 @@ fun Settings(viewState: SettingsViewState) {
                     AboutUs()
                 }
             )
+
         },
         primary = {
             val state = rememberLazyListState()
-            val safeInsets = WindowInsets.systemBars.only(WindowInsetsSides.Vertical)
             LazyColumn(
                 state = state,
                 // In immersive mode, add horizontal padding to prevent settings from touching the screen edges.
                 // Immersive layouts typically have a bottom app bar, so extra padding improves aesthetics.
                 // Non-immersive layouts only need vertical padding.
                 contentPadding = Padding(
-                    if (isPhoneLayout) CP.large else CP.medium,
-                    vertical = CP.normal
-                ) + navBarPadding + WindowInsets.contentInsets + safeInsets.asPaddingValues(),
+                    horizontal = if (strategy is SinglePaneStrategy) CP.large else CP.medium, CP.normal
+                ) + (WindowInsets.content.union(WindowInsets.systemBars)
+                    .union(inAppNavBarInsets).only(
+                        WindowInsetsSides.Vertical
+                    )).asPaddingValues(),
                 modifier = Modifier
-                    .observe(provider)
+                    .source(surface)
                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
-                    .fadingEdge2(
-                        listOf(
-                            AppTheme.colors.background(1.dp),
-                            AppTheme.colors.background.copy(alpha = 0.5f),
-                            Color.Transparent
-                        ),
-                        length = 56.dp
-                    ),
+                    .fadingEdge2(length = 56.dp),
                 content = {
                     //Sponsor
                     item(contentType = "sponsor") {

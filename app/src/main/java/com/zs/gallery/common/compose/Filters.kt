@@ -40,14 +40,54 @@ import com.zs.compose.foundation.fadingEdge
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Chip
 import com.zs.compose.theme.ChipDefaults
+import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.SelectableChip
 import com.zs.compose.theme.text.Label
+import com.zs.gallery.R
 import com.zs.gallery.common.Action
 import com.zs.gallery.common.Filter
+import com.zs.preferences.StringSaver
 
 private val REC_SPACING =
     Arrangement.spacedBy(ContentPadding.small)
+
+object FilterDefaults {
+
+    val ORDER_NONE get() = Action(R.string.none,  id = "filter_by_none")
+    val ORDER_BY_TITLE get() = Action(R.string.title,  id = "filter_by_title")
+
+
+    val NO_FILTER get() = Filter(true, ORDER_NONE)
+
+    /**
+     * Creates a [StringSaver] for serializing and deserializing a [Filter] object.
+     *
+     * A [Filter] is represented as a `Pair<Boolean?, Action>`, and this saver converts it to a string using
+     * a delimiter and reconstructs it when restoring.
+     *
+     * @param action A function that takes an action ID [String] and returns the corresponding [Action].
+     * @return A [StringSaver] capable of saving and restoring a nullable [Filter].
+     */
+    inline fun FilterSaver(crossinline action: (id: String) -> Action): StringSaver<Filter?> {
+        return object : StringSaver<Filter?> {
+            val delimiter = " | "
+            override fun restore(value: String): Filter? {
+                if (value.isEmpty()) return null
+                val (first, second) = value.split(delimiter, limit = 2)
+                val order = action(second)
+                return (first == "0") to order
+            }
+
+            override fun save(value: Filter?): String {
+                if (value == null) return ""
+                val first = if (value.first == true) "1" else "0"
+                val second = value.second.id
+                return "$first$delimiter$second"
+            }
+        }
+    }
+}
 
 // TODO - Migrate to LazyRow instead.
 
@@ -65,7 +105,7 @@ fun Filters(
     values: List<Action>,
     onRequest: (order: Action?) -> Unit,
     modifier: Modifier = Modifier,
-    padding: PaddingValues = PaddingValues(),
+    padding: PaddingValues = PaddingValues.Zero,
 ) {
     // Early return if values are empty.
     if (values.isEmpty()) return
@@ -94,8 +134,12 @@ fun Filters(
                 },
                 colors = ChipDefaults.chipColors(
                     backgroundColor = AppTheme.colors.accent,
-                    contentColor = AppTheme.colors.onAccent
+                    contentColor = AppTheme.colors.onAccent,
+                    disabledContentColor = AppTheme.colors.onAccent.copy(ContentAlpha.disabled),
+                    disabledBackgroundColor = AppTheme.colors.accent.copy(ContentAlpha.disabled)
                 ),
+                // if order_id is none- dont allow this.
+                enabled = order != FilterDefaults.ORDER_NONE,
                 modifier = Modifier
                     .padding(end = ContentPadding.medium),
                 shape = AppTheme.shapes.small
@@ -118,7 +162,7 @@ fun Filters(
                     content = {
                         Label(label, modifier = Modifier.padding(padding))
                     },
-                    leadingIcon = composableIf (value.icon != null){
+                    leadingIcon = composableIf(value.icon != null) {
                         Icon(value.icon!!, contentDescription = label.toString())
                     },
                     colors = colors,

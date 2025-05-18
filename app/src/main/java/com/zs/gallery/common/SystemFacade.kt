@@ -32,10 +32,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.core.net.toUri
@@ -44,11 +41,11 @@ import com.zs.core.billing.Product
 import com.zs.core.billing.Purchase
 import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
+import com.zs.gallery.settings.Settings.PKG_MARKET_ID
+import com.zs.gallery.settings.Settings.PREFIX_MARKET_FALLBACK
+import com.zs.gallery.settings.Settings.PREFIX_MARKET_URL
 import com.zs.preferences.Key
 
-private const val PREFIX_MARKET_URL = "market://details?id="
-private const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
-private const val PKG_MARKET_ID = "com.android.vending"
 
 /**
  * An interface defining the methods and properties needed for common app functionality,
@@ -115,7 +112,7 @@ interface SystemFacade {
      * @param pkg the package name of the app to open on the App Store.
      */
     fun launchAppStore(pkg: String = BuildConfig.APPLICATION_ID) {
-        val url = "$PREFIX_MARKET_URL$pkg"
+        val url = "${PREFIX_MARKET_URL}$pkg"
         // Create an Intent to open the Play Store app.
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             // Set the package to explicitly target the Play Store app.
@@ -145,7 +142,7 @@ interface SystemFacade {
      * @param report If `true`, low-priority issues will be reported to the user using the
      *               ToastHostState channel.
      */
-    fun launchUpdateFlow(report: Boolean = false)
+    fun initiateUpdateFlow(report: Boolean = false)
 
     /**
      * Launches an in-app review process if appropriate.
@@ -153,7 +150,7 @@ interface SystemFacade {
      * This method ensures the review dialog is shown only at suitable intervals based on launch count and time since last prompt.
      * It considers [MIN_LAUNCH_COUNT], [MAX_DAYS_BEFORE_FIRST_REVIEW], and [MAX_DAYS_AFTER_FIRST_REVIEW] to prevent excessive prompting.
      */
-    fun launchReviewFlow()
+    fun initiateReviewFlow()
 
     /**
      * Unlocks the app, granting access to its content.
@@ -267,57 +264,3 @@ interface SystemFacade {
     // This will be null when the lib has not been represhed otherwise this must not be null.
     fun getProductInfo(id: String): Product?
 }
-
-/**
- * A [staticCompositionLocalOf] variable that provides access to the [SystemFacade] interface.
- *
- * The [SystemFacade] interface defines common methods that can be implemented by an activity that
- * uses a single view with child views.
- * This local composition allows child views to access the implementation of the [SystemFacade]
- * interface provided by their parent activity.
- *
- * If the [SystemFacade] interface is not defined, an error message will be thrown.
- */
-val LocalSystemFacade =
-    staticCompositionLocalOf<SystemFacade> {
-        error("Provider not defined.")
-    }
-
-/**
- * A composable function that uses the [LocalSystemFacade] to fetch [Preference] as state.
- * @param key A key to identify the preference value.
- * @return A [State] object that represents the current value of the preference identified by the provided key.
- * The value can be null if no preference value has been set for the given key.
- */
-@Composable
-inline fun <S, O> preference(key: Key.Key1<S, O>): State<O?> {
-    val provider = LocalSystemFacade.current
-    return provider.observeAsState(key = key)
-}
-
-/**
- * @see [preference]
- */
-@Composable
-inline fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
-    val provider = LocalSystemFacade.current
-    return provider.observeAsState(key = key)
-}
-
-/**
- * A composable function that retrieves the purchase state of a product using the [LocalSystemFacade].
- *
- * This function leverages the `LocalSystemFacade` to access the purchase information for a given product ID.
- * In preview mode, it returns a `null` purchase state as the activity context is unavailable.
- *
- * @param id The ID of the product to check the purchase state for.
- * @return A [State] object representing the current purchase state of the product.
- * The state value can be `null` if there is no purchase associated with the given product ID or if the function
- * is called in preview mode.
- */
-@Composable
-@NonRestartableComposable
-@Stable
-fun purchase(id: String): State<Purchase?> = LocalSystemFacade.current.observePurchaseAsState(id)
-
-

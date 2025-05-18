@@ -22,9 +22,11 @@ import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ReplyAll
 import androidx.compose.material.icons.filled.DocumentScanner
@@ -40,43 +42,37 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.core.bundle.Bundle
-import androidx.core.net.toUri
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import com.zs.compose.foundation.UmbraGrey
-import com.zs.compose.foundation.plus
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
-import com.zs.compose.theme.adaptive.contentInsets
 import com.zs.core.coil.preferCachedThumbnail
-import com.zs.gallery.common.LocalNavController
-import com.zs.gallery.common.LocalSystemFacade
-import com.zs.gallery.common.Route
+import com.zs.gallery.common.FallbackWallpaperIntent
+import com.zs.gallery.common.GoogleLensIntent
+import com.zs.gallery.common.NearByShareIntent
+import com.zs.gallery.common.ShareFilesIntent
+import com.zs.gallery.common.WallpaperIntent
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.compose.FloatingActionMenu
+import com.zs.gallery.common.compose.LocalNavController
+import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.PlayerView
 import com.zs.gallery.common.compose.background
-import com.zs.gallery.common.compose.observe
-import com.zs.gallery.common.compose.rememberBackgroundProvider
+import com.zs.gallery.common.compose.rememberAcrylicSurface
+import com.zs.gallery.common.compose.shine
+import com.zs.gallery.common.compose.source
 import com.zs.gallery.common.icons.NearbyShare
-import com.zs.gallery.common.setAsWallpaper
-import com.zs.gallery.settings.Settings.GoogleLens
-import com.zs.gallery.settings.Settings.NearByShare
-import com.zs.gallery.settings.Settings.Share
+import com.zs.gallery.common.scaledInsideAndCenterAlignedFrom
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import coil3.request.ImageRequest.Builder as ImageRequest
@@ -84,34 +80,6 @@ import com.zs.gallery.common.compose.rememberPlayerController as Controller
 import me.saket.telephoto.zoomable.rememberZoomableState as ZoomableState
 
 private const val TAG = "IntentViewer"
-
-// Define the Route for this screen.
-object RouteIntentViewer : Route {
-
-    const val PARAM_URI = "param_uri"
-    const val PARAM_MIME = "param_mime"
-
-    override val route = "$domain/{${PARAM_URI}}/{${PARAM_MIME}}"
-
-    operator fun invoke(uri: Uri, mime: String) =
-        "$domain/${Uri.encode(uri.toString())}/${Uri.encode(mime)}"
-
-    fun buildArgs(bundle: Bundle): Pair<Uri, String> {
-        val uri = bundle.getString(PARAM_URI)!!.toUri()
-        val mime = bundle.getString(PARAM_MIME)
-        return uri to (mime ?: "image/*")
-    }
-}
-
-@Composable
-@NonRestartableComposable
-fun IntentViewer(value: Pair<Uri, String>) {
-    val (contentUri, mime) = value
-    when {
-        mime.startsWith("video/") -> MediaPlayer(contentUri)
-        else -> ImageViewer(contentUri)
-    }
-}
 
 /**
  * Represents the media player screen for playing local/non-local media files.
@@ -159,27 +127,13 @@ private val DEFAULT_ZOOM_SPECS = ZoomSpec(5f)
 /**  Indicates whether the content is currently at its default zoom level (not zoomed in). */
 private val ZoomableState.isZoomedOut get() = (zoomFraction ?: 0f) <= 0.0001f
 
-/**  Scales and centers content based on size. */
-private fun ZoomableState.scaledInsideAndCenterAlignedFrom(size: Size) {
-    // Do nothing if intrinsic size is unknown
-    if (size.isUnspecified) return
-
-    // Scale and center content based on intrinsic size
-    // TODO - Make this suspend fun instead of runBlocking
-    setContentLocation(
-        ZoomableContentLocation.scaledInsideAndCenterAligned(
-            size
-        )
-    )
-}
-
 @Composable
 private fun ImageViewer(uri: Uri) {
     // Obtain the system facade for interacting with window properties.
     val facade = LocalSystemFacade.current
     val zoomable =
-        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
-    val observer = rememberBackgroundProvider()
+        ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.Fit }
+    val surface = rememberAcrylicSurface()
     val navController = LocalNavController.current
     val scope = rememberCoroutineScope()
 
@@ -197,16 +151,17 @@ private fun ImageViewer(uri: Uri) {
     BackHandler(immersive || !zoomable.isZoomedOut, onBack = onBackClick)
 
     // Scaffold for basic screen structure.
-    val (width, height) = LocalWindowSize.current
-    val portrait = width < height
+    val (width, _) = LocalWindowSize.current
+    val compact = width < Category.Medium
     Scaffold(
-        fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
+        fabPosition = if (compact) FabPosition.Center else FabPosition.End,
+        // TODO - Provide a way to add dynamic blur to this.
         containerColor = Color.Black,
         topBar = {
             MediaViewerTopAppBar(
                 !immersive,
                 "",
-                observer,
+                surface,
                 navigationIcon = {
                     IconButton(
                         icon = Icons.AutoMirrored.Outlined.ReplyAll, // Back icon.
@@ -234,10 +189,10 @@ private fun ImageViewer(uri: Uri) {
                         .build(),
                 ),
                 alignment = Alignment.Center,
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.None,
                 modifier = Modifier
                     .fillMaxSize()
-                    .observe(observer)
+                    .source(surface)
                     .zoomable(
                         state = zoomable,
                         onClick = {
@@ -251,45 +206,71 @@ private fun ImageViewer(uri: Uri) {
         },
         floatingActionButton = {
             val colors = AppTheme.colors
-            val activity = facade as? Activity
             FloatingActionMenu(
                 visible = !immersive,
-                background = colors.background(
-                    observer,
-                    Color.White,
-                    blurRadius = 70.dp,
-                    luminance = -1f,
+                background = colors.background(surface),
+                contentColor = AppTheme.colors.onBackground,
+                modifier = Modifier.windowInsetsPadding(
+                    WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)
                 ),
-                contentColor = Color.UmbraGrey,
-                insets = WindowInsets.contentInsets + WindowInsets.safeContent.asPaddingValues(),
+                border = colors.shine,
                 content = {
                     // Nearby share
                     IconButton(
                         Icons.Default.NearbyShare,
                         contentDescription = "share",
-                        onClick = { facade.launch(NearByShare(uri)) }
+                        onClick = { facade.launch(NearByShareIntent(uri)) }
                     )
                     // wallpaper
                     IconButton(
                         Icons.Default.Wallpaper,
                         contentDescription = "Use as",
-                        onClick = { activity?.setAsWallpaper(uri) }
+                        onClick = {
+                            val res = runCatching {
+                                facade.launch(WallpaperIntent(uri))
+                            }
+                            if (res.isFailure) facade.launch(FallbackWallpaperIntent(uri))
+                        }
                     )
                     // scan
                     IconButton(
                         Icons.Default.DocumentScanner,
                         contentDescription = "Visual search",
-                        onClick = { facade.launch(GoogleLens(uri)) }
+                        onClick = { facade.launch(GoogleLensIntent(uri)) }
                     )
 
                     //share
                     IconButton(
                         Icons.Outlined.Share,
                         contentDescription = "Share",
-                        onClick = { facade.launch(Share(uri)) }
+                        onClick = { facade.launch(ShareFilesIntent(uri)) }
                     )
                 }
             )
-        },
+        }
     )
+
+    DisposableEffect(key1 = Unit) {
+        // This block runs when the composable is first displayed.
+        // Store the original window style to restore it later.
+        val original = facade.style
+        // Hide the system bars (status bar and navigation bar) for a full-screen video experience.
+        facade.style = original + WindowStyle.FLAG_SYSTEM_BARS_APPEARANCE_DARK
+        // This block runs when the composable leaves the composition (e.g., the screen is closed).
+        onDispose {
+            // Reset to default on disposal
+            // Release the player resources to prevent memory leaks.
+            facade.style = original
+        }
+    }
+}
+
+@Composable
+@NonRestartableComposable
+fun IntentViewer(value: Pair<Uri, String>) {
+    val (contentUri, mime) = value
+    when {
+        mime.startsWith("video/") -> MediaPlayer(contentUri)
+        else -> ImageViewer(contentUri)
+    }
 }

@@ -45,6 +45,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -80,12 +81,11 @@ import com.zs.core.billing.Product
 import com.zs.core.billing.Purchase
 import com.zs.core.billing.purchased
 import com.zs.core.common.showPlatformToast
+import com.zs.core.getPackageInfoCompat
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
-import com.zs.gallery.common.current
 import com.zs.gallery.common.domain
-import com.zs.gallery.common.getPackageInfoCompat
 import com.zs.gallery.common.products
 import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.lockscreen.RouteLockScreen
@@ -171,7 +171,10 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         Paymaster(this, BuildConfig.PLAY_CONSOLE_APP_RSA_KEY, Paymaster.products)
     }
 
-    override var style: WindowStyle by mutableStateOf(WindowStyle())
+    var _style: Int by mutableIntStateOf(WindowStyle.FLAG_STYLE_AUTO)
+    override var style: WindowStyle
+        get() = WindowStyle(_style)
+        set(value) { _style = value.value }
     var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
         private set
 
@@ -393,7 +396,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
     override fun launch(intent: Intent, options: Bundle?) =
         startActivity(intent, options)
 
-    override fun launchUpdateFlow(report: Boolean) {
+    override fun initiateUpdateFlow(report: Boolean) {
         val manager = AppUpdateManagerFactory.create(this@MainActivity)
         manager.requestUpdateFlow().onEach { result ->
             when (result) {
@@ -455,7 +458,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         }.launchIn(lifecycleScope)
     }
 
-    override fun launchReviewFlow() {
+    override fun initiateReviewFlow() {
         lifecycleScope.launch {
             // Get the app launch count from preferences.
             val count = preferences[Settings.KEY_LAUNCH_COUNTER]
@@ -583,7 +586,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         // Initialize
         if (isColdStart) {
             // Trigger update flow
-            launchUpdateFlow()
+            initiateUpdateFlow()
 
             // Enable secure mode if required by user settings
             if (preferences[Settings.KEY_SECURE_MODE])

@@ -4,8 +4,9 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟 Share via <b>Nearby/Quick share</b>.
             \n🌟 Bug fixes and performance improvements.
+            \n🌟 Some minor fixes.
+            \n🌟 Share via <b>Nearby/Quick share</b>.
             \n🌟 Added <b>Open with</b> feature. This will allow you now open media files directly in Gallery.
             \n🌟 A new "None" filter has been added to the folders screen, and it will now persist.
             \n🌟 Now you can <b>Instantly share</b> with nearby devices.

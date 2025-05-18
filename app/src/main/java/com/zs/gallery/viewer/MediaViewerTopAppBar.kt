@@ -24,9 +24,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Modifier
@@ -36,7 +33,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.zs.compose.foundation.SignalWhite
 import com.zs.compose.theme.AppTheme
-import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.appbar.TopAppBar
 import com.zs.compose.theme.text.Text
 import com.zs.gallery.common.compose.background

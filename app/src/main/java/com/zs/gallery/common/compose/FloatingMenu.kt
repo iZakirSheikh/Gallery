@@ -1,7 +1,7 @@
 /*
- * Copyright 2025 sheik
+ * Copyright 2025 Zakir Sheikh
  *
- * Created by sheik on 10-04-2025.
+ * Created by Zakir Sheikh on 14-05-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -37,13 +36,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -60,24 +59,16 @@ import com.zs.compose.theme.menu.DropDownMenu
 import com.zs.compose.theme.menu.DropDownMenuItem
 import com.zs.gallery.common.Action
 
-private val DefaultItemSpace = Arrangement.spacedBy(ContentPadding.small)
 
 @Composable
+@NonRestartableComposable
 fun FloatingActionMenu(
     visible: Boolean,
     background: Background,
     modifier: Modifier = Modifier,
     contentColor: Color = AppTheme.colors.onBackground,
     insets: PaddingValues?= null,
-    border: BorderStroke? = BorderStroke(
-        0.5.dp,
-        Brush.verticalGradient(
-            listOf(
-                if (AppTheme.colors.isLight) AppTheme.colors.background else Color.Gray.copy(0.24f),
-                if (AppTheme.colors.isLight) AppTheme.colors.background.copy(0.3f) else Color.Gray.copy(0.075f),
-            )
-        )
-    ),
+    border: BorderStroke? = null,
     content: @Composable RowScope.() -> Unit,
 ) {
     AnimatedVisibility(
@@ -89,20 +80,48 @@ fun FloatingActionMenu(
                 LocalContentColor provides contentColor,
                 content = {
                     Row(
-                        horizontalArrangement = DefaultItemSpace,
+                        horizontalArrangement = ContentPadding.SmallArrangement,
                         verticalAlignment = Alignment.CenterVertically,
                         content = content,
-                        modifier = Modifier
+                        modifier = modifier
                             .pointerInput(Unit) {}
                             .thenIf(insets != null) { padding(insets!!) }
                             .scale(0.85f)
                             .shadow(12.dp, shape = CircleShape)
                             .thenIf(border != null) { border(border!!, CircleShape) }
                             .background(background)
-                            .then(modifier)
                             .animateContentSize()
                     )
                 }
+            )
+        }
+    )
+}
+
+@Composable
+fun FloatingActionMenu(
+    background: Background,
+    modifier: Modifier = Modifier,
+    contentColor: Color = AppTheme.colors.onBackground,
+    insets: PaddingValues?= null,
+    border: BorderStroke? = null,
+    content: @Composable RowScope.() -> Unit,
+) {
+    CompositionLocalProvider(
+        LocalContentColor provides contentColor,
+        content = {
+            Row(
+                horizontalArrangement = ContentPadding.SmallArrangement,
+                verticalAlignment = Alignment.CenterVertically,
+                content = content,
+                modifier = modifier
+                    .pointerInput(Unit) {}
+                    .thenIf(insets != null) { padding(insets!!) }
+                    .scale(0.85f)
+                    .shadow(12.dp, shape = CircleShape)
+                    .thenIf(border != null) { border(border!!, CircleShape) }
+                    .background(background)
+                    .animateContentSize()
             )
         }
     )

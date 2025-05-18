@@ -18,9 +18,6 @@
 
 package com.zs.gallery.folders
 
-import android.content.Context
-import android.os.Environment
-import android.text.format.Formatter
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,15 +38,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.zs.compose.foundation.runCatching
 import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.text.Label
+import com.zs.core.common.PathUtils
 import com.zs.core.store.Folder
 import com.zs.gallery.R
-import java.io.File
+import com.zs.gallery.common.fileSizeFormatted
 import com.zs.gallery.common.compose.ContentPadding as CP
 
 private const val TAG = "Folder"
@@ -58,29 +55,6 @@ private const val TAG = "Folder"
  * The default shape for tiles in the grid.
  */
 private val DEFAULT_SHAPE = RoundedCornerShape(16)
-
-/**
- * Formats a file size in bytes to a human-readable string.
- *
- * @param bytes The file size in bytes.
- * @return The formatted file size string.
- */
-private fun Context.formattedFileSize(bytes: Long) =
-    Formatter.formatFileSize(this, bytes)
-
-/**
- * Checks if a given path corresponds to removable storage.
- *
- * @param path The path to check.
- * @return True if the path is on removable storage, false otherwise.
- */
-private fun isRemovableStorage(path: String): Boolean =
-    runCatching(TAG) {
-        val externalStorageDirectory = Environment.getExternalStorageDirectory().absolutePath
-        !path.startsWith(externalStorageDirectory) && Environment.isExternalStorageRemovable(
-            File(path)
-        )
-    } == true
 
 @Composable
 fun Folder(
@@ -107,7 +81,7 @@ fun Folder(
                     contentScale = ContentScale.Crop
                 )
 
-                val isRemovable = isRemovableStorage(value.path)
+                val isRemovable = PathUtils.isRemovableStorage(value.path)
                 if (!isRemovable) return@Box
                 Icon(
                     imageVector = Icons.Outlined.SdStorage,
@@ -137,7 +111,7 @@ fun Folder(
         Label(
             text = textResource(
                 id = R.string.folders_scr_folder_name_sds, value.count,
-                ctx.formattedFileSize(value.size.toLong())
+                ctx.fileSizeFormatted(value.size.toLong())
             ),
             style = AppTheme.typography.label3.copy(fontSize = 10.sp),
             color = AppTheme.colors.onBackground.copy(ContentAlpha.medium),

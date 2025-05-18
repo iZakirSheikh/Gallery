@@ -18,10 +18,7 @@
 
 package com.zs.gallery.settings
 
-import android.content.ComponentName
-import android.content.ContentUris
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.font.FontFamily
@@ -30,7 +27,6 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import com.zs.core.store.MediaProvider
 import com.zs.gallery.R
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
@@ -53,20 +49,23 @@ import com.zs.preferences.floatPreferenceKey
 import com.zs.preferences.intPreferenceKey
 import com.zs.preferences.stringPreferenceKey
 
+//
 object RouteSettings : Route
-
-private val provider by lazy {
+//
+private val fontProvider by lazy {
     GoogleFont.Provider(
         providerAuthority = "com.google.android.gms.fonts",
         providerPackage = "com.google.android.gms",
         certificates = R.array.com_google_android_gms_fonts_certs
     )
 }
+//
 
-private val OutfitFontFamily = FontFamily("Outfit")
-val FontFamily.Companion.OutfitFontFamily get() = com.zs.gallery.settings.OutfitFontFamily
-val DancingScriptFontFamily = FontFamily("Dancing Script")
-val FontFamily.Companion.DancingScriptFontFamily get() = com.zs.gallery.settings.DancingScriptFontFamily
+private val _OutfitFontFamily = FontFamily("Outfit")
+private  val _DancingScriptFontFamily = FontFamily("Dancing Script")
+//
+val FontFamily.Companion.OutfitFontFamily get() = _OutfitFontFamily
+val FontFamily.Companion.DancingScriptFontFamily get() = _DancingScriptFontFamily
 
 /**
  * Creates a [FontFamily] from the given Google Font name.
@@ -81,22 +80,22 @@ private fun FontFamily(name: String): FontFamily {
     // Create a FontFamily object with four different font weights.
     return FontFamily(
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Light
         ),
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Medium
         ),
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Normal
         ),
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Bold
         ),
@@ -109,6 +108,7 @@ private fun FontFamily(name: String): FontFamily {
 interface SettingsViewState {
     fun <S, O> set(key: Key<S, O>, value: O)
 }
+
 
 /**
  * ## Settings
@@ -158,6 +158,11 @@ interface SettingsViewState {
  */
 object Settings {
     // The keys for the preferences
+
+    const val PREFIX_MARKET_URL = "market://details?id="
+    const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
+    const val PKG_MARKET_ID = "com.android.vending"
+
     private const val PREFIX = "global"
     val STANDARD_TILE_SIZE = 100.dp
     val KEY_NIGHT_MODE =
@@ -247,103 +252,4 @@ object Settings {
             "Hey, check out this cool app: [https://play.google.com/store/apps/details?id=com.googol.android.apps.photos&pcampaignid=web_share]"
         )
     }
-
-    /**
-     * Builds intent to set [uri] as wallpaper.
-     */
-    fun Wallpaper(uri: Uri): Intent =
-        com.zs.core.Intent("android.service.wallpaper.CROP_AND_SET_WALLPAPER") {
-            setDataAndType(uri, "image/*")
-            putExtra("mimeType", "image/*") // Specifies the MIME type of the image
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) // Grants temporary read permission to the wallpaper app
-            addCategory(Intent.CATEGORY_DEFAULT)
-            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        }
-
-    /**
-     * Builds an intent to search file with Google Lens.
-     */
-    fun GoogleLens(file: Uri) =
-        com.zs.core.Intent(Intent.ACTION_SEND) {
-            /* Extracted from manifest of Google App
-                 <activity android:theme="resourceId:0x7f160e0a" android:name="com.google.android.apps.search.lens.LensShareEntryPointActivity" android:exported="true" android:process=":search">
-                 <intent-filter android:label="Search image">
-                 <action android:name="android.intent.action.SEND" />
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <data android:mimeType="image/jpeg" />
-                 <data android:mimeType="image/png" />
-                 </intent-filter>
-                 </activity>*/
-            component = ComponentName(
-                "com.google.android.googlequicksearchbox",
-                "com.google.android.apps.search.lens.LensShareEntryPointActivity"
-            )
-            type = "image/*"
-            putExtra(Intent.EXTRA_STREAM, file)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        }
-
-
-    fun NearByShare(vararg uri: Uri) =
-        com.zs.core.Intent("com.google.android.gms.SHARE_NEARBY") {
-//    setClassName(
-//        "com.google.android.gms",
-//        "com.google.android.gms.nearby.sharing.ReceiveSurfaceActivity"
-//    )
-// Extracted from manifest of QuickShare
-// Keep an eye on it.
-//    <activity android:theme="resourceId:0x7f160c16" android:label="Quick Share" android:icon="res/782.xml" android:name="com.google.android.gms.nearby.sharing.send.SendActivity" android:enabled="true" android:exported="true" android:process="com.google.android.gms.ui" android:taskAffinity="" android:documentLaunchMode="2" android:maxRecents="1" android:resizeableActivity="true">
-//    <intent-filter>
-//    <action android:name="android.intent.action.SEND"/>
-//    <action android:name="android.intent.action.SEND_MULTIPLE"/>
-//    <action android:name="com.google.android.gms.SHARE_NEARBY"/>
-//    <category android:name="android.intent.category.DEFAULT"/>
-//    <data android:mimeType="*/*"/>
-//    </intent-filter>
-//    <intent-filter>
-//    <action android:name="com.google.android.gms.nearby.SEND_FOLDER"/>
-//    <category android:name="android.intent.category.DEFAULT"/>
-//    </intent-filter>
-//    <meta-data android:name="android.service.chooser.chip_label" android:resource="Quick Share"/>
-//    <meta-data android:name="android.service.chooser.chip_icon" android:resource="res/H2T.xml"/>
-//    <meta-data android:name="android.service.chooser.chooser_target_service" android:value=".nearby.sharing.DirectShareService"/>
-//    </activity>
-            component = ComponentName(
-                "com.google.android.gms",
-                "com.google.android.gms.nearby.sharing.send.SendActivity"
-            )
-            // Add the URIs as extras.
-            putParcelableArrayListExtra(
-                Intent.EXTRA_STREAM,
-                uri.toMutableList() as ArrayList<Uri>
-            )
-            // Set the MIME type to allow sharing of various file types.
-            type = "*/*"
-            // Specify supported MIME types.
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
-            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        }
-
-    fun Share(vararg uri: Uri) = Intent.createChooser(
-        com.zs.core.Intent(Intent.ACTION_SEND_MULTIPLE) {
-            // Map selected IDs to content URIs.
-            // TODO - Construct custom content uri.
-            // Set the action to send multiple items.
-            action = Intent.ACTION_SEND_MULTIPLE
-            // Add the URIs as extras.
-            putParcelableArrayListExtra(
-                Intent.EXTRA_STREAM,
-                uri.toMutableList() as ArrayList<Uri>
-            )
-            // Grant read permission to the receiving app.
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            // Set the MIME type to allow sharing of various file types.
-            type = "*/*"
-            // Specify supported MIME types.
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "video/*"))
-            addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        },
-        "Share files..."
-    )
 }
