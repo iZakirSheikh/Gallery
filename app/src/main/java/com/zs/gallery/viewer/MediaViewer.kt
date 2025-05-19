@@ -325,9 +325,9 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                 // Transformation for blur effect, chosen based on Android version.
                 val transformation = remember {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        ReBlurTransformation(25f, 12f)
+                        ReBlurTransformation(25f, 2.1f)
                     else
-                        RsBlurTransformation(ctx, 25f, 12f)
+                        RsBlurTransformation(ctx, 25f, 2.1f)
                 }
                 Crossfade(
                     // Crossfade animation for the ambient background when the focused item changes.
