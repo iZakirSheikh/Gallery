@@ -36,5 +36,5 @@ data class Folder(
     @JvmField val lastModified: Long
 ) {
     val name: String get() = PathUtils.name(path)
-    val artworkUri = MediaProvider.contentUri(artworkID)
+    val artworkUri = MediaProvider.buildContentUri(artworkID)
 }

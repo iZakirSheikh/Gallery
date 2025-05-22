@@ -123,7 +123,7 @@ interface MediaProvider {
         /**
          * @return The content URI for [id] provider.
          */
-        fun contentUri(id: Long) = ContentUris.withAppendedId(EXTERNAL_CONTENT_URI, id)
+        fun buildContentUri(id: Long) = ContentUris.withAppendedId(EXTERNAL_CONTENT_URI, id)
 
         /**
          * Provides an instance of [MediaProvider].

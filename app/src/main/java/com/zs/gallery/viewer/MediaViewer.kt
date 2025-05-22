@@ -20,29 +20,28 @@
 
 package com.zs.gallery.viewer
 
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.PlayCircleFilled
+import androidx.compose.material.icons.outlined.ReplyAll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -51,56 +50,54 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
+import coil3.request.transformations
+import com.zs.compose.foundation.ImageBrush
 import com.zs.compose.foundation.SignalWhite
-import com.zs.compose.foundation.UmbraGrey
 import com.zs.compose.foundation.findActivity
-import com.zs.compose.foundation.plus
+import com.zs.compose.foundation.foreground
 import com.zs.compose.foundation.thenIf
+import com.zs.compose.foundation.visualEffect
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
-import com.zs.compose.theme.adaptive.TwoPane
-import com.zs.compose.theme.adaptive.contentInsets
-import com.zs.compose.theme.appbar.TopAppBar
-import com.zs.compose.theme.sharedBounds
-import com.zs.compose.theme.text.Text
+import com.zs.compose.theme.adaptive.Scaffold
+import com.zs.core.coil.ReBlurTransformation
+import com.zs.core.coil.RsBlurTransformation
 import com.zs.core.coil.preferCachedThumbnail
-import com.zs.core.player.PlayerController
 import com.zs.core.store.MediaProvider
-import com.zs.gallery.common.DefaultBoundsTransform
-import com.zs.gallery.common.LocalNavController
-import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.WindowStyle
+import com.zs.gallery.common.compose.ContentPadding
 import com.zs.gallery.common.compose.FloatingActionMenu
+import com.zs.gallery.common.compose.LocalNavController
+import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.OverflowMenu
-import com.zs.gallery.common.compose.PlayerView
 import com.zs.gallery.common.compose.background
-import com.zs.gallery.common.compose.rememberBackgroundProvider
-import com.zs.gallery.common.compose.rememberPlayerController
+import com.zs.gallery.common.compose.preference
+import com.zs.gallery.common.compose.rememberAcrylicSurface
+import com.zs.gallery.common.compose.shine
+import com.zs.gallery.common.compose.source
+import com.zs.gallery.common.scaledInsideAndCenterAlignedFrom
 import com.zs.gallery.files.RouteFiles
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeSource
+import com.zs.gallery.settings.Settings
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.DoubleClickToZoomListener
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.ZoomableState
 import me.saket.telephoto.zoomable.zoomable
 import androidx.compose.foundation.pager.rememberPagerState as PagerState
 import androidx.compose.ui.graphics.vector.rememberVectorPainter as VectorPainter
+import coil3.compose.rememberAsyncImagePainter as Painter
 import coil3.request.ImageRequest.Builder as ImageRequest
 import me.saket.telephoto.zoomable.rememberZoomableState as ZoomableState
 
@@ -113,63 +110,24 @@ private const val EVENT_BACK_PRESS = 0
 private const val EVENT_SHOW_INFO = 1
 private const val EVENT_IMMERSIVE_VIEW = 2
 
-/**
- * The background color of the app-bar
- */
-private val AppBarOverlay = Brush.verticalGradient(listOf(Color.Black, Color.Transparent))
 private val DEFAULT_ZOOM_SPECS = ZoomSpec(5f)
 
-/**  Indicates whether the content is currently at its default zoom level (not zoomed in). */
+// FixMe - This is not the best solution; find another.
 private val ZoomableState.isZoomedOut get() = (zoomFraction ?: 0f) <= 0.0001f
 
-/**  Scales and centers content based on size. */
-private fun ZoomableState.scaledInsideAndCenterAlignedFrom(size: Size) {
-    // Do nothing if intrinsic size is unknown
-    if (size.isUnspecified) return
-
-    // Scale and center content based on intrinsic size
-    // TODO - Make this suspend fun instead of runBlocking
-    setContentLocation(
-        ZoomableContentLocation.scaledInsideAndCenterAligned(
-            size
-        )
-    )
-}
 
 @Composable
 private fun Carousel(
     viewState: MediaViewerViewState,
-    controller: PlayerController,
-    onRequest: (request: Int) -> Unit,
+    onRequest: (event: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val data = viewState.data
-    val ctx = LocalContext.current
-    // if data is still being loaded;
-    // early return with showing the focused image only.
-    if (data.isEmpty())
-        return Image(
-            contentDescription = null,
-            alignment = Alignment.Center,
-            contentScale = ContentScale.Fit,
-            painter = rememberAsyncImagePainter(
-                model = ImageRequest(ctx)
-                    .data(MediaProvider.contentUri(viewState.focused))
-                    .build(),
-            ),
-            modifier = modifier.sharedBounds(
-                RouteFiles.buildSharedFrameKey(viewState.focused),
-                boundsTransform = AppTheme.DefaultBoundsTransform
-            ),
-        )
-
-    // else load real data- wtih current being the focused one.
-    // Construct the state variables for pager.
-    val pager = PagerState(initialPage = viewState.index, pageCount = { data.size })
+    val state = PagerState(initialPage = viewState.index, pageCount = { data.size })
     val scope = rememberCoroutineScope()
+    //
     val zoomable =
         ZoomableState(DEFAULT_ZOOM_SPECS).apply { contentScale = ContentScale.None }
-
     // Modifier for zoomable images,
     // triggering immersive mode on click and handling double-tap zoom
     val zModifier = Modifier.zoomable(
@@ -177,7 +135,6 @@ private fun Carousel(
         onClick = { onRequest(EVENT_IMMERSIVE_VIEW) },
         onDoubleClick = DoubleClickToZoomListener.cycle(2f)
     )
-
     // TODO - Remove this once inBuilt Video Player is available.
     val vector = VectorPainter(Icons.Outlined.PlayCircleFilled)
     val playIconModifier = Modifier.drawWithCache {
@@ -194,51 +151,27 @@ private fun Carousel(
         }
     }
 
-    // State to control the visibility of the PlayerView
-    // Lazily create the PlayerView content
-    var showVideoView by remember { mutableStateOf(false) }
-    val videoView by remember {
-        lazy {
-            movableContentOf {
-                PlayerView(
-                    controller,
-                    Modifier.fillMaxSize(),
-                    Color.Transparent,
-                    true,
-                    true
-                )
-            }
-        }
-    }
-
     // Handle BackPress
     BackHandler {
         when {
-            // pause if playing
-            controller.isPlaying -> controller.pause()
-            // hide videoView
-            showVideoView -> {
-                onRequest(EVENT_IMMERSIVE_VIEW) // reset immersive-view
-                controller.pause()
-                showVideoView = false // hide video-view.
-            }
             // reset zoom
             !zoomable.isZoomedOut -> scope.launch { zoomable.resetZoom() }
             // else ask parent to handle back-press
             else -> onRequest(EVENT_BACK_PRESS)
         }
     }
-
     // Horizontal pager to display the images/videos
     // Disable swipe when zoomed in
     // Preload adjacent pages for smoother transitions
     Log.d(TAG, "MainContent - ZoomFraction: ${zoomable.zoomFraction}")
+    val navController = LocalNavController.current
+    val ctx = LocalContext.current
     HorizontalPager(
-        state = pager,
+        state = state,
         key = { data[it].id },
-        pageSpacing = 16.dp,
+        pageSpacing = ContentPadding.normal,
         modifier = modifier,
-        userScrollEnabled = zoomable.isZoomedOut && !showVideoView,
+        userScrollEnabled = zoomable.isZoomedOut,
         beyondViewportPageCount = 1,
         pageContent = { index ->
             val item = data[index]
@@ -247,94 +180,112 @@ private fun Carousel(
             // focused item,
             // ensuring smooth animations and optimized performance by avoiding unnecessary modifications
             // to other items.
-            val isFocused = pager.currentPage == index
+            val isFocused = state.currentPage == index
+            val painter = Painter(
+                ImageRequest(ctx).apply {
+                    memoryCacheKey("${item.id}")
+                    data(item.mediaUri)
+                    if (item.isImage)  // Make sure that image is not loaded from Thumbnail repo.
+                        preferCachedThumbnail(false)
+                }.build(),
+                onSuccess = {
+                    val size = it.painter.intrinsicSize
+                    Log.d(TAG, "Carousel success: ${size}")
+                    if (isFocused)
+                        scope.launch { zoomable.scaledInsideAndCenterAlignedFrom(size) }
+                },
+            )
             // if the user navigated to this item
             // TODO - maybe move to launched- effect.
             if (isFocused) {
                 viewState.focused = item.id
-                zoomable.scaledInsideAndCenterAlignedFrom(
-                    Size(item.width.toFloat(), item.height.toFloat())
-                )
-                controller.clear()
-                if (!item.isImage) {
-                    controller.setMediaItem(item.mediaUri)
-                    controller.prepare()
-                }
+                zoomable.scaledInsideAndCenterAlignedFrom(painter.intrinsicSize)
+                Log.d(TAG, "Carousel focused: ${painter.intrinsicSize}")
             }
             // The content
-            when {
-                isFocused && showVideoView -> videoView()
-                else -> AsyncImage(
-                    model = ImageRequest(ctx).apply {
-                        memoryCacheKey("${item.id}")
-                        data(item.mediaUri)
-                        if (item.isImage)  // Make sure that image is not loaded from Thumbnail repo.
-                            preferCachedThumbnail(false)
-                    }.build(),
-                    onSuccess = {
-                        val size = it.painter.intrinsicSize
-                        if (isFocused)
-                            scope.launch { zoomable.scaledInsideAndCenterAlignedFrom(size) }
-                    },
-                    placeholder = rememberAsyncImagePainter(
-                        model = ImageRequest(ctx)
-                            .apply {
-                                data(MediaProvider.contentUri(item.id))
-                            }.build(),
-                    ),
-                    contentDescription = item.name,
-                    alignment = Alignment.Center,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .thenIf(isFocused) {
-                            when {
-                                item.isImage -> zModifier
-                                else -> playIconModifier.clickable(null, null) {
-                                    onRequest(EVENT_IMMERSIVE_VIEW)
-                                    controller.play(true)
-                                    showVideoView = true
-                                }
-                            } then Modifier.sharedBounds(
-                                RouteFiles.buildSharedFrameKey(
-                                    item.id
-                                ),
-                                boundsTransform = AppTheme.DefaultBoundsTransform
-                            )
-                        }
-                        .fillMaxSize()
-                )
-            }
+            Image(
+                painter = painter,
+                contentDescription = item.name,
+                alignment = Alignment.Center,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .thenIf(isFocused) {
+                        when {
+                            item.isImage -> zModifier
+                            else -> playIconModifier.clickable(null, null) {
+                                navController.navigate(
+                                    RouteIntentViewer(
+                                        item.mediaUri,
+                                        item.mimeType
+                                    )
+                                )
+                            }
+                        } then RouteFiles.sharedElement(viewState.focused)
+                    }
+            )
         }
     )
 }
 
+/** Represents the MediaViewer Screen. */
 @Composable
-private fun MediaViewerAppBar(
-    visible: Boolean,
-    title: CharSequence,
-    provider: HazeState,
-    onRequest: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = slideInVertically() + fadeIn(),
-        exit = slideOutVertically() + fadeOut(),
-        content = {
-            TopAppBar(
+fun MediaViewer(viewState: MediaViewerViewState) {
+    //
+    var immersive by remember { mutableStateOf(false) }
+    val compact = LocalWindowSize.current.width < Category.Medium
+    val surface = rememberAcrylicSurface()
+    val colors = AppTheme.colors
+    //
+    val facade = LocalSystemFacade.current
+    val navController = LocalNavController.current
+    val onRequest: (Int) -> Unit = { request: Int ->
+        when (request) {
+            // Toggle the visibility of detailed information.
+            EVENT_SHOW_INFO -> viewState.showDetails = !viewState.showDetails;
+            // Toggle immersive mode and update system UI accordingly.
+            EVENT_IMMERSIVE_VIEW -> {
+                immersive = !immersive
+                facade.style += if (immersive) WindowStyle.FLAG_SYSTEM_BARS_HIDDEN else WindowStyle.FLAG_SYSTEM_BARS_VISIBLE
+            }
+            // Handle back press events, prioritizing focused states (immersive, details)
+            // before navigating up.
+            EVENT_BACK_PRESS if viewState.showDetails -> viewState.showDetails = false
+            EVENT_BACK_PRESS if immersive -> {
+                immersive = false
+                facade.style += WindowStyle.FLAG_SYSTEM_BARS_VISIBLE
+            }
+            // Navigate up if no focused states
+            EVENT_BACK_PRESS -> navController.navigateUp()
+            // This must not happen.
+            else -> error("Received unexpected event: $request")
+        }
+    }
+    //
+    DetailsViewDialog(
+        viewState.details,
+        colors.background(surface),
+        onDismissRequest = { viewState.showDetails = false }
+    )
+
+    val isLoading by remember { derivedStateOf { viewState.data.isEmpty() } }
+    val ctx = LocalContext.current
+    Scaffold(
+        fabPosition = if (compact) FabPosition.Center else FabPosition.End,
+        contentColor = Color.SignalWhite,
+        //
+        containerColor = Color.Black,
+        // TopAppBar
+        topBar = {
+            MediaViewerTopAppBar(
+                visible = !immersive && !isLoading,
+                title = viewState.title,
+                provider = surface,
                 navigationIcon = {
                     IconButton(
-                        icon = Icons.AutoMirrored.Outlined.ArrowBack,
-                        contentDescription = null,
+                        Icons.Outlined.ReplyAll,
+                        contentDescription = "Back",
                         onClick = { onRequest(EVENT_BACK_PRESS) }
-                    )
-                },
-                title = {
-                    Text(
-                        title,
-                        maxLines = 2,
-                        fontFamily = FontFamily.Monospace,
-                        style = AppTheme.typography.title3
                     )
                 },
                 actions = {
@@ -344,117 +295,83 @@ private fun MediaViewerAppBar(
                         onClick = { onRequest(EVENT_SHOW_INFO) }
                     )
                 },
-                background = AppTheme.colors.background(
-                    provider,
-                    Color.Transparent,
-                    progressive = 1f,
-                    blurRadius = 60.dp,
-                    tint = Color.Black.copy(0.3f),
-                    blendMode = BlendMode.Multiply
-                ),
-                contentColor = Color.SignalWhite,
-                elevation = 0.dp,
             )
         },
-    )
-}
-
-/** Represents the MediaViewer Screen. */
-@Composable
-fun MediaViewer(viewState: MediaViewerViewState) {
-    // Define required state variables
-    val clazz = LocalWindowSize.current
-    var immersive by remember { mutableStateOf(false) }
-    val facade = LocalSystemFacade.current
-    val navController = LocalNavController.current
-    val onRequest: (Int) -> Unit = { request: Int ->
-        when (request) {
-            // Toggle the visibility of detailed information.
-            EVENT_SHOW_INFO -> {
-                viewState.showDetails = !viewState.showDetails;
-                immersive = viewState.showDetails
-            }
-            // Toggle immersive mode and update system UI accordingly.
-            EVENT_IMMERSIVE_VIEW -> {
-                immersive = !immersive
-                facade.style += if (immersive) WindowStyle.FLAG_SYSTEM_BARS_HIDDEN else WindowStyle.FLAG_SYSTEM_BARS_VISIBLE
-            }
-            // Handle back press events, prioritizing focused states (immersive, details)
-            // before navigating up.
-            EVENT_BACK_PRESS -> {
-                when {
-                    // consume in making not immersive
-                    immersive -> {
-                        immersive = false
-                        facade.style += WindowStyle.FLAG_SYSTEM_BARS_VISIBLE
-                    }
-                    // consume in hiding the details this action
-                    viewState.showDetails -> viewState.showDetails = false
-                    // Navigate up if no focused states
-                    else -> navController.navigateUp()
-                }
-            }
-            // Handle unexpected events
-            else -> error("Unknown event: $request")
-        }
-    }
-
-    val portrait = clazz.width < clazz.height
-
-    // The player controller
-    // initialized here because we can destroy it once the view is destroyed.
-    val controller =
-        rememberPlayerController(true, true)
-    val observer = rememberBackgroundProvider()
-    val colors = AppTheme.colors
-    Details(
-        viewState.details,
-        colors.background(
-            observer,
-            Color.White,
-            blurRadius = 70.dp,
-        ),
-        onDismissRequest = {
-            viewState.showDetails = false
-        }
-    )
-
-    // Actual content
-    TwoPane(
-        fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
-        contentColor = Color.SignalWhite,
-        containerColor = Color.Black,
-        topBar = { MediaViewerAppBar(!immersive, viewState.title, observer, onRequest) },
-        primary = {
-            Carousel(
-                viewState = viewState,
-                controller = controller,
-                onRequest = onRequest,
-                modifier = Modifier
-                    .hazeSource(observer)
-                    .fillMaxSize()
-            )
-        },
+        // FloatingActionMenu
         floatingActionButton = {
             val actions = viewState.actions
             FloatingActionMenu(
-                visible = !immersive && !actions.isEmpty(),
-                background = colors.background(
-                    observer,
-                    Color.White,
-                    blurRadius = 70.dp,
+                visible = !immersive && !isLoading,
+                background = colors.background(surface),
+                modifier = Modifier.windowInsetsPadding(
+                    WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)
                 ),
-                contentColor = Color.UmbraGrey,
-                insets = WindowInsets.contentInsets + WindowInsets.safeContent.asPaddingValues(),
+                border = colors.shine,
                 content = {
-                    val ctx = LocalContext.current
                     OverflowMenu(
                         actions,
-                        onItemClicked = { viewState.onAction(it, ctx.findActivity()) },
+                        onItemClicked = { viewState.onPerformAction(it, ctx.findActivity()) },
                         collapsed = 5
                     )
                 }
             )
+        },
+        // Carousal
+        content = {
+            // Ambient mode: applies a blur effect and noise overlay for an immersive background.
+            // since content in placed inside of Box; so doing this is pretty normal
+            val isAmbientModeEnabled by preference(Settings.KEY_VISUAL_EFFECT_MODE)
+            if (isAmbientModeEnabled == 1) {
+                // Transformation for blur effect, chosen based on Android version.
+                val transformation = remember {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                        ReBlurTransformation(25f, 2.1f)
+                    else
+                        RsBlurTransformation(ctx, 25f, 2.1f)
+                }
+                Crossfade(
+                    // Crossfade animation for the ambient background when the focused item changes.
+                    viewState.focused,
+                    modifier = Modifier
+                        .foreground(Color.Black.copy(0.92f))
+                        .visualEffect(ImageBrush.NoiseBrush, 0.04f, true, BlendMode.Luminosity),
+                    // Content of the Crossfade: an AsyncImage with blur and noise effects.
+                    content = {
+                        AsyncImage(
+                            ImageRequest(ctx)
+                                .data(MediaProvider.buildContentUri(it))
+                                .size(256)
+                                .transformations(transformation).build(),
+                            null,
+                            contentScale = ContentScale.Crop,
+                            filterQuality = FilterQuality.None,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                )
+            }
+            // Modifier for the main content, applying surface properties and filling the maximum size.
+            val modifier = Modifier.source(surface).fillMaxSize()
+            // If data is loading, display a placeholder image with shared element transition.
+            if (isLoading)
+                AsyncImage(
+                    contentDescription = null,
+                    alignment = Alignment.Center,
+                    contentScale = ContentScale.Fit,
+                    model = ImageRequest(ctx)
+                        .memoryCacheKey("${viewState.focused}")
+                        .data(MediaProvider.buildContentUri(viewState.focused))
+                        .preferCachedThumbnail(false)
+                        .build(),
+                    placeholder = Painter(
+                        model = ImageRequest(ctx)
+                            .data(MediaProvider.buildContentUri(viewState.focused))
+                            .build(),
+                    ),
+                    modifier = modifier.then(RouteFiles.sharedElement(viewState.focused)),
+                )
+            // If data is loaded, display the Carousel with the media items.
+            else Carousel(viewState, onRequest, modifier = modifier)
         }
     )
 
@@ -467,7 +384,6 @@ fun MediaViewer(viewState: MediaViewerViewState) {
         onDispose {
             // Reset to default on disposal
             facade.style = original
-            controller.release()
         }
     }
 }

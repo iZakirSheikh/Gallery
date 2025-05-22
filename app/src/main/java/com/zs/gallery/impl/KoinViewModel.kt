@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 17-07-2024.
+ * Created by Zakir Sheikh on 10-05-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
  */
 
 package com.zs.gallery.impl
-
 import android.app.Application
 import android.content.res.Resources
 import android.text.format.Formatter
@@ -34,6 +33,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.viewModelScope
 import com.zs.compose.foundation.OrientRed
 import com.zs.compose.foundation.getText2
 import com.zs.compose.theme.snackbar.SnackbarDuration
@@ -42,9 +42,14 @@ import com.zs.compose.theme.snackbar.SnackbarResult
 import com.zs.core.common.showPlatformToast
 import com.zs.gallery.R
 import com.zs.preferences.Preferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 import org.koin.androidx.scope.ScopeViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.component.inject
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 private const val TAG = "KoinViewModel"
 
@@ -109,6 +114,36 @@ abstract class KoinViewModel : ScopeViewModel() {
         accent = Color.OrientRed,
         duration = SnackbarDuration.Indefinite
     )
+
+    /**
+     * Launches a new coroutine within the ViewModel scope, handling potential exceptions.
+     *
+     * This function wraps the [viewModelScope.launch] function to provide a convenient way
+     * to launch coroutines with error handling. If any exceptions occur during the execution
+     * of the coroutine, a toast message with the error details will be displayed to the user.
+     *
+     * @param context The [CoroutineContext] to use for the coroutine.
+     *                Defaults to [EmptyCoroutineContext].
+     * @param start The [CoroutineStart] mode to use for the coroutine.
+     *              Defaults to [CoroutineStart.DEFAULT].
+     * @param block The suspend function to execute within the coroutine.
+     */
+    inline fun launch(
+        context: CoroutineContext = EmptyCoroutineContext,
+        start: CoroutineStart = CoroutineStart.DEFAULT,
+        crossinline block: suspend CoroutineScope.() -> Unit
+    ) {
+        viewModelScope.launch(context, start) {
+            try { block() }
+            catch (e: Exception) {
+                // Handle any exceptions that occurred during the coroutine execution.
+                // Display an error message to the user, providing context and error details.
+                val report = report(e.message ?: getText(R.string.msg_unknown_error))
+//                if (report == SnackbarResult.ActionPerformed)
+//                    analytics.record(e)
+            }
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()

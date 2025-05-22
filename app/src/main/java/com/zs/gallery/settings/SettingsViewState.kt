@@ -49,20 +49,23 @@ import com.zs.preferences.floatPreferenceKey
 import com.zs.preferences.intPreferenceKey
 import com.zs.preferences.stringPreferenceKey
 
+//
 object RouteSettings : Route
-
-private val provider by lazy {
+//
+private val fontProvider by lazy {
     GoogleFont.Provider(
         providerAuthority = "com.google.android.gms.fonts",
         providerPackage = "com.google.android.gms",
         certificates = R.array.com_google_android_gms_fonts_certs
     )
 }
+//
 
-private val OutfitFontFamily = FontFamily("Outfit")
-val FontFamily.Companion.OutfitFontFamily get() = com.zs.gallery.settings.OutfitFontFamily
-val DancingScriptFontFamily = FontFamily("Dancing Script")
-val FontFamily.Companion.DancingScriptFontFamily get() = com.zs.gallery.settings.DancingScriptFontFamily
+private val _OutfitFontFamily = FontFamily("Outfit")
+private  val _DancingScriptFontFamily = FontFamily("Dancing Script")
+//
+val FontFamily.Companion.OutfitFontFamily get() = _OutfitFontFamily
+val FontFamily.Companion.DancingScriptFontFamily get() = _DancingScriptFontFamily
 
 /**
  * Creates a [FontFamily] from the given Google Font name.
@@ -77,22 +80,22 @@ private fun FontFamily(name: String): FontFamily {
     // Create a FontFamily object with four different font weights.
     return FontFamily(
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Light
         ),
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Medium
         ),
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Normal
         ),
         Font(
-            fontProvider = provider,
+            fontProvider = fontProvider,
             googleFont = font,
             weight = FontWeight.Bold
         ),
@@ -105,6 +108,7 @@ private fun FontFamily(name: String): FontFamily {
 interface SettingsViewState {
     fun <S, O> set(key: Key<S, O>, value: O)
 }
+
 
 /**
  * ## Settings
@@ -154,6 +158,11 @@ interface SettingsViewState {
  */
 object Settings {
     // The keys for the preferences
+
+    const val PREFIX_MARKET_URL = "market://details?id="
+    const val PREFIX_MARKET_FALLBACK = "http://play.google.com/store/apps/details?id="
+    const val PKG_MARKET_ID = "com.android.vending"
+
     private const val PREFIX = "global"
     val STANDARD_TILE_SIZE = 100.dp
     val KEY_NIGHT_MODE =
@@ -178,7 +187,10 @@ object Settings {
         booleanPreferenceKey(PREFIX + "_dynamic_gallery", defaultValue = true)
     val KEY_FONT_SCALE = floatPreferenceKey(PREFIX + "_font_scale", -1f)
     val KEY_TRANSPARENT_SYSTEM_BARS =
-        booleanPreferenceKey(PREFIX + "_transparent_system_bars", defaultValue = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+        booleanPreferenceKey(
+            PREFIX + "_transparent_system_bars",
+            defaultValue = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+        )
     val KEY_IMMERSIVE_VIEW =
         booleanPreferenceKey(PREFIX + "_immersive_view", defaultValue = false)
     val KEY_FAVOURITE_FILES =
@@ -206,7 +218,15 @@ object Settings {
     val KEY_USE_ACCENT_IN_NAV_BAR =
         booleanPreferenceKey("use_accent_in_nav_bar", false)
     val KEY_DYNAMIC_COLORS =
-        booleanPreferenceKey(PREFIX + "_dynamic_colors", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        booleanPreferenceKey(
+            PREFIX + "_dynamic_colors",
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        )
+    // TODO: Use an integer instead of a boolean to allow for multiple background effects in the future.
+    // 0 - represents 0ff state; 1 ambient
+    val KEY_VISUAL_EFFECT_MODE =
+        intPreferenceKey("${PREFIX}_visual_effect_mode", 0)
+
 
     val DefaultFontFamily get() = FontFamily.Default
 
@@ -232,6 +252,9 @@ object Settings {
     }
     val ShareAppIntent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_TEXT, "Hey, check out this cool app: [https://play.google.com/store/apps/details?id=com.googol.android.apps.photos&pcampaignid=web_share]")
+        putExtra(
+            Intent.EXTRA_TEXT,
+            "Hey, check out this cool app: [https://play.google.com/store/apps/details?id=com.googol.android.apps.photos&pcampaignid=web_share]"
+        )
     }
 }

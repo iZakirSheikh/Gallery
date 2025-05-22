@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 18-07-2024.
+ * Created by Zakir Sheikh on 10-05-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,6 @@
  */
 
 package com.zs.gallery.common
-
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.SizeTransform
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavDestination
-import androidx.navigation.NavGraph
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.zs.compose.theme.LocalNavAnimatedVisibilityScope
 
 private val SPLIT_REGEX = Regex("(?=[A-Z])")
 
@@ -66,131 +48,3 @@ interface Route {
      */
     operator fun invoke(): String = route
 }
-
-/**
- * Extends [Route] to provide mapping to and from arguments, typically using [SavedStateHandle].
- *
- * @param T The type of arguments this route accepts.
- */
-interface SafeArgs<T> : Route {
-
-    override fun invoke() = error("Not Supported")
-
-    /**
-     * Constructs the navigation direction for this route, replacing placeholders in [route]
-     * with the provided arguments.
-     *
-     * @param arg The arguments to use for constructing the direction.
-     */
-    operator fun invoke(arg: T): String
-
-    /**
-     * Builds the arguments for this route from the provided [SavedStateHandle].
-     *
-     * @param handle The [SavedStateHandle] to use for building the arguments.
-     * @return The arguments for this route.
-     */
-    fun build(handle: SavedStateHandle): T
-}
-
-/**
- * Retrieves the [SafeArgs] object of type[T] associated with the given [SafeArgs] instance
- * from this [SavedStateHandle].
- *
- * @param route The [SafeArgs] instance representing the navigation route and arguments.
- * @return The args object of type [T] containing the deserialized arguments.
- **/
-operator fun <T> SavedStateHandle.get(route: SafeArgs<T>): T = route.build(this)
-
-/**
- * Adds a composable route to the [NavGraphBuilder] for the given [Route].
- *
- * @param route The [Route] object representing the navigation destination.
- * @param content The composable content to display for this route.
- */
-fun NavGraphBuilder.composable(
-    route: Route,
-    enterTransition:
-    (@JvmSuppressWildcards
-    AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? =
-        null,
-    exitTransition:
-    (@JvmSuppressWildcards
-    AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? =
-        null,
-    popEnterTransition:
-    (@JvmSuppressWildcards
-    AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? =
-        enterTransition,
-    popExitTransition:
-    (@JvmSuppressWildcards
-    AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? =
-        exitTransition,
-    sizeTransform:
-    (@JvmSuppressWildcards
-    AnimatedContentTransitionScope<NavBackStackEntry>.() -> SizeTransform?)? =
-        null,
-    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
-) = composable(
-    route = route.route,
-    enterTransition = enterTransition,
-    exitTransition = exitTransition,
-    popExitTransition = popExitTransition,
-    popEnterTransition = popEnterTransition,
-    sizeTransform = sizeTransform,
-    content = { id ->
-        CompositionLocalProvider(value = LocalNavAnimatedVisibilityScope provides this) {
-            content(id)
-        }
-    }
-)
-
-/**
- * @see androidx.navigation.NavGraph.setStartDestination(java.lang.String)
- */
-fun <T> NavGraph.setStartDestination(route: Route) =
-    setStartDestination(route.route)
-
-/**
- * Used to provide access to the [NavHostController] through composition without needing to pass it down the tree.
- *
- * To use this composition local, you can call [LocalNavController.current] to get the [NavHostController].
- * If no [NavHostController] has been set, an error will be thrown.
- *
- * Example usage:
- *
- * ```
- * val navController = LocalNavController.current
- * navController.navigate("destination")
- * ```
- */
-val LocalNavController =
-    staticCompositionLocalOf<NavHostController> {
-        error("no local nav host controller found")
-    }
-
-/**
- * Returns the current route of the [NavHostController]
- */
-val NavHostController.current
-    @Composable inline get() = currentBackStackEntryAsState().value?.destination
-
-/**
- * Extracts the domain portion from a [NavDestination]'s route.
- *
- * The domain is considered to be the part of the route before the first '/'.
- * For example, for the route "settings/profile", the domain would be "settings".
- *
- * @return The domain portion of the route, or null if the route is null or does not contain a '/'.
- */
-val NavDestination.domain: String?
-    get() {
-        // Get the route, or return null if it's not available.
-        val route = route ?: return null
-
-        // Find the index of the first '/' character.
-        val index = route.indexOf('/')
-
-        // Return the substring before the '/' if it exists, otherwise return the entire route.
-        return if (index == -1) route else route.substring(0, index)
-    }

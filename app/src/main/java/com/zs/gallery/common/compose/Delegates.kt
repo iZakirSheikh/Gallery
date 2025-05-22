@@ -21,9 +21,10 @@
 package com.zs.gallery.common.compose
 
 import android.annotation.SuppressLint
-import android.os.Build
 import android.util.Log
 import androidx.annotation.RawRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -32,15 +33,11 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -48,21 +45,24 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -70,48 +70,37 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.composable
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.airbnb.lottie.compose.rememberLottiePainter
-import com.zs.compose.foundation.Background
-import com.zs.compose.foundation.background
 import com.zs.compose.foundation.composableIf
 import com.zs.compose.foundation.effects.shimmer
 import com.zs.compose.foundation.fullLineSpan
-import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
-import com.zs.compose.theme.Colors
 import com.zs.compose.theme.ExperimentalThemeApi
+import com.zs.compose.theme.LocalNavAnimatedVisibilityScope
 import com.zs.compose.theme.Placeholder
-import com.zs.compose.theme.appbar.AppBarDefaults
-import com.zs.compose.theme.appbar.BottomNavigationItem
-import com.zs.compose.theme.appbar.FloatingLargeTopAppBar
-import com.zs.compose.theme.appbar.LargeTopAppBar
-import com.zs.compose.theme.appbar.NavigationItemColors
-import com.zs.compose.theme.appbar.NavigationItemDefaults
-import com.zs.compose.theme.appbar.SideNavigationItem
-import com.zs.compose.theme.appbar.TopAppBar
-import com.zs.compose.theme.appbar.TopAppBarScrollBehavior
-import com.zs.compose.theme.appbar.TopAppBarStyle
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.Text
+import com.zs.core.billing.Purchase
 import com.zs.core.player.PlayerController
 import com.zs.core.player.PlayerView
 import com.zs.gallery.R
 import com.zs.gallery.common.Mapped
-import dev.chrisbanes.haze.ExperimentalHazeApi
-import dev.chrisbanes.haze.HazeInputScale
-import dev.chrisbanes.haze.HazeProgressive
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeTint
-import dev.chrisbanes.haze.hazeEffect
-import dev.chrisbanes.haze.hazeSource
+import com.zs.gallery.common.Route
+import com.zs.gallery.common.SystemFacade
+import com.zs.gallery.common.compose.ContentPadding
+import com.zs.preferences.Key
 import kotlin.math.roundToInt
 
 private const val TAG = "Delegates"
+
 
 /**
  * A composable function that delegates to [LottieAnimation] painter and behaves like [AndroidVectorDrawable].
@@ -177,8 +166,7 @@ fun lottieAnimationPainter(
         reverseOnRepeat = repeatMode == RepeatMode.Reverse,
     )
     return rememberLottiePainter(
-        composition = composition,
-        progress = progress
+        composition = composition, progress = progress
     )
 }
 
@@ -205,49 +193,18 @@ inline fun Placeholder(
         },
         title = {
             Label(
-                text = title.ifEmpty { " " },
-                maxLines = 2,
-                color = AppTheme.colors.onBackground
+                text = title.ifEmpty { " " }, maxLines = 2, color = AppTheme.colors.onBackground
             )
         },
         icon = {
             Image(
-                painter = lottieAnimationPainter(id = iconResId),
-                contentDescription = null
+                painter = lottieAnimationPainter(id = iconResId), contentDescription = null
             )
         },
         action = action,
     )
 }
 
-/**
- * Represents a navigation item that can be used in either a bottom navigation bar or a side navigation rail.
- *
- * This composable simplifies the creation of navigation items by abstracting the underlying implementation
- * (either [BottomNavigationItem] or [NavigationRailItem]). It determines which item type to use based on
- * the `typeRail` parameter.
- *
- * @param onClick The callback to be invoked when this item is clicked.
- * @param icon The icon content of this navigation item.
- * @param label The label content of this navigation item.
- * @param modifier The [Modifier] to be applied to this navigation item.
- * @param checked `true` if this item is selected, `false` otherwise.
- * @param typeRail `true` if this item should be rendered as a side navigation rail item,
- *                 `false` if it should be rendered as a bottom navigation item.
- */
-@Composable
-inline fun NavItem(
-    noinline onClick: () -> Unit,
-    noinline icon: @Composable () -> Unit,
-    noinline label: @Composable (() -> Unit),
-    modifier: Modifier = Modifier,
-    checked: Boolean = false,
-    typeRail: Boolean = false,
-    colors: NavigationItemColors = NavigationItemDefaults.colors(),
-) = when (typeRail) {
-    true -> SideNavigationItem(checked, onClick, icon, label, modifier, colors = colors)
-    else -> BottomNavigationItem(checked, onClick, icon, label, modifier, colors = colors)
-}
 
 /**
  * A simple utility fun for loading animation header index
@@ -271,60 +228,44 @@ fun <T> LazyGridScope.emit(
 ): Mapped<T>? {
     when {
         // null means loading
-        data == null -> items(
-            20,
-            contentType = { "loading_item" },
-            span = {
-                if (isIndexHeader(it))
-                    GridItemSpan(maxLineSpan)
-                else
-                    GridItemSpan(1)
-            },
-            itemContent = {
-                val isHeader = isIndexHeader(it)
-                if (isHeader)
-                    Box(
-                        contentAlignment = Alignment.CenterStart,
-                        content = {
-                            Spacer(
-                                Modifier
-                                    .padding(
-                                        top = ContentPadding.large,
-                                        bottom = ContentPadding.medium
-                                    )
-                                    .requiredSize(100.dp, 30.dp)
-                                    .clip(CircleShape)
-                                    .shimmer(
-                                        Color.Gray.copy(0.5f),
-                                        animationSpec = ShimmerAnimSpec,
-                                        width = 400.dp
-                                    )
-                                    .background(
-                                        AppTheme.colors.background(0.5.dp)
-                                    )
-                            )
-
-                        }
-                    )
-                else
+        data == null -> items(20, contentType = { "loading_item" }, span = {
+            if (isIndexHeader(it)) GridItemSpan(maxLineSpan)
+            else GridItemSpan(1)
+        }, itemContent = {
+            val isHeader = isIndexHeader(it)
+            if (isHeader) Box(
+                contentAlignment = Alignment.CenterStart, content = {
                     Spacer(
                         Modifier
-                            .aspectRatio(1.0f)
-                            .background(AppTheme.colors.background(0.5.dp), RectangleShape)
+                            .padding(
+                                top = ContentPadding.large, bottom = ContentPadding.medium
+                            )
+                            .requiredSize(100.dp, 30.dp)
+                            .clip(CircleShape)
                             .shimmer(
                                 Color.Gray.copy(0.5f),
                                 animationSpec = ShimmerAnimSpec,
-                                width = 20.dp
+                                width = 400.dp
+                            )
+                            .background(
+                                AppTheme.colors.background(0.5.dp)
                             )
                     )
-            }
-        )
+
+                })
+            else Spacer(
+                Modifier
+                    .aspectRatio(1.0f)
+                    .background(AppTheme.colors.background(0.5.dp), RectangleShape)
+                    .shimmer(
+                        Color.Gray.copy(0.5f), animationSpec = ShimmerAnimSpec, width = 20.dp
+                    )
+            )
+        })
 
         // empty means empty
         data.isEmpty() -> item(
-            span = fullLineSpan,
-            key = "key_empty_placeholder...",
-            content = {
+            span = fullLineSpan, key = "key_empty_placeholder...", content = {
                 Placeholder(
                     title = stringResource(R.string.oops_empty),
                     iconResId = R.raw.lt_empty_box,
@@ -332,8 +273,7 @@ fun <T> LazyGridScope.emit(
                         .fillMaxSize()
                         .animateItem()
                 )
-            },
-            contentType = "data_empty_placeholder"
+            }, contentType = "data_empty_placeholder"
         )
     }
     // return if non-empty else return null
@@ -350,14 +290,27 @@ fun <T> LazyGridScope.emit(
  * @param vertical `true` for top/bottom fade, `false` for left/right. Defaults to `true`.
  * @return A [Modifier] with the fading edge effect.
  */
+// TODO - Add logic to make fading edge apply/exclude content padding in real one.
 fun Modifier.fadingEdge2(
-    colors: List<Color>,
     length: Dp = 10.dp,
     vertical: Boolean = true,
-) = drawWithContent {
+) = graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen).drawWithContent {
     drawContent()
-    drawRect(Brush.verticalGradient(colors, endY = length.toPx()))
-    drawRect(Brush.verticalGradient(colors.reversed(), startY = (size.height - length.toPx())))
+    drawRect(
+        Brush.verticalGradient(
+            listOf(Color.Black, Color.Transparent), endY = length.toPx(), startY = 0f
+        ), blendMode = BlendMode.DstOut, size = size.copy(height = length.toPx())
+    )
+    drawRect(
+        brush = Brush.verticalGradient(
+            colors = listOf(Color.Transparent, Color.Black),
+            startY = size.height - length.toPx(),
+            endY = size.height
+        ),
+        //  topLeft = Offset(0f, size.height - length.toPx()),
+        // size = size.copy(height = length.toPx()),
+        blendMode = BlendMode.DstOut
+    )
 }
 
 /**
@@ -420,159 +373,108 @@ fun PlayerView(
         Log.d(TAG, "PlayerView: updating")
         playerView.setBackgroundColor(background.toArgb())
         playerView.keepScreenOn = keepScreenOn
-    }
-)
+    })
 
-
-/** Creates and [remember] s the instance of [HazeState] */
-@Composable
-@NonRestartableComposable
-fun rememberBackgroundProvider() = remember(::HazeState)
-
-fun Modifier.observe(provider: HazeState) = hazeSource(state = provider)
-
-// Reusable mask
-private val PROGRESSIVE_MASK = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-    Brush.verticalGradient(
-        listOf(
-            Color.Black,
-            Color.Black,
-            Color.Transparent
-        )
-    )
-else
-    Brush.verticalGradient(
-        0.5f to Color.Black,
-        0.8f to Color.Black.copy(0.5f),
-        1.0f to Color.Transparent,
-    )
 
 /**
- * Applies a hazy effect to the background based on the provided [HazeState].
+ * Adds a composable route to the [NavGraphBuilder] for the given [Route].
  *
- * This function creates a blurred background with optional noise and tint effects. It provides customization options
- * for blur radius, noise factor, tint color, blend mode, and progressive blurring.
- *
- * @param provider The [HazeState] instance that manages the haze effect.
- * @param containerColor The background color of the container. Defaults to [Colors.background].
- * @param blurRadius The radius of the blur effect. Defaults to 38.dp for light backgrounds (luminance >= 0.5) and 60.dp for dark backgrounds.
- * @param noiseFactor The factor for the noise effect. Defaults to 0.4f for light backgrounds and 0.28f for dark backgrounds. Noise effect is disabled on Android versions below 12.
- * @param tint The color to tint the blurred background with. Defaults to a semi-transparent version of [containerColor].
- * @param blendMode The blend mode to use for the tint. Defaults to [BlendMode.SrcOver].
- * @param progressive A float value to control progressive blurring:
- *   - -1f: Progressive blurring is disabled.
- *   - 0f: Bottom to top gradient.
- *   - 1f: Top to bottom gradient.
- *   - Values between 0f and 1f: Intermediate gradient positions.
- *   Progressive blurring is only available on Android 12 and above.
- * @return A [Background] composable with the specified haze effect.
+ * @param route The [Route] object representing the navigation destination.
+ * @param content The composable content to display for this route.
  */
-@SuppressLint("ModifierFactoryExtensionFunction")
-@OptIn(ExperimentalHazeApi::class)
-fun Colors.background(
-    provider: HazeState,
-    containerColor: Color = background(1.dp),
-    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 80.dp,
-    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.4f else 0.45f,
-    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.65f),
-    blendMode: BlendMode = BlendMode.SrcOver,
-    progressive: Float = -1f,
-) = Background(
-    Modifier
-        .hazeEffect(state = provider) {
-            this.blurEnabled = true
-            this.blurRadius = blurRadius
-            this.backgroundColor = containerColor
-            // Disable noise factor on Android versions below 12.
-            this.noiseFactor = noiseFactor
-            this.tints = listOf(
-                // apply luminosity just like in Microsoft Acrylic.
-                HazeTint(Color.White.copy(0.07f), BlendMode.Luminosity),
-                HazeTint(tint, blendMode = blendMode)
-            )
-            // Configure progressive blurring (if enabled).
-            if (progressive != -1f) {
-                this.progressive = HazeProgressive.verticalGradient(
-                    startIntensity = progressive,
-                    endIntensity = 0f,
-                    preferPerformance = true
-                )
-                // Adjust input scale for Android versions below 12 for better visuals.
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                    inputScale = HazeInputScale.Fixed(0.5f)
-                mask = PROGRESSIVE_MASK
-            }
+fun NavGraphBuilder.composable(
+    route: Route,
+    content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
+) = composable(
+    route = route.route, content = { id ->
+        CompositionLocalProvider(value = LocalNavAnimatedVisibilityScope provides this) {
+            content(id)
         }
-)
-
-private val FloatingTopBarShape = RoundedCornerShape(20)
-
-private val Colors.border
-    get() = BorderStroke(
-        0.5.dp,
-        Brush.verticalGradient(
-            listOf(
-                if (isLight) background else Color.Gray.copy(0.24f),
-                if (isLight) background.copy(0.3f) else Color.Gray.copy(0.075f),
-            )
-        )
-    )
+    })
 
 /**
- * Represents the general purpose [TopAppBar] for screens.
- * @param immersive weather to load a topBar tha is end to end or floating.
+ * Used to provide access to the [NavHostController] through composition without needing to pass it down the tree.
+ *
+ * To use this composition local, you can call [LocalNavController.current] to get the [NavHostController].
+ * If no [NavHostController] has been set, an error will be thrown.
+ *
+ * Example usage:
+ *
+ * ```
+ * val navController = LocalNavController.current
+ * navController.navigate("destination")
+ * ```
  */
-@Composable
-@NonRestartableComposable
-fun GalleryTopAppBar(
-    immersive: Boolean,
-    title: @Composable () -> Unit,
-    backdrop: Background,
-    modifier: Modifier = Modifier,
-    navigationIcon: @Composable () -> Unit = {},
-    actions: @Composable RowScope.() -> Unit = {},
-    behavior: TopAppBarScrollBehavior,
-    style: TopAppBarStyle = if (immersive) AppBarDefaults.largeAppBarStyle() else AppBarDefaults.floatingLargeAppBarStyle(),
-    insets: WindowInsets = AppBarDefaults.topAppBarWindowInsets,
-) = when {
-    !immersive -> FloatingLargeTopAppBar(
-        title = title,
-        scrollBehavior = behavior,
-        modifier = modifier,
-        navigationIcon = navigationIcon,
-        actions = actions,
-        windowInsets = insets,
-        style = style,
-        background = {
-            if (fraction > 0.1f) return@FloatingLargeTopAppBar Spacer(Modifier)
-            val colors = AppTheme.colors
-            Spacer(
-                modifier = Modifier
-                    .shadow(lerp(100.dp, 0.dp, fraction / .05f), FloatingTopBarShape)
-                    .thenIf(fraction == 0f) {
-                        border(colors.border, FloatingTopBarShape)
-                    }
-                    .background(backdrop)
-                    .fillMaxSize()
-            )
-        }
-    )
-
-    else -> LargeTopAppBar(
-        scrollBehavior = behavior,
-        title = title,
-        modifier = modifier,
-        navigationIcon = navigationIcon,
-        actions = actions,
-        windowInsets = insets,
-        style = style,
-        background = {
-            if (fraction > 0.1f) return@LargeTopAppBar Spacer(Modifier)
-            Spacer(
-                modifier = Modifier
-                    .background(backdrop)
-                    .fillMaxSize()
-            )
-        }
-    )
+val LocalNavController = staticCompositionLocalOf<NavHostController> {
+    error("no local nav host controller found")
 }
+
+/**
+ * A [staticCompositionLocalOf] variable that provides access to the [SystemFacade] interface.
+ *
+ * The [SystemFacade] interface defines common methods that can be implemented by an activity that
+ * uses a single view with child views.
+ * This local composition allows child views to access the implementation of the [SystemFacade]
+ * interface provided by their parent activity.
+ *
+ * If the [SystemFacade] interface is not defined, an error message will be thrown.
+ */
+val LocalSystemFacade = staticCompositionLocalOf<SystemFacade> {
+    error("Provider not defined.")
+}
+
+/**
+ * A composable function that uses the [LocalSystemFacade] to fetch [Preference] as state.
+ * @param key A key to identify the preference value.
+ * @return A [State] object that represents the current value of the preference identified by the provided key.
+ * The value can be null if no preference value has been set for the given key.
+ */
+@Composable
+inline fun <S, O> preference(key: Key.Key1<S, O>): androidx.compose.runtime.State<O?> {
+    val provider = LocalSystemFacade.current
+    return provider.observeAsState(key = key)
+}
+
+/**
+ * @see [preference]
+ */
+@Composable
+inline fun <S, O> preference(key: Key.Key2<S, O>): androidx.compose.runtime.State<O> {
+    val provider = LocalSystemFacade.current
+    return provider.observeAsState(key = key)
+}
+
+/**
+ * A composable function that retrieves the purchase state of a product using the [LocalSystemFacade].
+ *
+ * This function leverages the `LocalSystemFacade` to access the purchase information for a given product ID.
+ * In preview mode, it returns a `null` purchase state as the activity context is unavailable.
+ *
+ * @param id The ID of the product to check the purchase state for.
+ * @return A [State] object representing the current purchase state of the product.
+ * The state value can be `null` if there is no purchase associated with the given product ID or if the function
+ * is called in preview mode.
+ */
+@Composable
+@NonRestartableComposable
+@Stable
+fun purchase(id: String): State<Purchase?> = LocalSystemFacade.current.observePurchaseAsState(id)
+
+@Composable
+inline fun <S> ProvideAnimationScope(
+    target: S,
+    modifier: Modifier = Modifier,
+    crossinline content: @Composable() AnimatedContentScope.(targetState: S) -> Unit,
+) {
+    AnimatedContent(target, modifier) { value ->
+        CompositionLocalProvider(LocalNavAnimatedVisibilityScope provides this) {
+            content(value)
+        }
+    }
+}
+
+// Spacer
+fun LazyGridScope.section(height: Dp = ContentPadding.normal) =
+    item(contentType = "spacer", span = fullLineSpan) {
+        Spacer(Modifier.padding(vertical = height))
+    }

@@ -1,7 +1,7 @@
 /*
- * Copyright 2025 sheik
+ * Copyright 2025 Zakir Sheikh
  *
- * Created by sheik on 04-04-2025.
+ * Created by Zakir Sheikh on 16-05-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
  */
 
 package com.zs.gallery.impl
-
 
 import android.text.format.DateUtils
 import android.util.Log
@@ -36,9 +35,9 @@ import com.zs.gallery.R
 import com.zs.gallery.common.Action
 import com.zs.gallery.common.Filter
 import com.zs.gallery.common.Mapped
+import com.zs.gallery.common.compose.FilterDefaults
+import com.zs.gallery.common.debounceAfterFirst
 import com.zs.gallery.folders.FoldersViewState
-import com.zs.preferences.Key
-import com.zs.preferences.StringSaver
 import com.zs.preferences.stringPreferenceKey
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.catch
@@ -51,40 +50,26 @@ private const val TAG = "FoldersViewModel"
 private val Folder.firstTitleChar
     inline get() = name.uppercase(Locale.ROOT)[0].toString()
 
-private val ORDER_BY_DATE_MODIFIED = Action(R.string.last_modified, Icons.Outlined.DateRange)
-private val ORDER_BY_NAME = Action(R.string.name, Icons.Outlined.TextFields)
-private val ORDER_BY_NONE = Action(R.string.none)
+private val ORDER_BY_DATE_MODIFIED =
+    Action(R.string.last_modified, Icons.Outlined.DateRange, id = "date_modified")
+private val ORDER_BY_NAME = Action(R.string.name, Icons.Outlined.TextFields, id = "name")
+private val ORDER_BY_NONE = FilterDefaults.ORDER_NONE
 
-private val PrefFilter: Key.Key2<String, Filter?> = stringPreferenceKey(
-    "folders_filter",
-    null,
-    object : StringSaver<Filter?> {
-        val delimiter = " | "
-        override fun restore(value: String): Filter? {
-            if (value.isEmpty()) return null
-            val (first, second) = value.split(delimiter, limit = 2)
-            val order = when (second) {
+class FoldersViewModel(provider: MediaProvider) : KoinViewModel(), FoldersViewState {
+
+
+    val filterKey = stringPreferenceKey(
+        "folders_filter",
+        null,
+        FilterDefaults.FilterSaver { id ->
+            when (id) {
                 ORDER_BY_DATE_MODIFIED.id -> ORDER_BY_DATE_MODIFIED
                 ORDER_BY_NAME.id -> ORDER_BY_NAME
                 else -> ORDER_BY_NONE
             }
-            return (first == "0") to order
-
         }
-
-        override fun save(value: Filter?): String {
-            if (value == null) return ""
-            val first = if (value.first == true) "1" else "0"
-            val second = value.second.id
-            return "$first$delimiter$second"
-        }
-    }
-)
-
-class FoldersViewModel(
-    private val provider: MediaProvider,
-) : KoinViewModel(), FoldersViewState {
-
+    )
+    override var filter: Filter by mutableStateOf(preferences[filterKey] ?: (true to ORDER_BY_NAME))
     override val orders: List<Action> = listOf(ORDER_BY_NONE, ORDER_BY_DATE_MODIFIED, ORDER_BY_NAME)
 
     override fun filter(ascending: Boolean, order: Action) {
@@ -94,14 +79,14 @@ class FoldersViewModel(
         if (order == filter.second && order == ORDER_BY_NONE && filter.first != ascending)
             return
         val newFilter = ascending to order
-        preferences[PrefFilter] = newFilter
+        preferences[filterKey] = newFilter
         filter = newFilter
     }
 
-    override var filter: Filter by mutableStateOf(preferences[PrefFilter] ?: (true to ORDER_BY_NAME))
 
     override val data = combine(
-        snapshotFlow(::filter), provider.observer(MediaProvider.EXTERNAL_CONTENT_URI)
+        snapshotFlow(::filter).debounceAfterFirst(300L),
+        provider.observer(MediaProvider.EXTERNAL_CONTENT_URI).debounceAfterFirst(300L)
     ) { (ascending, order), _ ->
         val folders = provider.fetchFolders(ascending = false)
         val result = when (order) {
@@ -129,5 +114,5 @@ class FoldersViewModel(
             )
         }
         // Convert to state.
-        .stateIn(viewModelScope, started = SharingStarted.Lazily, null)
+        .stateIn(viewModelScope, started = SharingStarted.WhileSubscribed(500), null)
 }

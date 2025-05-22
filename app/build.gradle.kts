@@ -30,14 +30,11 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 35
-        versionCode = 50
-        versionName = "0.5.2-dev"
+        versionCode = 57
+        versionName = "0.7.1-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables {
-            useSupportLibrary = true
-        }
-
+        vectorDrawables { useSupportLibrary = true }
         // Load secrets into BuildConfig
         // These are passed through env of github.
         secrets.forEach { secret ->

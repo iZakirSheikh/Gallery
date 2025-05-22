@@ -18,6 +18,7 @@
 
 package com.zs.gallery.common.compose
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zs.gallery.common.compose.ContentPadding.large
@@ -41,4 +42,8 @@ object ContentPadding {
     val normal: Dp = 16.dp
     val large: Dp = 22.dp
     val xLarge: Dp = 32.dp
+
+    val LargeArrangement = Arrangement.spacedBy(large)
+    val MediumArrangement = Arrangement.spacedBy(medium)
+    val SmallArrangement = Arrangement.spacedBy(small)
 }

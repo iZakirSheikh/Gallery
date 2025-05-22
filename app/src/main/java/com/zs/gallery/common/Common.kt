@@ -18,20 +18,23 @@
 
 package com.zs.gallery.common
 
-import android.content.pm.PackageManager
-import android.os.Build
+
+import android.content.Context
+import android.net.Uri
+import android.text.format.Formatter
 import android.view.Window
-import androidx.compose.animation.BoundsTransform
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.core.view.WindowInsetsControllerCompat
-import com.zs.compose.foundation.runCatching
-import com.zs.compose.theme.AppTheme
-import com.zs.core.billing.Paymaster
-
-private const val TAG = "Common-Utils"
+import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.NavDestination
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.debounce
+import me.saket.telephoto.zoomable.ZoomableContentLocation
+import me.saket.telephoto.zoomable.ZoomableState
 
 /**
  * Represents a sorting order and associated grouping or ordering action.
@@ -47,6 +50,26 @@ typealias Filter = Pair<Boolean, Action>
  * @param T The type of items in the list.
  */
 typealias Mapped<T> = Map<CharSequence, List<T>>
+
+/**
+ * Extracts the domain portion from a [NavDestination]'s route.
+ *
+ * The domain is considered to be the part of the route before the first '/'.
+ * For example, for the route "settings/profile", the domain would be "settings".
+ *
+ * @return The domain portion of the route, or null if the route is null or does not contain a '/'.
+ */
+val NavDestination.domain: String?
+    get() {
+        // Get the route, or return null if it's not available.
+        val route = route ?: return null
+
+        // Find the index of the first '/' character.
+        val index = route.indexOf('/')
+
+        // Return the substring before the '/' if it exists, otherwise return the entire route.
+        return if (index == -1) route else route.substring(0, index)
+    }
 
 /**
  * Controls the color of both the status bar and the navigation bar.
@@ -66,36 +89,6 @@ var Window.systemBarsColor: Color
     }
     get() = error("Not supported!")
 
-/**
- * Controls whether both the system status bars and navigation bars have a light appearance.
- *
- * - When `true`, both the status bar and navigation bar will use a light theme (dark icons on a light background).
- * - When `false`, both will use a dark theme (light icons on a dark background).
- *
- * Setting this property adjusts both `isAppearanceLightStatusBars` and `isAppearanceLightNavigationBars`.
- *
- * @property value `true` to apply light appearance, `false` for dark appearance.
- */
-var WindowInsetsControllerCompat.isAppearanceLightSystemBars: Boolean
-    set(value) {
-        isAppearanceLightStatusBars = value
-        isAppearanceLightNavigationBars = value
-    }
-    get() = isAppearanceLightStatusBars && isAppearanceLightNavigationBars
-
-/**
- * Gets the package info of this app using the package manager.
- * @return a PackageInfo object containing information about the app, or null if an exception occurs.
- * @see android.content.pm.PackageManager.getPackageInfo
- */
-fun PackageManager.getPackageInfoCompat(pkgName: String) =
-    runCatching(TAG + "_review") {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            getPackageInfo(pkgName, PackageManager.PackageInfoFlags.of(0))
-        else
-            getPackageInfo(pkgName, 0)
-    }
-
 private const val ELLIPSIS_NORMAL = "\u2026"; // HORIZONTAL ELLIPSIS (…)
 
 /**
@@ -107,8 +100,89 @@ private const val ELLIPSIS_NORMAL = "\u2026"; // HORIZONTAL ELLIPSIS (…)
 fun CharSequence.ellipsize(after: Int): CharSequence =
     if (this.length > after) this.substring(0, after) + ELLIPSIS_NORMAL else this
 
-@OptIn(ExperimentalSharedTransitionApi::class)
-private val DEFULT_BOUNDS_TRANSFORM = BoundsTransform { _, _ -> tween(180) }
+/**
+ * Operator function to retrieve a value from [SavedStateHandle] using a specified key.
+ * It supports type-safe retrieval for common types such as String, Int, Long, Float, Boolean, and Uri.
+ *
+ * This function uses [SavedStateHandle.get] to retrieve the value and then casts or converts it
+ * to the specified type [T]. If the value cannot be converted, it returns null.
+ *
+ * @param T The reified type to which the retrieved value should be converted.
+ * @param key The key under which the value is stored in [SavedStateHandle].
+ * @return The value associated with the key, cast to type [T], or null if the value is not found or cannot be cast.
+ * @throws IllegalArgumentException if an unsupported type is requested.
+ */
+inline operator fun <reified T : Any> SavedStateHandle.invoke(key: String): T? {
+    // Retrieve the value from SavedStateHandle as String.
+    val value = get<String>(key) ?: return null
+    // Check the requested type.
+    val result = when (T::class) {
+        // If String, return the value directly.
+        String::class -> value
+        Int::class -> value.toInt()
+        Long::class -> value.toLong()
+        Float::class -> value.toFloat()
+        Boolean::class -> value.toBoolean()
+        Uri::class -> Uri.parse(value)
+        else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
+    }
+    // Safely cast the result to the requested type.
+    return result as T
+}
 
-@OptIn(ExperimentalSharedTransitionApi::class)
-val AppTheme.DefaultBoundsTransform get() = DEFULT_BOUNDS_TRANSFORM
+/**
+ * Retrieves the trimmed, non-empty string representation of the text field's content.
+ * If the trimmed text is empty, returns `null`.
+ *
+ * @return The trimmed text as a [String], or `null` if the trimmed text is empty.
+ */
+val TextFieldState.raw get() = text.trim().toString().ifEmpty { null }
+
+@OptIn(FlowPreview::class)
+
+        /**
+         * Returns a flow that mirrors the original flow, but debounces emissions after the first one.
+         *
+         * The first emission from the original flow is emitted immediately. Subsequent emissions
+         * are debounced by the specified [delayMillis].
+         *
+         * @param delayMillis The duration in milliseconds to debounce subsequent emissions.
+         * @return A flow that debounces emissions after the first one.
+         *
+         * @see [debounce]
+         */
+fun <T> Flow<T>.debounceAfterFirst(delayMillis: Long): Flow<T> {
+    var firstEmission = true
+    return this
+        .debounce {
+            if (firstEmission) {
+                firstEmission = false
+                0L
+            } else {
+                delayMillis
+            }
+        }
+}
+
+/**
+ * Formats a file size in bytes to a human-readable string.
+ *
+ * @param bytes Thefile size in bytes.
+ * @return The formatted file size string.
+ */
+fun Context.fileSizeFormatted(bytes: Long) =
+    Formatter.formatFileSize(this, bytes)
+
+/**  Scales and centers content based on size. */
+fun ZoomableState.scaledInsideAndCenterAlignedFrom(size: Size) {
+    // Do nothing if intrinsic size is unknown
+    if (size.isUnspecified) return
+
+    // Scale and center content based on intrinsic size
+    // TODO - Make this suspend fun instead of runBlocking
+    setContentLocation(
+        ZoomableContentLocation.scaledInsideAndCenterAligned(
+            size
+        )
+    )
+}

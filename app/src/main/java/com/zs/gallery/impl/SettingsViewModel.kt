@@ -1,7 +1,7 @@
 /*
- * Copyright 2024 Zakir Sheikh
+ * Copyright 2025 Zakir Sheikh
  *
- * Created by Zakir Sheikh on 18-07-2024.
+ * Created by Zakir Sheikh on 16-05-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ package com.zs.gallery.impl
 import com.zs.gallery.settings.SettingsViewState
 import com.zs.preferences.Key
 
-
-class SettingsViewModel() : KoinViewModel(), SettingsViewState {
-    override fun <S, O> set(key: Key<S, O>, value: O)  { preferences[key] = value }
+class SettingsViewModel : KoinViewModel(), SettingsViewState{
+    override fun <S, O> set(key: Key<S, O>, value: O) {
+        preferences[key] = value
+    }
 }

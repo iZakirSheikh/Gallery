@@ -23,13 +23,18 @@ package com.zs.gallery.files
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -44,12 +49,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zs.compose.foundation.findActivity
-import com.zs.compose.foundation.fullLineSpan
 import com.zs.compose.foundation.plus
 import com.zs.compose.foundation.stickyHeader
 import com.zs.compose.theme.AppTheme
@@ -57,33 +62,44 @@ import com.zs.compose.theme.Icon
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalContentColor
 import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.None
 import com.zs.compose.theme.VerticalDivider
+import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
-import com.zs.compose.theme.adaptive.contentInsets
+import com.zs.compose.theme.adaptive.content
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
-import com.zs.compose.theme.sharedElement
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.TonalHeader
 import com.zs.core.store.MediaFile
-import com.zs.gallery.common.DefaultBoundsTransform
-import com.zs.gallery.common.LocalNavController
+import com.zs.gallery.R
 import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.common.compose.FloatingActionMenu
-import com.zs.gallery.common.compose.GalleryTopAppBar
+import com.zs.gallery.common.compose.FloatingLargeTopAppBar
+import com.zs.gallery.common.compose.LocalNavController
 import com.zs.gallery.common.compose.OverflowMenu
 import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.emit
 import com.zs.gallery.common.compose.fadingEdge2
-import com.zs.gallery.common.compose.observe
-import com.zs.gallery.common.compose.rememberBackgroundProvider
-import com.zs.gallery.common.preference
+import com.zs.gallery.common.compose.preference
+import com.zs.gallery.common.compose.rememberAcrylicSurface
+import com.zs.gallery.common.compose.section
+import com.zs.gallery.common.compose.shine
+import com.zs.gallery.common.compose.source
 import com.zs.gallery.settings.Settings
 import androidx.compose.foundation.combinedClickable as clickable
+import androidx.compose.foundation.layout.PaddingValues as Padding
+import androidx.compose.ui.res.vectorResource as Drawable
 import com.zs.gallery.common.compose.ContentPadding as CP
 
-private val TileArrangement = Arrangement.spacedBy(2.dp)
+private val SelectionTracker.Level.toImageVector
+    get() = when (this) {
+        SelectionTracker.Level.NONE -> Icons.Outlined.Circle
+        SelectionTracker.Level.PARTIAL -> Icons.Outlined.RemoveCircle
+        SelectionTracker.Level.FULL -> Icons.Outlined.Verified
+    }
+private val HeaderPadding = Padding(2.dp, 4.dp, 2.dp, 4.dp)
 
 @Composable
 fun Files(viewState: FilesViewState) {
@@ -94,55 +110,55 @@ fun Files(viewState: FilesViewState) {
     )
 
     // The top nav insets
-    val inAppNavInsets = WindowInsets.contentInsets
-    val clazz = LocalWindowSize.current
-    val portrait = clazz.width < clazz.height
-
-    // Define the scroll behavior for the top app bar
+    val (width, _) = LocalWindowSize.current
+    val compact = width < Category.Medium
+    val inAppNavInsets = WindowInsets.content
+    //
     val topAppBarScrollBehavior = AppBarDefaults.exitUntilCollapsedScrollBehavior()
-    val observer = rememberBackgroundProvider()
-
+    val surface = rememberAcrylicSurface()
+    val colors = AppTheme.colors
+    // actions
     val actions = viewState.actions
     val ctx = LocalContext.current
-    val navController = LocalNavController.current
 
-    // Layout
-    val colors = AppTheme.colors
     Scaffold(
-        fabPosition = if (portrait) FabPosition.Center else FabPosition.End,
+        fabPosition = if (compact) FabPosition.Center else FabPosition.End,
         topBar = {
             val (icon, title) = viewState.meta
-            GalleryTopAppBar(
-                immersive = false,
+            FloatingLargeTopAppBar(
                 title = { Label(title, maxLines = 2) },
-                backdrop = colors.background(observer),
-                behavior = topAppBarScrollBehavior,
+                background = colors.background(surface),
+                insets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
+                scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
                     Icon(
-                        imageVector = icon,
+                        imageVector = icon ?: ImageVector.Drawable(R.drawable.ic_app),
                         title.toString(),
                         modifier = Modifier.minimumInteractiveComponentSize(),
-                        tint = Color.Unspecified
+                        tint = if (icon == null) Color.Unspecified else LocalContentColor.current
                     )
                 },
                 actions = {
+                    // Show menu in TopBar if not in selection.
                     if (!viewState.isInSelectionMode)
                         OverflowMenu(
                             actions,
-                            onItemClicked = { viewState.onAction(it, ctx.findActivity()) }
+                            onItemClicked = { viewState.onRequest(it, ctx.findActivity()) }
                         )
                 }
             )
-
         },
+        //
         floatingActionButton = {
             FloatingActionMenu(
                 visible = viewState.isInSelectionMode,
-                background = colors.background(observer),
+                background = colors.background(surface),
                 contentColor = AppTheme.colors.onBackground,
-                insets = (if (portrait) inAppNavInsets else WindowInsets.contentInsets) + PaddingValues(
-                    bottom = CP.medium
+                modifier = Modifier.windowInsetsPadding(
+                    (if (compact) inAppNavInsets else WindowInsets.None).union(WindowInsets.systemBars)
+                        .only(WindowInsetsSides.Bottom + WindowInsetsSides.End)
                 ),
+                border = colors.shine,
                 content = {
                     // Label
                     Label(
@@ -158,39 +174,38 @@ fun Files(viewState: FilesViewState) {
                     // overflow
                     OverflowMenu(
                         actions,
-                        onItemClicked = { viewState.onAction(it, ctx.findActivity()) },
+                        onItemClicked = { viewState.onRequest(it, ctx.findActivity()) },
                         collapsed = 5
                     )
                 }
             )
         },
+        //
         content = {
-            val data = viewState.data
-            val selected = viewState.selected
             val state = rememberLazyGridState()
             val multiplier by preference(key = Settings.KEY_GRID_ITEM_SIZE_MULTIPLIER)
-
-            val content: LazyGridScope.() -> Unit = list@{
+            val navController = LocalNavController.current
+            //
+            val data = viewState.data
+            val selected = viewState.selected
+            // Data
+            val content: LazyGridScope.() -> Unit = content@{
                 // emit state or return non-null | non empty data points
-                val data = emit(data) ?: return@list
+                val data = emit(data) ?: return@content
                 // items along with sticky headers
                 for ((header, items) in data) {
                     // Selection level of the group.
                     val level by viewState.isGroupSelected(header.toString())
                     stickyHeader(state, key = header, contentType = "header") {
                         Row(
-                            Modifier.padding(2.dp, 4.dp, 2.dp, 4.dp),
+                            Modifier.padding(HeaderPadding),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
                             content = {
                                 TonalHeader(header)
                                 // toggle
                                 IconButton(
-                                    icon = when (level) {
-                                        SelectionTracker.Level.NONE -> Icons.Outlined.Circle
-                                        SelectionTracker.Level.PARTIAL -> Icons.Outlined.RemoveCircle
-                                        SelectionTracker.Level.FULL -> Icons.Outlined.Verified
-                                    },
+                                    icon = level.toImageVector,
                                     contentDescription = null,
                                     tint = if (level == SelectionTracker.Level.FULL) AppTheme.colors.accent else LocalContentColor.current,
                                     onClick = { viewState.select(header.toString()) }
@@ -205,6 +220,17 @@ fun Files(viewState: FilesViewState) {
                         key = MediaFile::id,
                         contentType = { "media_file" },
                         itemContent = { item ->
+                            //
+                            val clickable = Modifier.clickable(
+                                onClick = {
+                                    if (selected.isNotEmpty())
+                                        viewState.select(item.id)
+                                    else
+                                        navController.navigate(viewState.direction(item.id))
+                                },
+                                onLongClick = { viewState.select(item.id) }
+                            )
+                            //
                             MediaFile(
                                 focused = false,
                                 value = item,
@@ -214,57 +240,30 @@ fun Files(viewState: FilesViewState) {
                                     else -> 0
                                 },
                                 modifier = Modifier
-                                    .sharedElement(
-                                        RouteFiles.buildSharedFrameKey(item.id),
-                                        boundsTransform = AppTheme.DefaultBoundsTransform
-                                    )
-                                    .clickable(
-                                        // onClick of item
-                                        onClick = {
-                                            if (selected.isNotEmpty())
-                                                viewState.select(item.id)
-                                            else
-                                                navController.navigate(
-                                                    viewState.buildRouteViewer(
-                                                        item.id
-                                                    )
-                                                )
-                                        },
-                                        // onLong Click
-                                        onLongClick = { viewState.select(item.id) }
-                                    )
+                                    .animateItem()
+                                    .then(RouteFiles.sharedElement(item.id))
+                                    .then(clickable)
                             )
-
                         }
                     )
-                    // Spacer
-                    item(contentType = "spacer", span = fullLineSpan, key = "${header}_items_end") {
-                        Spacer(Modifier.padding(vertical = CP.normal))
-                    }
-                }
-                //
-            }
 
+                    // spacer
+                    section()
+                }
+            }
+            // Content
             LazyVerticalGrid(
                 state = state,
                 columns = GridCells.Adaptive(Settings.STANDARD_TILE_SIZE * multiplier),
-                horizontalArrangement = TileArrangement,
-                verticalArrangement = TileArrangement,
-                contentPadding = inAppNavInsets +
-                        WindowInsets.contentInsets +
-                        PaddingValues(end = if (!portrait) CP.large else 0.dp) +
-                        PaddingValues(horizontal = CP.medium),
+                horizontalArrangement = CP.SmallArrangement,
+                verticalArrangement = CP.SmallArrangement,
+                contentPadding = (inAppNavInsets.add(WindowInsets.content)
+                    .union(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))).asPaddingValues() +
+                        (Padding(end = if (!compact) CP.large else 0.dp) + Padding(horizontal = CP.medium)),
                 modifier = Modifier
                     .fillMaxSize()
-                    .fadingEdge2(
-                        listOf(
-                            colors.background(1.dp),
-                            colors.background.copy(alpha = 0.5f),
-                            Color.Transparent
-                        ),
-                        length = 56.dp
-                    )
-                    .observe(observer)
+                    .fadingEdge2(length = 56.dp)
+                    .source(surface)
                     .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
                 content = content
             )

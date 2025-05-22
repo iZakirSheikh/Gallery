@@ -34,8 +34,8 @@ import com.zs.compose.theme.ButtonDefaults
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.gallery.R
-import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.Route
+import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.Placeholder
 
 object RouteLockScreen: Route

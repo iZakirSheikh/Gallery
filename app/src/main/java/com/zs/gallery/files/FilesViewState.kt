@@ -1,7 +1,7 @@
 /*
- * Copyright 2025 sheik
+ * Copyright 2025 Zakir Sheikh
  *
- * Created by sheik on 04-04-2025.
+ * Created by Zakir Sheikh on 16-05-2025.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,46 +20,61 @@ package com.zs.gallery.files
 
 import android.app.Activity
 import android.net.Uri
+import androidx.compose.animation.BoundsTransform
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.SavedStateHandle
+import com.zs.compose.theme.sharedElement
 import com.zs.core.store.MediaFile
 import com.zs.gallery.common.Action
 import com.zs.gallery.common.Mapped
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SelectionTracker
+import com.zs.gallery.files.RouteFiles.SOURCE_TIMELINE
 
+// Some special cases
+object RouteTimeline : Route
+
+fun RouteFolder(path: String) = RouteFiles(RouteFiles.SOURCE_FOLDER, path)
+fun RouteLiked() = RouteFiles(RouteFiles.SOURCE_FAV)
+fun RouteBin() = RouteFiles(RouteFiles.SOURCE_BIN)
+
+private const val PARAM_ARG = "param_path"
+private const val PARAM_SOURCE = "param_source"
 
 object RouteFiles : Route {
 
-    private const val PARAM_KEY = "param_key"
+    const val SOURCE_BIN = "source_bin"
+    const val SOURCE_FAV = "source_fav"
+    const val SOURCE_TIMELINE = "source_timeline"
+    const val SOURCE_FOLDER = "source_folder"
 
-    const val ALBUM_BIN = "album_bin"
-    const val ALBUM_FAV = "album_fav"
+    override val route: String = "$domain/{$PARAM_SOURCE}/{$PARAM_ARG}"
 
-    override val route: String =
-        "$domain/{$PARAM_KEY}"
-
-    val SavedStateHandle.key
-        get() =
-            get<String>(PARAM_KEY).takeIf { !it.isNullOrEmpty() }
-
-    override fun invoke() = error("use RouteTimeline instead!")
+    override fun invoke() = RouteTimeline()
 
     /** Navigates to files of folder identified by [source] providing args*/
-    operator fun invoke(key: String): String = "$domain/${Uri.encode(key)}"
+    operator fun invoke(source: String, key: String = ""): String =
+        "$domain/${source}/${Uri.encode(key)}"
+
+    @OptIn(ExperimentalSharedTransitionApi::class)
+    private val DefaultBoundsTransform = BoundsTransform { _, _ -> tween(200) }
 
     /**
      * Generates a unique key for shared element transitions based on the given ID.
      * @param id ID to generate the key from.
      * @return The generated shared frame key.
      */
-    fun buildSharedFrameKey(id: Long) = "shared_frame_$id"
+    @ExperimentalSharedTransitionApi
+    fun sharedElement(id: Long) =
+        Modifier.sharedElement("shared_frame_$id", boundsTransform = DefaultBoundsTransform, zIndexInOverlay = 0.1f)
 }
 
-// Some special cases
-object RouteTimeline : Route
-fun RouteLiked() = RouteFiles(RouteFiles.ALBUM_FAV)
-fun RouteBin() = RouteFiles(RouteFiles.ALBUM_BIN)
+operator fun SavedStateHandle.get(route: RouteFiles) =
+    (get<String>(PARAM_SOURCE)
+        ?: SOURCE_TIMELINE) to get<String>(PARAM_ARG).takeIf { !it.isNullOrEmpty() }
 
 /**
  * Represents the state of the files screen.
@@ -68,8 +83,8 @@ fun RouteBin() = RouteFiles(RouteFiles.ALBUM_BIN)
  */
 interface FilesViewState : SelectionTracker {
 
-    /** Represents the */
-    val meta: Pair<ImageVector, CharSequence>
+    /** If icon is null use app icon. */
+    val meta: Pair<ImageVector?, CharSequence>
 
     /**
      * Represents the data associated with this screen.
@@ -79,9 +94,9 @@ interface FilesViewState : SelectionTracker {
     /** The list of actions supported by screen.*/
     val actions: List<Action>
 
-    /** Executes the [value] using the [activity]*/
-    fun onAction(value: Action, activity: Activity)
+    /** Executes the [value] using the [resolver]*/
+    fun onRequest(value: Action, resolver: Activity)
 
     /** @return the navigation route for the [id]*/
-    fun buildRouteViewer(id: Long): String
+    fun direction(id: Long): String
 }
