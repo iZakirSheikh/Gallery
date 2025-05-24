@@ -82,7 +82,7 @@ fun Colors.background(
 ) = Background(
     Modifier.hazeEffect(state = surface) {
         this.blurEnabled = true
-        this.blurRadius =  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && blurRadius.value > 25) 25.dp else blurRadius
+        this.blurRadius =  blurRadius
         this.backgroundColor = containerColor
         // Disable noise factor on Android versions below 12.
         this.noiseFactor = noiseFactor
@@ -92,9 +92,6 @@ fun Colors.background(
                 this += HazeTint(Color.White.copy(0.07f), BlendMode.Luminosity)
             this += HazeTint(tint, blendMode = blendMode)
         }
-        // Adjust input scale for Android versions below 12 for better visuals.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-            inputScale = HazeInputScale.Fixed(0.5f)
         // Configure progressive blurring (if enabled).
         if (progressive != -1f) {
             this.progressive = HazeProgressive.verticalGradient(
@@ -103,6 +100,9 @@ fun Colors.background(
                 preferPerformance = true
             )
             mask = PROGRESSIVE_MASK
+            // Adjust input scale for Android versions below 12 for better visuals.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                inputScale = HazeInputScale.Fixed(0.5f)
         }
     }
 )
