@@ -327,13 +327,13 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
                         ReBlurTransformation(25f, 2.1f)
                     else
-                        RsBlurTransformation(ctx, 25f, 2.1f)
+                        RsBlurTransformation(ctx, 300f, 2.1f)
                 }
                 Crossfade(
                     // Crossfade animation for the ambient background when the focused item changes.
                     viewState.focused,
                     modifier = Modifier
-                        .foreground(Color.Black.copy(0.92f))
+                        .foreground(Color.Black.copy(0.82f))
                         .visualEffect(ImageBrush.NoiseBrush, 0.04f, true, BlendMode.Luminosity),
                     // Content of the Crossfade: an AsyncImage with blur and noise effects.
                     content = {

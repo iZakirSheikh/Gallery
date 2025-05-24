@@ -175,11 +175,6 @@
               \nAsegura la Galería con autenticación biométrica.
         </font>
     </string>
-    <string name="pref_color_nav_bar"><b>Barra de Navegación Coloreada</b>
-        <font color="grey" size="14">
-           Utilice el color de acento en la barra de navegación.
-        </font>
-    </string>
     <string name="about_us">Sobre nosotros</string>
     <string name="postfix_x_f">%1$.1fx</string>
     <string name="system">Sistema</string>
