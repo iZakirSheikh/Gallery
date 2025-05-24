@@ -60,7 +60,7 @@ fun LockScreen() {
             onClick = facade::unlock,
             modifier = Modifier.size(width = 200.dp, height = 46.dp),
             elevation = null,
-            text = "Authenticate",
+            text = stringResource(R.string.authenticate),
             border = ButtonDefaults.outlinedBorder,
             shape = AppTheme.shapes.medium,
         )
