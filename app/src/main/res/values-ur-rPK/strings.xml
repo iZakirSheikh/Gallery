@@ -16,8 +16,186 @@
           The string resources should follow the above rules strictly
      -->
     <string name="app_name">گیلری</string>
+    <string name="permission_scr_title">اسٹوریج کی اجازت</string>
     <string name="allow">اجازت دیں</string>
+    <string name="permission_scr_desc"><b>گیلری</b> کو آپ کے
+        ڈیوائس کے اسٹوریج تک رسائی کی اجازت چاہیے تاکہ تصاویر اور ویڈیوز دکھا سکے۔
+        <b>\n\nاینڈرائیڈ 14 یا اس سے اوپر:</b>
+        <font color="grey">
+            \n  1. براہ کرم ایپ کے درست کام کے لیے اجازت ڈائیلاگ میں <b>تمام کی اجازت دیں</b> منتخب کریں۔
+        </font>    </string>
     <string name="photos">تصاویر</string>
+    <string name="settings">ترتیبات</string>
+    <string name="folders">فولڈر</string>
+    <string name="loading">لوڈ ہو رہا ہے</string>
+    <string name="oops_empty">اوپس! خالی ہے!!</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d فائلیں - %2$s</string>
+    <string name="size">سائز</string>
+    <string name="name">نام</string>
+    <string name="recent">حالیہ</string>
+    <string name="dark">تاریک</string>
+    <string name="light">روشن</string>
+    <string name="sync_with_system">سسٹم کے ساتھ ہم آہنگ کریں</string>
+    <string name="general">جنرل</string>
+    <string name="appearance">ظہور</string>
+    <string name="feedback">تاثرات</string>
+    <string name="about_gallery">گیلری کے بارے میں</string>
+    <string name="msg_unknown_error">کچھ غلط ہو گیا ہے۔ ایک نامعلوم خرابی پیش آ گئی ہے۔.</string>
+    <string name="report">اطلاع دیں</string>
+    <string name="timeline">ٹائم لائن</string>
+    <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="files_selected_d">%1$d منتخب</string>
+    <string name="select_all">تمام منتخب کریں</string>
+    <string name="bin">ڈبہ</string>
+    <string name="recycle_bin">کچرا خانہ</string>
+    <string name="favourites">پسندیدہ</string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$sx</string>
+    <string name="last_modified">آخری ترمیم شدہ</string>
+    <string name="msg_error_sharing_files">عفواً، حدث خطأ ما خلال مشاركة الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="msg_files_delete_unknown_error">عفواً، حدث خطأ ما خلال مشاركة الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="msg_files_trash_unknown_error">عفواً، حدث خطأ ما خلال مشاركة الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="trash">ردی</string>
+    <string name="msg_files_restore_unknown_error">اوپس، فائلیں بحال کرتے ہوئے کچھ غلط ہو گیا۔ براہ کرم دوبارہ کوشش کریں۔.</string>
+    <string name="share">بانٹیں</string>
+    <string name="edit">ترمیم</string>
+    <string name="delete">حذف کریں</string>
+    <string name="info">معلومات</string>
+    <string name="edit_in">میں ترمیم کریں</string>
+    <string name="use_as">استعمال کریں</string>
+    <string name="set_as_wallpaper">بطور وال پیپر سیٹ کریں</string>
+    <string name="like">پسند</string>
+    <string name="unlike">ناپسند</string>
+    <string name="details">تفصیلات</string>
+    <string name="title">نام</string>
+    <string name="path">راستہ</string>
+    <string name="metadata">میٹا ڈیٹا</string>
+    <string name="msg_files_confirm_deletion"><b>حذف کریں</b>
+        <font color="grey">\nکیا آپ واقعی اسے حذف کرنا چاہتے ہیں؟ آپ اسے دوبارہ حاصل نہیں کر سکیں گے۔
+        </font>    </string>
+    <string name="msg_update_check_error">اوپس! اپ ڈیٹس چیک کرتے ہوئے کچھ غلط ہو گیا۔.</string>
+    <string name="msg_update_not_available">آپ مکمل تیار ہیں! کوئی اپ ڈیٹ دستیاب نہیں ہے۔.</string>
+    <string name="msg_new_update_downloaded">اپ ڈیٹ تیار ہے! اب تنصیب جاری رکھی جا سکتی ہے۔.</string>
+    <string name="install">انسٹال کریں</string>
+    <string name="lock_scr_title">اپنی شناخت کی تصدیق کروائیں</string>
+    <string name="lock_scr_subtitle">حیاتیاتی شناخت کے ذریعے تصدیق کریں</string>
+    <string name="lock_scr_desc">اپنا فنگر پرنٹ یا چہرے کی شناخت کے ذریعے تصدیق کریں
+تاکہ عمل جاری رکھا جا سکے۔ یہ قدم آپ کے ڈیٹا کی حفاظت کے لیے بہت اہم ہے۔    </string>
+    <string name="msg_enroll_biometric">سیٹنگز میں حیاتیاتی شناخت کو فعال کریں۔.</string>
+    <string name="msg_favourites_updated">\"پسندیدہ اپ ڈیٹ ہو گئے!\"</string>
+    <string name="msg_media_player_promotion"><b>نیا میڈیا پلیئر ایپ!</b>        
+        <font color="gray">
+🎶 ہمارا نیا <b>میڈیا پلیئر!</b> دیکھیں اپنی پسندیدہ دھنیں
+اور ویڈیوز آسانی سے لطف اٹھائیں۔ اسے آزمائیں! 🎥
+        </font>    </string>
+    <string name="get">حاصل کریں</string>
+    <string name="dismiss">رخصت کریں</string>
+    <string name="msg_auth_failed">تصدیق ناکام! براہ کرم دوبارہ کوشش کریں یا متبادل طریقہ استعمال کریں۔.</string>
+    <string name="msg_auth_error_s">توثیق کی خرابی: %1$s</string>
+    <string name="restore">بحال کریں</string>
+    <string name="empty_bin">بن خالی ہے</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s فائلیں</string>
+    <string name="viewer_msg_no_wallpaper_app_found">اوپس! کوئی وال پیپر ایپ نہیں ملی۔ آگے بڑھنے کے لیے ایک انسٹال کریں۔.</string>
+    <string name="viewer_set_as">سیٹ کریں</string>
+    <string name="today">آج</string>
+    <string name="trash_one_day_left">1 دن باقی</string>
+    <string name="trash_days_left_d">%1$s دن باقی</string>
+    <string name="auth_confirm_biometric">بایو میٹرک تصدیق</string>
+    <string name="pref_app_theme_s"><b>ایپ کا تھیم (%1$s)</b>
+        <font color="grey" size="14">
+            \nایپ کے نظارے کو رات، دن یا سسٹم تھیم کے اختیارات سے اپنے مطابق بنائیں۔
+        </font>
+    </string>
+    <string name="pref_immersive_view"><b>ایمرسیو ویو</b>
+        <font color="grey" size="14">
+            \nپوری اسکرین کے تجربے کے لیے اسٹیٹس بار اور نیویگیشن بار چھپائیں۔
+        </font>    </string>
+    <string name="pref_enable_trash_can"><b>ری سائیکل بن (Android 11+)</b>
+          <font color="grey" size="14">
+              \nحذف شدہ فائلوں کو مستقل طور پر ڈیلیٹ کرنے کی بجائے ری سائیکل بن میں منتقل کریں۔
+          </font>
+    </string>
+    <string name="pref_grid_item_size_multiplier"><b>گرڈ سائز ملٹی پلائر</b>
+          <font color="grey" size="14">
+              \nگرڈ لے آؤٹ میں ہر آئٹم کی جگہ کو ایڈجسٹ کریں۔
+          </font>
+    </string>
+    <string name="pref_colorization_strategy"><b>آٹو کلرائز <sup><font color="#ae1c27" size="10"><b>بیٹا</b></font></sup></b>
+         <font color="grey" size="14">
+             \nموجودہ میڈیا آرٹ ورک کے رنگوں کی بنیاد پر خودکار تھیم بنائیں۔
+          </font>
+    </string>
+    <string name="pref_privacy_policy"><b>رازداری کی پالیسی</b>
+           <font color="grey" size="14">
+               \nرازداری کی پالیسی دیکھنے کیلئے یہاں کلک کریں۔
+          </font>
+    </string>
+    <string name="pref_live_gallery"><b>لائیو گیلری</b>
+           <font color="grey" size="14">
+               \nگیلری میں اینیمیشنز اور ویڈیو آٹوپلے کو فعال کریں۔
+          </font></string>
+    <string name="pref_font_scale"><b>فونٹ سکیل</b>
+         <font color="grey" size="14">
+            \nمتن کو پڑھنے میں آسانی کیلئے فونٹ سائز کو ایڈجسٹ کریں۔ بہتر قراتی کے لیے اپنی ترجیح کے مطابق سکیل منتخب کریں۔
+        </font>    </string>
+    <string name="pref_transparent_system_bars"><b>سسٹم بارز</b>
+        <font color="grey" size="14">
+            \nایج ٹو ایج تجربے کیلئے ٹرانسپیرنٹ سسٹم بارز کو فعال کریں <b><i>\n(Android 6.0+)</i></b>
+        </font>
+    </string>
+    <string name="pref_report_an_issue"><b>مسئلہ رپورٹ کریں</b>
+        <font color="grey" size="14">
+           \nمدد یا مسائل کی رپورٹنگ کیلئے ہماری سپورٹ ٹیم سے رابطہ کریں
+        </font>
+    </string>
+    <string-array name="pref_night_mode_entries">
+        <item>تاریک</item>
+        <item>روشن</item>
+        <item>سسٹم کے ساتھ ہم آہنگ کریں</item>
+    </string-array>
+    <string name="version">ورژن</string>
+    <string name="version_info_s">ورژن: %1$s</string>
+    <string name="pref_secure_mode"><b>محفوظ موڈ</b>
+        <font color="grey" size="14">
+           \nمحفوظ موڈ ایپ کے مندرجات کو ایپ پیش نظارہ میں چھپا دیتا ہے، تاکہ جب ایپ فعال استعمال میں نہ ہو تو صارف کی رازداری محفوظ رہے۔
+        </font>    </string>
+    <string name="pref_app_lock_s"><b>ایپ لاک</b> (<small>%1$s</small>)<sup><font color="#ae1c27" size="10"><b> بیٹا</b></font></sup>
+          <font color="grey" size="14">
+              \nبایومیٹرک تصدیق کے ذریعے گیلری کو محفوظ بنائیں۔
+        </font>    </string>
+    <string name="pref_color_nav_bar"><b>رنگین نیویگیشن بار</b><font color="grey" size="14">\nنیویگیشن بار میں ایکسنٹ رنگ استعمال کریں۔
+        </font>    </string>
+    <string name="about_us">ہمارے متعلق</string>
+    <string name="postfix_x_f">%1$.1fx</string>
+    <string name="system">نظام</string>
+    <string name="join_the_beta">بیٹا میں شامل ہوں</string>
+    <string name="update_gallery">گیلری اپڈیٹ</string>
+    <string name="rate_us">ہمیں ریٹ کریں</string>
+    <string name="share_app_label">دوستوں سے شیئر کریں</string>
+    <string name="pref_dynamic_colors"><b>متحرک رنگ</b>\n<font color="grey" size="14">متحرک رنگوں کے استعمال کو آن یا آف کریں۔ یہ خصوصیت صرف <b>اینڈرائیڈ 12</b> یا اس سے اعلیٰ پر دستیاب ہے۔
+        </font>    </string>
+    <string name="error">خرابی</string>
+    <string-array name="pref_app_lock_options">
+        <item>بند کیا ہوا</item>
+        <item>فوری</item>
+        <item>۱ منٹ</item>
+        <item>۳۰ منٹ</item>
+    </string-array>
+    <string name="pref_scr_version_by_author_s">"v%1$s توسط <b><i>ذاکر شیخ</i></b>"</string>
+    <string name="buy_me_a_coffee">کافی کا ٹپ دیں</string>
+    <string name="msg_support_gallery"><b>گیلری ابھی شروع ہو رہی ہے — اور یہ مسلسل بہتر ہو رہی ہے۔</b>
+    \nگیلری اوپن سورس ہے، خوبصورتی سے ڈیزائن کی گئی ہے، اور تیزی سے بڑھ رہی ہے۔ آپ میری مدد کر سکتے ہیں:
+        \n1. 🌍 اسے دوسروں تک پہنچائیں
+        \n2. 🔧 بگز رپورٹ کریں
+        \n3. ☕ چھوٹے اشارے سے مجھے حوصلہ دیں، جیسے کہ مجھے کافی خریدنا یا کھانے پر لے جانا۔ 😊    </string>
+    <string name="fuel">توانا کریں</string>
+    <string name="viewer_scr_open_in_lens">لینس میں کھولیں</string>
+    <string name="quick_share">کِوِک شیئر</string>
+    <string name="msg_viewer_scr_no_g_lens">لینس استعمال کرنے کے لیے گوگل ایپ انسٹال کریں۔</string>
+    <string name="msg_files_quick_share_error">اس فیچر کو استعمال کرنے کے لیے Quick Share ایپ انسٹال کریں۔.</string>
+    <string name="none">کوئی نہیں</string>
+    <string name="properties">خصوصیات</string>
+    <string name="pref_ambient_mode"><b>ایمبیئینٹ موڈ</b><font color="grey">\nمیڈیا ویور کے گرد ماحول ساز روشنی شامل کرتا ہے تاکہ سینما جیسا تجربہ فراہم ہو۔</font></string>
+    <string name="authenticate">تصدیق</string>
 </resources>

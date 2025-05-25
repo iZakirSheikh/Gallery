@@ -15,6 +15,192 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name">图库</string>
+    <string name="permission_scr_title">存储权限</string>
+    <string name="allow">允许</string>
+    <string name="permission_scr_desc"><b>图库</b>需要权限访问您的  
+设备存储，以显示图片和视频。  
+<b>\n\n在 Android 14 或更高版本上：</b>  
+<font color="grey">  
+    \n  1. 请在权限对话框中选择 <b>允许所有</b>，以确保应用正常运行。  
+</font>
+    </string>
+    <string name="photos">图片</string>
+    <string name="settings">设置</string>
+    <string name="folders">文件夹</string>
+    <string name="loading">加载</string>
+    <string name="oops_empty">哎呀，空！</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d 文件 - %2$s</string>
+    <string name="size">大小</string>
+    <string name="name">名称</string>
+    <string name="recent">最近</string>
+    <string name="dark">暗色</string>
+    <string name="light">浅色</string>
+    <string name="sync_with_system">跟随系统</string>
+    <string name="general">概况</string>
+    <string name="appearance">外观</string>
+    <string name="feedback">反馈</string>
+    <string name="about_gallery">关于相册</string>
+    <string name="msg_unknown_error">出错了。发生未知错误。</string>
+    <string name="report">举报</string>
+    <string name="timeline">时间轴</string>
+    <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="files_selected_d">%1$d 已选择</string>
+    <string name="select_all">选择所有</string>
+    <string name="bin">搁架</string>
+    <string name="recycle_bin">应用回收站</string>
+    <string name="favourites">收藏夹</string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$sx</string>
+    <string name="last_modified">上次修改时间</string>
+    <string name="msg_error_sharing_files">哎呀，分享文件时出了点问题。请再试一次。</string>
+    <string name="msg_files_delete_unknown_error">哎呀，删除文件时出错。请再试一次。</string>
+    <string name="msg_files_trash_unknown_error">哎呀，删除文件时出错。请再试一次。</string>
+    <string name="trash">回收站</string>
+    <string name="msg_files_restore_unknown_error">哎呀，恢复文件时出错。请再试一次。</string>
+    <string name="share">分享</string>
+    <string name="edit">编辑</string>
+    <string name="delete">删除</string>
+    <string name="info">信息</string>
+    <string name="edit_in">编辑在</string>
+    <string name="use_as">设置为</string>
+    <string name="set_as_wallpaper">设为壁纸</string>
+    <string name="like">赞</string>
+    <string name="unlike">取消收藏</string>
+    <string name="details">详情</string>
+    <string name="title">标题</string>
+    <string name="path">连接</string>
+    <string name="metadata">元数据</string>
+    <string name="msg_files_confirm_deletion"><b>删除</b>
+        <font color="grey">\n您确定要删除它吗？您将无法将其返回
+        </font>
+    </string>
+    <string name="msg_update_check_error">哎呀！在检查更新时出了错。</string>
+    <string name="msg_update_not_available">你已经设置了！没有可用的更新。</string>
+    <string name="msg_new_update_downloaded">更新准备好了！现在就可以开始安装。</string>
+    <string name="install">安装</string>
+    <string name="lock_scr_title">验证您的身份</string>
+    <string name="lock_scr_subtitle">使用生物识别认证</string>
+    <string name="lock_scr_desc">请使用指纹或面部识别进行身份验证  
+以继续操作。此步骤对保护您的数据至关重要。
+    </string>
+    <string name="msg_enroll_biometric">在设置中启用生物鉴别认证。</string>
+    <string name="msg_favourites_updated">收藏已更新！</string>
+    <string name="msg_media_player_promotion"><b>全新媒体播放器应用！</b>
+<font color="gray">\n🎶 Check out our new <b>媒体播放器！</b> Enjoy your favorite tunes
+            and videos effortlessly. Give it a try! 🎥
+        </font>
+    </string>
+    <string name="get">获取</string>
+    <string name="dismiss">略过</string>
+    <string name="msg_auth_failed">身份验证失败！请重试或使用替代方法。</string>
+    <string name="msg_auth_error_s">验证出错：%1$s</string>
+    <string name="restore">恢复</string>
+    <string name="empty_bin">清空回收站</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s个文件</string>
+    <string name="viewer_msg_no_wallpaper_app_found">哎呀！未检测到壁纸应用。请安装一个来继续。</string>
+    <string name="viewer_set_as">设置为</string>
+    <string name="today">今天</string>
+    <string name="trash_one_day_left">剩余 1 天</string>
+    <string name="trash_days_left_d">剩余 %1$d 天</string>
+    <string name="auth_confirm_biometric">确认生物计</string>
+    <string name="pref_app_theme_s"><b>应用主题（%1$s）</b>
+<font color="grey" size="14">
+    \n自定义应用外观，支持夜间、日间或系统主题选项。
+</font>
+    </string>
+    <string name="pref_immersive_view"><b>沉浸式视图</b> 
+<font color="grey" size="14">
+    \n隐藏状态栏和导航栏，带来无干扰的全屏体验。
+</font>
+    </string>
+    <string name="pref_enable_trash_can"><b>回收站 (Android 11+)</b>
+          <font color="grey" size="14">
+              \n启用将已删除的文件移动到回收站而不是永久删除。
+          </font>
+    </string>
+    <string name="pref_grid_item_size_multiplier"><b>网格大小倍数</b>
+          <font color="grey" size="14">
+              \n调整每个项目在网格布局中占用的空间。
+          </font>
+    </string>
+    <string name="pref_colorization_strategy"><b>自动着色 <sup><font color="#ae1c27" size="10"><b>测试版</b></font></sup></b>
+         <font color="grey" size="14">
+             \n根据当前播放的媒体封面颜色动态生成主题。
+          </font>
+    </string>
+    <string name="pref_privacy_policy"><b>隐私政策</b>
+<font color="grey" size="14">
+    \n点击此处查看隐私政策。
+</font>
+    </string>
+    <string name="pref_live_gallery"><b>实时图库</b>
+           <font color="grey" size="14">
+               \n在图库中启用动画和视频自动播放。
+          </font></string>
+    <string name="pref_font_scale"><b>字体比例</b> <font color="grey" size="14">\" 
+放大或缩小屏幕显示文本\"</font>\" \"</string>
+    <string name="pref_transparent_system_bars"><b>系统栏</b>
+<font color="grey" size="14">
+    \n启用透明系统栏，实现无边框体验 <b><i>\n（Android 6.0 及以上）</i></b>
+</font></string>
+    <string name="pref_report_an_issue"><b>报告一个问题</b>
+        <font color="grey" size="14">
+           \n与我们的支持团队取得联系以获得帮助或报告问题
+        </font>
+    </string>
+    <string-array name="pref_night_mode_entries">
+        <item>暗色</item>
+        <item>浅色</item>
+        <item>与系统同步</item>
+    </string-array>
+    <string name="version">版本</string>
+    <string name="version_info_s">版本: %1$s</string>
+    <string name="pref_secure_mode"><b>安全模式</b>
+        <font color="grey" size="14">
+           \n安全模式模糊了应用预览中的应用内容
+            应用程序未激活时保护用户隐私。
+        </font>
+    </string>
+    <string name="pref_app_lock_s"><b>应用锁</b> (<small>%1$s</small>)<sup><font color="#ae1c27" size="10"><b> 测试版</b></font></sup>
+          <font color="grey" size="14">
+              \n使用生物识别进行图库安全保护。
+        </font>    </string>
+    <string name="pref_color_nav_bar"><b>导航栏颜色</b><font color="grey" size="14">\n在导航栏使用强调色。
+</font></string>
+    <string name="about_us">关于我们</string>
+    <string name="postfix_x_f">%1$.1fx</string>
+    <string name="system">系统</string>
+    <string name="join_the_beta">加入测试版</string>
+    <string name="update_gallery">更新相册</string>
+    <string name="rate_us">评价我们</string>
+    <string name="share_app_label">与好友共享</string>
+    <string name="pref_dynamic_colors"><b>动态颜色</b>\n<font color="grey" size="14">切换动态颜色的使用。 此功能仅可在 <b>Android 12</b> 或更高版本上使用。
+        </font>
+    </string>
+    <string name="error">错误</string>
+    <string-array name="pref_app_lock_options">
+        <item>停用</item>
+        <item>即时</item>
+        <item>1 分钟</item>
+        <item>30 分钟</item>
+    </string-array>
+    <string name="pref_scr_version_by_author_s">"由 <b><i>Zakir Sheikh</i></b> 创建的第 v%1$s 版"</string>
+    <string name="buy_me_a_coffee">给我买一杯咖啡</string>
+    <string name="msg_support_gallery"><b>图库才刚刚起步——未来只会更好。</b>
+\n图库是开源的，设计精美，发展迅速。你可以通过以下方式支持我：
+\n1. 🌍 传播这个消息
+\n2. 🔧 报告错误
+\n3. ☕ 用小小的心意激励我，比如请我喝杯咖啡或请我吃顿饭。😊
+    </string>
+    <string name="fuel">燃料</string>
+    <string name="viewer_scr_open_in_lens">在镜子中打开</string>
+    <string name="quick_share">快速共享</string>
+    <string name="msg_viewer_scr_no_g_lens">安装谷歌应用以使用镜头</string>
+    <string name="msg_files_quick_share_error">安装快速共享应用来使用此功能。</string>
+    <string name="none">无</string>
+    <string name="properties">详情</string>
+    <string name="pref_ambient_mode"><b>环境模式</b><font color="grey">\n为媒体查看器添加沉浸式灯光效果，带来更具电影感的体验。</font></string>
+    <string name="authenticate">验证</string>
 </resources>
