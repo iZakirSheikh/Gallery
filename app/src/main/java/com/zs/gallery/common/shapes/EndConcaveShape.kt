@@ -21,13 +21,25 @@ class EndConcaveShape(private val radius: Dp) : Shape {
         val radiusPx = with(density) { radius.toPx() }
 
         val path = Path().apply {
-            moveTo(w, 0f)
-            quadraticTo(w -radiusPx, 0f, w - radiusPx, radiusPx)
-            lineTo(w-radiusPx, h- radiusPx)
-            quadraticTo(w - radiusPx, h, w, h)
-            lineTo(0f, h)
-            lineTo(0f, 0f)
-            lineTo(w, 0f)
+            if (layoutDirection == LayoutDirection.Ltr) {
+                // Concave on the right side
+                moveTo(w, 0f)
+                quadraticTo(w - radiusPx, 0f, w - radiusPx, radiusPx)
+                lineTo(w - radiusPx, h - radiusPx)
+                quadraticTo(w - radiusPx, h, w, h)
+                lineTo(0f, h)
+                lineTo(0f, 0f)
+                close()
+            } else {
+                // Concave on the left side (mirrored)
+                moveTo(0f, 0f)
+                quadraticTo(radiusPx, 0f, radiusPx, radiusPx)
+                lineTo(radiusPx, h - radiusPx)
+                quadraticTo(radiusPx, h, 0f, h)
+                lineTo(w, h)
+                lineTo(w, 0f)
+                close()
+            }
         }
         return Outline.Generic(path)
     }

@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,7 +81,7 @@ fun Shortcut(
             imageVector = icon,
             contentDescription = null, // Ensure a content description is provided elsewhere
             tint = accent,
-            modifier = Modifier.align(Alignment.TopStart)
+            modifier = Modifier.align(AbsoluteAlignment.TopLeft)
         )
 
         // Label at the bottom
@@ -88,7 +89,7 @@ fun Shortcut(
             text = label,
             style = AppTheme.typography.label3,
             color = accent,
-            modifier = Modifier.align(Alignment.BottomStart)
+            modifier = Modifier.align(AbsoluteAlignment.BottomLeft)
         )
     }
 }
