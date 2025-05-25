@@ -105,10 +105,9 @@
     <string name="trash_one_day_left">Queda 1 día</string>
     <string name="trash_days_left_d">%1$s Días restantes</string>
     <string name="auth_confirm_biometric">Confirmar Datos Biométricos</string>
-    <string name="pref_app_theme_s"><b>Tema de la aplicación</b>
+    <string name="pref_app_theme_s"><b>Tema de la app (%1$s)</b>
         <font color="grey" size="14">
-            <b>\n%1$s</b>
-            \nPersonaliza la apariencia de la aplicación con las opciones de tema Noche, Día o Sistema.
+            \nPersonalice el aspecto de la aplicación con opciones de tema Nocturno, Diurno o del sistema.
         </font>
     </string>
     <string name="pref_immersive_view"><b>Vista Inmersiva</b>
@@ -116,9 +115,9 @@
             \nOculte la barra de estado y la barra de navegación para disfrutar de una experiencia de pantalla completa sin distracciones.
         </font>
     </string>
-    <string name="pref_enable_trash_can"><b>Papelera de Reciclaje<small>(Android 11+)</small></b>
+    <string name="pref_enable_trash_can"><b>Papelera de Reciclaje (Android 11+)</b>
           <font color="grey" size="14">
-              \nHabilite la función para mover archivos eliminados a la Papelera de reciclaje en lugar de eliminarlos de forma permanente.
+              \nHabilite para mover los archivos eliminados a la papelera de reciclaje en lugar de eliminarlos permanentemente.
           </font>
     </string>
     <string name="pref_grid_item_size_multiplier"><b>Multiplicador del Tamaño de la Cuadrícula</b>
@@ -169,10 +168,12 @@
             la aplicación no está en uso activo.
         </font>
     </string>
-    <string name="pref_app_lock_s"><b>Bloqueo de la Aplicación</b> <sup><font color="#ae1c27" size="10"><b>Beta</b></font></sup>
-          <small>\n%1$s</small>
+    <string name="pref_app_lock_s"><b>Bloqueo de Aplicación</b> (<small>%1$s</small>)<sup><font color="#ae1c27" size="10"><b> Beta</b></font></sup>
           <font color="grey" size="14">
-              \nAsegura la Galería con autenticación biométrica.
+              \nAsegura la galería con autenticación biométrica.
+        </font>
+    </string>
+    <string name="pref_color_nav_bar"><b>Barra de Nav. Coloreada</b><font color="grey" size="14">\nUtilice el color de acento en la barra de navegación.
         </font>
     </string>
     <string name="about_us">Sobre nosotros</string>
@@ -182,10 +183,31 @@
     <string name="update_gallery">Actualiza la Galería</string>
     <string name="rate_us">Calificanos</string>
     <string name="share_app_label">Comparte con Amigos</string>
+    <string name="pref_dynamic_colors"><b>Colores Dinámicos</b>\n<font color="grey" size="14">Alternar el uso de colores dinámicos. Esta función solo está disponible en <b>Android 12</b> o mayor.
+        </font>
+    </string>
+    <string name="error">Error</string>
     <string-array name="pref_app_lock_options">
         <item>Desactivado</item>
         <item>Instantáneo</item>
         <item>1 Min</item>
         <item>30 Min</item>
     </string-array>
+    <string name="pref_scr_version_by_author_s">"v%1$s por <b><i>Zakir Sheikh</i></b>"</string>
+    <string name="buy_me_a_coffee">Cómprame un café</string>
+    <string name="msg_support_gallery"><b>Galeria solo esta empezando — y solo está mejorando.</b>
+    \nGaleria es de código abierto, está bellamente diseñada y está creciendo rápidamente. Puedes ayudarme a seguir adelante mediante:
+        \n1. 🌍 Corra la voz
+        \n2. 🔧 Reportar errores
+        \n3. ☕ Mantenme motivado con un pequeño gesto, como invitarme a un café o invitarme a comer. 😊
+    </string>
+    <string name="fuel">Combustible</string>
+    <string name="viewer_scr_open_in_lens">Abrir en Lens</string>
+    <string name="quick_share">Quick Share</string>
+    <string name="msg_viewer_scr_no_g_lens">Instala la aplicación de Google para usar lens</string>
+    <string name="msg_files_quick_share_error">Instale la aplicación Quick Share para usar esta función.</string>
+    <string name="none">Ninguna</string>
+    <string name="properties">Propiedades</string>
+    <string name="pref_ambient_mode"><b>Modo ambiente</b><font color="grey">\nAñade iluminación inmersiva alrededor del visor de medios para una experiencia más cinematográfica.</font></string>
+    <string name="authenticate">Autenticar</string>
 </resources>
