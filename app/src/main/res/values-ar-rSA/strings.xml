@@ -15,6 +15,191 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name">مَعْرِض</string>
+    <string name="permission_scr_title">إذن التخزين</string>
+    <string name="allow">سماح</string>
+    <string name="permission_scr_desc"><b>مَعْرِض الصور</b> يتطلب إذنًا للوصول إلى وحدة تخزين جهازك لعرض الصور ومقاطع الفيديو.
+<b>\n\nعلى أندرويد 14 أو أعلى:</b>
+<font color="grey">
+    \n  1. يرجى اختيار <b>السماح للجميع</b> في مربع حوار الأذونات ليعمل التطبيق بشكل صحيح.
+</font></string>
+    <string name="photos">الصور</string>
+    <string name="settings">إعدادات</string>
+    <string name="folders">المجلدات</string>
+    <string name="loading">تحميل</string>
+    <string name="oops_empty">عفواً فارغة!</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d ملفات - %2$s</string>
+    <string name="size">حجم</string>
+    <string name="name">الاسم</string>
+    <string name="recent">حديثاً</string>
+    <string name="dark">داكن</string>
+    <string name="light">خفيف</string>
+    <string name="sync_with_system">المزامنة مع النظام</string>
+    <string name="general">عام</string>
+    <string name="appearance">مظهر</string>
+    <string name="feedback">ملاحظات</string>
+    <string name="about_gallery">حول مَعْرِض الصور</string>
+    <string name="msg_unknown_error">حدث خطأ ما. حدث خطأ غير معروف.</string>
+    <string name="report">بلاغ</string>
+    <string name="timeline">الأحدث</string>
+    <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="files_selected_d">%1$d محدد</string>
+    <string name="select_all"> حدد الكل </string>
+    <string name="bin">صندوق</string>
+    <string name="recycle_bin">سلة المحذوفات</string>
+    <string name="favourites">المفضلة</string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$sx</string>
+    <string name="last_modified">آخر تعديل</string>
+    <string name="msg_error_sharing_files">عفواً، حدث خطأ ما خلال مشاركة الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="msg_files_delete_unknown_error">عفواً، حدث خطأ خلال حذف الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="msg_files_trash_unknown_error">عفواً، حدث خطأ خلال تحويل الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="trash">مهملات</string>
+    <string name="msg_files_restore_unknown_error">عفواً، حدث خطأ ما خلال استعادة الملفات. الرجاء المحاولة مرة أخرى.</string>
+    <string name="share">حصة</string>
+    <string name="edit">تعديل</string>
+    <string name="delete">حذف</string>
+    <string name="info">معلومة</string>
+    <string name="edit_in">تحرير في</string>
+    <string name="use_as">استخدام كـ</string>
+    <string name="set_as_wallpaper">تعيين كخلفية</string>
+    <string name="like">إعجاب</string>
+    <string name="unlike">غير مفضل</string>
+    <string name="details">معلومات</string>
+    <string name="title">الاسم</string>
+    <string name="path">الطريق</string>
+    <string name="metadata">البيانات الوصفية</string>
+    <string name="msg_files_confirm_deletion"><b>حذف</b>
+        <font color="grey">\nهل أنت متأكد من أنك تريد حذف هذا؟ لن تتمكن من استرجاعه
+        </font>
+    </string>
+    <string name="msg_update_check_error">عفواً! حدث خطأ خلال التحقق من وجود تحديثات.</string>
+    <string name="msg_update_not_available">لقد تم تعيينها! لا توجد تحديثات متاحة.</string>
+    <string name="msg_new_update_downloaded">التحديث مُعدّ! يمكن الاستمرار في التثبيت الآن.</string>
+    <string name="install">تثبيت</string>
+    <string name="lock_scr_title">التحقق من هويتك</string>
+    <string name="lock_scr_subtitle">المصادقة بالقياسات الحيوية</string>
+    <string name="lock_scr_desc">المصادقة مع بصمة الإصبع أو التعرف على الوجه
+        للمتابعة. هذه الخطوة حاسمة لحماية بياناتك.
+    </string>
+    <string name="msg_enroll_biometric">تمكين المصادقة الحيوية في الإعدادات.</string>
+    <string name="msg_favourites_updated">تحديث المفضلة!</string>
+    <string name="msg_media_player_promotion"><b>تطبيق مشغل وسائط جديد!</b>
+<font color="gray">\n🎶 جرّب تطبيق <b>مشغل الوسائط</b> الجديد لدينا! استمتع بأغانيك ومقاطع الفيديو المفضلة بسهولة. جربه الآن! 🎥
+</font></string>
+    <string name="get">توصيل</string>
+    <string name="dismiss">تجاهل</string>
+    <string name="msg_auth_failed">فشل المصادقة! الرجاء المحاولة مرة أخرى أو استخدام طريقة بديلة.</string>
+    <string name="msg_auth_error_s">خطأ المصادقة: %1$s</string>
+    <string name="restore">استعادة</string>
+    <string name="empty_bin">تفريغ السلة</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s مِلَفّ</string>
+    <string name="viewer_msg_no_wallpaper_app_found">عفواً! لم يتم العثور على تطبيق الخلفية. قم بتثبيت واحد للمتابعة.</string>
+    <string name="viewer_set_as">تعيين كـ</string>
+    <string name="today">اليوم</string>
+    <string name="trash_one_day_left">يتبقى يوم</string>
+    <string name="trash_days_left_d">بقي %1$s أيام</string>
+    <string name="auth_confirm_biometric">تأكيد القياسات الحيوية</string>
+    <string name="pref_app_theme_s"><b>سمة التطبيق (%1$s)</b>
+        <font color="grey" size="14">
+            \nتخصيص مظهر التطبيق مع خيارات الليل، أو اليوم، أو سمة النظام.
+        </font>
+    </string>
+    <string name="pref_immersive_view"><b>عرض غامض</b>
+        <font color="grey" size="14">
+            \nإخفاء شريط الحالة وشريط التنقل لتجربة خالية من التشتت. ملء الشاشة.
+        </font>
+    </string>
+    <string name="pref_enable_trash_can"><b>سلة المحذوفات (أندرويد 11+)</b>
+          <font color="grey" size="14">
+              \nتمكين نقل الملفات المحذوفة إلى سلة المحذوفات بدلاً من حذفها نهائياً.
+          </font>
+    </string>
+    <string name="pref_grid_item_size_multiplier"><b>مُضاعف حجم الشبكة</b>
+<font color="grey" size="14">
+    \nقم بضبط المساحة التي يشغلها كل عنصر في تخطيط الشبكة.
+</font></string>
+    <string name="pref_colorization_strategy">&lt;b&gt;التلوين التلقائي &lt;sup&gt;&lt;font color="#ae1c27" size="10"&gt;&lt;b&gt;Beta&lt;/b&gt;&lt;/font&gt;&lt;/sup&gt;&lt;/b&gt;
+         &lt;font color="grey" size="14"&gt;&lt;font color="grey" size="14"&gt;
+             \nإنشاء موضوع بشكل ديناميكي استناداً إلى ألوان العمل الفني لوسائط الإعلام حاليا.
+          &lt;/font&gt;
+    </string>
+    <string name="pref_privacy_policy"><b>سياسة الخصوصية</b>
+           <font color="grey" size="14">
+               \nانقر هنا لعرض سياسة الخصوصية.
+          </font>
+    </string>
+    <string name="pref_live_gallery"><b>معرض الصور الحية</b>
+           <font color="grey" size="14">
+               \nتمكين الرسوم المتحركة والتشغيل التلقائي للفيديو في المعرض.
+          </font></string>
+    <string name="pref_font_scale"><b>حجم الخط</b>
+         <font color="grey" size="14">
+            \nضبط حجم الخط لجعل النص أسهل قراءته. اختر مقياساً يناسب تفضيلاتك
+             من أجل تحسين القراءة.
+        </font>
+    </string>
+    <string name="pref_transparent_system_bars"><b>أشرطة النظام</b>
+<font color="grey" size="14">
+    \nقم بتمكين أشرطة النظام الشفافة لتجربة تمتد من الحافة إلى الحافة <b><i>\n(أندرويد 6.0 فأعلى)</i></b>
+</font></string>
+    <string name="pref_report_an_issue"><b>أبلغ عن مشكلة</b>
+        <font color="grey" size="14">
+           \nاتصل بفريق الدعم لدينا للحصول على المساعدة أو للإبلاغ عن المشكلات
+        </font>
+    </string>
+    <string-array name="pref_night_mode_entries">
+        <item>مظلم</item>
+        <item>خفيف</item>
+        <item>المزامنة مع النظام</item>
+    </string-array>
+    <string name="version">نسخة</string>
+    <string name="version_info_s">النسخة: %1$s</string>
+    <string name="pref_secure_mode"><b>الوضع الآمن</b>
+        <font color="grey" size="14">
+           \nالوضع الآمن يحجب محتوى التطبيق في معاينة التطبيق، حماية خصوصية المستخدم عندما يكون التطبيق
+            غير مستخدم بشكل نشط.
+        </font>
+    </string>
+    <string name="pref_app_lock_s"><b>App Lock</b> (<small>%1$s</small>)<sup><font color="#ae1c27" size="10"><b> Beta</b></font></sup>
+          <font color="grey" size="14">
+              \nمعرض آمن مع المصادقة البيومترية.
+        </font>
+    </string>
+    <string name="pref_color_nav_bar"><b>لون شريط التنقل</b><font color="grey" size="14">\nاستخدم لون التمييز في شريط التنقل.
+</font>    </string>
+    <string name="about_us">نبذا عنا</string>
+    <string name="postfix_x_f">%1$.1fx</string>
+    <string name="system">النظام</string>
+    <string name="join_the_beta">انضم إلى بيتا</string>
+    <string name="update_gallery">تحديث المَعْرِض</string>
+    <string name="rate_us">قم بتقييمنا</string>
+    <string name="share_app_label">شارك مع الأصدقاء</string>
+    <string name="pref_dynamic_colors"><b>ألوان ديناميكية</b>\n<font color="grey" size="14">تبديل استخدام الألوان الديناميكية. هذه الميزة متوفرة فقط على <b>Android 12</b> أو أعلى.
+        </font>
+    </string>
+    <string name="error">خطأ</string>
+    <string-array name="pref_app_lock_options">
+        <item>معطَّل</item>
+        <item>فورا</item>
+        <item>1 دقيقة</item>
+        <item>30 دقيقة</item>
+    </string-array>
+    <string name="pref_scr_version_by_author_s">"v%1$s بواسطة &lt;b&gt;&lt;i&gt;كزير"</string>
+    <string name="buy_me_a_coffee">إشتر لي قهوة</string>
+    <string name="msg_support_gallery"><b>مَعْرِض الصور بدأ للتو — وسيصبح أفضل باستمرار.</b>
+\nمعرض الصور مفتوح المصدر، مصمم بشكل جميل، ويتطور بسرعة. يمكنك دعمي من خلال
+\n1. 🌍 نشر الكلمة
+\n2. 🔧 الإبلاغ عن الأخطاء
+\n3. ☕ تحفيزي بإيماءة صغيرة، مثل شراء فنجان قهوة أو دعمي على وجبة. 😊</string>
+    <string name="fuel">الوقود</string>
+    <string name="viewer_scr_open_in_lens">فتح في عدسة</string>
+    <string name="quick_share">مشاركة سريع</string>
+    <string name="msg_viewer_scr_no_g_lens">تثبيت تطبيق جوجل لاستخدام العدسة</string>
+    <string name="msg_files_quick_share_error">تثبيت تطبيق مشاركة سريعة لاستخدام هذه الميزة.</string>
+    <string name="none">لا</string>
+    <string name="properties">الخصائص</string>
+    <string name="pref_ambient_mode"><b>الوضع المحيط</b><font color="grey">\nيضيف الإضاءة الغامرة حول مشغل الوسائط لتجربة سينمائية أكثر.</font></string>
+    <string name="authenticate">مصادقة</string>
 </resources>

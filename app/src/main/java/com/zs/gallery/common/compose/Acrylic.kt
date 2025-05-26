@@ -82,7 +82,7 @@ fun Colors.background(
 ) = Background(
     Modifier.hazeEffect(state = surface) {
         this.blurEnabled = true
-        this.blurRadius = blurRadius
+        this.blurRadius =  blurRadius
         this.backgroundColor = containerColor
         // Disable noise factor on Android versions below 12.
         this.noiseFactor = noiseFactor
@@ -99,10 +99,10 @@ fun Colors.background(
                 endIntensity = 0f,
                 preferPerformance = true
             )
+            mask = PROGRESSIVE_MASK
             // Adjust input scale for Android versions below 12 for better visuals.
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
                 inputScale = HazeInputScale.Fixed(0.5f)
-            mask = PROGRESSIVE_MASK
         }
     }
 )

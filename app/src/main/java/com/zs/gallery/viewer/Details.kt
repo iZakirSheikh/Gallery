@@ -113,6 +113,7 @@ fun DetailsViewDialog(
         shape = AppTheme.shapes.xLarge,
         properties = DialogProperties(usePlatformDefaultWidth = !compact),
         background = background,
+        margin = if (compact) PaddingValues(horizontal = ContentPadding.normal) else null,
         topBar = {
             TopAppBar(
                 title = { Label(stringResource(R.string.properties)) },

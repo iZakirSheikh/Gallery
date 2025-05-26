@@ -1,9 +1,9 @@
 [versions]
 agp = "8.10.0"
 kotlin = "2.1.21"
-compose = "1.9.0-alpha02"
-media3 = "1.6.1"
-toolkit = "3.3.3-dev"
+compose = "1.9.0-alpha03"
+media3 = "1.7.1"
+toolkit = "3.4.1-dev"
 material_icons = "1.7.8"
 coil = "3.2.0"
 
@@ -28,14 +28,14 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.6" }
-saket-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.15.1" }
+saket-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.16.0" }
 
 # Androidx compose
 androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compose" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "compose" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
-androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.8.1" }
+androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.8.2" }
 
 # Toolkit
 toolkit-foundation = { module = "com.github.prime-zs.toolkit:foundation", version.ref = "toolkit" }

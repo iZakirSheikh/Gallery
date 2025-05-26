@@ -228,5 +228,6 @@
     <string name="none">None</string>
     <string name="properties">Properties</string>
     <string name="pref_ambient_mode"><b>Ambient Mode</b><font color="grey">\nAdds immersive lighting around the media viewer for a more cinematic experience.</font></string>
+    <string name="authenticate">Authenticate</string>
 
 </resources>

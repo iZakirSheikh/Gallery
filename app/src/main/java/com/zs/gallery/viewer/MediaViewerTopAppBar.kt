@@ -18,6 +18,7 @@
 
 package com.zs.gallery.viewer
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -67,11 +68,11 @@ fun MediaViewerTopAppBar(
                 provider,
                 Color.Transparent,
                 progressive = 1f,
-                blurRadius = 100.dp,
-                noiseFactor = 0.18f,
+                blurRadius =  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) 25.dp else 100.dp,
+                noiseFactor = 0.22f,
                 luminance = -1f,
-                tint = Color.Black.copy(0.3f),
-                blendMode = BlendMode.Multiply
+                tint = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) Color.Black.copy(0.3f) else Color.Transparent,
+                blendMode = BlendMode.Overlay
             ),
             contentColor = Color.SignalWhite,
             elevation = 0.dp,

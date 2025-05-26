@@ -264,7 +264,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
     //
     DetailsViewDialog(
         viewState.details,
-        colors.background(surface),
+        colors.background(surface, luminance = -1f),
         onDismissRequest = { viewState.showDetails = false }
     )
 
@@ -302,7 +302,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
             val actions = viewState.actions
             FloatingActionMenu(
                 visible = !immersive && !isLoading,
-                background = colors.background(surface),
+                background = colors.background(surface, luminance = -1f),
                 modifier = Modifier.windowInsetsPadding(
                     WindowInsets.systemBars.only(WindowInsetsSides.Bottom + WindowInsetsSides.End)
                 ),
@@ -325,7 +325,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                 // Transformation for blur effect, chosen based on Android version.
                 val transformation = remember {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        ReBlurTransformation(25f, 2.1f)
+                        ReBlurTransformation(300f, 2.1f)
                     else
                         RsBlurTransformation(ctx, 25f, 2.1f)
                 }
@@ -333,7 +333,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                     // Crossfade animation for the ambient background when the focused item changes.
                     viewState.focused,
                     modifier = Modifier
-                        .foreground(Color.Black.copy(0.92f))
+                        .foreground(Color.Black.copy(0.85f))
                         .visualEffect(ImageBrush.NoiseBrush, 0.04f, true, BlendMode.Luminosity),
                     // Content of the Crossfade: an AsyncImage with blur and noise effects.
                     content = {
