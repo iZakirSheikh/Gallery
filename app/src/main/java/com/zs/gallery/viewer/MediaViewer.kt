@@ -48,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -72,7 +73,6 @@ import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
-import com.zs.core.coil.ReBlurTransformation
 import com.zs.core.coil.RsBlurTransformation
 import com.zs.core.coil.preferCachedThumbnail
 import com.zs.core.store.MediaProvider
@@ -321,27 +321,30 @@ fun MediaViewer(viewState: MediaViewerViewState) {
             // Ambient mode: applies a blur effect and noise overlay for an immersive background.
             // since content in placed inside of Box; so doing this is pretty normal
             val isAmbientModeEnabled by preference(Settings.KEY_VISUAL_EFFECT_MODE)
+
             if (isAmbientModeEnabled == 1) {
-                // Transformation for blur effect, chosen based on Android version.
-                val transformation = remember {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                        ReBlurTransformation(300f, 2.1f)
-                    else
-                        RsBlurTransformation(ctx, 25f, 2.1f)
-                }
+                val transformation =
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+                    remember { RsBlurTransformation(ctx, 25f, 2.1f) }
+                else null
                 Crossfade(
                     // Crossfade animation for the ambient background when the focused item changes.
                     viewState.focused,
                     modifier = Modifier
-                        .foreground(Color.Black.copy(0.85f))
-                        .visualEffect(ImageBrush.NoiseBrush, 0.04f, true, BlendMode.Luminosity),
+                        .thenIf(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+                            blur(100.dp)
+                        }
+                        .foreground(Color(0xFF0E0E0F).copy(0.90f))
+                        .visualEffect(ImageBrush.NoiseBrush, 0.08f, true, BlendMode.Luminosity),
                     // Content of the Crossfade: an AsyncImage with blur and noise effects.
                     content = {
                         AsyncImage(
                             ImageRequest(ctx)
                                 .data(MediaProvider.buildContentUri(it))
-                                .size(256)
-                                .transformations(transformation).build(),
+                                .size(512)
+                                .let {
+                                    if (transformation == null) it else it.transformations(transformation)
+                                }.build(),
                             null,
                             contentScale = ContentScale.Crop,
                             filterQuality = FilterQuality.None,
