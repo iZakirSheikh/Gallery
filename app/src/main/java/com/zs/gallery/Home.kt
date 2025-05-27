@@ -68,6 +68,7 @@ import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.MotionScheme
 import com.zs.compose.theme.OutlinedButton
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.NavigationSuiteScaffold
@@ -489,13 +490,14 @@ fun Home(
             content = {
                 // Load start destination based on if storage permission is set or not.
                 val granted = activity.checkSelfPermissions(REQUIRED_PERMISSIONS)
+                val motion = AppTheme.motionScheme
                 NavHost(
                     navController = navController,
                     startDestination = if (origin != RouteIntentViewer && !granted) RoutePermission() else origin(),
                     builder = navGraphBuilder,
                     modifier = Modifier.source(surface),
-                    enterTransition = { scaleIn(tween(220, 90), 0.98f) + fadeIn(tween(700)) },
-                    exitTransition = { fadeOut(tween(700)) },
+                    enterTransition = { scaleIn(motion.slowSpatialSpec(), 0.98f) + fadeIn(motion.slowEffectsSpec()) },
+                    exitTransition = { fadeOut(motion.slowEffectsSpec()) },
                 )
             }
         )
@@ -516,6 +518,7 @@ fun Home(
     AppTheme(
         isLight = !isDark,
         fontFamily = Settings.DefaultFontFamily,
+        motionScheme = MotionScheme.expressive(),
         accent = when {
             useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(
                 activity,

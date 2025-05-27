@@ -54,8 +54,8 @@ abstract class StoreViewModel(val provider: MediaProvider): KoinViewModel(){
             // show rationale if items are in bulk
             if (selected.size > 1) {
                 val res = showSnackbar(
-                    "Modify ${selected.size} items in Favorites?",
-                    "Confirm",
+                    getText(R.string.msg_favourites_modify_d, selected.size),
+                    getText(R.string.confirm),
                     Icons.Outlined.FavoriteBorder,
                     duration = SnackbarDuration.Long
                 )

@@ -70,6 +70,7 @@ import com.zs.compose.theme.adaptive.Scaffold
 import com.zs.compose.theme.adaptive.content
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
+import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.TonalHeader
 import com.zs.core.store.MediaFile
@@ -78,6 +79,7 @@ import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.common.compose.FloatingActionMenu
 import com.zs.gallery.common.compose.FloatingLargeTopAppBar
 import com.zs.gallery.common.compose.LocalNavController
+import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.OverflowMenu
 import com.zs.gallery.common.compose.background
 import com.zs.gallery.common.compose.emit
@@ -131,12 +133,27 @@ fun Files(viewState: FilesViewState) {
                 insets = WindowInsets.systemBars.only(WindowInsetsSides.Top),
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
-                    Icon(
-                        imageVector = icon ?: ImageVector.Drawable(R.drawable.ic_app),
-                        title.toString(),
-                        modifier = Modifier.minimumInteractiveComponentSize(),
-                        tint = if (icon == null) Color.Unspecified else LocalContentColor.current
-                    )
+                    val facade = LocalSystemFacade.current
+                    when {
+                        icon != null -> Icon(
+                            imageVector = icon,
+                            title.toString(),
+                            modifier = Modifier.minimumInteractiveComponentSize(),
+                        )
+
+                        else -> IconButton(
+                            onClick = {
+                                facade.showSnackbar(R.string.what_s_new_latest, duration = SnackbarDuration.Indefinite)
+                            },
+                            content = {
+                                Icon(
+                                    ImageVector.Drawable(R.drawable.ic_app),
+                                    contentDescription = null,
+                                    tint = Color.Unspecified
+                                )
+                            }
+                        )
+                    }
                 },
                 actions = {
                     // Show menu in TopBar if not in selection.
