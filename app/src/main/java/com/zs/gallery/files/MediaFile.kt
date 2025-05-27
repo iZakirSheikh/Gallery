@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.text.Label
@@ -78,7 +79,10 @@ fun MediaFile(
     val elevation = if (kotlin.random.Random.nextBoolean()) 0.5.dp else 1.dp
     Box(modifier = Modifier.background(AppTheme.colors.background(elevation = elevation)) then modifier) {
         val selected = checked == 1
-        val progress by animateFloatAsState(targetValue = if (selected) 1f else 0f)
+        val progress by animateFloatAsState(
+            targetValue = if (selected) 1f else 0f,
+            AppTheme.motionScheme.fastSpatialSpec()
+        )
         val ctx = LocalContext.current
         AsyncImage(
             model = remember(key1 = value.id) {
@@ -93,12 +97,15 @@ fun MediaFile(
             ),
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .graphicsLayer {
-                    val scale = lerp(start = 1f, 0.8f, progress)
-                    scaleX = scale
-                    scaleY = scale
-                    shape = RoundedCornerShape(lerp(0, 16, progress))
-                    clip = true
+                // only apply graphics layer when selected.
+                .thenIf(selected) {
+                    graphicsLayer {
+                        val scale = lerp(start = 1f, 0.8f, progress)
+                        scaleX = scale
+                        scaleY = scale
+                        shape = RoundedCornerShape(lerp(0, 16, progress))
+                        clip = true
+                    }
                 }
                 .aspectRatio(1.0f),
         )

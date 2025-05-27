@@ -50,8 +50,8 @@ fun MediaViewerTopAppBar(
     navigationIcon: @Composable () -> Unit = {},
 ) =  AnimatedVisibility(
     visible = visible,
-    enter = slideInVertically() + fadeIn(),
-    exit = slideOutVertically() + fadeOut(),
+    enter = slideInVertically(animationSpec = AppTheme.motionScheme.fastSpatialSpec()) + fadeIn(AppTheme.motionScheme.fastEffectsSpec()),
+    exit = slideOutVertically(animationSpec = AppTheme.motionScheme.fastSpatialSpec()) + fadeOut(AppTheme.motionScheme.fastEffectsSpec()),
     content = {
         TopAppBar(
             navigationIcon = navigationIcon,

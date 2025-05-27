@@ -271,7 +271,11 @@ fun <T> LazyGridScope.emit(
                     iconResId = R.raw.lt_empty_box,
                     modifier = Modifier
                         .fillMaxSize()
-                        .animateItem()
+                        .animateItem(
+                            AppTheme.motionScheme.slowSpatialSpec<Float>(),
+                            AppTheme.motionScheme.defaultSpatialSpec(),
+                            AppTheme.motionScheme.slowSpatialSpec<Float>(),
+                        )
                 )
             }, contentType = "data_empty_placeholder"
         )

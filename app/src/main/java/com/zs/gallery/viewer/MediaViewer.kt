@@ -346,6 +346,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                         }
                         .foreground(Color(0xFF0E0E0F).copy(0.90f))
                         .visualEffect(ImageBrush.NoiseBrush, 0.08f, true, BlendMode.Luminosity),
+                    animationSpec = AppTheme.motionScheme.slowEffectsSpec(),
                     // Content of the Crossfade: an AsyncImage with blur and noise effects.
                     content = {
                         AsyncImage(

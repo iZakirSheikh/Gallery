@@ -4,46 +4,13 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
+            \n🌟 <b>M3 Motion Scheme</b>: The app now utilizes the M3 expressive motion scheme for a more dynamic and engaging user experience.
+            \n🌟 <b>Bug Fix</b>: Resolved an issue that caused a blinking effect when tapping on an image to display it.
             \n🌟 <b>Ambient mode</b> - Simulates ambient lighting for a rich visual experience.
             \n🌟 Bug fixes and performance improvements.
             \n🌟 Share via <b>Nearby/Quick share</b>.
             \n🌟 Now you can <b>Instantly share</b> with nearby devices.
             \n🌟 Search with Google Lens! Explore images like never before.
-            \n🌟 <b>New Look &amp; Feel!</b> The app has been completely redesigned.
         </font>
     </string>
-
-    <!--1.0.0-alpha03-->
-    <string name="what_s_new_1_0_0_alpha03">
-        <b>1.0.0-alpha03</b>
-         <font color='grey'>
-            \n fixed an issue causing
-            \n Fixed a major bug that prevented the app from requesting permissions on Android 11/12.
-            \n🎥 Enjoy seamless <b>video playback</b> with our new in-app <b>media player!</b>
-            \n✨<b>Toasts</b> &amp; <b>Snackbars</b> got a boost! Swipe to dismiss, expand for more info, and enjoy smoother interactions.
-            \n\n<b>In Focus</b>
-            \n ⦿ General performance improvements
-            \n ⦿ Support for various file types: <b>GIF, SVG,</b> etc.
-        </font>
-    </string>
-
-    <!--20_dev20-->
-    <string name="what_s_new_20_dev20">
-        <b>0.1.0-dev20</b>
-        <font color='grey'>
-            \n🌟 Thanks for using our app! ❤️😍
-            \n🌟 Biometric Authentication: Supports Android 9+.
-            \n🌟 UI Updates: We\'ve made improvements to the design and navigation.
-            \n🌟 Introduced Favourites and Recycle Bin in Folders
-            \n🌟 Bug Fixes: We\'ve resolved issues with loading and app lock.
-            \n🌟 Some minor bug fixes
-        </font>
-    </string>
-
-    <!---->
-    <string-array name="what_s_new">
-        <!--first is always latest-->
-        <item>@string/what_s_new_latest</item>
-        <item>@string/what_s_new_20_dev20</item>
-    </string-array>
 </resources>
