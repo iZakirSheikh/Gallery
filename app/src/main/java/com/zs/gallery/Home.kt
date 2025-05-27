@@ -21,13 +21,13 @@ package com.zs.gallery
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
+import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -39,7 +39,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.NonRestartableComposable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -84,7 +87,6 @@ import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
-import com.zs.gallery.common.compose.ContentPadding
 import com.zs.gallery.common.compose.LocalNavController
 import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.background
@@ -97,7 +99,6 @@ import com.zs.gallery.common.domain
 import com.zs.gallery.common.shapes.EndConcaveShape
 import com.zs.gallery.files.Files
 import com.zs.gallery.files.RouteFiles
-import com.zs.gallery.files.RouteTimeline
 import com.zs.gallery.folders.Folders
 import com.zs.gallery.folders.RouteFolders
 import com.zs.gallery.impl.FilesViewModel
@@ -121,6 +122,53 @@ private val LightAccentColor = /*Color(0xFF514700)*/ Color.ClaretViolet
 private val DarkAccentColor = Color(0xFFD8A25E)
 
 private val SIDE_BAR_WIDTH = 100.dp
+
+/**
+ * Determines the primary navigation route domain from the current [NavController] back stack.
+ *
+ * This extension property observes the current back stack entry and identifies the domain of
+ * the top-level destination if it's one of the known primary routes (RouteFiles, RouteFolders, RouteSettings)
+ * and has no arguments.
+ *
+ * The result is memoized using [remember] and updated efficiently with [derivedStateOf]
+ * whenever the back stack changes.
+ *
+ * @return A [State] holding the domain string of the primary route, or `null` if none is active.
+ */
+private val NavController.primary: State<String?>
+    @Composable
+    inline get() {
+        // Observe the current back stack entry as state
+        val entry by currentBackStackEntryAsState()
+        return remember() {
+            derivedStateOf {
+                val dest = entry?.destination ?: return@derivedStateOf null
+
+                // Check if the destination is one of the known top-level domains
+                val isPrimary = when (dest.domain) {
+                    RouteFiles.domain -> true
+                    RouteFolders.domain -> true
+                    RouteSettings.domain -> true
+                    else -> false
+                }
+
+                // Determines if the current route is a primary, top-level screen without arguments.
+                //
+                // TODO: Investigate why arguments are sometimes present in `dest.arguments`
+                //       and other times in `entry?.arguments`.
+                //
+                // The logic is as follows:
+                // 1. Check if the current route's domain is one of the primary routes.
+                // 2. Verify that there are no arguments in `dest.arguments`.
+                // 3. Additionally, ensure that `entry?.arguments` is either null or contains only one entry
+                //    (which might be a default or system-added argument).
+                // If all conditions are met, the domain of the primary route is returned.
+                // Otherwise, `null` is returned, indicating it's not a primary, argument-less route.
+                Log.d(TAG, "args: ${dest.arguments} | ${entry?.arguments?.size()}")
+                if (isPrimary &&( dest.arguments.isEmpty() && (entry?.arguments == null || entry?.arguments?.size() == 1))) dest.domain else null
+            }
+        }
+    }
 
 private val NavRailShape = EndConcaveShape(12.dp)
 private val NavRailBorder = BorderStroke(
@@ -177,13 +225,6 @@ private fun NavController.toRoute(route: Route) {
 }
 
 /**
- * The set of domains that require the navigation bar to be shown.
- * For other domains, the navigation bar will be hidden.
- */
-private val DOMAINS_REQUIRING_NAV_BAR =
-    arrayOf(RouteTimeline.domain, RouteFolders.domain, RouteSettings.domain)
-
-/**
  * List of permissions required to run the app.
  *
  * This list is constructed based on the device's Android version to ensure
@@ -227,8 +268,8 @@ private fun Permission() {
     val permission =
         Permissions(permissions = REQUIRED_PERMISSIONS) {
             if (!it.all { (_, state) -> state }) return@Permissions
-            controller.graph.setStartDestination(RouteTimeline())
-            controller.navigate(RouteTimeline()) {
+            controller.graph.setStartDestination(RouteFiles())
+            controller.navigate(RouteFiles()) {
                 popUpTo(RoutePermission()) {
                     inclusive = true
                 }
@@ -261,12 +302,6 @@ private val navGraphBuilder: NavGraphBuilder.() -> Unit = {
 
     // Route for handling storage permissions.
     composable(RoutePermission) { Permission() }
-
-    // RouteTimeline
-    composable(RouteTimeline) {
-        val state = koinViewModel<FilesViewModel>()
-        Files(viewState = state)
-    }
 
     // RouteFiles
     composable(RouteFiles) {
@@ -337,17 +372,17 @@ private fun NavigationBar(
             unselectedIconColor = if (contentColor == colors.onAccent) colors.onAccent else colors.onBackground,
             unselectedTextColor = if (contentColor == colors.onAccent) colors.onAccent else colors.onBackground
         )
-        val domain = current?.destination?.domain
 
         // Required to launch review.
         val facade = LocalSystemFacade.current
+        val primary by navController.primary
 
         // Timeline
         NavigationItem(
             label = { Label(text = textResource(R.string.timeline)) },
             icon = { Icon(imageVector = Icons.Filled.PhotoLibrary, contentDescription = null) },
-            selected = domain == RouteTimeline.domain,
-            onClick = { facade.initiateReviewFlow(); navController.toRoute(RouteTimeline) },
+            selected = primary == RouteFiles.domain,
+            onClick = { facade.initiateReviewFlow(); navController.toRoute(RouteFiles) },
             isBottomNav = isBottomAligned,
             colors = colors
         )
@@ -356,7 +391,7 @@ private fun NavigationBar(
         NavigationItem(
             label = { Label(text = textResource(R.string.folders)) },
             icon = { Icon(imageVector = Icons.Filled.FolderCopy, contentDescription = null) },
-            selected = domain == RouteFolders.domain,
+            selected = primary == RouteFolders.domain,
             onClick = { facade.initiateReviewFlow(); navController.toRoute(RouteFolders) },
             isBottomNav = isBottomAligned,
             colors = colors
@@ -366,7 +401,7 @@ private fun NavigationBar(
         NavigationItem(
             label = { Label(text = textResource(R.string.settings)) },
             icon = { Icon(imageVector = Icons.Filled.Settings, contentDescription = null) },
-            selected = domain == RouteSettings.domain,
+            selected = primary == RouteSettings.domain,
             onClick = { facade.initiateReviewFlow(); navController.toRoute(RouteSettings) },
             isBottomNav = isBottomAligned,
             colors = colors
@@ -412,10 +447,11 @@ fun Home(
 
     // properties
     val style = (activity as SystemFacade).style
+    val primary by navController.primary
     val requiresNavBar = when (style.flagNavBarVisibility) {
         WindowStyle.FLAG_APP_NAV_BAR_HIDDEN -> false
         WindowStyle.FLAG_APP_NAV_BAR_VISIBLE -> true
-        else -> current?.destination?.domain in DOMAINS_REQUIRING_NAV_BAR  // auto
+        else -> primary != null // auto
     }
     // Determine the screen orientation.
     // This check assesses whether to display NavRail or BottomBar.

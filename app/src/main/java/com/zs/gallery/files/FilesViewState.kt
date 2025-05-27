@@ -34,9 +34,6 @@ import com.zs.gallery.common.Route
 import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.files.RouteFiles.SOURCE_TIMELINE
 
-// Some special cases
-object RouteTimeline : Route
-
 fun RouteFolder(path: String) = RouteFiles(RouteFiles.SOURCE_FOLDER, path)
 fun RouteLiked() = RouteFiles(RouteFiles.SOURCE_FAV)
 fun RouteBin() = RouteFiles(RouteFiles.SOURCE_BIN)
@@ -52,8 +49,6 @@ object RouteFiles : Route {
     const val SOURCE_FOLDER = "source_folder"
 
     override val route: String = "$domain/{$PARAM_SOURCE}/{$PARAM_ARG}"
-
-    override fun invoke() = RouteTimeline()
 
     /** Navigates to files of folder identified by [source] providing args*/
     operator fun invoke(source: String, key: String = ""): String =
