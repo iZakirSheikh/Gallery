@@ -183,10 +183,20 @@ private fun Carousel(
             val isFocused = state.currentPage == index
             val painter = Painter(
                 ImageRequest(ctx).apply {
-                    memoryCacheKey("${item.id}")
-                    data(item.mediaUri)
-                    if (item.isImage)  // Make sure that image is not loaded from Thumbnail repo.
+                    // For images, set a memory cache key using the item's ID.
+                    // Load the image data from its file URI instead of a image URI.
+                    // This allows for consistent image loading, matching what's shown during the loading phase,
+                    // and prevents the image from being reloaded, which could cause a blinking effect.
+                    // Request the original size of the image.
+                    // Disable the preference for cached thumbnails to ensure the full-resolution image is loaded.
+                    // This is crucial for displaying high-quality images in the viewer.
+                    // Using the content URI directly helps in leveraging Coil's caching mechanism effectively.
+                    if (item.isImage) {
+                        memoryCacheKey("${item.id}")
+                        data(MediaProvider.buildContentUri(item.id))
+                        this.size(coil3.size.Size.ORIGINAL)
                         preferCachedThumbnail(false)
+                    } else data(item.mediaUri)
                 }.build(),
                 onSuccess = {
                     val size = it.painter.intrinsicSize
@@ -325,13 +335,13 @@ fun MediaViewer(viewState: MediaViewerViewState) {
             if (isAmbientModeEnabled == 1) {
                 val transformation =
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
-                    remember { RsBlurTransformation(ctx, 25f, 2.1f) }
-                else null
+                        remember { RsBlurTransformation(ctx, 25f, 2.1f) }
+                    else null
                 Crossfade(
                     // Crossfade animation for the ambient background when the focused item changes.
                     viewState.focused,
                     modifier = Modifier
-                        .thenIf(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+                        .thenIf(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             blur(100.dp)
                         }
                         .foreground(Color(0xFF0E0E0F).copy(0.90f))
@@ -343,7 +353,9 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                                 .data(MediaProvider.buildContentUri(it))
                                 .size(512)
                                 .let {
-                                    if (transformation == null) it else it.transformations(transformation)
+                                    if (transformation == null) it else it.transformations(
+                                        transformation
+                                    )
                                 }.build(),
                             null,
                             contentScale = ContentScale.Crop,
@@ -354,7 +366,9 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                 )
             }
             // Modifier for the main content, applying surface properties and filling the maximum size.
-            val modifier = Modifier.source(surface).fillMaxSize()
+            val modifier = Modifier
+                .source(surface)
+                .fillMaxSize()
             // If data is loading, display a placeholder image with shared element transition.
             if (isLoading)
                 AsyncImage(
@@ -363,6 +377,7 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                     contentScale = ContentScale.Fit,
                     model = ImageRequest(ctx)
                         .memoryCacheKey("${viewState.focused}")
+                        .size(coil3.size.Size.ORIGINAL)
                         .data(MediaProvider.buildContentUri(viewState.focused))
                         .preferCachedThumbnail(false)
                         .build(),

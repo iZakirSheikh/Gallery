@@ -23,7 +23,6 @@ import android.text.format.Formatter
 import android.view.Gravity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
@@ -37,6 +36,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -55,6 +55,7 @@ import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.appbar.TopAppBar
+import com.zs.compose.theme.drawHorizontalDivider
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
@@ -125,8 +126,6 @@ fun DetailsViewDialog(
                     )
                 },
                 elevation = 0.dp,
-                shape = AppTheme.shapes.xLarge,
-                modifier = Modifier.padding(2.dp),
                 actions = {
                     IconButton(
                         Icons.Outlined.Close,
@@ -134,7 +133,13 @@ fun DetailsViewDialog(
                         onClick = onDismissRequest
                     )
                 },
-                background = Background(AppTheme.colors.accent.copy(ContentAlpha.indication))
+                background = Background(Color.Transparent),
+                modifier = Modifier
+                    .drawHorizontalDivider(
+                    color = AppTheme.colors.onBackground.copy(ContentAlpha.divider),
+                    thickness = 1.5.dp,
+                    indent = _root_ide_package_.androidx.compose.ui.unit.DpOffset(22.dp, 22.dp)
+                )
             )
 
         },
