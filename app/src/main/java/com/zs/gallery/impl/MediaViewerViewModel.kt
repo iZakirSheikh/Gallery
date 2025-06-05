@@ -185,7 +185,7 @@ class MediaViewerViewModel(
     }
 
     val onRequestUpdate: suspend (List<MediaFile>) -> Unit = { values ->
-        delay(300) // necessary for shared animation to work effectively.
+        delay(600) // necessary for shared animation to work effectively.
         // experiment for optimal value
         data = values
     }

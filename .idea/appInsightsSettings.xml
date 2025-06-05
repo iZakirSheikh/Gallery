@@ -21,6 +21,14 @@
         <entry key="Firebase Crashlytics">
           <value>
             <InsightsFilterSettings>
+              <option name="connection">
+                <ConnectionSetting>
+                  <option name="appId" value="com.googol.android.apps.photos" />
+                  <option name="mobileSdkAppId" value="1:849036525156:android:c13272277d749355d42971" />
+                  <option name="projectId" value="gallery-b17a1" />
+                  <option name="projectNumber" value="849036525156" />
+                </ConnectionSetting>
+              </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
               <option name="timeIntervalDays" value="THIRTY_DAYS" />
               <option name="visibilityType" value="ALL" />

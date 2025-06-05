@@ -26,6 +26,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.SavedStateHandle
+import com.zs.compose.theme.sharedBounds
 import com.zs.compose.theme.sharedElement
 import com.zs.core.store.MediaFile
 import com.zs.gallery.common.Action
@@ -64,7 +65,7 @@ object RouteFiles : Route {
      */
     @ExperimentalSharedTransitionApi
     fun sharedElement(id: Long) =
-        Modifier.sharedElement("shared_frame_$id", boundsTransform = DefaultBoundsTransform, zIndexInOverlay = 0.1f)
+        Modifier.sharedBounds("shared_frame_$id", boundsTransform = DefaultBoundsTransform, zIndexInOverlay = 0.1f)
 }
 
 operator fun SavedStateHandle.get(route: RouteFiles) =
