@@ -19,6 +19,7 @@
 package com.zs.gallery.settings
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.text.font.FontFamily
@@ -257,4 +258,9 @@ object Settings {
             "Hey, check out this cool app: [https://play.google.com/store/apps/details?id=com.googol.android.apps.photos&pcampaignid=web_share]"
         )
     }
+
+    val TranslateIntent = com.zs.core.Intent(Intent.ACTION_VIEW) {
+        data = Uri.parse("https://crowdin.com/project/gallery-photos-videos")
+    }
+
 }

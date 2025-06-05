@@ -61,6 +61,7 @@ import androidx.compose.material.icons.outlined.RateReview
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Textsms
+import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.ReadOnlyComposable
@@ -537,9 +538,9 @@ private fun ColumnScope.AboutUs() {
         )
 
         Chip(
-            content = { Label(textResource(R.string.share_app_label)) },
-            leadingIcon = { Icon(Icons.Outlined.Share, null) },
-            onClick = { facade.launch(Settings.ShareAppIntent) },
+            content = { Label(textResource(R.string.add_your_language)) },
+            leadingIcon = { Icon(Icons.Outlined.Translate, null) },
+            onClick = { facade.launch(Settings.TranslateIntent) },
             colors = colors,
             shape = AppTheme.shapes.xSmall
         )

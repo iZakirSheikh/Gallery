@@ -18,7 +18,6 @@
 
 package com.zs.gallery.viewer
 
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -28,16 +27,37 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.zs.compose.foundation.Background
 import com.zs.compose.foundation.SignalWhite
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.appbar.TopAppBar
 import com.zs.compose.theme.text.Text
-import com.zs.gallery.common.compose.background
 import dev.chrisbanes.haze.HazeState
+
+private val Veil = Background(
+    brush = Brush.verticalGradient(
+        listOf(
+            Color.Black,
+            Color.Black.copy(0.5f),
+            Color.Black.copy(0.0f)
+        )
+    )
+)
+
+//            background = AppTheme.colors.background(
+//                provider,
+//                Color.Transparent,
+//                progressive = 1f,
+//                blurRadius =  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) 25.dp else 100.dp,
+//                noiseFactor = 0.22f,
+//                luminance = -1f,
+//                tint = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) Color.Black.copy(0.3f) else Color.Transparent,
+//                blendMode = BlendMode.Overlay
+//            ),
 
 @Composable
 @NonRestartableComposable
@@ -48,10 +68,14 @@ fun MediaViewerTopAppBar(
     modifier: Modifier = Modifier,
     actions: @Composable RowScope.() -> Unit = {},
     navigationIcon: @Composable () -> Unit = {},
-) =  AnimatedVisibility(
+) = AnimatedVisibility(
     visible = visible,
-    enter = slideInVertically() + fadeIn(),
-    exit = slideOutVertically() + fadeOut(),
+    enter = slideInVertically(animationSpec = AppTheme.motionScheme.defaultSpatialSpec()) + fadeIn(
+        AppTheme.motionScheme.fastEffectsSpec()
+    ),
+    exit = slideOutVertically(animationSpec = AppTheme.motionScheme.defaultSpatialSpec()) + fadeOut(
+        AppTheme.motionScheme.fastEffectsSpec()
+    ),
     content = {
         TopAppBar(
             navigationIcon = navigationIcon,
@@ -64,16 +88,7 @@ fun MediaViewerTopAppBar(
                 )
             },
             actions = actions,
-            background = AppTheme.colors.background(
-                provider,
-                Color.Transparent,
-                progressive = 1f,
-                blurRadius =  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) 25.dp else 100.dp,
-                noiseFactor = 0.22f,
-                luminance = -1f,
-                tint = if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S) Color.Black.copy(0.3f) else Color.Transparent,
-                blendMode = BlendMode.Overlay
-            ),
+            background = Veil,
             contentColor = Color.SignalWhite,
             elevation = 0.dp,
         )

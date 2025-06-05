@@ -36,7 +36,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Coffee
-import androidx.compose.material.icons.outlined.Downloading
+import androidx.compose.material.icons.outlined.GetApp
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -46,7 +46,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,8 +68,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
 import com.google.firebase.crashlytics.crashlytics
-import com.zs.compose.foundation.MetroGreen
-import com.zs.compose.foundation.Rose
+import com.zs.compose.foundation.Amber
 import com.zs.compose.foundation.getText2
 import com.zs.compose.foundation.runCatching
 import com.zs.compose.theme.snackbar.SnackbarDuration
@@ -87,7 +85,7 @@ import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.domain
 import com.zs.gallery.common.products
-import com.zs.gallery.files.RouteTimeline
+import com.zs.gallery.files.RouteFiles
 import com.zs.gallery.lockscreen.RouteLockScreen
 import com.zs.gallery.settings.Settings
 import com.zs.gallery.viewer.RouteIntentViewer
@@ -331,8 +329,8 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         // Update the start destination to RouteTimeline
         if (navController.graph.startDestinationRoute == RouteLockScreen()) {
             Log.d(TAG, "unlock: updating start destination")
-            navController.graph.setStartDestination(RouteTimeline())
-            navController.navigate(RouteTimeline()) {
+            navController.graph.setStartDestination(RouteFiles())
+            navController.navigate(RouteFiles()) {
                 popUpTo(RouteLockScreen()) {
                     inclusive = true
                 }
@@ -431,8 +429,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                         message = resources.getText2(R.string.msg_new_update_downloaded),
                         action = resources.getText2(R.string.install),
                         duration = SnackbarDuration.Long,
-                        accent = Color.MetroGreen,
-                        icon = Icons.Outlined.Downloading
+                        icon = Icons.Outlined.NewReleases
                     )
                     // complete update when ever user clicks on action.
                     if (res == SnackbarResult.ActionPerformed) manager.completeUpdate()
@@ -533,10 +530,10 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 1 -> {
                     val result = snackbarHostState.showSnackbar(
                         message = resources.getText2(R.string.msg_media_player_promotion),
-                        icon = Icons.Outlined.NewReleases,
+                        icon = Icons.Outlined.GetApp,
                         duration = SnackbarDuration.Indefinite,
                         action = resources.getText2(R.string.get),
-                        accent = Color.Rose
+                        accent = Color.Amber
                     )
                     if (result == SnackbarResult.ActionPerformed)
                         launchAppStore("com.prime.player")
@@ -646,7 +643,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 when {
                     intent.action == Intent.ACTION_VIEW -> RouteIntentViewer
                     isAuthenticationRequired -> RouteLockScreen
-                    else -> RouteTimeline
+                    else -> RouteFiles
                 },
                 snackbarHostState,
                 navController

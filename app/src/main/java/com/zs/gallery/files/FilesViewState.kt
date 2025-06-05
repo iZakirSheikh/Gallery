@@ -26,6 +26,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.SavedStateHandle
+import com.zs.compose.theme.sharedBounds
 import com.zs.compose.theme.sharedElement
 import com.zs.core.store.MediaFile
 import com.zs.gallery.common.Action
@@ -33,9 +34,6 @@ import com.zs.gallery.common.Mapped
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SelectionTracker
 import com.zs.gallery.files.RouteFiles.SOURCE_TIMELINE
-
-// Some special cases
-object RouteTimeline : Route
 
 fun RouteFolder(path: String) = RouteFiles(RouteFiles.SOURCE_FOLDER, path)
 fun RouteLiked() = RouteFiles(RouteFiles.SOURCE_FAV)
@@ -52,8 +50,6 @@ object RouteFiles : Route {
     const val SOURCE_FOLDER = "source_folder"
 
     override val route: String = "$domain/{$PARAM_SOURCE}/{$PARAM_ARG}"
-
-    override fun invoke() = RouteTimeline()
 
     /** Navigates to files of folder identified by [source] providing args*/
     operator fun invoke(source: String, key: String = ""): String =

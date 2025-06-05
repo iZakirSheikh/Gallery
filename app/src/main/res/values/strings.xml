@@ -229,5 +229,8 @@
     <string name="properties">Properties</string>
     <string name="pref_ambient_mode"><b>Ambient Mode</b><font color="grey">\nAdds immersive lighting around the media viewer for a more cinematic experience.</font></string>
     <string name="authenticate">Authenticate</string>
+    <string name="confirm">Confirm</string>
+    <string name="msg_favourites_modify_d">Modify %1$d items in Favorites?</string>
+    <string name="add_your_language">Add Your Language</string>
 
 </resources>

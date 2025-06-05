@@ -91,20 +91,17 @@ class ThumbnailFetcher(
             // Early exit if the URI is not a content URI
             if (data.scheme != ContentResolver.SCHEME_CONTENT) return null
 
-            // Early exit if the request is
-            // because we only support loading thumbnails from this that too of images and videos
-            // that android automatically generated.
-            if (!options.preferCachedThumbnail) {
-                Log.d(TAG, "preferCachedThumbnail: ${options.preferCachedThumbnail}")
-                return null
-            }
-
             val context = options.context
             // Retrieve the MIME type of the content
             val mimeType = context.contentResolver.getType(data.toAndroidUri()) ?: return null
 
             // Check if the MIME type is supported (image or video)
             if (!mimeType.startsWith("image/") && !mimeType.startsWith("video/")) {
+                return null
+            }
+
+            // Check if the MIME type is supported (image or video)
+            if (mimeType.startsWith("image/") && !options.preferCachedThumbnail) {
                 return null
             }
 

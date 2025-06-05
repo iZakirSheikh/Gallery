@@ -24,7 +24,6 @@ import android.text.format.DateUtils
 import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.HotelClass
 import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material.icons.outlined.Recycling
 import androidx.compose.material.icons.outlined.Restore
