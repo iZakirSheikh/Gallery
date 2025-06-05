@@ -65,7 +65,7 @@ object RouteFiles : Route {
      */
     @ExperimentalSharedTransitionApi
     fun sharedElement(id: Long) =
-        Modifier.sharedBounds("shared_frame_$id", boundsTransform = DefaultBoundsTransform, zIndexInOverlay = 0.1f)
+        Modifier.sharedElement("shared_frame_$id", boundsTransform = DefaultBoundsTransform, zIndexInOverlay = 0.1f)
 }
 
 operator fun SavedStateHandle.get(route: RouteFiles) =
