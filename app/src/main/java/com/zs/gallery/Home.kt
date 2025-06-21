@@ -270,11 +270,8 @@ private fun Permission() {
         Permissions(permissions = REQUIRED_PERMISSIONS) {
             if (!it.all { (_, state) -> state }) return@Permissions
             controller.graph.setStartDestination(RouteFiles())
-            controller.navigate(RouteFiles()) {
-                popUpTo(RoutePermission()) {
-                    inclusive = true
-                }
-            }
+            // This fixes the problem partially; but casues a slight black screen.
+            controller.navigateUp()
         }
     // If the permissions are not granted, show the permission screen.
     com.zs.gallery.common.compose.Placeholder(

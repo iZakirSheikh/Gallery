@@ -1,7 +1,7 @@
 [versions]
 agp = "8.10.1"
 kotlin = "2.1.21"
-compose = "1.9.0-alpha04"
+compose = "1.9.0-beta01"
 media3 = "1.7.1"
 toolkit = "3.7.0-dev"
 material_icons = "1.7.8"
@@ -22,12 +22,12 @@ androidx-biometric-ktx = { module = "androidx.biometric:biometric-ktx", version 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version = "1.16.0" }
 androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version = "1.4.1" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.0" }
-androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.0.4" }
-chrisbanes-haze = {module= "dev.chrisbanes.haze:haze", version = "1.6.3" }
+androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.1.0" }
+chrisbanes-haze = {module= "dev.chrisbanes.haze:haze", version = "1.6.4" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
-lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.6" }
+lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.6.7" }
 saket-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.16.0" }
 
 # Androidx compose
@@ -35,7 +35,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compo
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "compose" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
-androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.8.2" }
+androidx-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.8.3" }
 
 # Toolkit
 toolkit-foundation = { module = "com.github.prime-zs.toolkit:foundation", version.ref = "toolkit" }
@@ -55,7 +55,7 @@ androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "medi
 
 #  Firebase
 firebase-analytics-ktx = { module = "com.google.firebase:firebase-analytics-ktx", version = "22.4.0" }
-firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version = "19.4.3" }
+firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-ktx", version = "19.4.4" }
 
 # Play app-review
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }

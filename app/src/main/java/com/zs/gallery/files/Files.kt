@@ -68,6 +68,7 @@ import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
 import com.zs.compose.theme.adaptive.content
+import com.zs.compose.theme.appbar.AdaptiveLargeTopAppBar
 import com.zs.compose.theme.appbar.AppBarDefaults
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.snackbar.SnackbarDuration

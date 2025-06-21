@@ -26,7 +26,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.SavedStateHandle
-import com.zs.compose.theme.sharedBounds
 import com.zs.compose.theme.sharedElement
 import com.zs.core.store.MediaFile
 import com.zs.gallery.common.Action
@@ -69,8 +68,15 @@ object RouteFiles : Route {
 }
 
 operator fun SavedStateHandle.get(route: RouteFiles) =
-    (get<String>(PARAM_SOURCE)
-        ?: SOURCE_TIMELINE) to get<String>(PARAM_ARG).takeIf { !it.isNullOrEmpty() }
+// FixMe: This is a workaround for a potential issue where navigation arguments
+//       might not be null as expected when navigating without explicit arguments.
+//       Investigate why the arguments are sometimes populated with keys
+//       instead of being null. This `takeIf` ensures that we only use the
+//       arguments if they don't seem to be the default placeholder keys.
+//       A more robust solution would be to understand and fix the root cause
+    //       of this behavior in the navigation logic.
+    (get<String>(PARAM_SOURCE)?.takeIf { it.contains(PARAM_SOURCE) == false }
+        ?: SOURCE_TIMELINE) to get<String>(PARAM_ARG)?.takeIf { it.contains(PARAM_ARG) == false }
 
 /**
  * Represents the state of the files screen.
