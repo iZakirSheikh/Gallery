@@ -190,7 +190,7 @@ object Settings {
     val KEY_TRANSPARENT_SYSTEM_BARS =
         booleanPreferenceKey(
             PREFIX + "_transparent_system_bars",
-            defaultValue = Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
+            defaultValue = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
         )
     val KEY_IMMERSIVE_VIEW =
         booleanPreferenceKey(PREFIX + "_immersive_view", defaultValue = false)

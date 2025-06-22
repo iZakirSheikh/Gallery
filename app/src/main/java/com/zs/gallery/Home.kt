@@ -166,7 +166,14 @@ private val NavController.primary: State<String?>
                 // If all conditions are met, the domain of the primary route is returned.
                 // Otherwise, `null` is returned, indicating it's not a primary, argument-less route.
                 Log.d(TAG, "args: ${dest.arguments} | ${entry?.arguments?.size()}")
-                if (isPrimary &&( dest.arguments.isEmpty() && (entry?.arguments == null || entry?.arguments?.size() == 1))) dest.domain else null
+                //if (isPrimary &&( dest.arguments.isEmpty() && (entry?.arguments == null || entry?.arguments?.size() == 1))) dest.domain else null
+                val args = entry?.arguments
+                val noRealArgs = args == null || args.isEmpty || args.keySet().all { key ->
+                    val value = args.get(key)
+                    Log.d(TAG, "$value: $key")
+                    key.startsWith("android-support-nav:controller") || value == null || value == "{$key}"
+                }
+                if (isPrimary && noRealArgs) dest.domain else null
             }
         }
     }
@@ -270,8 +277,11 @@ private fun Permission() {
         Permissions(permissions = REQUIRED_PERMISSIONS) {
             if (!it.all { (_, state) -> state }) return@Permissions
             controller.graph.setStartDestination(RouteFiles())
-            // This fixes the problem partially; but casues a slight black screen.
-            controller.navigateUp()
+            controller.navigate(RouteFiles()) {
+                popUpTo(RoutePermission()) {
+                    inclusive = true
+                }
+            }
         }
     // If the permissions are not granted, show the permission screen.
     com.zs.gallery.common.compose.Placeholder(
