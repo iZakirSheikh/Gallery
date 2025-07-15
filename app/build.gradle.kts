@@ -24,14 +24,14 @@ val secrets = arrayOf(
 
 android {
     namespace = "com.zs.gallery"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 67
-        versionName = "0.8.4-dev"
+        targetSdk = 36
+        versionCode = 68
+        versionName = "0.8.5-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
