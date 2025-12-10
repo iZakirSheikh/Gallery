@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AppInsightsSettings">
-    <option name="selectedTabId" value="Firebase Crashlytics" />
     <option name="tabSettings">
       <map>
         <entry key="Android Vitals">
@@ -9,7 +8,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.prime.calculator" />
+                  <option name="appId" value="com.googol.android.apps.oneplayer" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
@@ -23,8 +22,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.googol.android.apps.photos" />
-                  <option name="mobileSdkAppId" value="1:849036525156:android:c13272277d749355d42971" />
+                  <option name="appId" value="com.googol.android.apps.photos.dev" />
+                  <option name="mobileSdkAppId" value="1:849036525156:android:3082fbf2efe108e0d42971" />
                   <option name="projectId" value="gallery-b17a1" />
                   <option name="projectNumber" value="849036525156" />
                 </ConnectionSetting>

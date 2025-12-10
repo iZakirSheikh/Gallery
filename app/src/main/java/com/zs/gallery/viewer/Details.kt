@@ -32,30 +32,23 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Memory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
 import com.zs.compose.foundation.Background
 import com.zs.compose.theme.AlertDialog
 import com.zs.compose.theme.AppTheme
-import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.WindowSize.Category
-import com.zs.compose.theme.appbar.TopAppBar
-import com.zs.compose.theme.drawHorizontalDivider
 import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
@@ -102,59 +95,32 @@ private fun Info(
 @Composable
 fun DetailsViewDialog(
     of: MediaFile?,
-    background: Background,
     onDismissRequest: () -> Unit,
 ) {
     val compact = LocalWindowSize.current.width < Category.Medium
     val value = of ?: return
     AlertDialog(
-        expanded = true,
         onDismissRequest = onDismissRequest,
-        contentColor = AppTheme.colors.onBackground,
-        shape = AppTheme.shapes.xLarge,
-        properties = DialogProperties(usePlatformDefaultWidth = !compact),
-        background = background,
-        margin = if (compact) PaddingValues(horizontal = ContentPadding.normal) else null,
-        topBar = {
-            TopAppBar(
-                title = { Label(stringResource(R.string.properties)) },
-                navigationIcon = {
-                    Icon(
-                        Icons.Outlined.Info,
-                        contentDescription = null,
-                        modifier = Modifier.minimumInteractiveComponentSize()
-                    )
-                },
-                elevation = 0.dp,
-                actions = {
-                    IconButton(
-                        Icons.Outlined.Close,
-                        contentDescription = null,
-                        onClick = onDismissRequest
-                    )
-                },
-                background = Background(Color.Transparent),
-                modifier = Modifier
-                    .drawHorizontalDivider(
-                    color = AppTheme.colors.onBackground.copy(ContentAlpha.divider),
-                    thickness = 1.5.dp,
-                    indent = _root_ide_package_.androidx.compose.ui.unit.DpOffset(22.dp, 22.dp)
-                )
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        title = {
+            Label(stringResource(R.string.properties))
+        },
+        gravity = if (compact) Gravity.BOTTOM else Gravity.CENTER,
+        navigationIcon = {
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = null,
+                modifier = Modifier.minimumInteractiveComponentSize()
             )
-
+        },
+        actions = {
+            IconButton(
+                Icons.Outlined.Close,
+                contentDescription = null,
+                onClick = onDismissRequest
+            )
         },
         content = {
-            val view = LocalView.current
-            SideEffect {
-                val window = (view.parent as DialogWindowProvider).window
-                if (compact)
-                    window.setGravity(Gravity.BOTTOM)
-                else {
-                    window.setGravity(Gravity.END)
-                }
-            }
-
-            //
             // Date Modified
             Header(
                 remember(value.id) { formatter.format(Date(value.dateModified)) },
