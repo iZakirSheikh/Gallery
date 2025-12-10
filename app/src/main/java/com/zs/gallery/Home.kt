@@ -28,7 +28,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -422,6 +425,7 @@ private fun NavigationBar(
             background = background,
             elevation = 12.dp,
             border = colors.shine,
+            windowInsets = AppBarDefaults.bottomAppBarWindowInsets.union(WindowInsets(bottom = 16.dp)).add(WindowInsets(bottom = 10.dp)),
             shape = CircleShape,
             modifier = modifier,
             // Display routes at the contre of available space
