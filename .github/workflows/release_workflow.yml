@@ -1,8 +1,9 @@
-name: Automated Release Workflow
+name: CI/CD Pipeline
 on:
   push:
     branches: # Change this to master once everything is setup.
       - 'beta'
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
@@ -10,6 +11,7 @@ on:
         description: "Release notes up to:"
         required: false
         default: "1"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -48,8 +50,9 @@ jobs:
           echo "notes<<EOF" >> $GITHUB_OUTPUT
           echo "$notes" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
       # Cache Gradle
-      - name: Cache Gradle Build Artifacts
+      - name: Cache Gradle Dependencies
         uses: actions/cache@v3
         with:
           path: |
@@ -59,13 +62,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+
       - name: Configure Environment Variables
         run: |
           echo "DATE_TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
           echo "PLAY_CONSOLE_APP_RSA_KEY=$(echo ${{ secrets.PLAY_CONSOLE_APP_RSA_KEY }})" >> $GITHUB_ENV
+          echo "ADS_APP_ID=$(echo ${{ secrets.ADS_APP_ID }})" >> $GITHUB_ENV
           echo "GIT_TAG=$(grep -E "versionName\s*=?\s*['\"]" "app/build.gradle.kts" | awk -F"['\"]" '{print $2}')" >> $GITHUB_ENV
 
-      - name: Validate Environment Variables
+      - name:  Validate Environment Variables
         run: |
           echo $ADS_APP_ID | sed 's/./&‌/g'
           echo $PLAY_CONSOLE_APP_RSA_KEY | sed 's/./&‌/g'
@@ -85,7 +90,6 @@ jobs:
             --parallel \
             --configure-on-demand \
             --no-daemon \
-            --stacktrace --info \
             -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
 
       - name: Determine Build Tools Version
@@ -107,7 +111,7 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
-      - name: Sign AAB
+      - name: Signing AAB
         uses: r0adkll/sign-android-release@v1
         id: signed_aab
         with:
@@ -131,7 +135,7 @@ jobs:
             ${{steps.signed_apk.outputs.signedReleaseFile}}
 
       # Uploading Signed AAB to internal track of PlayConsole
-      - name: Upload AAB to Play Console
+      - name: Deploy to Play Store (Internal)
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
@@ -139,6 +143,3 @@ jobs:
           releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
           track: internal
           whatsNewDirectory: ./whatsnew
-
-
-
