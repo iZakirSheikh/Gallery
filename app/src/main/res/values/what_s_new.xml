@@ -4,7 +4,11 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟 Added Turkish translation thanks to <b>𝗛𝗼𝗹𝗶 (mikropsoft)</b>💕 from <b>Crowdin</b>.
+            \n🌟 Added Portuguese (Brazil) translation.
+            \n🌟 The app lock screen is now re-enabled for better security.
+            \n🌟 The details view dialog has been updated for better usability.
+            \n🌟 Overall bug fixes and performance improvements.
+	        \n🌟 Added Turkish translation thanks to <b>𝗛𝗼𝗹𝗶 (mikropsoft)</b>💕 from <b>Crowdin</b>.
             \n🌟 Bug fixes and performance improvements.
             \n🌟 <b>M3 Motion Scheme</b>: Enjoy a more dynamic experience with the M3 expressive motion scheme.
             \n🌟 <b>Bug Fix</b>: Resolved an issue that caused a blinking effect when tapping on an image to display it.

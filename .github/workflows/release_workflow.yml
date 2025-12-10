@@ -5,38 +5,97 @@ on:
       - 'beta'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      max_commits:
+        description: "Release notes up to:"
+        required: false
+        default: "1"
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Codebase
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # full git history
+
+      # Generate release notes from commit messages, restricted by 3
+      - name: Generate Release Notes
+        id: notes
+        run: |
+          # Make sure we have enough commits fetched
+          git fetch --prune --unshallow 2>/dev/null || git fetch --prune
+          # Use MAX_COMMITS from workflow input, default to 1
+          MAX_COMMITS="${{ github.event.inputs.max_commits || 1 }}"
+          echo "Using MAX_COMMITS=$MAX_COMMITS"
+          # Build the notes header first
+          notes="## What's new
+          "
+          
+          # Take the last MAX_COMMITS from the current branch only, no merges
+          commit_notes=$(git log HEAD --no-merges --first-parent -n $MAX_COMMITS \
+            --pretty=format:"- %s (%h)")
+          
+          
+          # Combine
+          notes="$notes$commit_notes"
+          
+          # If there are no commits, provide a fallback message
+          if [ -z "$notes" ]; then
+            notes="No new commits found."
+          fi
+          # Output to GitHub Actions
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$notes" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      # Cache Gradle
+      - name: Cache Gradle Build Artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       - name: Configure Environment Variables
         run: |
           echo "DATE_TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
           echo "PLAY_CONSOLE_APP_RSA_KEY=$(echo ${{ secrets.PLAY_CONSOLE_APP_RSA_KEY }})" >> $GITHUB_ENV
           echo "GIT_TAG=$(grep -E "versionName\s*=?\s*['\"]" "app/build.gradle.kts" | awk -F"['\"]" '{print $2}')" >> $GITHUB_ENV
-      - name: Verify Environment Variables
+
+      - name: Validate Environment Variables
         run: |
+          echo $ADS_APP_ID | sed 's/./&‌/g'
           echo $PLAY_CONSOLE_APP_RSA_KEY | sed 's/./&‌/g'
           echo $GIT_TAG | sed 's/./&‌/g'
+
       - name: Set Up Java and Gradle
         uses: actions/setup-java@v3
         with:
           distribution: zulu
           java-version: "17"
           cache: gradle
-      - name: Build Unsigned APK and AAB
+
+      - name: Build App
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleRelease
-          ./gradlew bundleRelease
+          ./gradlew assembleRelease bundleRelease \
+            --parallel \
+            --configure-on-demand \
+            --no-daemon \
+            --stacktrace --info \
+            -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError"
+
       - name: Determine Build Tools Version
         shell: bash
         run: |
           BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
           echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
           echo Last build tool version is: $BUILD_TOOL_VERSION
-      - name: Sign Release APK
+
+      - name: Signing APK
         uses: r0adkll/sign-android-release@v1
         id: signed_apk
         with:
@@ -47,7 +106,8 @@ jobs:
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
-      - name: Sign Release AAB
+
+      - name: Sign AAB
         uses: r0adkll/sign-android-release@v1
         id: signed_aab
         with:
@@ -58,21 +118,27 @@ jobs:
           keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
-      # Uploading Signed AAB to internal track of PlayConsole
-      - name: Deploy to Play Store (Internal)
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: com.googol.android.apps.photos
-          releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
-          track: internal
-          changesNotSentForReview: false
-      - name: Create GitHub Release and Upload Artifacts
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ env.GIT_TAG }}
-          generate_release_notes: true
+          generate_release_notes: false
+          body: ${{ steps.notes.outputs.notes }}
           prerelease: true
           files: |
             ${{steps.signed_aab.outputs.signedReleaseFile}}
             ${{steps.signed_apk.outputs.signedReleaseFile}}
+
+      # Uploading Signed AAB to internal track of PlayConsole
+      - name: Upload AAB to Play Console
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.googol.android.apps.oneplayer
+          releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
+          track: internal
+          whatsNewDirectory: ./whatsnew
+
+
+
