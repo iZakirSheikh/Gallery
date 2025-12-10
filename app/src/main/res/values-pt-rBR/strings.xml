@@ -15,6 +15,20 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="permission_scr_desc"><b>Gallery</b> precisa das seguintes permissões  acesso as 
+        Suas fotos e vídeos 
+        No Android 14 ou superior 
+        <font color="grey">
+            \n  1. Por favor, selecione <b>todas as</b> permissões for para que o aplicativo  funcione corretamente.
+        </font>
+    </string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="timeline">Linha do tempo </string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="info">Informações </string>
+    <string name="edit_in">Editar em </string>
+    <string name="title">título </string>
+    <string name="metadata">Metadados </string>
+    <string name="msg_update_not_available">Não há atualização disponível </string>
+    <string name="msg_new_update_downloaded">Atualização disponível. Por favor, atualize o aplicativo.</string>
 </resources>
