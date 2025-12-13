@@ -15,6 +15,197 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name">Galeri</string>
+    <string name="permission_scr_title">Depolama İzni</string>
+    <string name="allow">İzin Ver</string>
+    <string name="permission_scr_desc"><b>Galeri</b> uygulamasının, resim ve videoları görüntüleyebilmesi için cihazınızın depolama alanına erişim izni gereklidir.
+        <b>\n\nAndroid 14 ve üzeri sürümlerde:</b>
+        <font color="grey">
+            \n  1. Uygulamanın düzgün çalışması için lütfen izin iletişim kutusunda <b>Tümüne izin ver</b> seçeneğini seçin.
+        </font>
+    </string>
+    <string name="photos">Fotoğraflar</string>
+    <string name="settings">Ayarlar</string>
+    <string name="folders">Klasörler</string>
+    <string name="loading">Yükleniyor</string>
+    <string name="oops_empty">Hiçbir şey yok!!</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d Dosya - %2$s</string>
+    <string name="size">Boyut</string>
+    <string name="name">Ad</string>
+    <string name="recent">En Son</string>
+    <string name="dark">Karanlık</string>
+    <string name="light">Aydınlık</string>
+    <string name="sync_with_system">Sistemle Eşitle</string>
+    <string name="general">Genel</string>
+    <string name="appearance">Görünüm</string>
+    <string name="feedback">Geri Bildirim</string>
+    <string name="about_gallery">Galeri Hakkında</string>
+    <string name="msg_unknown_error">Bir şeyler ters gitti. Bilinmeyen bir hata oluştu.</string>
+    <string name="report">Bildir</string>
+    <string name="timeline">Zaman Tüneli</string>
+    <string name="files_source_folder_title_s">%1$s</string>
+    <string name="files_selected_d">%1$d seçildi</string>
+    <string name="select_all">Tümünü Seç</string>
+    <string name="bin">Çöp Kutusu</string>
+    <string name="recycle_bin">Geri Dönüşüm Kutusu</string>
+    <string name="favourites">Favoriler</string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$sx</string>
+    <string name="last_modified">Son değiştirilme</string>
+    <string name="msg_error_sharing_files">Dosyalar paylaşılırken bir sorun oluştu. Lütfen tekrar deneyin.</string>
+    <string name="msg_files_delete_unknown_error">Dosyalar silinirken bir sorun oluştu. Lütfen tekrar deneyin.</string>
+    <string name="msg_files_trash_unknown_error">Dosyalar çöp kutusuna taşınırken bir sorun oluştu. Lütfen tekrar deneyin.</string>
+    <string name="trash">Çöp Kutusuna Taşı</string>
+    <string name="msg_files_restore_unknown_error">Dosyalar geri yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.</string>
+    <string name="share">Paylaş</string>
+    <string name="edit">Düzenle</string>
+    <string name="delete">Sil</string>
+    <string name="info">Bilgi</string>
+    <string name="edit_in">Birlikte Düzenle</string>
+    <string name="use_as">Farklı Kullan</string>
+    <string name="set_as_wallpaper">Duvar Kağıdı Yap</string>
+    <string name="like">Favorilere Ekle</string>
+    <string name="unlike">Favorilerden Kaldır</string>
+    <string name="details">Ayrıntılar</string>
+    <string name="title">Başlık</string>
+    <string name="path">Dosya Yolu</string>
+    <string name="metadata">Üst Veri</string>
+    <string name="msg_files_confirm_deletion"><b>Sil</b>
+        <font color="grey">\nBunu silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+        </font>
+    </string>
+    <string name="msg_update_check_error">Güncellemeler kontrol edilirken bir sorun oluştu!</string>
+    <string name="msg_update_not_available">Her şey güncel! Kullanılabilir yeni bir güncelleme yok.</string>
+    <string name="msg_new_update_downloaded">Güncelleme hazır! Kurulum şimdi başlayabilir.</string>
+    <string name="install">Yükle</string>
+    <string name="lock_scr_title">Kimliğinizi Doğrulayın</string>
+    <string name="lock_scr_subtitle">Biyometrik Veri ile Kimlik Doğrulama</string>
+    <string name="lock_scr_desc">Devam etmek için parmak iziniz veya yüz tanıma ile kimliğinizi doğrulayın. Bu adım, verilerinizin korunması için çok önemlidir.
+    </string>
+    <string name="msg_enroll_biometric">Ayarlardan biyometrik kimlik doğrulamayı etkinleştirin.</string>
+    <string name="msg_favourites_updated">Favoriler güncellendi!</string>
+    <string name="msg_media_player_promotion"><b>Yeni Medya Oynatıcı Uygulaması!</b>
+        <font color="gray">\n🎶 Yeni <b>Medya Oynatıcımıza</b> göz atın! En sevdiğiniz müziklerin ve videoların keyfini zahmetsizce çıkarın. Bir deneyin! 🎥
+        </font>
+    </string>
+    <string name="get">Al</string>
+    <string name="dismiss">Kapat</string>
+    <string name="msg_auth_failed">Kimlik Doğrulama Başarısız! Lütfen tekrar deneyin veya alternatif bir yöntem kullanın.</string>
+    <string name="msg_auth_error_s">Kimlik Doğrulama Hatası: %1$s</string>
+    <string name="restore">Geri Yükle</string>
+    <string name="empty_bin">Çöp Kutusunu Boşalt</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s Dosya</string>
+    <string name="viewer_msg_no_wallpaper_app_found">Uygun bir duvar kağıdı uygulaması bulunamadı. Devam etmek için lütfen bir tane yükleyin.</string>
+    <string name="viewer_set_as">Farklı Ayarla</string>
+    <string name="today">Bugün</string>
+    <string name="trash_one_day_left">1 gün kaldı</string>
+    <string name="trash_days_left_d">%1$s gün kaldı</string>
+    <string name="auth_confirm_biometric">Biyometrik Veriyi Onayla</string>
+    <string name="pref_app_theme_s"><b>Uygulama Teması (%1$s)</b>
+        <font color="grey" size="14">
+            \nUygulamanın görünümünü Karanlık, Aydınlık veya Sistem teması seçenekleriyle özelleştirin.
+        </font>
+    </string>
+    <string name="pref_immersive_view"><b>Tam Ekran Görünümü</b>
+        <font color="grey" size="14">
+            \nDikkat dağıtmayan, tam ekran bir deneyim için durum çubuğunu ve gezinme çubuğunu gizleyin.
+        </font>
+    </string>
+    <string name="pref_enable_trash_can"><b>Geri Dönüşüm Kutusu (Android 11+)</b>
+          <font color="grey" size="14">
+              \nSilinen dosyaları kalıcı olarak silmek yerine Geri Dönüşüm Kutusu\'na taşımak için etkinleştirin.
+          </font>
+    </string>
+    <string name="pref_grid_item_size_multiplier"><b>Izgara Boyutu Çarpanı</b>
+          <font color="grey" size="14">
+              \nHer bir öğenin ızgara düzeninde kapladığı alanı ayarlayın.
+          </font>
+    </string>
+    <string name="pref_colorization_strategy"><b>Otomatik Renklendirme <sup><font color="#ae1c27" size="10"><b>Beta</b></font></sup></b>
+         <font color="grey" size="14">
+             \nO an görüntülenen medyanın renklerine göre dinamik olarak bir tema oluşturun.
+          </font>
+    </string>
+    <string name="pref_privacy_policy"><b>Gizlilik Politikası</b>
+           <font color="grey" size="14">
+               \nGizlilik politikasını görüntülemek için buraya tıklayın.
+          </font>
+    </string>
+    <string name="pref_live_gallery"><b>Canlı Galeri</b>
+           <font color="grey" size="14">
+               \nGaleride animasyonları ve videoların otomatik oynatılmasını etkinleştirin.
+          </font></string>
+    <string name="pref_font_scale"><b>Yazı Tipi Boyutu</b>
+         <font color="grey" size="14">
+            \nMetni daha kolay okunur hale getirmek için yazı tipi boyutunu ayarlayın. Daha iyi okunabilirlik için tercihinize uygun bir ölçek seçin.
+        </font>
+    </string>
+    <string name="pref_transparent_system_bars"><b>Sistem Çubukları</b>
+        <font color="grey" size="14">
+            \nUçtan uca bir deneyim için şeffaf sistem çubuklarını etkinleştirin <b><i>\n(Android 6.0+)</i></b>
+        </font>
+    </string>
+    <string name="pref_report_an_issue"><b>Sorun Bildir</b>
+        <font color="grey" size="14">
+           \nYardım almak veya sorunları bildirmek için destek ekibimizle iletişime geçin
+        </font>
+    </string>
+    <string-array name="pref_night_mode_entries">
+        <item>Karanlık</item>
+        <item>Aydınlık</item>
+        <item>Sistemle Eşitle</item>
+    </string-array>
+    <string name="version">Sürüm</string>
+    <string name="version_info_s">Sürüm: %1$s</string>
+    <string name="pref_secure_mode"><b>Güvenli Mod</b>
+        <font color="grey" size="14">
+           \nGüvenli Mod, uygulama aktif kullanımda değilken uygulama önizlemesindeki içeriği gizleyerek kullanıcı gizliliğini korur.
+        </font>
+    </string>
+    <string name="pref_app_lock_s"><b>Uygulama Kilidi</b> (<small>%1$s</small>)<sup><font color="#ae1c27" size="10"><b> Beta</b></font></sup>
+          <font color="grey" size="14">
+              \nGaleri\'yi biyometrik kimlik doğrulama ile güvence altına alın.
+        </font>
+    </string>
+    <string name="pref_color_nav_bar"><b>Renkli Gezinme Çubuğu</b><font color="grey" size="14">\nGezinme çubuğunda vurgu rengini kullanın.
+        </font>
+    </string>
+    <string name="about_us">Hakkımızda</string>
+    <string name="postfix_x_f">%1$.1fx</string>
+    <string name="system">Sistem</string>
+    <string name="join_the_beta">Beta Programına Katıl</string>
+    <string name="update_gallery">Galeri\'yi Güncelle</string>
+    <string name="rate_us">Bizi Değerlendir</string>
+    <string name="share_app_label">Arkadaşlarınla Paylaş</string>
+    <string name="pref_dynamic_colors"><b>Dinamik Renkler</b>\n<font color="grey" size="14">Dinamik renklerin kullanımını açıp kapatın. Bu özellik yalnızca <b>Android 12</b> ve üzeri sürümlerde mevcuttur.
+        </font>
+    </string>
+    <string name="error">Hata</string>
+    <string-array name="pref_app_lock_options">
+        <item>Devre Dışı</item>
+        <item>Anında</item>
+        <item>1 Dakika</item>
+        <item>30 Dakika</item>
+    </string-array>
+    <string name="pref_scr_version_by_author_s">"v%1$s - Geliştiren: <b><i>Zakir Sheikh</i></b>"</string>
+    <string name="buy_me_a_coffee">Bana bir kahve ısmarla</string>
+    <string name="msg_support_gallery"><b>Galeri daha yolun başında ve her geçen gün daha da iyiye gidiyor.</b>
+    \nGaleri açık kaynaklıdır, şık bir tasarıma sahiptir ve hızla büyümektedir. Bana destek olarak bu gelişimime devam etmemi sağlayabilirsiniz:
+        \n1. 🌍 Herkese anlatarak
+        \n2. 🔧 Hataları bildirerek
+        \n3. ☕ Bana bir kahve ısmarlamak veya bir yemek ikram etmek gibi küçük bir jestle motivasyonumu yüksek tutarak. 😊
+    </string>
+    <string name="fuel">Yakıt</string>
+    <string name="viewer_scr_open_in_lens">Lens ile Aç</string>
+    <string name="quick_share">Hızlı Paylaş</string>
+    <string name="msg_viewer_scr_no_g_lens">Lens\'i kullanmak için Google uygulamasını yükleyin</string>
+    <string name="msg_files_quick_share_error">Bu özelliği kullanmak için Hızlı Paylaş uygulamasını yükleyin.</string>
+    <string name="none">Hiçbiri</string>
+    <string name="properties">Özellikler</string>
+    <string name="pref_ambient_mode"><b>Ortam Modu</b><font color="grey">\nDaha sinematik bir deneyim için medya görüntüleyicinin etrafına sürükleyici bir aydınlatma ekler.</font></string>
+    <string name="authenticate">Doğrula</string>
+    <string name="confirm">Onayla</string>
+    <string name="msg_favourites_modify_d">Favorilerdeki %1$d öğe değiştirilsin mi?</string>
+    <string name="add_your_language">Kendi Dilini Ekle</string>
 </resources>

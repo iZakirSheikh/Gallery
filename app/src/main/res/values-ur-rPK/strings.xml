@@ -198,4 +198,7 @@
     <string name="properties">خصوصیات</string>
     <string name="pref_ambient_mode"><b>ایمبیئینٹ موڈ</b><font color="grey">\nمیڈیا ویور کے گرد ماحول ساز روشنی شامل کرتا ہے تاکہ سینما جیسا تجربہ فراہم ہو۔</font></string>
     <string name="authenticate">تصدیق</string>
+    <string name="confirm">تصدیق کریں</string>
+    <string name="msg_favourites_modify_d">پسندیدہ میں %1$d آئٹمز کو تبدیل کریں؟</string>
+    <string name="add_your_language">اپنی زبان شامل کریں</string>
 </resources>

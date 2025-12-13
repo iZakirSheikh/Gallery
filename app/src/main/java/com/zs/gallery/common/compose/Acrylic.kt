@@ -73,9 +73,9 @@ else
 fun Colors.background(
     surface: HazeState,
     containerColor: Color = background(0.4.dp),
-    blurRadius: Dp = if (containerColor.luminance() >= 0.5f) 38.dp else 80.dp,
-    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.5f else 0.25f,
-    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.63f else 0.65f),
+    blurRadius: Dp = 38.dp,
+    noiseFactor: Float = if (containerColor.luminance() >= 0.5f) 0.5f else 0.35f,
+    tint: Color = containerColor.copy(alpha = if (containerColor.luminance() >= 0.5) 0.50f else 0.63f),
     luminance: Float = 0.07f,
     blendMode: BlendMode = BlendMode.SrcOver,
     progressive: Float = -1f,
@@ -89,7 +89,7 @@ fun Colors.background(
         this.tints = buildList {
             // apply luminosity just like in Microsoft Acrylic.
             if (luminance != -1f)
-                this += HazeTint(Color.White.copy(0.07f), BlendMode.Luminosity)
+                this += HazeTint(Color.White.copy(luminance), BlendMode.Luminosity)
             this += HazeTint(tint, blendMode = blendMode)
         }
         // Configure progressive blurring (if enabled).

@@ -524,7 +524,8 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 // What's new
                 0 -> showSnackbar(
                     R.string.what_s_new_latest,
-                    duration = SnackbarDuration.Indefinite
+                    duration = SnackbarDuration.Indefinite,
+                    icon = Icons.Outlined.NewReleases
                 )
                 // Media player
                 1 -> {
@@ -654,8 +655,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 navController.addOnDestinationChangedListener(this@MainActivity)
                 // Cover the screen with lock_screen if authentication is required
                 // Only remove this veil when the user authenticates
-                // don't show lock screen because their is dedicated button
-                // if (isAuthenticationRequired) unlock();
+                if (isAuthenticationRequired) unlock()
                 this@MainActivity.navController = navController
                 onDispose {
                     navController.removeOnDestinationChangedListener(this@MainActivity)

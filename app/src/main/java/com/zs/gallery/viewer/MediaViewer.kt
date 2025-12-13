@@ -274,7 +274,6 @@ fun MediaViewer(viewState: MediaViewerViewState) {
     //
     DetailsViewDialog(
         viewState.details,
-        colors.background(surface, luminance = -1f),
         onDismissRequest = { viewState.showDetails = false }
     )
 

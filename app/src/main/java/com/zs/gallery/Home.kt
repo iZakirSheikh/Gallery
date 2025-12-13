@@ -28,7 +28,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -166,7 +169,14 @@ private val NavController.primary: State<String?>
                 // If all conditions are met, the domain of the primary route is returned.
                 // Otherwise, `null` is returned, indicating it's not a primary, argument-less route.
                 Log.d(TAG, "args: ${dest.arguments} | ${entry?.arguments?.size()}")
-                if (isPrimary &&( dest.arguments.isEmpty() && (entry?.arguments == null || entry?.arguments?.size() == 1))) dest.domain else null
+                //if (isPrimary &&( dest.arguments.isEmpty() && (entry?.arguments == null || entry?.arguments?.size() == 1))) dest.domain else null
+                val args = entry?.arguments
+                val noRealArgs = args == null || args.isEmpty || args.keySet().all { key ->
+                    val value = args.get(key)
+                    Log.d(TAG, "$value: $key")
+                    key.startsWith("android-support-nav:controller") || value == null || value == "{$key}"
+                }
+                if (isPrimary && noRealArgs) dest.domain else null
             }
         }
     }
@@ -415,6 +425,7 @@ private fun NavigationBar(
             background = background,
             elevation = 12.dp,
             border = colors.shine,
+            windowInsets = AppBarDefaults.bottomAppBarWindowInsets.union(WindowInsets(bottom = 16.dp)).add(WindowInsets(bottom = 10.dp)),
             shape = CircleShape,
             modifier = modifier,
             // Display routes at the contre of available space
