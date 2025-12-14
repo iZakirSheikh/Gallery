@@ -183,11 +183,11 @@ fun Files(viewState: FilesViewState) {
                         text = "${viewState.selected.size}",
                         style = AppTheme.typography.title2,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(start = CP.normal, end = CP.medium)
+                        modifier = Modifier
                     )
 
                     // Divider
-                    VerticalDivider(modifier = Modifier.height(CP.large))
+                    VerticalDivider(modifier = Modifier.height(CP.large).padding(start = CP.small, end = CP.small))
 
                     // overflow
                     OverflowMenu(

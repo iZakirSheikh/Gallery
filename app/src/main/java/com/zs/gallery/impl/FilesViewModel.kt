@@ -88,7 +88,7 @@ private val SELECT_ALL = Action(R.string.select_all, Icons.Outlined.SelectAll)
 private val RESTORE = Action(R.string.restore, Icons.Outlined.Restore)
 private val EMPTY_BIN = Action(R.string.empty_bin, Icons.Outlined.PlaylistRemove)
 private val STAR_APP = Action(R.string.rate_us, Icons.TwoTone.HotelClass)
-private val QUICK_SHARE = Action(R.string.quick_share, Icons.Filled.NearbyShare)
+private val QUICK_SHARE = Action(R.string.beam, Icons.Filled.NearbyShare)
 private val TELEGRAM = Action(R.string.report, Icons.Outlined.SupportAgent)
 
 @SuppressLint("NewApi")

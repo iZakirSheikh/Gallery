@@ -70,7 +70,7 @@
     <string name="use_as">Use as</string>
     <string name="set_as_wallpaper">Set as Wallpaper</string>
     <string name="like">Like</string>
-    <string name="unlike">Unfavorite</string>
+    <string name="unlike">Unlike</string>
     <string name="details">Details</string>
     <string name="title">Title</string>
     <string name="path">Path</string>
@@ -232,5 +232,9 @@
     <string name="confirm">Confirm</string>
     <string name="msg_favourites_modify_d">Modify %1$d items in Favorites?</string>
     <string name="add_your_language">Add Your Language</string>
+    <string name="wallpaper">Wallpaper</string>
+    <string name="lens">Lens</string>
+    <string name="beam">Beam</string>
+
 
 </resources>

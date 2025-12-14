@@ -17,7 +17,7 @@
         <item name="isLightTheme">false</item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="android:windowFullscreen">true</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/gallery_splash_icon</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="NewApi">@drawable/logo_dark</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>

@@ -1,107 +1,92 @@
-/*
- * Copyright 2025 sheik
- *
- * Created by sheik on 04-05-2025.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.zs.gallery.common.icons
-
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
+import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
-import com.zs.gallery.common.icons._NearbyShare
-
 
 public val Icons.Filled.NearbyShare: ImageVector
     get() {
-        if (_NearbyShare != null) {
-            return _NearbyShare!!
+        if (_nearbyShare != null) {
+            return _nearbyShare!!
         }
-        _NearbyShare = ImageVector.Builder(
-            name = "Nearby_Share",
-            defaultWidth = 24.dp,
-            defaultHeight = 11.22.dp,
-            viewportWidth = 31.173876f,
-            viewportHeight = 14.572845f
-        ).apply {
-            path(
-                fill = SolidColor(Color(0xFF1A73E8)),
-                fillAlpha = 1.0f,
-                stroke = null,
-                strokeAlpha = 1.0f,
-                strokeLineWidth = 1.0f,
-                strokeLineCap = StrokeCap.Butt,
-                strokeLineJoin = StrokeJoin.Miter,
-                strokeLineMiter = 1.0f,
-                pathFillType = PathFillType.NonZero
-            ) {
-                moveTo(29.244187f, 0.00600321f)
-                curveToRelative(-0.490f, 0.00470f, -0.97680f, 0.19610f, -1.33980f, 0.57810f)
-                lineTo(24.043015f, 4.5431132f)
-                lineToRelative(-2.677734f, 2.732421f)
-                lineToRelative(-1.662109f, 1.701172f)
-                arcToRelative(5.65f, 5.65f, 0f, isMoreThanHalf = false, isPositiveArc = true, -4.111328f, 1.7402348f)
-                arcToRelative(5.555f, 5.555f, 0f, isMoreThanHalf = false, isPositiveArc = true, -3.726563f, -1.4140628f)
-                lineTo(9.2070781f, 12.0353f)
-                curveToRelative(1.760f, 1.6060f, 3.99480f, 2.50590f, 6.38480f, 2.50590f)
-                curveToRelative(2.60f, 00f, 5.02780f, -1.01270f, 6.84380f, -2.88670f)
-                lineToRelative(1.607421f, -1.644532f)
-                lineToRelative(2.675782f, -2.7343748f)
-                lineToRelative(3.919921f, -4.013671f)
-                arcToRelative(1.94f, 1.94f, 0f, isMoreThanHalf = false, isPositiveArc = false, -0.03906f, -2.71484399f)
-                curveToRelative(-0.3730f, -0.3630f, -0.86550f, -0.54580f, -1.35550f, -0.5410f)
-                close()
-                moveToRelative(-13.652343f, 0.0059f)
-                arcTo(9.437f, 9.437f, 0f, isMoreThanHalf = false, isPositiveArc = false, 8.7480941f, 2.8986212f)
-                lineToRelative(-5.9843755f, 6.136719f)
-                lineTo(0.54692168f, 11.312684f)
-                curveToRelative(-0.7270f, 0.7450f, -0.72790f, 1.96930f, 0.03710f, 2.69530f)
-                curveToRelative(0.7450f, 0.7270f, 1.96930f, 0.72590f, 2.69530f, -0.03910f)
-                lineToRelative(3.8613289f, -3.957073f)
-                lineToRelative(2.677734f, -2.7343758f)
-                lineToRelative(1.6621089f, -1.701171f)
-                arcToRelative(5.65f, 5.65f, 0f, isMoreThanHalf = false, isPositiveArc = true, 4.111329f, -1.740235f)
-                curveToRelative(1.3960f, 00f, 2.67650f, 0.4980f, 3.72850f, 1.4160f)
-                lineToRelative(2.65625f, -2.734375f)
-                curveTo(20.21760f, 0.91170f, 17.98180f, 0.01380f, 15.59180f, 0.01380f)
-                close()
-                moveToRelative(-13.9492191f, 0.007772f)
-                arcToRelative(1.887f, 1.887f, 0f, isMoreThanHalf = false, isPositiveArc = false, -1.05664072f, 0.527344f)
-                arcToRelative(1.887f, 1.887f, 0f, isMoreThanHalf = false, isPositiveArc = false, -0.039063f, 2.69531199f)
-                lineToRelative(1.92968802f, 2.007813f)
-                lineToRelative(2.6582029f, -2.753907f)
-                lineTo(3.2812967f, 0.58608121f)
-                arcToRelative(1.887f, 1.887f, 0f, isMoreThanHalf = false, isPositiveArc = false, -1.6386718f, -0.566406f)
-                close()
-                moveTo(28.726609f, 9.3419412f)
-                lineToRelative(-2.65625f, 2.7519528f)
-                lineToRelative(1.833985f, 1.892578f)
-                curveToRelative(0.7270f, 0.7650f, 1.92930f, 0.78510f, 2.69530f, 0.03910f)
-                arcToRelative(1.94f, 1.94f, 0f, isMoreThanHalf = false, isPositiveArc = false, 0.574219f, -1.376953f)
-                curveToRelative(00f, -0.4780f, -0.17220f, -0.97490f, -0.53520f, -1.33790f)
-                close()
-            }
-        }.build()
-        return _NearbyShare!!
+        _nearbyShare =
+            Builder(
+                    name = "NearbyShare",
+                    defaultWidth = 24.0.dp,
+                    defaultHeight = 24.0.dp,
+                    viewportWidth = 24.0f,
+                    viewportHeight = 24.0f,
+                )
+                .apply {
+                    path(
+                        fill = SolidColor(Color(0xFF505050)),
+                        stroke = null,
+                        strokeLineWidth = 0.0f,
+                        strokeLineCap = Butt,
+                        strokeLineJoin = Miter,
+                        strokeLineMiter = 4.0f,
+                        pathFillType = NonZero,
+                    ) {
+                        moveTo(19.886f, 8.003f)
+                        arcToRelative(1.1f, 1.1f, 0.0f, false, false, -0.774f, 0.318f)
+                        lineToRelative(-2.23f, 2.173f)
+                        lineToRelative(-1.546f, 1.5f)
+                        lineToRelative(-0.96f, 0.934f)
+                        arcToRelative(3.3f, 3.3f, 0.0f, false, true, -1.083f, 0.71f)
+                        arcToRelative(3.4f, 3.4f, 0.0f, false, true, -1.29f, 0.245f)
+                        arcToRelative(3.3f, 3.3f, 0.0f, false, true, -2.152f, -0.776f)
+                        lineToRelative(-1.535f, 1.5f)
+                        arcToRelative(5.6f, 5.6f, 0.0f, false, false, 3.687f, 1.376f)
+                        curveToRelative(1.501f, 0.0f, 2.903f, -0.556f, 3.951f, -1.585f)
+                        lineToRelative(0.929f, -0.903f)
+                        lineToRelative(1.545f, -1.501f)
+                        lineToRelative(2.263f, -2.203f)
+                        curveToRelative(0.202f, -0.202f, 0.313f, -0.471f, 0.309f, -0.75f)
+                        arcToRelative(1.04f, 1.04f, 0.0f, false, false, -0.332f, -0.74f)
+                        curveToRelative(-0.215f, -0.2f, -0.5f, -0.3f, -0.782f, -0.298f)
+                        moveToRelative(-7.883f, 0.004f)
+                        arcToRelative(5.7f, 5.7f, 0.0f, false, false, -2.147f, 0.407f)
+                        arcTo(5.5f, 5.5f, 0.0f, false, false, 8.051f, 9.59f)
+                        lineToRelative(-3.455f, 3.37f)
+                        lineToRelative(-1.28f, 1.25f)
+                        curveToRelative(-0.42f, 0.408f, -0.42f, 1.08f, 0.021f, 1.479f)
+                        curveToRelative(0.43f, 0.399f, 1.137f, 0.398f, 1.557f, -0.021f)
+                        lineToRelative(2.23f, -2.173f)
+                        lineToRelative(1.545f, -1.5f)
+                        lineToRelative(0.96f, -0.935f)
+                        arcToRelative(3.3f, 3.3f, 0.0f, false, true, 1.083f, -0.71f)
+                        arcToRelative(3.4f, 3.4f, 0.0f, false, true, 1.29f, -0.245f)
+                        curveToRelative(0.807f, 0.0f, 1.546f, 0.273f, 2.154f, 0.777f)
+                        lineToRelative(1.533f, -1.5f)
+                        arcToRelative(5.6f, 5.6f, 0.0f, false, false, -3.686f, -1.375f)
+                        close()
+                        moveTo(3.948f, 8.011f)
+                        curveToRelative(-0.23f, 0.032f, -0.444f, 0.133f, -0.61f, 0.29f)
+                        arcToRelative(1.0f, 1.0f, 0.0f, false, false, -0.247f, 0.335f)
+                        arcToRelative(0.99f, 0.99f, 0.0f, false, false, 0.225f, 1.144f)
+                        lineToRelative(1.114f, 1.102f)
+                        lineTo(5.965f, 9.37f)
+                        lineToRelative(-1.07f, -1.048f)
+                        curveToRelative(-0.12f, -0.12f, -0.269f, -0.211f, -0.434f, -0.265f)
+                        arcToRelative(1.14f, 1.14f, 0.0f, false, false, -0.513f, -0.046f)
+                        moveToRelative(15.639f, 5.117f)
+                        lineToRelative(-1.534f, 1.511f)
+                        lineToRelative(1.06f, 1.04f)
+                        curveToRelative(0.419f, 0.42f, 1.113f, 0.43f, 1.555f, 0.02f)
+                        quadToRelative(0.159f, -0.149f, 0.246f, -0.346f)
+                        arcToRelative(1.02f, 1.02f, 0.0f, false, false, -0.223f, -1.144f)
+                        close()
+                    }
+                }
+                .build()
+        return _nearbyShare!!
     }
 
-private var _NearbyShare: ImageVector? = null
+private var _nearbyShare: ImageVector? = null

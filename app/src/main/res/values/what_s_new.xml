@@ -4,6 +4,8 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
+            \n🌟 <b>Animated Splash Screen</b>: A fresh animated splash experience for Android 12+ devices.
+            \n🌟 <b>UI Refinements</b>: Floating menu redesigned with labels below icons, now on a rounded rectangular surface.
             \n🌟 Added Portuguese (Brazil) translation.
             \n🌟 The app lock screen is now re-enabled for better security.
             \n🌟 The details view dialog has been updated for better usability.

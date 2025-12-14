@@ -26,10 +26,18 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -42,6 +50,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -57,8 +66,11 @@ import com.zs.compose.theme.Icon
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.IconToggleButton
 import com.zs.compose.theme.LocalContentColor
+import com.zs.compose.theme.Surface
 import com.zs.compose.theme.menu.DropDownMenu
 import com.zs.compose.theme.menu.DropDownMenuItem
+import com.zs.compose.theme.ripple
+import com.zs.compose.theme.text.Label
 import com.zs.gallery.common.Action
 
 
@@ -76,24 +88,22 @@ fun FloatingActionMenu(
     val motion = AppTheme.motionScheme
     AnimatedVisibility(
         visible = visible,
+        modifier = modifier.thenIf(insets != null){padding(insets!!)},
         enter = fadeIn(motion.fastEffectsSpec()) + slideInVertically(motion.fastSpatialSpec()),
         exit = fadeOut(motion.fastEffectsSpec()) + slideOutVertically(motion.fastSpatialSpec()),
         content = {
-            CompositionLocalProvider(
-                LocalContentColor provides contentColor,
+            Surface(
+                background = background,
+                contentColor = contentColor,
+                elevation = 12.dp,
+                shape = AppTheme.shapes.medium,
+                border = border,
                 content = {
                     Row(
-                        horizontalArrangement = ContentPadding.SmallArrangement,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         content = content,
-                        modifier = modifier
-                            .pointerInput(Unit) {}
-                            .thenIf(insets != null) { padding(insets!!) }
-                            .scale(0.85f)
-                            .shadow(12.dp, shape = CircleShape)
-                            .thenIf(border != null) { border(border!!, CircleShape) }
-                            .background(background)
-                            .animateContentSize(motion.fastSpatialSpec())
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp).animateContentSize(motion.fastSpatialSpec())
                     )
                 }
             )
@@ -153,7 +163,8 @@ inline fun RowScope.OverflowMenu(
     items: List<Action>,
     noinline onItemClicked: (item: Action) -> Unit,
     collapsed: Int = 2,
-    expanded: Int = -1
+    expanded: Int = -1,
+    compact: Boolean = false
 ) {
     val size = items.size
     if (size == 0) return // Nothing to render
@@ -161,12 +172,45 @@ inline fun RowScope.OverflowMenu(
     // Show first `collapsed` items as IconButtons directly in the row
     repeat(minOf(size, collapsed)) { index ->
         val item = items[index]
-        IconButton(
-            icon = item.icon ?: Icons.Outlined.BrokenImage, // Fallback for missing icons
-            onClick = { onItemClicked(item) },
-            contentDescription = stringResource(item.label),
-            enabled = item.enabled
-        )
+        when{
+            compact -> IconButton(
+                icon = item.icon ?: Icons.Outlined.BrokenImage, // Fallback for missing icons
+                onClick = { onItemClicked(item) },
+                contentDescription = stringResource(item.label),
+                enabled = item.enabled
+            )
+
+            else -> {
+                val interactions = remember(::MutableInteractionSource)
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.width(55.dp).clickable(
+                        interactionSource = interactions,
+                        enabled = item.enabled,
+                        indication = null
+                    ){onItemClicked(item)},
+                    content = {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().clip(CircleShape).indication(interactions, ripple()),
+                            contentAlignment = Alignment.Center,
+                            content = {
+                                Icon(
+                                    imageVector = item.icon
+                                        ?: Icons.Outlined.BrokenImage, // Fallback for missing icons
+                                    contentDescription = stringResource(item.label)
+                                )
+                            }
+                        )
+
+                        Label(
+                            stringResource(item.label),
+                            style = AppTheme.typography.label3
+                        )
+                    }
+                )
+            }
+        }
     }
 
     // All items already shown, no need for dropdown

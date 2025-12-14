@@ -74,10 +74,10 @@ private val SHARE = Action(R.string.share, Icons.Outlined.Share)
 private val STAR = Action(R.string.like, Icons.Outlined.StarBorder)
 private val UN_STAR = Action(R.string.unlike, Icons.TwoTone.Star)
 private val RESTORE = Action(R.string.restore, Icons.Outlined.Restore)
-private val QUICK_SHARE = Action(R.string.quick_share, Icons.Filled.NearbyShare)
+private val QUICK_SHARE = Action(R.string.beam, Icons.Filled.NearbyShare)
 private val EDIT_IN = Action(R.string.edit_in, Icons.Outlined.Edit)
-private val USE_AS = Action(R.string.set_as_wallpaper, Icons.Outlined.Wallpaper)
-private val GOOGLE_LENS = Action(R.string.viewer_scr_open_in_lens, Icons.Outlined.DocumentScanner)
+private val USE_AS = Action(R.string.wallpaper, Icons.Outlined.Wallpaper)
+private val GOOGLE_LENS = Action(R.string.lens, Icons.Outlined.DocumentScanner)
 
 class MediaViewerViewModel(
     handle: SavedStateHandle,
