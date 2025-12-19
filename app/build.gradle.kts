@@ -1,4 +1,4 @@
-import com.android.build.api.dsl.ApplicationDefaultConfig
+import com.android.build.api.dsl.ApplicationBaseFlavor
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // -----------------------------------------------------------------------------
@@ -18,7 +18,7 @@ plugins {
 }
 
 /** Adds a string BuildConfig field to the project. */
-private fun ApplicationDefaultConfig.buildConfigField(name: String, value: String) =
+private fun ApplicationBaseFlavor.buildConfigField(name: String, value: String) =
     buildConfigField("String", name, "\"" + value + "\"")
 
 // -----------------------------------------------------------------------------
@@ -97,6 +97,12 @@ android {
         for (secret in secrets) {
             buildConfigField(secret, System.getenv(secret) ?: "")
         }
+        // default edition is freemium
+        buildConfigField( "EDITION", "freemium")
+        // 📌 Edition constants (used for comparison in code)
+        buildConfigField("EDITION_FOSS", "foss")
+        buildConfigField("EDITION_FREEMIUM", "freemium")
+        buildConfigField("EDITION_PRO", "pro")
     }
     // -----------------------------------------------------------------------------
     // Build Types
@@ -127,6 +133,30 @@ android {
             applicationIdSuffix = ".debug"  // 📛 Appends ".debug" to the application ID so debug and release can coexist
             resValue("string", "launcher_label", "Debug")  // 🏷️ Custom string resource for launcher label in debug builds
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
+        }
+    }
+    // -------------------------------------------------------------------------
+    // PRODUCT FLAVORS
+    // -------------------------------------------------------------------------
+    flavorDimensions += "edition"
+    productFlavors {
+        /// FREEMIUM (Default flavor, ads + purchases enabled)
+        create("freemium") { dimension = "edition" }
+
+        // PRO (All features unlocked, no ads/telemetry)
+        create("pro") {
+            dimension = "edition"
+            versionNameSuffix = "-pro"
+            // Override edition field for this flavor
+            buildConfigField("EDITION", "pro")
+        }
+
+        // FOSS (Minimal free edition, no ads/telemetry)
+        create("foss") {
+            dimension = "edition"
+            versionNameSuffix = "-foss"
+            // Override edition field for this flavor
+            buildConfigField("EDITION", "foss")
         }
     }
 }
