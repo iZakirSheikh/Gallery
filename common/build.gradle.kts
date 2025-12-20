@@ -10,6 +10,7 @@ private val secrets = arrayOf("ADS_APP_ID", "PLAY_CONSOLE_APP_RSA_KEY")
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 /** Adds a string BuildConfig field to the project. */
@@ -103,4 +104,8 @@ android {
 // ============================================================================
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.room.runtime)
+    implementation(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.work.runtime.ktx)
 }
