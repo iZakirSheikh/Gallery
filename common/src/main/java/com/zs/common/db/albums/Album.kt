@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2025 Zakir Sheikh
  *
- * Created by sheik on 20 of Dec 2025
+ * Created by sheik on 23 of Dec 2025
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 20 of Dec 2025
+ * Last Modified by sheik on 23 of Dec 2025
  */
 
 package com.zs.common.db.albums
@@ -45,7 +45,6 @@ class Album internal constructor(
     @ColumnInfo(name = "date_added") val dateAdded: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "date_modified") val dateModified: Long = dateAdded
 ) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -70,44 +69,44 @@ class Album internal constructor(
         return result
     }
 
-    override fun toString(): String {
-        return "Album(id=$id, name='$name', description=$description, dateAdded=$dateAdded, dateModified=$dateModified)"
-    }
-
     /**
      * Returns a new [Album] instance with updated metadata.
      *
      * @param name New display name for the album. Defaults to the current name.
      * @param description New optional description for the album.
      */
-    fun update(
-        name: String = this.name, description: String? = this.description
-    ): Album = Album(
-        id = id,
-        name = name,
-        description = description,
-        dateAdded = dateAdded,
-        dateModified = System.currentTimeMillis()
-    )
+    fun update(name: String = this.name, description: String? = this.description): Album =
+        Album(
+            id = id,
+            name = name,
+            description = description,
+            dateAdded = dateAdded,
+            dateModified = System.currentTimeMillis()
+        )
+
+    override fun toString(): String {
+        return "Album(id=$id, name='$name', description=$description, dateAdded=$dateAdded, dateModified=$dateModified)"
+    }
 
     /**
-     * Represents a memory within an album.
+     * Represents a moment within an album.
      *
-     * A memory links an album to a media item (photo or video) and stores
+     * A moment links an album to a media item (photo or video) and stores
      * album-specific metadata such as ordering and the time the media
      * was added to the album.
      *
      * This entity acts as a junction between [Album] and [MediaFile].
      * Deleting either the album or the media item will automatically
-     * remove the associated memory.
+     * remove the associated moment.
      *
-     * @property albumId Identifier of the album this memory belongs to.
-     * @property mediaId Identifier of the media item associated with this memory.
+     * @property albumId Identifier of the album this moment belongs to.
+     * @property mediaId Identifier of the media item associated with this moment.
      * @property dateAdded Timestamp when the media item was added to the album.
+     * @property thumbnail url of the thumbnail of the movement.
      * @property order Position of the memory within the album.
      */
     @Entity(
-        tableName = "tbl_album_memory", primaryKeys = ["album_id", "media_id"],
+        tableName = "tbl_album_moment", primaryKeys = ["album_id", "media_id"],
         indices = [Index("album_id"), Index("media_id")],
         foreignKeys = [ForeignKey(
             entity = Album::class,
@@ -124,9 +123,11 @@ class Album internal constructor(
     class Memory(
         @ColumnInfo(name = "album_id") val albumId: Long,
         @ColumnInfo(name = "media_id") val mediaId: Long,
+        val thumbnail: String,
         val dateAdded: Long = System.currentTimeMillis(),
         val order: Int
     ) {
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -137,18 +138,23 @@ class Album internal constructor(
             if (mediaId != other.mediaId) return false
             if (dateAdded != other.dateAdded) return false
             if (order != other.order) return false
+            if (thumbnail != other.thumbnail) return false
 
             return true
         }
+
         override fun hashCode(): Int {
             var result = albumId.hashCode()
             result = 31 * result + mediaId.hashCode()
             result = 31 * result + dateAdded.hashCode()
             result = 31 * result + order
+            result = 31 * result + thumbnail.hashCode()
             return result
         }
+
+
         override fun toString(): String {
-            return "Memory(albumId=$albumId, mediaId=$mediaId, dateAdded=$dateAdded, order=$order)"
+            return "Memory(albumId=$albumId, mediaId=$mediaId, thumbnail='$thumbnail', dateAdded=$dateAdded, order=$order)"
         }
     }
 }

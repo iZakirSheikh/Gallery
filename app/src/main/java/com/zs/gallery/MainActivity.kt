@@ -1,12 +1,19 @@
 package com.zs.gallery
 
+import android.os.Bundle
 import androidx.activity.ComponentActivity
-import com.zs.common.BuildConfig
+import androidx.lifecycle.lifecycleScope
+import com.zs.common.db.SyncWorker
+import kotlinx.coroutines.launch
 
 
-class MainActivity : ComponentActivity(){
+class MainActivity : ComponentActivity() {
 
-    init {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        SyncWorker.execute(applicationContext)
+        lifecycleScope.launch {
 
+        }
     }
 }

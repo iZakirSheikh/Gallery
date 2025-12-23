@@ -62,7 +62,7 @@ android {
     // -----------------------------------------------------------------------------
     // 📦 Core app settings: ID, SDK versions, versioning, and test runner.
     defaultConfig {
-        applicationId = "com.googol.android.apps.oneplayer"
+        applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
         versionCode = 1000
@@ -95,13 +95,8 @@ android {
         // DEBUG BUILD
         // -------------------------------------------------------------------------
         debug {
-            applicationIdSuffix =
-                ".debug"  // 📛 Appends ".debug" to the application ID so debug and release can coexist
-            resValue(
-                "string",
-                "launcher_label",
-                "Debug"
-            )  // 🏷️ Custom string resource for launcher label in debug builds
+            applicationIdSuffix = ".debug"  // 📛 Appends ".debug" to the application ID so debug and release can coexist
+            resValue("string", "launcher_label", "Debug")  // 🏷️ Custom string resource for launcher label in debug builds
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }
@@ -110,18 +105,24 @@ android {
     // -------------------------------------------------------------------------
     flavorDimensions += "edition"
     productFlavors {
-        /// FREEMIUM (Default flavor, ads + purchases enabled)
-        create("freemium") { dimension = "edition" }
-
-        // PRO (All features unlocked, no ads/telemetry)
-        create("pro") {
-            dimension = "edition"
-            versionNameSuffix = "-pro"
-        }
-        // FOSS (Minimal free edition, no ads/telemetry)
-        create("foss") {
+        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        create("community") {
             dimension = "edition"
             versionNameSuffix = "-foss"
+        }
+        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        create("standard") { dimension = "edition" }
+
+        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        create("plus") {
+            dimension = "edition"
+            versionNameSuffix = "-plus"
+        }
+
+        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        create("premium") {
+            dimension = "edition"
+            versionNameSuffix = "-pro"
         }
     }
 }

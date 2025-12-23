@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2025 Zakir Sheikh
  *
- * Created by sheik on 20 of Dec 2025
+ * Created by sheik on 23 of Dec 2025
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 20 of Dec 2025
+ * Last Modified by sheik on 23 of Dec 2025
  */
 
 package com.zs.common.db.albums
@@ -80,10 +80,7 @@ import androidx.room.PrimaryKey
  * or idle maintenance pass.
  *
  */
-@Entity(
-    tableName = "tbl_media",
-    indices = [Index(value = ["data"], unique = true), Index("date_taken")]
-)
+@Entity(tableName = "tbl_media", indices = [Index(value = ["data"], unique = true)])
 class MediaFile internal constructor(
     // ── Identity / source ───────────────────────────────────
     @PrimaryKey(autoGenerate = true) @JvmField val id: Long = 0,
@@ -122,52 +119,10 @@ class MediaFile internal constructor(
     @JvmField val description: String? = null,
     @JvmField val bookmark: Long = -1L,
 ) {
+
     val isFavourite: Boolean get() = flags and Albums.FLAG_IS_FAVOURITE != 0
-    val isPending: Boolean get() = flags and Albums.FLAG_IS_PENDING != 0
     val isPrivate: Boolean get() = flags and Albums.FLAG_IS_PRIVATE != 0
     val isTrashed: Boolean get() = flags and Albums.FLAG_IS_TRASHED != 0
-
-    /**
-     * Returns a new [MediaFile] with updated metadata while preserving identity fields.
-     */
-    internal fun update(
-        name: String = this.name,
-        width: Int = this.width,
-        height: Int = this.height,
-        orientation: Int = this.orientation,
-        duration: Long = this.duration,
-        mimeType: String? = this.mimeType,
-        bitrate: Int = this.bitrate,
-        longitude: Float = this.longitude,
-        latitude: Float = this.latitude,
-        thumbnail: String? = this.thumbnail,
-        dateModified: Long = this.dateModified,
-        dateTaken: Long = this.dateTaken,
-        flags: Int=  this.flags,
-        dateExpires: Long = this.dateExpires,
-        year: Int = this.year
-    ): MediaFile =
-        MediaFile(
-            id = id,
-            name = name,
-            data = data,
-            width = width,
-            height = height,
-            orientation = orientation,
-            size = size,
-            duration = duration,
-            mimeType = mimeType,
-            bitrate = bitrate,
-            longitude = longitude,
-            latitude = latitude,
-            thumbnail = thumbnail,
-            dateAdded = dateAdded,
-            dateModified = dateModified,
-            dateTaken = dateTaken,
-            flags = flags,
-            year = year,
-            dateExpires = dateExpires
-        )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -226,6 +181,6 @@ class MediaFile internal constructor(
     }
 
     override fun toString(): String {
-        return "MediaFile(id=$id, data='$data', name='$name', mimeType=$mimeType, size=$size, duration=$duration, bitrate=$bitrate, year=$year, width=$width, height=$height, orientation=$orientation, latitude=$latitude, longitude=$longitude, thumbnail=$thumbnail, dateAdded=$dateAdded, dateModified=$dateModified, dateTaken=$dateTaken, dateExpires=$dateExpires, flags=$flags, description=$description, bookmark=$bookmark, isFavourite=$isFavourite, isPending=$isPending, isPrivate=$isPrivate, isTrashed=$isTrashed)"
+        return "MediaFile(description=$description, id=$id, data='$data', name='$name', mimeType=$mimeType, size=$size, duration=$duration, bitrate=$bitrate, year=$year, width=$width, height=$height, orientation=$orientation, latitude=$latitude, longitude=$longitude, thumbnail=$thumbnail, dateAdded=$dateAdded, dateModified=$dateModified, dateTaken=$dateTaken, dateExpires=$dateExpires, bookmark=$bookmark, isFavourite=$isFavourite, isPrivate=$isPrivate, isTrashed=$isTrashed)"
     }
 }

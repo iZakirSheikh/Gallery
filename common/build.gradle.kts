@@ -1,3 +1,4 @@
+
 import com.android.build.api.dsl.VariantDimension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -67,9 +68,10 @@ android {
             buildConfigField(secret, System.getenv(secret) ?: "")
 
         // 📌 Edition constants (used for comparison in code)
-        buildConfigField("FLAVOR_FOSS", "foss")
-        buildConfigField("FLAVOR_FREEMIUM", "freemium")
-        buildConfigField("FLAVOR_PRO", "pro")
+        buildConfigField("FLAVOR_COMMUNITY", "_community")
+        buildConfigField("FLAVOR_STANDARD", "_standard")
+        buildConfigField("FLAVOR_PLUS", "_plus")
+        buildConfigField("FLAVOR_PREMIUM", "_premium")
     }
 
     // BUILD TYPES
@@ -88,14 +90,17 @@ android {
     // -------------------------------------------------------------------------
     flavorDimensions += "edition"
     productFlavors {
-        /// FREEMIUM (Default flavor, ads + purchases enabled)
-        create("freemium") { dimension = "edition" }
+        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        create("community") { dimension = "edition" }
 
-        // PRO (All features unlocked, no ads/telemetry)
-        create("pro") { dimension = "edition" }
+        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        create("standard") { dimension = "edition" }
 
-        // FOSS (Minimal free edition, no ads/telemetry)
-        create("foss") { dimension = "edition" }
+        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        create("plus") { dimension = "edition" }
+
+        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        create("premium") { dimension = "edition" }
     }
 }
 
@@ -105,7 +110,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.room.runtime)
-    implementation(libs.room.compiler)
     implementation(libs.room.ktx)
     implementation(libs.work.runtime.ktx)
+    ksp(libs.room.compiler)
 }
