@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "849036525156",
+    "project_id": "gallery-b17a1",
+    "storage_bucket": "gallery-b17a1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:c13272277d749355d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

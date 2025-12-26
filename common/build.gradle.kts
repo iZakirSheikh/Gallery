@@ -28,6 +28,7 @@ kotlin {
 
         // Add experimental/advanced compiler flags
         freeCompilerArgs.addAll(
+            "-Xexplicit-backing-fields", //  Explicit backing fields
             "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
             "-Xwhen-guards",                 // Enable experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
@@ -74,6 +75,24 @@ android {
         buildConfigField("FLAVOR_PREMIUM", "_premium")
     }
 
+    // -------------------------------------------------------------------------
+    // PRODUCT FLAVORS
+    // -------------------------------------------------------------------------
+    flavorDimensions += "edition"
+    productFlavors {
+        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        create("standard") { dimension = "edition" }
+
+        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        create("community") { dimension = "edition" }
+
+        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        create("plus") { dimension = "edition" }
+
+        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        create("premium") { dimension = "edition" }
+    }
+
     // BUILD TYPES
     buildTypes {
         release {
@@ -83,24 +102,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-
-    // -------------------------------------------------------------------------
-    // PRODUCT FLAVORS
-    // -------------------------------------------------------------------------
-    flavorDimensions += "edition"
-    productFlavors {
-        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
-        create("community") { dimension = "edition" }
-
-        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
-        create("standard") { dimension = "edition" }
-
-        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
-        create("plus") { dimension = "edition" }
-
-        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
-        create("premium") { dimension = "edition" }
     }
 }
 
@@ -113,4 +114,11 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.work.runtime.ktx)
     ksp(libs.room.compiler)
+    implementation(libs.coil.core)
+    api(libs.toolkit.preferences)
+    "standardImplementation"(libs.firebase.analytics.ktx)
+    "standardImplementation"(libs.firebase.crashlytics.ktx)
+    "standardImplementation"(libs.unity.ads.mediation)
+    "standardImplementation"(libs.unity.ads.adquality)
+    "standardImplementation"(libs.google.billing.ktx)
 }

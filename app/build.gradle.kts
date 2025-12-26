@@ -21,6 +21,7 @@ kotlin {
 
         // Add experimental/advanced compiler flags
         freeCompilerArgs.addAll(
+            "-XXLanguage:+ExplicitBackingFields", //  Explicit backing fields
             "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
             "-Xwhen-guards",                 // Enable experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
@@ -69,6 +70,32 @@ android {
         versionName = "2.0.0-dev"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    // -------------------------------------------------------------------------
+    // PRODUCT FLAVORS
+    // -------------------------------------------------------------------------
+    flavorDimensions += "edition"
+    productFlavors {
+        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        create("standard") { dimension = "edition" }
+
+        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        create("community") {
+            dimension = "edition"
+            versionNameSuffix = "-foss"
+        }
+
+        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        create("plus") {
+            dimension = "edition"
+            versionNameSuffix = "-plus"
+        }
+
+        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        create("premium") {
+            dimension = "edition"
+            versionNameSuffix = "-pro"
+        }
+    }
     // -----------------------------------------------------------------------------
     // Build Types
     // -----------------------------------------------------------------------------
@@ -100,31 +127,6 @@ android {
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }
-    // -------------------------------------------------------------------------
-    // PRODUCT FLAVORS
-    // -------------------------------------------------------------------------
-    flavorDimensions += "edition"
-    productFlavors {
-        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
-        create("community") {
-            dimension = "edition"
-            versionNameSuffix = "-foss"
-        }
-        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
-        create("standard") { dimension = "edition" }
-
-        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
-        create("plus") {
-            dimension = "edition"
-            versionNameSuffix = "-plus"
-        }
-
-        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
-        create("premium") {
-            dimension = "edition"
-            versionNameSuffix = "-pro"
-        }
-    }
 }
 
 // -----------------------------------------------------------------------------
@@ -142,5 +144,29 @@ dependencies {
     //
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation(libs.nav3.runtime)
+    implementation(libs.nav3.ui)
+    implementation(libs.toolkit.theme)
+    implementation(libs.toolkit.foundation)
+    implementation(libs.androidx.splashscreen)
+    implementation(libs.androidx.startup)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.google.fonts)
+    implementation(libs.androidx.material.icons)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.telephoto.zoomable)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.koin)
+    implementation(libs.chrisbanes.haze)
+    implementation(libs.lottie.compose)
+    "standardImplementation"(libs.play.app.update.ktx)
+    "standardImplementation"(libs.play.app.review.ktx)
     //fossImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+afterEvaluate {
+    if (gradle.startParameter.taskNames.any { it.contains("standard") }) {
+        apply(plugin = libs.plugins.crashanlytics.get().pluginId)
+        apply(plugin = libs.plugins.google.services.get().pluginId)
+    }
 }
