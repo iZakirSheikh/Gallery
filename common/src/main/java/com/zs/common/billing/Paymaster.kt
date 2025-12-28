@@ -55,7 +55,7 @@ interface Paymaster: Closeable {
          * @return A configured [Paymaster] implementation.
          */
         operator fun invoke(context: Context, products: Array<String>): Paymaster =
-            PaymasterImpl(context, products)
+            TODO("Not Implemented yet!.")
 
         // Represents different
         const val STATE_UNSPECIFIED = 0   // No purchase or unknown state

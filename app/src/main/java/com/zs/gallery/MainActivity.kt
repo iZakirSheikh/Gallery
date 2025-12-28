@@ -23,8 +23,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         SyncWorker.execute(applicationContext)
         val color = Color.Black
-        val master = Paymaster(this, emptyArray())
-        //val analytics = Analytics(this.applicationContext)
+        //val master = Paymaster(this, emptyArray())
+        val analytics = Analytics.getInstance()
+        analytics.logEvent("test", Bundle.EMPTY)
         color.isSpecified
         lifecycleScope.launch {
         }

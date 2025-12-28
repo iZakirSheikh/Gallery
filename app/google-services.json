@@ -42,6 +42,120 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.foss"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.foss.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.plus"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.plus.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.pro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "android_client_info": {
+          "package_name": "com.googol.android.apps.photos.pro.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu73BNwsHaaoSWPNJqfEYTVabKY3F0a3E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

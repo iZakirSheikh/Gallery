@@ -88,18 +88,21 @@ android {
         create("community") {
             dimension = "edition"
             versionNameSuffix = "-foss"
+            applicationIdSuffix = ".foss"
         }
 
         // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
         create("plus") {
             dimension = "edition"
             versionNameSuffix = "-plus"
+            applicationIdSuffix = ".plus"
         }
 
         // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
         create("premium") {
             dimension = "edition"
             versionNameSuffix = "-pro"
+            applicationIdSuffix = ".pro"
         }
     }
     // -----------------------------------------------------------------------------
@@ -135,7 +138,7 @@ android {
                 "launcher_label",
                 "Debug"
             )  // 🏷️ Custom string resource for launcher label in debug builds
-            versionNameSuffix = "-dev" // 🔖 Adds "-debug" suffix to version name for clarity
+            versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }
 }

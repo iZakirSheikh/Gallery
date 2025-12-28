@@ -32,6 +32,6 @@ class AnalyticsInitializer : Initializer<Unit> {
     override fun dependencies(): List<Class<out Initializer<*>?>?> = emptyList()
     override fun create(context: Context) {
         Log.d(TAG, "initializing firebase: ")
-        Analytics(context)
+        Analytics.initialize(context)
     }
 }

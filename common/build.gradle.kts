@@ -1,4 +1,3 @@
-
 import com.android.build.api.dsl.VariantDimension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -8,6 +7,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // 🔐 Keys or IDs injected into BuildConfig at runtime.
 private val secrets = arrayOf("ADS_APP_ID", "PLAY_CONSOLE_APP_RSA_KEY")
 
+// -----------------------------------------------------------------------------
+// PLUGINS
+// -----------------------------------------------------------------------------
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -80,17 +82,39 @@ android {
     // -------------------------------------------------------------------------
     flavorDimensions += "edition"
     productFlavors {
-        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        // STANDARD → Default monetized edition.
+        // PLUS + Ad SDK
         create("standard") { dimension = "edition" }
 
-        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        // COMMUNITY → FOSS/open‑source build.
+        // Minimal free edition with no ads, no telemetry, and no purchases.
         create("community") { dimension = "edition" }
 
-        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        // PLUS → Privacy-friendly edition:
+        // No Ad SDK, but telemetry and in‑app purchases.
         create("plus") { dimension = "edition" }
 
-        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        // PREMIUM → Full unlock build.
+        // Based on Community, but with all features enabled.
         create("premium") { dimension = "edition" }
+    }
+    // -------------------------------------------------------------------------
+    // SOURCE SETS
+    // -------------------------------------------------------------------------
+    sourceSets {
+        // Premium uses Community sources.
+        // Community = locked features, no ads, no telemetry.
+        // Premium = Community + all features unlocked.
+        getByName("premium") {
+            java.srcDir("src/community/java")
+        }
+
+        // Standard builds on Plus sources.
+        // Plus = Play Billing only.
+        // Standard = Plus + ads (toggle via Play Billing) + telemetry (analytics, crash reporting, update check, review).
+        getByName("standard") {
+            java.srcDirs("src/plus/java")
+        }
     }
 
     // BUILD TYPES
@@ -116,11 +140,13 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.coil.core)
     api(libs.toolkit.preferences)
-    // Plus includes only
+    // Plus only
     "plusImplementation"(libs.google.billing.ktx)
     "plusImplementation"(libs.play.app.update.ktx)
     "plusImplementation"(libs.play.app.review.ktx)
-    /*For standard as well*/
+    "plusImplementation"(libs.firebase.analytics.ktx)
+    "plusImplementation"(libs.firebase.crashlytics.ktx)
+    // Standard only
     "standardImplementation"(libs.google.billing.ktx)
     "standardImplementation"(libs.play.app.update.ktx)
     "standardImplementation"(libs.play.app.review.ktx)

@@ -21,19 +21,22 @@
 
 package com.zs.common.analytics
 
-internal class AnalyticsImpl(context: Context){
-    // Log events to Logcat
-    private val TAG = "FallbackAnalytics"
+import android.content.Context
+import android.os.Bundle
+import android.util.Log
 
-    init {
-        Log.i(TAG, "$name : params = $params")
-    }
-
+internal class AnalyticsImpl : Analytics() {
+    private val TAG = "AnalyticsImpl"
     override fun record(throwable: Throwable) {
-        Log.e(TAG, throwable.message, throwable)
+        Log.e(TAG, "record: ${throwable.stackTrace}")
     }
 
     override fun logEvent(name: String, params: Bundle) {
-        Log.i(TAG, "$name : params = $params")
+        Log.i(TAG, "name:$name, params = $params")
+    }
+
+    override fun initialize(context: Context) {
+        Log.i(TAG, "Analytics fallback initialized (no telemetry backend)")
+        /* STUB: No initialization required */
     }
 }

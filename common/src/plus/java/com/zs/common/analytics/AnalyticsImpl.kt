@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2025 Zakir Sheikh
  *
- * Created by sheik on 27 of Dec 2025
+ * Created by sheik on 28 of Dec 2025
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 27 of Dec 2025
+ * Last Modified by sheik on 28 of Dec 2025
  *
  */
 
 package com.zs.common.analytics
 
-internal class AnalyticsImpl(context: Context){
-    // Log events to Logcat
-    private val TAG = "FallbackAnalytics"
+import android.content.Context
+import android.os.Bundle
+import com.google.firebase.FirebaseApp
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 
-    init {
-        Log.i(TAG, "$name : params = $params")
-    }
+/**
+ * Implementation of the [Analytics] interface using Firebase Analytics and Crashlytics.
+ * @property crashlytics Instance of Firebase Crashlytics for crash reporting.
+ * @property analytics Instance of Firebase Analytics for event logging.
+ */
+internal class AnalyticsImpl : Analytics() {
+
+    lateinit var crashlytics: FirebaseCrashlytics
+    lateinit var analytics: FirebaseAnalytics
 
     override fun record(throwable: Throwable) {
-        Log.e(TAG, throwable.message, throwable)
+        crashlytics.recordException(throwable)
     }
 
     override fun logEvent(name: String, params: Bundle) {
-        Log.i(TAG, "$name : params = $params")
+        analytics.logEvent(name, params)
+    }
+
+    override fun initialize(context: Context) {
+        FirebaseApp.initializeApp(context.applicationContext)
+        crashlytics = Firebase.crashlytics
+        analytics = Firebase.analytics
     }
 }
