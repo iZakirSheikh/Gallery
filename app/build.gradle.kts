@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.android.application)   // Android application plugin
     alias(libs.plugins.kotlin.android)        // Kotlin support for Android
     alias(libs.plugins.kotlin.compose)        // Jetpack Compose UI toolkit
+    // TODO - Find a way to apply these to only standard flavour
+    // ⚠️ Currently Crashlytics + Google Services are applied globally.
+    alias(libs.plugins.crashanlytics) // Firebase Crashlytics (should be flavor-scoped)
+    alias(libs.plugins.google.services) // Google Services (should be flavor-scoped)
 }
 
 // -----------------------------------------------------------------------------
@@ -76,7 +80,9 @@ android {
     flavorDimensions += "edition"
     productFlavors {
         // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
-        create("standard") { dimension = "edition" }
+        create("standard") {
+            dimension = "edition"
+        }
 
         // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
         create("community") {
@@ -122,9 +128,14 @@ android {
         // DEBUG BUILD
         // -------------------------------------------------------------------------
         debug {
-            applicationIdSuffix = ".debug"  // 📛 Appends ".debug" to the application ID so debug and release can coexist
-            resValue("string", "launcher_label", "Debug")  // 🏷️ Custom string resource for launcher label in debug builds
-            versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
+            applicationIdSuffix =
+                ".dev"  // 📛 Appends ".debug" to the application ID so debug and release can coexist
+            resValue(
+                "string",
+                "launcher_label",
+                "Debug"
+            )  // 🏷️ Custom string resource for launcher label in debug builds
+            versionNameSuffix = "-dev" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }
 }
@@ -142,8 +153,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     //
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation(libs.nav3.runtime)
     implementation(libs.nav3.ui)
     implementation(libs.toolkit.theme)
@@ -159,14 +168,7 @@ dependencies {
     implementation(libs.androidx.koin)
     implementation(libs.chrisbanes.haze)
     implementation(libs.lottie.compose)
-    "standardImplementation"(libs.play.app.update.ktx)
-    "standardImplementation"(libs.play.app.review.ktx)
-    //fossImplementation(libs.androidx.compose.ui.test.manifest)
-}
 
-afterEvaluate {
-    if (gradle.startParameter.taskNames.any { it.contains("standard") }) {
-        apply(plugin = libs.plugins.crashanlytics.get().pluginId)
-        apply(plugin = libs.plugins.google.services.get().pluginId)
-    }
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

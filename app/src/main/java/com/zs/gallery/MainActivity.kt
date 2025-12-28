@@ -1,10 +1,12 @@
 package com.zs.gallery
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.lifecycle.lifecycleScope
+import com.zs.common.analytics.Analytics
+import com.zs.common.billing.Paymaster
 import com.zs.common.billing.Product
 import com.zs.common.db.SyncWorker
 import com.zs.gallery.common.Navigator
@@ -20,10 +22,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SyncWorker.execute(applicationContext)
-        val xyz = mutableIntStateOf()
+        val color = Color.Black
+        val master = Paymaster(this, emptyArray())
+        //val analytics = Analytics(this.applicationContext)
+        color.isSpecified
         lifecycleScope.launch {
-            val x = Product(null)
-            Log.d(TAG, "onCreate: ${x.isSpecified}")
         }
     }
 }

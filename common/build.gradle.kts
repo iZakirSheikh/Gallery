@@ -116,9 +116,16 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.coil.core)
     api(libs.toolkit.preferences)
+    // Plus includes only
+    "plusImplementation"(libs.google.billing.ktx)
+    "plusImplementation"(libs.play.app.update.ktx)
+    "plusImplementation"(libs.play.app.review.ktx)
+    /*For standard as well*/
+    "standardImplementation"(libs.google.billing.ktx)
+    "standardImplementation"(libs.play.app.update.ktx)
+    "standardImplementation"(libs.play.app.review.ktx)
     "standardImplementation"(libs.firebase.analytics.ktx)
     "standardImplementation"(libs.firebase.crashlytics.ktx)
     "standardImplementation"(libs.unity.ads.mediation)
     "standardImplementation"(libs.unity.ads.adquality)
-    "standardImplementation"(libs.google.billing.ktx)
 }

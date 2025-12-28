@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2025 Zakir Sheikh
  *
- * Created by sheik on 26 of Dec 2025
+ * Created by sheik on 27 of Dec 2025
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,31 +15,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 26 of Dec 2025
+ * Last Modified by sheik on 27 of Dec 2025
+ *
  */
 
 package com.zs.common.billing
 
-import com.android.billingclient.api.Purchase as GP_Purchase
+import com.zs.common.BuildConfig
 
 /**
- * Representing a purchase.
+ * Represents a completed or pending purchase transaction.
  *
- * This class wraps a [GP_Purchase] purchase object and provides convenient access to its properties.
+ * This class encapsulates the essential metadata returned by the billing system
+ * when a user buys a product. It provides identifiers, state information, and
+ * acknowledgement status required for entitlement management.
  *
- * @property value The underlying [GP_Purchase] purchase object.
- * @property isAcknowledged Whether the purchase has been acknowledged.
- * @property state The state of the purchase. [com.android.billingclient.api.Purchase.PurchaseState]
- * @property quantity The quantity of the purchased items.
- * @property id The ID of the first product in the purchase, as assigned in Play Console Billing.
- * @property time The time of the purchase.
+ * @property id Unique identifier of the purchase transaction. Used to correlate
+ *              with backend records and entitlement checks.
+ *
+ * @property state Integer code representing the current state of the purchase.
+ *                 Indicates whether the transaction is pending, completed, or
+ *                 cancelled.
+ *
+ * @property purchased Flag indicating whether the item has been successfully
+ *                     purchased. True if the transaction is complete.
+ *
+ * @property isAcknowledged Internal flag indicating whether the purchase has
+ *                          been acknowledged by the app. Required to comply
+ *                          with billing system rules.
+ *
+ * @property quantity Number of units purchased in this transaction. Typically
+ *                    1 for most products, but may vary for consumables.
+ *
+ * @property time Epoch timestamp (milliseconds) when the purchase was made.
+ *                Useful for subscription validation and history display.
  */
-@JvmInline
-value class Purchase internal constructor(private val value: GP_Purchase) {
-    val isAcknowledged get() = value.isAcknowledged
-    val state get() = value.purchaseState
-    val quantity get() = value.quantity
-    val id get() = value.products.first()
-    val time get() = value.purchaseTime
-
+class Purchase(
+    val id: String,
+    val state: Int,
+    val quantity: Int,
+    val time: Long,
+) {
+    val purchased get() = state == Paymaster.STATE_ACKNOWLEDGED
 }
+
