@@ -53,8 +53,8 @@ import com.zs.common.BuildConfig
 class Purchase(
     val id: String,
     val state: Int,
-    val quantity: Int,
-    val time: Long,
+    val quantity: Int = -1,
+    val time: Long = -1,
 ) {
     val purchased get() = state == Paymaster.STATE_ACKNOWLEDGED
 }

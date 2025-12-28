@@ -24,6 +24,7 @@ package com.zs.common.analytics
 import android.content.Context
 import android.os.Bundle
 import androidx.annotation.Size
+import com.zs.common.AnalyticsImpl
 import com.zs.common.analytics.Analytics.Companion.getInstance
 import com.zs.common.analytics.Analytics.Companion.initialize
 

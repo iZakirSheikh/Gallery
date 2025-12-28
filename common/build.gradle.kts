@@ -102,18 +102,17 @@ android {
     // SOURCE SETS
     // -------------------------------------------------------------------------
     sourceSets {
-        // Premium uses Community sources.
-        // Community = locked features, no ads, no telemetry.
-        // Premium = Community + all features unlocked.
-        getByName("premium") {
-            java.srcDir("src/community/java")
+        getByName("community") {
+            java.srcDirs("src/analytics/stub/java", "src/billing/stub/java", "src/ads/stub/java")
         }
-
-        // Standard builds on Plus sources.
-        // Plus = Play Billing only.
-        // Standard = Plus + ads (toggle via Play Billing) + telemetry (analytics, crash reporting, update check, review).
+        getByName("premium") {
+            java.srcDirs("src/analytics/stub/java", "src/billing/stub/java", "src/ads/stub/java")
+        }
         getByName("standard") {
-            java.srcDirs("src/plus/java")
+            java.srcDirs("src/analytics/sdk/java", "src/billing/sdk/java", "src/ads/sdk/java")
+        }
+        getByName("plus") {
+            java.srcDirs("src/billing/sdk/java")
         }
     }
 
@@ -144,8 +143,6 @@ dependencies {
     "plusImplementation"(libs.google.billing.ktx)
     "plusImplementation"(libs.play.app.update.ktx)
     "plusImplementation"(libs.play.app.review.ktx)
-    "plusImplementation"(libs.firebase.analytics.ktx)
-    "plusImplementation"(libs.firebase.crashlytics.ktx)
     // Standard only
     "standardImplementation"(libs.google.billing.ktx)
     "standardImplementation"(libs.play.app.update.ktx)

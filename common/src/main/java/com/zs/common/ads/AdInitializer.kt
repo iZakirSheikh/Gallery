@@ -19,5 +19,10 @@
  *
  */
 
-package com.zs.common
+package com.zs.common.ads
 
+import android.content.Context
+
+internal fun interface AdInitializer {
+    fun initialize(context: Context, id: String)
+}

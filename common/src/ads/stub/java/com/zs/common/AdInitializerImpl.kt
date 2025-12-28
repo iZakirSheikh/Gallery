@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2025 Zakir Sheikh
  *
- * Created by sheik on 27 of Dec 2025
+ * Created by sheik on 28 of Dec 2025
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 27 of Dec 2025
+ * Last Modified by sheik on 28 of Dec 2025
  *
  */
 
-package com.zs.common.analytics
+package com.zs.common
 
 import android.content.Context
-import android.os.Bundle
-import android.util.Log
+import com.zs.common.ads.AdInitializer
 
-internal class AnalyticsImpl : Analytics() {
-    private val TAG = "AnalyticsImpl"
-    override fun record(throwable: Throwable) {
-        Log.e(TAG, "record: ${throwable.stackTrace}")
-    }
-
-    override fun logEvent(name: String, params: Bundle) {
-        Log.i(TAG, "name:$name, params = $params")
-    }
-
-    override fun initialize(context: Context) {
-        Log.i(TAG, "Analytics fallback initialized (no telemetry backend)")
-        /* STUB: No initialization required */
+internal class AdInitializerImpl: AdInitializer {
+    override fun initialize(context: Context, id: String) {
+        // STUB - no-op
     }
 }

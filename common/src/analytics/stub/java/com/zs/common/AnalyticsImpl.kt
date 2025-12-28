@@ -1,0 +1,43 @@
+/*
+ * Copyright (c)  2025 Zakir Sheikh
+ *
+ * Created by sheik on 27 of Dec 2025
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Last Modified by sheik on 27 of Dec 2025
+ *
+ */
+
+package com.zs.common
+
+import android.content.Context
+import android.os.Bundle
+import android.util.Log
+import com.zs.common.analytics.Analytics
+
+internal class AnalyticsImpl : Analytics() {
+    private val TAG = "AnalyticsImpl"
+    override fun record(throwable: Throwable) {
+        Log.e(TAG, "record: ${throwable.stackTrace}")
+    }
+
+    override fun logEvent(name: String, params: Bundle) {
+        Log.i(TAG, "name:$name, params = $params")
+    }
+
+    override fun initialize(context: Context) {
+        Log.i(TAG, "Analytics fallback initialized (no telemetry backend)")
+        /* STUB: No initialization required */
+    }
+}
