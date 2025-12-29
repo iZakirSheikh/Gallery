@@ -99,22 +99,42 @@ android {
         create("premium") { dimension = "edition" }
     }
     // -------------------------------------------------------------------------
-    // SOURCE SETS
+    // SOURCE SETS CONFIGURATION
     // -------------------------------------------------------------------------
     sourceSets {
+        // Community flavor → uses stubbed (no-op) implementations for all shared libs
         getByName("community") {
-            java.srcDirs("src/analytics/stub/java", "src/billing/stub/java", "src/ads/stub/java")
+            java.srcDirs(
+                "src/shared/analytics/stub/java",
+                "src/shared/billing/stub/java",
+                "src/shared/ads/stub/java"
+            )
         }
+
+        // Premium flavor → also wired to stub implementations (restricted feature set)
         getByName("premium") {
-            java.srcDirs("src/analytics/stub/java", "src/billing/stub/java", "src/ads/stub/java")
+            java.srcDirs(
+                "src/shared/analytics/stub/java",
+                "src/shared/billing/stub/java",
+                "src/shared/ads/stub/java"
+            )
         }
+
+        // Standard flavor → full/actual implementations of analytics, billing, and ads
         getByName("standard") {
-            java.srcDirs("src/analytics/sdk/java", "src/billing/sdk/java", "src/ads/sdk/java")
+            java.srcDirs(
+                "src/shared/analytics/actual/java",
+                "src/shared/billing/actual/java",
+                "src/shared/ads/actual/java"
+            )
         }
+
+        // Plus flavor → only requires actual billing implementation (no analytics/ads)
         getByName("plus") {
-            java.srcDirs("src/billing/sdk/java")
+            java.srcDirs("src/shared/billing/actual/java")
         }
     }
+
 
     // BUILD TYPES
     buildTypes {
