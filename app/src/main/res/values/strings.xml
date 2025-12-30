@@ -17,4 +17,15 @@
 <resources>
     <string name="app_name">Gallery</string>
     <string name="msg_enroll_biometric">Enable biometric authentication in settings.</string>
+    <string name="scr_permission_title">Storage Permission</string>
+    <string name="scr_permission_desc">For the best experience with <b><i>OnePlayer</i></b>, we need
+        to access your device\'s files. This allows us to:
+        \n  • Seamlessly play your media
+        \n  • Optimize playback quality
+        \n  • Personalize app features
+        \nYour data <b>security</b> and <b>privacy</b> are our top priorities.
+        \n\n
+        <b><i>Thank you for your support!</i></b>
+    </string>
+    <string name="allow">Allow</string>
 </resources>

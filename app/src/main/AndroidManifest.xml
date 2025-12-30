@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Devices running Android 12L (API level 32) or lower  -->
+    <!-- ============================================================
+         Permissions Section
+         Defines all runtime and install-time permissions required
+         for app-lock, media access, and storage compatibility.
+         ============================================================ -->
+
+    <!-- Biometric authentication (modern API) -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <!-- Legacy fingerprint API (still needed for older devices) -->
+    <!--suppress DeprecatedClassUsageInspection -->
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <!-- Storage access for devices running Android 12L (API 32) or lower -->
     <!--suppress ScopedStorage -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -10,44 +21,72 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <!-- Devices running Android 13 (API level 33) or higher -->
+
+    <!-- Media access for Android 13+ (API 33+) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <!-- Required to access GPS Data of Media -->
+
+    <!-- Access GPS metadata embedded in media files -->
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
+    <!-- Visual media reselection support for Android 14+ (API 34+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <!-- ============================================================
+            Application Section
+            Defines app-wide configuration, aliases, backup rules, icons, and theme.
+            ============================================================ -->
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:enableOnBackInvokedCallback="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Gallery">
-        <!--Providers-->
+
+        <!-- ========================================================
+             Startup Initializers
+             Uses AndroidX Startup to initialize libraries at launch.
+             ======================================================== -->
         <provider
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
-            <!--Firebase-->
+
+            <!-- Firebase Analytics initializer -->
             <meta-data
                 android:name="com.zs.gallery.common.impl.AnalyticsInitializer"
                 android:value="androidx.startup" />
+
+            <!-- Koin dependency injection initializer -->
+            <meta-data
+                android:name="com.zs.gallery.common.impl.KoinInitializer"
+                android:value="androidx.startup" />
+
+            <!-- Coil image loader initializer -->
+            <meta-data
+                android:name="com.zs.gallery.common.impl.CoilInitializer"
+                android:value="androidx.startup" />
         </provider>
 
+        <!-- ========================================================
+             Main Activity
+             Entry point of the app, launched from home screen.
+             ======================================================== -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:launchMode="singleTask"
             android:label="@string/app_name"
             android:theme="@style/Theme.Gallery">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
