@@ -20,15 +20,15 @@ import com.zs.gallery.common.Gallery.config.isBackgroundBlurEnabled
 import com.zs.gallery.common.Gallery.config.isFileGroupingEnabled
 import com.zs.gallery.common.Gallery.config.isLiveGalleryEnabled
 import com.zs.gallery.common.Gallery.config.isTrashCanEnabled
-import com.zs.gallery.common.Gallery.config.lockTimeoutMillis
+import com.zs.gallery.common.Gallery.config.lockTimeoutMinutes
 import com.zs.gallery.common.Gallery.keys.dynamic_colors
 import com.zs.gallery.common.Gallery.keys.launch_counter
 import com.zs.gallery.common.Gallery.keys.night_mode
-import com.zs.gallery.common.Gallery.keys.secure_mode
 import com.zs.gallery.common.Gallery.keys.transparent_system_bars
 import com.zs.preferences.IntSaver
 import com.zs.preferences.booleanPreferenceKey
 import com.zs.preferences.intPreferenceKey
+import com.zs.preferences.longPreferenceKey
 
 /**
  * Represents [Gallery] app.
@@ -136,12 +136,11 @@ object Gallery {
     object keys {
         val night_mode = intPreferenceKey("_night_mode", NightMode.FOLLOW_SYSTEM, OrdinalEnumSaver())
         val transparent_system_bars = booleanPreferenceKey("_transparent_system_bars", defaultValue = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-        val secure_mode = booleanPreferenceKey( "_secure_gallery", defaultValue = false)
         val launch_counter = intPreferenceKey( "_launch_counter", 0)
         val dynamic_colors = booleanPreferenceKey("_dynamic_colors", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
         val dark_accent_color = intPreferenceKey("_dark_accent_color", LightAccentColor, ColorSaver)
         val light_accent_color = intPreferenceKey("_light_accent_color", DarkAccentColor, ColorSaver)
-
+        val app_version_code = longPreferenceKey("_app_version_code", -1)
     }
 
     /**
@@ -166,7 +165,9 @@ object Gallery {
      * @property isFileGroupingEnabled Enables grouping of files in views where applicable.
      * @property isLiveGalleryEnabled Live gallery toggle (default: disabled).
      * @property fontScale Font scale override (default: -1f, meaning system scale).
-     * @property lockTimeoutMillis Lock timeout in seconds (default: -1, disabled).
+     * @property lockTimeoutMinutes Representing the timeout duration (in minutes) for app lock.
+     *                             - This preference determines how long the app can be in the background
+     *                             - before the user needs to authenticate to regain access.
      */
     object config {
         @JvmField var isBackgroundBlurEnabled: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -174,7 +175,8 @@ object Gallery {
         @JvmField var fontScale: Float = -1f
         @JvmField var gridItemSizeMultiplier: Float = 1.0f
         @JvmField var isFileGroupingEnabled: Boolean = true
-        @JvmField var lockTimeoutMillis: Long = -1
+        @JvmField var lockTimeoutMinutes: Int = -1
         @JvmField var isLiveGalleryEnabled: Boolean = false
+        @JvmField var isAppSecureModeEnabled: Boolean = false
     }
 }

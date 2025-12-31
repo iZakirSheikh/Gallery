@@ -30,7 +30,7 @@ kotlin {
 
         // Add experimental/advanced compiler flags
         freeCompilerArgs.addAll(
-            "-Xexplicit-backing-fields", //  Explicit backing fields
+ //           "-Xexplicit-backing-fields", //  Explicit backing fields
             "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
             "-Xwhen-guards",                 // Enable experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental

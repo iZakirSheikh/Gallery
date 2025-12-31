@@ -25,6 +25,8 @@ class Navigator<T>(start: T) {
     private val _backstack = mutableStateListOf(start)
     val backstack: List<T> get() = _backstack
 
+    val current get() = _backstack.last()
+
     /**
      * Pop the backstack until [route] is at the top.
      *
@@ -75,7 +77,7 @@ class Navigator<T>(start: T) {
         if (_backstack.size > 1) _backstack[_backstack.lastIndex - 1] else null
 
     /**
-     * Navigate up (pop the current top route).
+     * Attempts to navigate up in the navigation hierarchy.
      *
      * @return false if only root remains, true if a route was popped.
      */
@@ -134,4 +136,7 @@ class Navigator<T>(start: T) {
             }
         }
     }
+
+
+    fun popBackStack(): Boolean = navigateUp()
 }
