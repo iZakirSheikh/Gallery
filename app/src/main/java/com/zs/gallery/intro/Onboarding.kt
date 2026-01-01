@@ -32,7 +32,7 @@ fun Onboarding() {
     // Navigate from here to there.
     val permission = Permissions(permissions = G.REQUIRED_PERMISSIONS) {
         if (!it.all { (_, state) -> state }) return@Permissions
-        navigator.rebase(Route.Files())
+        navigator.rebase(Route.Timeline)
     }
     Placeholder(
         iconResId = R.raw.lt_permission,

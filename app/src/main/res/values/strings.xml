@@ -32,5 +32,11 @@
     <string name="dismiss">Dismiss</string>
     <string name="msg_auth_failed">Authentication Failed! Please try again or use an alternative method.</string>
     <string name="msg_auth_error_s">Authentication Error: %1$s</string>
+    <string name="timeline">Timeline</string>
+    <string name="folders">Folders</string>
+    <string name="error">Error</string>
+    <string name="report">Report</string>
+    <string name="msg_unknown_error">Oops! An unknown error occurred</string>
+    <string name="albums">Albums</string>
 
 </resources>

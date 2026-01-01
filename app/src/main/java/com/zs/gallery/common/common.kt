@@ -20,6 +20,7 @@
 
 package com.zs.gallery.common
 
+import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -29,7 +30,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import com.zs.compose.foundation.findActivity
 import com.zs.gallery.MainActivity
 import com.zs.preferences.Key
@@ -169,3 +172,6 @@ fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
     val activity = LocalContext.current.findActivity() as MainActivity
     return activity.preferences.observeAsState(key) as State<O>
 }
+
+@Composable
+inline fun imageVectorOf(@DrawableRes id: Int) = ImageVector.vectorResource(id)

@@ -25,7 +25,7 @@ class Navigator<T>(start: T) {
     private val _backstack = mutableStateListOf(start)
     val backstack: List<T> get() = _backstack
 
-    val current get() = _backstack.last()
+    val active get() = _backstack.last()
 
     /**
      * Pop the backstack until [route] is at the top.

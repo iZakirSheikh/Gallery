@@ -65,6 +65,8 @@ private val APP_MODULES = module {
     factory { androidApplication().resources }
     viewModelOf(::SettingsViewModel)
     viewModelOf(::FilesViewModel)
+    viewModelOf(::AlbumsViewModel)
+
 }
 
 // Initializes Koin dependency injection at app startup

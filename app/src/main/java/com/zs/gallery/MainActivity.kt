@@ -141,7 +141,8 @@ class MainActivity : ComponentActivity(), SystemFacade {
             Log.d(TAG, "onResume: navigating -> RouteLockScreen.")
             // since navController doesn't support adding new dest at the bottom of topMost dest;
             // remove current destination to insert lock screen below
-            if (navController?.current == Route.IntentViewer) {
+            val current = navController?.active
+            if (current is Route.Viewer && current.isIntentViewer) {
                 navController?.popBackStack()
             }
             navController?.navigate(Route.ScreenLock)
@@ -222,9 +223,9 @@ class MainActivity : ComponentActivity(), SystemFacade {
             timeAppWentToBackground = 0L
         // Check if the start destination needs to be updated
         // Update the start destination to RouteTimeline
-        if (navController.current == Route.ScreenLock) {
+        if (navController.active == Route.ScreenLock) {
             Log.d(TAG, "unlock: updating start destination")
-            navController.rebase(Route.Files())
+            navController.rebase(Route.Timeline)
             // return from here;
             return@authenticate
         }
@@ -312,9 +313,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
             // we want this to overlay over lockscreen; hence this.
 
             delay(200)
-//            controller?.navigate(RouteIntentViewer(intent.data!!, intent.type ?: "image/*")) {
-//                launchSingleTop = true
-//            }
+            navController?.navigate(Route.Viewer(intent.data!!, intent.type))
         }
     }
 
@@ -355,7 +354,6 @@ class MainActivity : ComponentActivity(), SystemFacade {
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -382,7 +380,6 @@ class MainActivity : ComponentActivity(), SystemFacade {
                 // If different, update preferences and notify user with release notes.
                 if (info.longVersionCode != preferences[G.keys.app_version_code]) {
                     preferences[G.keys.app_version_code] = info.longVersionCode
-
                     // Show release notes snackbar to highlight new version changes.
                     showSnackbar(
                         message = R.string.release_notes,
@@ -412,10 +409,10 @@ class MainActivity : ComponentActivity(), SystemFacade {
             // - Authentication required → ScreenLock
             // - Default case → Files browser
             navController = when {
-                intent.action == Intent.ACTION_VIEW -> Navigator(Route.IntentViewer)
+                intent.action == Intent.ACTION_VIEW -> Navigator(Route.Viewer(intent.data!!, intent.type))
                 !checkSelfPermissions(G.REQUIRED_PERMISSIONS) -> Navigator(Route.Onboarding)
                 isAuthenticationRequired -> Navigator(Route.ScreenLock)
-                else -> Navigator(Route.Files())
+                else -> Navigator(Route.Timeline)
             }
         }
 

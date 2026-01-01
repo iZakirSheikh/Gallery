@@ -1,7 +1,7 @@
 /*
- * Copyright (c)  2025 Zakir Sheikh
+ * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 26 of Dec 2025
+ * Created by sheik on 1 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 26 of Dec 2025
+ * Last Modified by sheik on 1 of Jan 2026
+ *
  */
 
 package com.zs.gallery.albums
 
-interface FoldersViewState {
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+
+@Composable
+fun Albums(viewState: AlbumsViewState) {
+
+
 }
