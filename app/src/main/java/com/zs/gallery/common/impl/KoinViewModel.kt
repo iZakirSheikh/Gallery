@@ -36,13 +36,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.viewModelScope
 import com.zs.common.analytics.Analytics
-import com.zs.common.utils.showPlatformToast
+import com.zs.common.util.showPlatformToast
 import com.zs.compose.foundation.OrientRed
 import com.zs.compose.foundation.getText2
 import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.compose.theme.snackbar.SnackbarResult
-import com.zs.gallery.R
+import com.zs.gallery.common.Res
 import com.zs.preferences.Preferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -58,13 +58,18 @@ abstract class KoinViewModel : ScopeViewModel() {
 
     private val TAG = "KoinViewModel"
 
+    //
+    //  --- Injected Dependencies ---
+    //
+    //  Private: internal helpers used only inside this base ViewModel.
+    //  Public: exposed properties that other classes or child ViewModels can access.
     private val resources: Resources by inject()
     private val toastHostState: SnackbarHostState by inject()
     val preferences: Preferences by inject()
     val analytics: Analytics by inject()
     val context: Application by inject()
 
-    fun imageVectorOf(@DrawableRes id: Int): ImageVector? =
+    fun imageVector(@DrawableRes id: Int): ImageVector? =
         ImageVector.vectorResource(context.theme, res = resources, id)
 
     fun showPlatformToast(
@@ -83,13 +88,13 @@ abstract class KoinViewModel : ScopeViewModel() {
         @DrawableRes icon: Int = ResourcesCompat.ID_NULL,
         accent: Color = Color.Unspecified,
         duration: SnackbarDuration = if (action == null) SnackbarDuration.Short else SnackbarDuration.Long,
-    ): SnackbarResult = toastHostState.showSnackbar(message, action, imageVectorOf(icon), accent, duration)
+    ): SnackbarResult = toastHostState.showSnackbar(message, action, imageVector(icon), accent, duration)
 
     suspend fun showSnackbar(
         @StringRes message: Int,
         @StringRes action: Int = ResourcesCompat.ID_NULL,
         @DrawableRes icon: Int = ResourcesCompat.ID_NULL,
-        accent: Color = Color.Unspecified,
+        accent: Color = Unspecified,
         duration: SnackbarDuration = if (action == ResourcesCompat.ID_NULL) SnackbarDuration.Short else SnackbarDuration.Long,
     ): SnackbarResult = showSnackbar(
         message = resources.getText2(message),
@@ -107,13 +112,13 @@ abstract class KoinViewModel : ScopeViewModel() {
      */
     suspend fun report(message: CharSequence) = showSnackbar(
         message = buildAnnotatedString {
-            appendLine(getText(R.string.error))
+            appendLine(getText(Res.string.error))
             withStyle(SpanStyle(color = Color.Gray)) {
                 append(message)
             }
         },
-        action = getText(R.string.report),
-        icon = R.drawable.ic_sharp_oct_outline_error,
+        action = getText(Res.string.report),
+        icon = Res.drawable.ic_sharp_oct_outline_error,
         accent = Color.OrientRed,
         duration = SnackbarDuration.Indefinite
     )
@@ -141,7 +146,7 @@ abstract class KoinViewModel : ScopeViewModel() {
             catch (e: Exception) {
                 // Handle any exceptions that occurred during the coroutine execution.
                 // Display an error message to the user, providing context and error details.
-                val report = report(e.message ?: getText(R.string.msg_unknown_error))
+                val report = report(e.message ?: getText(Res.string.msg_unknown_error))
                 if (report == SnackbarResult.ActionPerformed)
                     analytics.record(e)
             }

@@ -56,14 +56,9 @@
             android:exported="false"
             tools:node="merge">
 
-            <!-- Firebase Analytics initializer -->
+            <!-- App initializer -->
             <meta-data
-                android:name="com.zs.gallery.common.impl.AnalyticsInitializer"
-                android:value="androidx.startup" />
-
-            <!-- Koin dependency injection initializer -->
-            <meta-data
-                android:name="com.zs.gallery.common.impl.KoinInitializer"
+                android:name="com.zs.gallery.common.impl.AppInitializer"
                 android:value="androidx.startup" />
 
             <!-- Coil image loader initializer -->

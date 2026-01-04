@@ -19,7 +19,7 @@
  *
  */
 
-package com.zs.common.utils
+package com.zs.common.util
 
 import android.content.Context
 import android.content.pm.PackageManager

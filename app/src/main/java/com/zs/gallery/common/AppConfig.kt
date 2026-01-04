@@ -19,13 +19,25 @@
  *
  */
 
-package com.zs.gallery.settings
+package com.zs.gallery.common
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.zs.gallery.common.Route
+import android.os.Build
 
-@Composable
-fun Settings(viewState: SettingsViewState) {
 
+object AppConfig {
+    @JvmField var isBackgroundBlurEnabled: Boolean = Res.manifest.isAtLeast(Build.VERSION_CODES.S)
+    @JvmField var isTrashCanEnabled: Boolean = true
+    @JvmField var fontScale: Float = Float.NaN
+    @JvmField var gridItemSizeMultiplier: Float = 1.0f
+    @JvmField var isFileGroupingEnabled: Boolean = true
+    @JvmField var lockTimeoutMinutes: Int = Int.MIN_VALUE
+    @JvmField var isLiveGalleryEnabled: Boolean = false
+    @JvmField var isAppSecureModeEnabled: Boolean = false
+
+
+    private fun encode(): String {
+        return ""
+    }
+
+    fun restore(value: String?){}
 }

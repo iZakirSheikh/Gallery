@@ -1,7 +1,7 @@
 /*
- * Copyright (c)  2025 Zakir Sheikh
+ * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 26 of Dec 2025
+ * Created by sheik on 4 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 26 of Dec 2025
+ * Last Modified by sheik on 4 of Jan 2026
+ *
  */
 
 package com.zs.gallery.common
@@ -48,34 +49,20 @@ import kotlin.coroutines.CoroutineContext
  * Defines the strategies for extracting a source color accent
  * to construct the application theme.
  */
-enum class ColorPalette { MANUAL, DEFAULT, WALLPAPER }
+enum class ThemeAccentPolicy { CUSTOM, DEFAULT, WALLPAPER }
 
 /**
- * Represents the available options for applying dark theme
- * behavior within the application.
+ * Represents the available options for applying dark theme behavior within the application.
  */
-enum class NightMode { YES, NO, FOLLOW_SYSTEM }
+enum class NightMode { ENABLED, DISABLED, FOLLOW_SYSTEM }
 
-private const val ELLIPSIS_NORMAL = "\u2026"; // HORIZONTAL ELLIPSIS (…)
+/** A short-hand for [Navigator] */
+typealias NavController = Navigator<Route>
 
-/**
- * Ellipsizes this CharSequence, adding a horizontal ellipsis (…) if it is longer than [after] characters.
- *
- * @param after The maximum length of the CharSequence before it is ellipsized.
- * @return The ellipsized CharSequence.
- */
-fun CharSequence.ellipsize(after: Int): CharSequence =
-    if (this.length > after) this.substring(0, after) + ELLIPSIS_NORMAL else this
 
 private fun noLocalProvidedFor(name: String): Nothing {
     error("CompositionLocal $name not present")
 }
-
-/** Provides a [Navigator] that can be accessed within a Compose hierarchy. */
-val LocalNavigator =
-    staticCompositionLocalOf<Navigator<Route>> {
-        noLocalProvidedFor("LocalNavigator")
-    }
 
 /**
  * Provides a [SystemFacade] for child views within a Compose hierarchy.
@@ -90,11 +77,17 @@ val LocalSystemFacade = staticCompositionLocalOf<SystemFacade> {
     noLocalProvidedFor("LocalSystemFacade")
 }
 
+
+/** Provides a [NavController] that can be accessed within a Compose hierarchy. */
+val LocalNavController =
+    staticCompositionLocalOf<NavController> {
+        noLocalProvidedFor("LocalNavigator")
+    }
+
 private class ProduceStateScopeImpl<T>(
     state: MutableState<T>,
     override val coroutineContext: CoroutineContext,
 ) : ProduceStateScope<T>, MutableState<T> by state {
-
     override suspend fun awaitDispose(onDispose: () -> Unit): Nothing {
         try {
             suspendCancellableCoroutine<Nothing> {}
@@ -174,4 +167,4 @@ fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
 }
 
 @Composable
-inline fun imageVectorOf(@DrawableRes id: Int) = ImageVector.vectorResource(id)
+inline fun vectorResource(@DrawableRes id: Int) = ImageVector.vectorResource(id)

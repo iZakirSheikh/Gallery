@@ -1,7 +1,7 @@
 /*
- * Copyright (c)  2025 Zakir Sheikh
+ * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 23 of Dec 2025
+ * Created by sheik on 2 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 23 of Dec 2025
+ * Last Modified by sheik on 2 of Jan 2026
+ *
  */
 
-package com.zs.common.db
+package com.zs.common.util
 
 
 import android.annotation.SuppressLint

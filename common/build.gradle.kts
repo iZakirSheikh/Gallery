@@ -30,7 +30,7 @@ kotlin {
 
         // Add experimental/advanced compiler flags
         freeCompilerArgs.addAll(
- //           "-Xexplicit-backing-fields", //  Explicit backing fields
+            //           "-Xexplicit-backing-fields", //  Explicit backing fields
             "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
             "-Xwhen-guards",                 // Enable experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
@@ -76,7 +76,6 @@ android {
         buildConfigField("FLAVOR_PLUS", "_plus")
         buildConfigField("FLAVOR_PREMIUM", "_premium")
     }
-
     // -------------------------------------------------------------------------
     // PRODUCT FLAVORS
     // -------------------------------------------------------------------------
@@ -134,8 +133,6 @@ android {
             java.srcDirs("src/shared/billing/actual/java")
         }
     }
-
-
     // BUILD TYPES
     buildTypes {
         release {
@@ -147,7 +144,6 @@ android {
         }
     }
 }
-
 // ============================================================================
 // DEPENDENCIES
 // ============================================================================
@@ -159,16 +155,12 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.coil.core)
     api(libs.toolkit.preferences)
+    implementation(libs.room.paging)
+    implementation(libs.androidx.paging.runtime)
     // Plus only
-    "plusImplementation"(libs.google.billing.ktx)
-    "plusImplementation"(libs.play.app.update.ktx)
-    "plusImplementation"(libs.play.app.review.ktx)
+    "plusImplementation"(libs.bundles.play.services)
     // Standard only
-    "standardImplementation"(libs.google.billing.ktx)
-    "standardImplementation"(libs.play.app.update.ktx)
-    "standardImplementation"(libs.play.app.review.ktx)
-    "standardImplementation"(libs.firebase.analytics.ktx)
-    "standardImplementation"(libs.firebase.crashlytics.ktx)
-    "standardImplementation"(libs.unity.ads.mediation)
-    "standardImplementation"(libs.unity.ads.adquality)
+    "standardImplementation"(libs.bundles.play.services)
+    "standardImplementation"(libs.bundles.analytics)
+    "standardImplementation"(libs.bundles.ads)
 }

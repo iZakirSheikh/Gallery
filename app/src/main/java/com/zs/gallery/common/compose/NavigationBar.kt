@@ -47,9 +47,9 @@ import com.zs.compose.theme.appbar.NavigationItemDefaults
 import com.zs.compose.theme.appbar.SideBar
 import com.zs.compose.theme.appbar.SideNavigationItem
 import com.zs.compose.theme.text.Label
-import com.zs.gallery.common.imageVectorOf
 import com.zs.gallery.common.shapes.EndConcaveShape
 import com.zs.gallery.common.shapes.TopConcaveShape
+import com.zs.gallery.common.vectorResource
 
 enum class NavigationType { BOTTOM_NAV, NAV_RAIL, NAV_DRAWER }
 
@@ -136,7 +136,7 @@ fun NavigationItem(
     NavigationType.BOTTOM_NAV -> BottomNavigationItem(
         selected = checked,
         onClick = onClick,
-        icon = { Icon(imageVectorOf(icon), label.toString()) },
+        icon = { Icon(vectorResource(icon), label.toString()) },
         label = { Label(label) },
         modifier = modifier,
         colors = colors,
@@ -147,7 +147,7 @@ fun NavigationItem(
     NavigationType.NAV_RAIL -> SideNavigationItem(
         selected = checked,
         onClick = onClick,
-        icon = { Icon(imageVectorOf(icon), label.toString()) },
+        icon = { Icon(vectorResource(icon), label.toString()) },
         label = { Label(label) },
         modifier = modifier,
         colors = colors,

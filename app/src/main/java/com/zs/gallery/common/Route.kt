@@ -1,7 +1,6 @@
 package com.zs.gallery.common
 
 import android.net.Uri
-import com.zs.gallery.common.Route.Files
 
 /**
  * Defines all navigation routes within the app.
@@ -9,7 +8,7 @@ import com.zs.gallery.common.Route.Files
  * Using a sealed interface ensures type safety and exhaustive handling
  * when navigating between static and dynamic destinations.
  *
- * Static routes: [Settings], [AboutUs], [ScreenLock], [Onboarding], [Folders], [Albums]
+ * Static routes: [Settings], [AboutUs], [Lockscreen], [AppIntro], [Folders], [Albums]
  *
  * Dynamic routes: [Files], [Viewer]
  */
@@ -28,8 +27,8 @@ sealed interface Route {
     // Static destinations (no parameters required)
     object Settings : Route
     object AboutUs : Route
-    object ScreenLock : Route
-    object Onboarding : Route
+    object Lockscreen : Route
+    object AppIntro : Route
     object Folders : Route
     object Albums : Route
     object Timeline: Route

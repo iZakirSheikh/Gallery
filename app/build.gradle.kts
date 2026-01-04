@@ -26,6 +26,7 @@ kotlin {
         // Add experimental/advanced compiler flags
         freeCompilerArgs.addAll(
          //   "-XXLanguage:+ExplicitBackingFields", //  Explicit backing fields
+            "-XXLanguage:+NestedTypeAliases",
             "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
             "-Xwhen-guards",                 // Enable experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
@@ -80,9 +81,7 @@ android {
     flavorDimensions += "edition"
     productFlavors {
         // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
-        create("standard") {
-            dimension = "edition"
-        }
+        create("standard") { dimension = "edition" }
 
         // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
         create("community") {
@@ -169,6 +168,7 @@ dependencies {
     implementation(libs.chrisbanes.haze)
     implementation(libs.lottie.compose)
     implementation(libs.bundles.coil)
+    implementation(libs.androidx.paging.compose)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

@@ -46,11 +46,13 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import com.zs.common.analytics.Analytics
-import com.zs.common.utils.checkSelfPermissions
-import com.zs.common.utils.showPlatformToast
+import com.zs.common.util.checkSelfPermissions
+import com.zs.common.util.showPlatformToast
 import com.zs.compose.foundation.getText2
 import com.zs.compose.theme.snackbar.SnackbarDuration
+import com.zs.gallery.common.AppConfig
 import com.zs.gallery.common.Navigator
+import com.zs.gallery.common.Res
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SystemFacade
 import com.zs.preferences.Preferences
@@ -59,7 +61,6 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
 import com.zs.compose.theme.snackbar.SnackbarHostState as SnackbarController
-import com.zs.gallery.common.Gallery as G
 
 class MainActivity : ComponentActivity(), SystemFacade {
     // TAG - for debugging purpose only
@@ -103,8 +104,8 @@ class MainActivity : ComponentActivity(), SystemFacade {
             }
 
             // Check the app lock timeout setting.
-            return when (val timeoutValue = G.config.lockTimeoutMinutes) {
-                -1 -> false // App lock is disabled (timeout value of -1)
+            return when (val timeoutValue = AppConfig.lockTimeoutMinutes) {
+                Int.MIN_VALUE -> false // App lock is disabled (timeout value of -1)
                 0 -> true // Immediate authentication required (timeout value of 0)
                 else -> {
                     // Calculate the time elapsed since the app went to background.
@@ -145,7 +146,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
             if (current is Route.Viewer && current.isIntentViewer) {
                 navController?.popBackStack()
             }
-            navController?.navigate(Route.ScreenLock)
+            navController?.navigate(Route.Lockscreen)
         }
     }
 
@@ -170,33 +171,31 @@ class MainActivity : ComponentActivity(), SystemFacade {
         Log.d(TAG, "preparing to show authentication dialog.")
         // Build the BiometricPrompt
         val prompt = BiometricPrompt.Builder(this).apply {
-            setTitle(getString(R.string.lock_scr_title))
+            setTitle(getString(Res.string.lock_scr_title))
             if (subtitle != null) setSubtitle(subtitle)
             if (desc != null) setDescription(desc)
             // Set allowed authenticators for Android R and above
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-                setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) setAllowedAuthenticators(
+                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+            )
             // Allow device credential fallback for Android Q
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q)
-                setDeviceCredentialAllowed(true)
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) setDeviceCredentialAllowed(true)
             // On Android P and below, BiometricPrompt crashes if a negative button is not set.
             // We provide a "Dismiss" button to avoid the crash, but this does not offer alternative
             // authentication (like PIN).
             // Future versions might include support for alternative authentication on older Android versions
             // if a compatibility library or API becomes available.
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
-                setNegativeButton(getString(R.string.dismiss), mainExecutor, { _, _ -> })
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-                setConfirmationRequired(false)
-            /*if (Build.VERSION.SDK_INT >= 35) {
-                setLogoRes(R.drawable.ic_app)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) setNegativeButton(
+                getString(Res.string.dismiss),
+                mainExecutor,
+                { _, _ -> })
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) setConfirmationRequired(false)/*if (Build.VERSION.SDK_INT >= 35) {
+                setLogoRes(Res.drawable.ic_app)
             }*/
         }.build()
         // Start the authentication process
         prompt.authenticate(
-            CancellationSignal(),
-            mainExecutor,
-            object : BiometricPrompt.AuthenticationCallback() {
+            CancellationSignal(), mainExecutor, object : BiometricPrompt.AuthenticationCallback() {
                 // Implement callback methods for authentication events (success, error, etc.)
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
                     onAuthenticated()
@@ -204,26 +203,24 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    showToast(getString(R.string.msg_auth_failed))
+                    showToast(getString(Res.string.msg_auth_failed))
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                     super.onAuthenticationError(errorCode, errString)
-                    showToast(getString(R.string.msg_auth_error_s, errString))
+                    showToast(getString(Res.string.msg_auth_error_s, errString))
                 }
-            }
-        )
+            })
     }
 
     @SuppressLint("NewApi")
     override fun unlock() = authenticate() {
         val navController = navController ?: return@authenticate
         // if it is initial app_lock update timeAppWentToBackground to 0
-        if (timeAppWentToBackground == -1L)
-            timeAppWentToBackground = 0L
+        if (timeAppWentToBackground == -1L) timeAppWentToBackground = 0L
         // Check if the start destination needs to be updated
         // Update the start destination to RouteTimeline
-        if (navController.active == Route.ScreenLock) {
+        if (navController.active == Route.Lockscreen) {
             Log.d(TAG, "unlock: updating start destination")
             navController.rebase(Route.Timeline)
             // return from here;
@@ -243,10 +240,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
     ) {
         lifecycleScope.launch {
             controller.showSnackbar(
-                message = message,
-                icon = icon,
-                accent = accent,
-                duration = duration
+                message = message, icon = icon, accent = accent, duration = duration
             )
         }
     }
@@ -257,14 +251,10 @@ class MainActivity : ComponentActivity(), SystemFacade {
         accent: Color,
         duration: SnackbarDuration,
     ) = showSnackbar(
-        resources.getText2(id = message),
-        icon = icon,
-        accent = accent,
-        duration = duration
+        resources.getText2(id = message), icon = icon, accent = accent, duration = duration
     )
 
-    override fun launch(intent: Intent, options: Bundle?) =
-        startActivity(intent, options)
+    override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
 
     override fun initiateUpdateFlow(report: Boolean) {
         TODO("Not yet implemented")
@@ -306,8 +296,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if (intent.action != Intent.ACTION_VIEW)
-            return
+        if (intent.action != Intent.ACTION_VIEW) return
         lifecycleScope.launch {
             // we delay it here because on resume loads lockscreen.
             // we want this to overlay over lockscreen; hence this.
@@ -317,11 +306,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
         }
     }
 
-    override fun configSystemBars(
-        isLightAppearance: Boolean,
-        visible: Boolean,
-        isBgTransparent: Boolean
-    ) {
+    override fun configSystemBars(isLightAppearance: Boolean, visible: Boolean, isBgTransparent: Boolean) {
         // Obtain a controller to manage system bar visibility and appearance
         val controller = WindowCompat.getInsetsController(window, window.decorView)
 
@@ -359,14 +344,13 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
         // Determine if this is a fresh launch (no saved state from rotation or process recreation)
         val isFreshLaunch = savedInstanceState == null
-
         if (isFreshLaunch) {
             // Show splash screen only on a fresh launch
             installSplashScreen()
 
             // Apply secure mode if user has enabled it in settings.
             // FLAG_SECURE prevents screenshots and screen recording of the app’s UI.
-            if (G.config.isAppSecureModeEnabled) {
+            if (AppConfig.isAppSecureModeEnabled) {
                 window.setFlags(LayoutParams.FLAG_SECURE, LayoutParams.FLAG_SECURE)
             }
 
@@ -378,11 +362,11 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
                 // Compare stored version code with the current one.
                 // If different, update preferences and notify user with release notes.
-                if (info.longVersionCode != preferences[G.keys.app_version_code]) {
-                    preferences[G.keys.app_version_code] = info.longVersionCode
+                if (info.longVersionCode != preferences[Res.key.app_version_code]) {
+                    preferences[Res.key.app_version_code] = info.longVersionCode
                     // Show release notes snackbar to highlight new version changes.
                     showSnackbar(
-                        message = R.string.release_notes,
+                        message = Res.string.release_notes,
                         accent = Color.Unspecified,
                         icon = null,
                         duration = SnackbarDuration.Long
@@ -409,14 +393,19 @@ class MainActivity : ComponentActivity(), SystemFacade {
             // - Authentication required → ScreenLock
             // - Default case → Files browser
             navController = when {
-                intent.action == Intent.ACTION_VIEW -> Navigator(Route.Viewer(intent.data!!, intent.type))
-                !checkSelfPermissions(G.REQUIRED_PERMISSIONS) -> Navigator(Route.Onboarding)
-                isAuthenticationRequired -> Navigator(Route.ScreenLock)
+                intent.action == Intent.ACTION_VIEW -> Navigator(
+                    Route.Viewer(
+                        intent.data!!, intent.type
+                    )
+                )
+
+                !checkSelfPermissions(Res.manifest.permissions) -> Navigator(Route.AppIntro)
+                isAuthenticationRequired -> Navigator(Route.Lockscreen)
                 else -> Navigator(Route.Timeline)
             }
         }
 
         // Set the main UI content with navigator and controller
-        setContent { MainContent(navController!!, controller) }
+        setContent { Gallery(navController!!, controller) }
     }
 }

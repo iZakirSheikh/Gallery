@@ -84,7 +84,7 @@ class Navigator<T>(start: T) {
     fun navigateUp(): Boolean {
         // Root must never be removed.
         if (_backstack.size <= 1) return false
-        _backstack.removeLast()
+        _backstack.removeLastOrNull()
         return true
     }
 
