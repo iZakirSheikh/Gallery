@@ -21,7 +21,6 @@
 
 package com.zs.common.db
 
-
 import android.content.Context
 import android.media.ExifInterface
 import android.os.Build
@@ -32,13 +31,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.zs.common.db.album.MediaProvider
 import com.zs.common.db.album.MediaFile
 import com.zs.common.db.album.MediaFile.Timeline
+import com.zs.common.db.album.MediaProvider
 import com.zs.common.util.query2
-import org.intellij.lang.annotations.Language
 import java.util.concurrent.TimeUnit
-import android.provider.MediaStore.Files.FileColumns as FC
+import android.provider.MediaStore.Files.FileColumns as Column
 import androidx.work.Constraints.Builder as Constraints
 import androidx.work.WorkerParameters as Params
 
@@ -57,37 +55,41 @@ internal class MediaSyncWorker private constructor(
     params: Params
 ) : CoroutineWorker(context, params) {
 
-    private val TAG = "SyncWorker"
+    private val TAG = "MediaSyncWorker"
 
     /** Base URI for querying all files in external MediaStore storage. */
     private val URI = MediaStore.Files.getContentUri("external")
 
-    // Core projection: the set of columns we always want to read from MediaStore.
-    // These cover identity, metadata, and timestamps. Extra columns (DATE_EXPIRES, IS_TRASHED)
-    // are conditionally added later depending on API level.
-    private val _PROJECTION
-        get() = arrayOf(
-            FC.DATA, // 0
-            FC.DISPLAY_NAME, // 1
-            FC.MIME_TYPE, // 2
-            FC.SIZE, // 3
-            FC.DURATION, // 4
-            FC.BITRATE, // 5
-            FC.YEAR, // 6
-            FC.WIDTH, // 7
-            FC.HEIGHT, // 8
-            FC.ORIENTATION, // 9
-            FC.DATE_ADDED, // 10
-            FC.DATE_MODIFIED, // 11
-            FC.DATE_TAKEN, // 12
-            FC._ID // 14
-        )
+    // Projection of media columns for queries
+    private val MEDIA_QUERY_PROJECTION = buildList {
+        // 🔑 Identity / path
+        this += Column._ID           // 0: unique row ID
+        this += Column.DATA          // 1: absolute file path
+        this += Column.DISPLAY_NAME  // 2: human-readable file name
+        this += Column.MIME_TYPE     // 3: content type (e.g., video/mp4)
 
-    /** Projection adjusted for API level (adds DATE_EXPIRES, IS_TRASHED on Android 11+). */
-    private val PROJECTION = when {
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.R -> _PROJECTION
-        else -> _PROJECTION + arrayOf(FC.DATE_EXPIRES, FC.IS_TRASHED)
-    }
+        // 📂 File attributes
+        this += Column.SIZE          // 4: file size in bytes
+
+        // 🎬 Media-specific properties
+        this += Column.DURATION      // 5: duration in ms (audio/video)
+        this += Column.BITRATE       // 6: encoding bitrate
+        this += Column.YEAR          // 7: year tag (if available)
+        this += Column.WIDTH         // 8: pixel width
+        this += Column.HEIGHT        // 9: pixel height
+        this += Column.ORIENTATION   // 10: rotation/orientation metadata
+
+        // ⏱ Temporal metadata
+        this += Column.DATE_ADDED    // 11: when added to MediaStore
+        this += Column.DATE_MODIFIED // 12: last modified timestamp
+        this += Column.DATE_TAKEN    // 13: original capture timestamp
+
+        // 🗑 Lifecycle (API 30+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            this += Column.DATE_EXPIRES // 14: expiry date (e.g., auto-deletion)
+            this += Column.IS_TRASHED   // 15: whether item is in trash
+        }
+    }.toTypedArray()
 
     /**
      * Schedule a one-time sync job triggered by MediaStore content changes.
@@ -116,7 +118,6 @@ internal class MediaSyncWorker private constructor(
         instance.enqueueUniqueWork("sync_schedule", ExistingWorkPolicy.APPEND_OR_REPLACE, request)
     }
 
-
     /**
      * Maps a native orientation value (video rotation degrees or EXIF orientation)
      * to the app-specific [Library] orientation constants.
@@ -143,74 +144,105 @@ internal class MediaSyncWorker private constructor(
         else -> MediaProvider.ORIENTATION_NORMAL
     }
 
-    // ─────────────────────────────────────────────
     // Synchronization workflow
-    // ─────────────────────────────────────────────
     override suspend fun doWork(): Result {
         // Schedule next cycle immediately to keep sync continuous
         schedule(context)
-
         val db = AppDb.getInstance()                // database wrapper
         val resolver = context.contentResolver      // MediaStore access
         val dao = db.mediaProvider                   // DAO for media table
-        // --- Step 1: Detect missing files ---
-        // TODO: Replace DATA-based matching with store_id for better stability.
-        // Query MediaStore for all current file paths (DATA column only).
-        // Delete any DB entries not present in MediaStore.
-        val count = resolver.query2(
+        // --- Step 1: Detect and clean up missing files ---
+        // Goal: Ensure local DB stays in sync with MediaStore.
+        // Strategy:
+        //   1. Query MediaStore for all current file IDs.
+        //   2. Compare against DB entries.
+        //   3. Delete any DB rows whose IDs are no longer present in MediaStore.
+        resolver.query2(
             URI,
-            projection = arrayOf(@Language("RoomSql") "GROUP_CONCAT(${FC._ID}, ''',''')"),
+            projection = arrayOf(Column._ID), // Only need the unique IDs for comparison
             use = { c ->
-                c.moveToFirst()
-                val ids = "'${c.getString(0)}'"
-                dao.deleteNotIn(ids) // bulk delete rows not in MediaStore
+                // Build a comma-separated list of IDs (e.g., "1,2,3").
+                // Note: On Android 10+ you can use GROUP_CONCAT directly in SQL
+                //       for faster aggregation instead of manual string building.
+                val before = dao.count() // Snapshot count before deletion
+
+                val ids = buildString {
+                    while (c.moveToNext()) {
+                        append(c.getLong(0))
+                        if (!c.isLast)
+                            append(',')
+                    }
+                }
+
+                // Delete any DB entries whose storeId is NOT in the current MediaStore set.
+                dao.deleteByStoreIdNotIn(ids)
+
+                // Log how many rows were removed for debugging/monitoring.
+                Log.d(TAG, "Deleted: ${before - dao.count()}")
             }
         )
-        Log.d(TAG, "Deleted = $count")
         // --- Step 2: Compute modification threshold ---
         // Convert lastModified from millis → seconds and subtract 2s.
         // This offset ensures very recent changes are not missed.
         val lastModified = (dao.lastModified() / 1000 - 2)
         // --- Step 3: Fetch modified/new media ---
+        // Goal: Detect new or updated media files since the last sync.
+        // Strategy:
+        //   1. Query MediaStore for items (images/videos) with DATE_MODIFIED >= lastModified.
+        //   2. For each result, construct a MediaFile object.
+        //   3. Upsert into DB: insert if new, update if existing.
+        //   4. Wrap in a transaction for atomicity and consistency.
         resolver.query2(
             URI,
-            selection = @Language("SQL") "${FC.MEDIA_TYPE} IN (${FC.MEDIA_TYPE_IMAGE}, ${FC.MEDIA_TYPE_VIDEO}) AND ${FC.DATE_MODIFIED} >= $lastModified",
-            projection = PROJECTION,
+            // language = sql
+            selection = "${Column.MEDIA_TYPE} IN (${Column.MEDIA_TYPE_IMAGE}, ${Column.MEDIA_TYPE_VIDEO}) AND ${Column.DATE_MODIFIED} >= $lastModified",
+            projection = MEDIA_QUERY_PROJECTION,
             use = { cursor ->
                 Log.d(TAG, "Changed: ${cursor.count}")
                 val transaction = suspend {
-                    // Iterate through each row and upsert into DB.
                     val isAtLeast11 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+
+
+                    // Iterate through all changed rows.
                     while (cursor.moveToNext()) {
-                        val storeID = cursor.getLong(14)
-                        val existing = dao.getMediaFile(storeID) // get existing or null mediaFile.
-                        // Construct new MediaFile object (reuse DB id if present).
-                        val mimeType = cursor.getString(2)
+                        // 🔑 Step A: Identify the store ID and check if entry already exists in DB.
+                        val storeID = cursor.getLong(0)
+                        val existing = dao.getMediaFile(storeID) // null if not present
+                        val mimeType = cursor.getString(3)
                         val newFile = MediaFile(
                             id = existing?.id ?: 0, // reuse DB id if present
                             storeID = storeID,
-                            source = cursor.getString(0),
-                            name = cursor.getString(1),
+                            source = cursor.getString(1),   // file path
+                            name = cursor.getString(2),     // display name
                             mimeType = mimeType,
-                            size = cursor.getLong(3),
+                            size = cursor.getLong(4),
                             bitrate = cursor.getInt(5),
-                            year = cursor.getInt(6),
-                            dateAdded = cursor.getLong(10) * 1000,    // convert seconds → millis
-                            dateModified = cursor.getLong(11) * 1000, // convert seconds → millis
-                            dateTaken = cursor.getLong(12) * 1000,    // convert seconds → millis
-                            dateExpires = if (isAtLeast11) cursor.getLong(13) * 1000 else Long.MIN_VALUE,
+                            year = cursor.getInt(7),
+
+                            // ⏱ Convert timestamps from seconds → millis
+                            dateAdded = cursor.getLong(11) * 1000,
+                            dateModified = cursor.getLong(12) * 1000,
+                            dateTaken = cursor.getLong(13) * 1000,
+                            dateExpires = if (isAtLeast11) cursor.getLong(14) * 1000 else Long.MIN_VALUE,
+
+                            // 📝 Optional metadata (currently null / placeholder)
                             description = null,
                             location = MediaFile.Location(Float.NaN, Float.NaN),
-                            resolution = MediaFile.Resolution(cursor.getInt(7), cursor.getInt(8)),
+
+                            // 📐 Resolution info
+                            resolution = MediaFile.Resolution(cursor.getInt(8), cursor.getInt(9)),
+
+                            // 🎞 Timeline: preserve playback position if available
                             timeline = let {
                                 val position = existing?.timeline?.position ?: Int.MIN_VALUE
-                                Timeline(position, cursor.getInt(4) / 1000/*s*/)
+                                Timeline(position, cursor.getInt(5) / 1000 /* seconds */)
                             },
+
+                            // ➕ Extras: preserve existing extras, update trash/orientation flags
                             extras = let {
-                                val extras =
-                                    existing?.extras ?: MediaFile.Extras(MediaProvider.DEFAULT_EXTRAS)
+                                val extras = existing?.extras ?: MediaFile.Extras(MediaProvider.DEFAULT_EXTRAS)
                                 extras.copy(
-                                    isTrashed = if (isAtLeast11) cursor.getInt(14) != 0 else false,
+                                    isTrashed = if (isAtLeast11) cursor.getInt(15) != 0 else false,
                                     orientation = mapNativeToAppOrientation(
                                         cursor.getInt(9),
                                         mimeType.startsWith("video")
@@ -219,13 +251,14 @@ internal class MediaSyncWorker private constructor(
                             }
                         )
                         // TODO: Preserve custom tags during updates.
-                        // A partial-update or SQL-level upsert strategy could significantly
-                        // reduce overhead and improve performance.
-                        Log.d(TAG, "${if (existing == null) "New" else "Update"}: {${newFile.source}}")
-                        // Upsert: insert if new, update if existing.
+                        // Consider partial-update or SQL-level UPSERT to reduce overhead.
+                        Log.d(TAG, "${if (existing == null) "New" else "Update"}: {${newFile}}")
+                        // 🗄️ Step C: Upsert into DB (insert if new, update if existing).
                         if (existing == null) dao.insert(newFile) else dao.update(newFile)
                     }
                 }
+
+                // 🔒 Step D: Wrap in transaction for atomicity.
                 db.withTransaction(transaction)
             }
         )

@@ -21,8 +21,17 @@
 
 package com.zs.gallery.common.impl
 
+import androidx.lifecycle.viewModelScope
 import com.zs.common.db.album.MediaProvider
+import com.zs.common.db.album.MediaProvider_Impl
 import com.zs.gallery.common.Route
 import com.zs.gallery.files.FilesViewState
+import kotlinx.coroutines.launch
 
-class FilesViewModel(val provider: MediaProvider, key: Route.Files? = null) : KoinViewModel(), FilesViewState
+class FilesViewModel(val provider: MediaProvider, key: Route.Files? = null) : KoinViewModel(), FilesViewState {
+
+    init {
+        viewModelScope.launch { MediaProvider.runImmediateSync(context) }
+    }
+
+}

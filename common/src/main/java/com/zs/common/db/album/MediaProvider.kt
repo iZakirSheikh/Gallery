@@ -22,13 +22,13 @@
 package com.zs.common.db.album
 
 import android.content.Context
+import android.database.Cursor
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.RoomRawQuery
 import androidx.room.Update
-import androidx.sqlite.db.SimpleSQLiteQuery
-import androidx.sqlite.db.SupportSQLiteQuery
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
@@ -73,7 +73,7 @@ abstract class MediaProvider {
          * Typically invoked at app startup to ensure the database is initialized
          * with the latest MediaStore state.
          */
-        fun runImmediateSync(context: Context){
+        fun runImmediateSync(context: Context) {
             // run on app start up for first time
             val workManager = WorkManager.getInstance(context.applicationContext)
             val work = OneTimeWorkRequestBuilder<MediaSyncWorker>()
@@ -82,9 +82,6 @@ abstract class MediaProvider {
             workManager.enqueueUniqueWork("immediate_sync", ExistingWorkPolicy.KEEP, work)
         }
     }
-
-    @RawQuery
-    internal abstract suspend fun _deleteAllNotIn(query: SupportSQLiteQuery): Int
 
     /* For maintain media database.*/
     @Insert
@@ -99,10 +96,28 @@ abstract class MediaProvider {
     @Query(" SELECT COALESCE(MAX(date_modified), 0) FROM tbl_media ORDER BY date_modified DESC LIMIT 1")
     internal abstract suspend fun lastModified(): Long
 
-    /**
-     * deletes all files not in [ids] from [MediaFile]
-     */
-    internal suspend fun deleteNotIn(ids: String): Int {
-        return _deleteAllNotIn(SimpleSQLiteQuery("DELETE FROM tbl_media WHERE store_id NOT IN ($ids)"))
+    @Query("SELECT COUNT(*) FROM tbl_media")
+    internal abstract suspend fun count(): Int
+
+    @RawQuery
+    internal abstract suspend fun rawQuery (query: RoomRawQuery): Int
+    internal suspend fun deleteByStoreIdNotIn (ids: String) {
+        // Deletes rows from tbl_media where store_id is NOT in the provided ids.
+        //
+        // Why this approach?
+        // - SQLite has a hard limit of 999 bind parameters in an IN/NOT IN clause.
+        //   If we try to pass a List<Long> with thousands of IDs (e.g., from MediaStore),
+        //   the query will exceed this limit and fail.
+        // - On modern phones, users may have 30,000+ photos. Passing all of those IDs
+        //   directly into a query would create a massive SQL statement, which is both slow
+        //   and error-prone.
+        // - By interpolating a prebuilt comma-separated string of IDs, we avoid Room’s
+        //   parameter expansion limit. This lets us handle larger sets of IDs.
+        //
+        // ⚠️ Caveats:
+        // - The ids string must be properly formatted (e.g., (1,2,3)).
+        // - This method does not return the number of rows deleted. If you need that,
+        //   prefer a count() fun.
+        rawQuery(RoomRawQuery("DELETE FROM tbl_media WHERE store_id NOT IN ($ids)"))
     }
 }

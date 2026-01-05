@@ -24,8 +24,10 @@ package com.zs.gallery.common.compose
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -101,7 +103,11 @@ internal inline fun NavigationBar(
             shape = BOTTOM_NAV_SHAPE,
             windowInsets = AppBarDefaults.bottomAppBarWindowInsets,
             modifier = modifier,
-            content = { content(type) }
+            content = {
+                Row(modifier = Modifier.offset(y = 8.dp)) {
+                    content(type)
+                }
+            }
         )
 
         NavigationType.NAV_RAIL if (floating) -> TODO("Not Implemented yet!")

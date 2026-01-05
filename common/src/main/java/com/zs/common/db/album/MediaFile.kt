@@ -231,6 +231,10 @@ class MediaFile(
 
             return Extras(value)
         }
+
+        override fun toString(): String {
+            return "Extras(isPrivate=$isPrivate, isArchived=$isArchived, isTrashed=$isTrashed, isLiked=$isLiked, orientation=$orientation)"
+        }
     }
 
 
