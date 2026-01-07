@@ -127,7 +127,7 @@ fun Snapshot(
                         imageVector = vectorResource(Res.drawable.play_circle_outline),
                         contentDescription = null,
                         modifier = Modifier
-                            .padding(Res.dimens.medium)
+                            .padding(Res.dimen.medium)
                     )
                 }
             )

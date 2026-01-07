@@ -92,7 +92,7 @@ private val ColorSaver = object : IntSaver<Color> {
  * @see mainfest
  * @see shape
  * @see action
- * @see dimens
+ * @see dimen
  */
 object Res {
 
@@ -190,11 +190,11 @@ object Res {
     }
 
     /**
-     * Standardized dimens values for Compose layouts.
+     * Standardized dimen values for Compose layouts.
      *
      * Provides consistent [Dp] values and [Arrangement] gaps for UI components.
      */
-    object dimens {
+    object dimen {
         val x_small: Dp = 4.dp
         val small: Dp = 8.dp
         val medium: Dp = 12.dp
