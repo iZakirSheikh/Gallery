@@ -53,7 +53,7 @@ import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.gallery.common.AppConfig
 import com.zs.gallery.common.Navigator
 import com.zs.gallery.common.Res
-import com.zs.gallery.common.Route
+import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.SystemFacade
 import com.zs.preferences.Preferences
 import kotlinx.coroutines.delay
@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
     val preferences: Preferences by inject()
     val controller: SnackbarController by inject()
-    private var navController: Navigator<Route>? = null
+    private var navController: Navigator<NavKey>? = null
     private val analytics: Analytics by inject()
 
     /**
@@ -143,10 +143,10 @@ class MainActivity : ComponentActivity(), SystemFacade {
             // since navController doesn't support adding new dest at the bottom of topMost dest;
             // remove current destination to insert lock screen below
             val current = navController?.active
-            if (current is Route.Viewer && current.isIntentViewer) {
+            if (current is NavKey.Viewer && current.isIntentViewer) {
                 navController?.popBackStack()
             }
-            navController?.navigate(Route.Lockscreen)
+            navController?.navigate(NavKey.Lockscreen)
         }
     }
 
@@ -220,9 +220,9 @@ class MainActivity : ComponentActivity(), SystemFacade {
         if (timeAppWentToBackground == -1L) timeAppWentToBackground = 0L
         // Check if the start destination needs to be updated
         // Update the start destination to RouteTimeline
-        if (navController.active == Route.Lockscreen) {
+        if (navController.active == NavKey.Lockscreen) {
             Log.d(TAG, "unlock: updating start destination")
-            navController.rebase(Route.Timeline)
+            navController.rebase(NavKey.Timeline)
             // return from here;
             return@authenticate
         }
@@ -302,7 +302,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
             // we want this to overlay over lockscreen; hence this.
 
             delay(200)
-            navController?.navigate(Route.Viewer(intent.data!!, intent.type))
+            navController?.navigate(NavKey.Viewer(intent.data!!, intent.type))
         }
     }
 
@@ -394,14 +394,14 @@ class MainActivity : ComponentActivity(), SystemFacade {
             // - Default case → Files browser
             navController = when {
                 intent.action == Intent.ACTION_VIEW -> Navigator(
-                    Route.Viewer(
+                    NavKey.Viewer(
                         intent.data!!, intent.type
                     )
                 )
 
-                !checkSelfPermissions(Res.manifest.permissions) -> Navigator(Route.AppIntro)
-                isAuthenticationRequired -> Navigator(Route.Lockscreen)
-                else -> Navigator(Route.Timeline)
+                !checkSelfPermissions(Res.manifest.permissions) -> Navigator(NavKey.AppIntro)
+                isAuthenticationRequired -> Navigator(NavKey.Lockscreen)
+                else -> Navigator(NavKey.Timeline)
             }
         }
 

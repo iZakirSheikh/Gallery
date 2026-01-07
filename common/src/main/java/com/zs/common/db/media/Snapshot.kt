@@ -19,47 +19,40 @@
  *
  */
 
-package com.zs.common.db.album
+package com.zs.common.db.media
 
 
-import com.zs.common.db.album.MediaFile.Extras
-import com.zs.common.db.album.MediaFile.Resolution
-import com.zs.common.db.album.MediaFile.Timeline
+import com.zs.common.db.media.MediaFile.Extras
+import com.zs.common.db.media.MediaFile.Resolution
+import com.zs.common.db.media.MediaFile.Timeline
 
 /**
- * Lightweight, read-only snapshot of a media item optimized for list and grid rendering.
+ * Represents a lightweight, read-only snapshot of a media item optimized for list and grid rendering.
  *
- * This model represents a **projection**, not a full entity. It is typically backed by
+ * This model is a **projection**, not a full entity. It is typically backed by
  * a Room query that selects only the columns required for fast scrolling and preview
- * rendering. Several logical attributes are **packed into `LONG` values** and exposed
- * here via derived properties.
+ * rendering. Several logical attributes are **bit-packed into `LONG` values** and
+ * exposed through derived properties.
  *
  * @property id Stable identifier of the media item.
- * @property poster File path or URI of the thumbnail, or `null` if unavailable.
+ * @property thumbnail File path or URI of the thumbnail image.
  *
- * @property order Play order of the item **within its album**.
- * This value defines playback sequence and is independent of UI sort order.
+ * @property order Playback order of the item within its album, or `-1` if unavailable.
  *
- * @property section Timestamp used for temporal grouping (e.g. day/month headers).
- * A value of `-1` indicates that this item is not a section header.
- *
- * @property rawResolution Packed width/height stored as a single `LONG`.
- * Prefer using [resolution] for decoded access.
- *
- * @property rawTimeline Packed temporal metadata used for grouping and sorting.
- * Prefer using [timeline] for decoded access.
- *
- * @property rawExtras Packed flags and small attributes stored as a single `LONG`
- * (e.g. privacy, archive state, liked state, orientation).
+ * @property header Column value used for grouping. Non-null for the first item in a group,
+ *                  null for subsequent items.
+ * @property isImage Indicates whether this snapshot represents a still image, video, or animated file.
  *
  * @property resolution Decoded [MediaFile.Resolution] derived from [rawResolution].
  * @property timeline Decoded [MediaFile.Timeline] derived from [rawTimeline].
+ * @property extras Decoded [MediaFile.Extras] derived from [rawExtras].
  */
 class Snapshot(
     @JvmField val id: Long,
-    @JvmField val poster: String?,
+    @JvmField val thumbnail: String,
     @JvmField val order: Int,
-    @JvmField val section: Long,
+    @JvmField var header: String?,
+    @JvmField val isImage: Boolean,
     @JvmField internal val rawResolution: Long,
     @JvmField internal val rawTimeline: Long,
     @JvmField internal val rawExtras: Int,
@@ -75,11 +68,12 @@ class Snapshot(
 
         if (id != other.id) return false
         if (order != other.order) return false
-        if (section != other.section) return false
+        if (isImage != other.isImage) return false
         if (rawResolution != other.rawResolution) return false
         if (rawTimeline != other.rawTimeline) return false
         if (rawExtras != other.rawExtras) return false
-        if (poster != other.poster) return false
+        if (thumbnail != other.thumbnail) return false
+        if (header != other.header) return false
 
         return true
     }
@@ -87,15 +81,16 @@ class Snapshot(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + order
-        result = 31 * result + section.hashCode()
+        result = 31 * result + isImage.hashCode()
         result = 31 * result + rawResolution.hashCode()
         result = 31 * result + rawTimeline.hashCode()
         result = 31 * result + rawExtras
-        result = 31 * result + (poster?.hashCode() ?: 0)
+        result = 31 * result + thumbnail.hashCode()
+        result = 31 * result + (header?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "Snapshot(id=$id, poster=$poster, order=$order, section=$section, resolution=$resolution, timeline=$timeline, extras=$extras)"
+        return "Snapshot(id=$id, thumbnail='$thumbnail', order=$order, header=$header, isImage=$isImage, resolution=$resolution, timeline=$timeline, extras=$extras)"
     }
 }

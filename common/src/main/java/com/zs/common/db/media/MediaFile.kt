@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 4 of Jan 2026
+ * Created by sheik on 7 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 4 of Jan 2026
+ * Last Modified by sheik on 7 of Jan 2026
  *
  */
 
-package com.zs.common.db.album
+package com.zs.common.db.media
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -31,48 +31,49 @@ import com.zs.common.util.unpackFloat1
 import com.zs.common.util.unpackFloat2
 import com.zs.common.util.unpackInt1
 import com.zs.common.util.unpackInt2
-import com.zs.common.db.album.MediaProvider as I
+import com.zs.common.db.media.MediaProvider as MP
 
 /**
- * Room entity representing a single media file stored on local storage.
+ * Room entity representing a single media file stored in local storage.
  *
- * This table is optimized for read performance and storage efficiency.
- * Several logical attributes are **bit-packed into single `LONG` columns**
- * (e.g. extras, timeline, resolution, location) to reduce column count
- * while keeping frequently queried data indexed and cache-friendly.
+ * Designed with a focus on **read performance** and **storage efficiency**:
+ * - Frequently accessed attributes are indexed for fast lookups.
+ * - Several logical properties are **bit-packed into `LONG` columns** to minimize
+ *   schema width while remaining cache-friendly and easy to decode.
  *
- * @property id Auto-generated primary key.
- * @property data Absolute file path; uniquely identifies the media file.
- * @property name Display name of the file.
+ * @property id Auto-generated primary key for the entity.
+ * @property data Absolute file path; uniquely identifies the media file on disk.
+ * @property name Human-readable display name of the file.
  *
  * @property mimeType MIME type of the media (e.g. `image/jpeg`, `video/mp4`).
  * @property size File size in bytes.
- * @property bitrate Media bitrate (if applicable).
- * @property year Year associated with the media (captured or tagged).
+ * @property bitrate Media bitrate in bits per second (if applicable). Use `-1` if not available.
+ * @property year Year associated with the media (captured or tagged). Use `-1` if not available.
  *
- * @property thumbnail Cached thumbnail path or key.
- * @property description Optional user or system description.
+ * @property description Optional description provided by the user or system.
  *
- * @property dateAdded Timestamp (ms since epoch) when the file was added.
- * @property dateModified Timestamp (ms since epoch) when the file was last modified.
- * @property dateTaken Timestamp (ms since epoch) when the media was captured.
- * @property dateExpires Timestamp (ms since epoch) when the entry should expire.
+ * @property dateAdded Timestamp (ms since epoch) when the file was first indexed by the system.
+ * @property dateModified Timestamp (ms since epoch) when the file was last modified on disk.
+ * @property dateTaken Timestamp (ms since epoch) when the media was originally captured.
+ * @property dateExpires Timestamp (ms since epoch) when the entry should be considered expired.
  *
- * @property rawExtras Packed flags and small attributes stored in a single `LONG`
- * (e.g. privacy, archive state, orientation).
- * @property rawTimeline Packed temporal metadata used for grouping and sorting.
- * @property rawResolution Packed width/height information.
- * @property rawLocation Packed latitude/longitude coordinates.
+ * ### Packed Columns
+ * @property rawExtras Encoded flags and small attributes (privacy, archive state, orientation).
+ * @property rawTimeline Encoded temporal metadata for grouping and chronological sorting.
+ * @property rawResolution Encoded width/height resolution values.
+ * @property rawLocation Encoded latitude/longitude coordinates for geotagging.
+ *
+ *
+ * ⚠️ **Note:** All timestamps are stored as milliseconds since epoch (UTC).
  */
-@Entity(tableName = "tbl_media", indices = [Index(value = ["source"], unique = true)])
+@Entity(tableName = "tbl_media", indices = [Index(value = ["data"], unique = true)])
 class MediaFile(
     // ── Identity ────────────────────────────────────────────
-    @PrimaryKey(autoGenerate = true)
-    @JvmField val id: Long,
+    @PrimaryKey(autoGenerate = true) @JvmField val id: Long,
     @ColumnInfo("store_id") @JvmField val storeID: Long,
 
     // ── Source / naming ─────────────────────────────────────
-    @JvmField val source: String, // absolute path to file in local storage
+    @JvmField val data: String, // absolute path to file in local storage
     @JvmField val name: String,
 
     // ── Intrinsic media attributes ──────────────────────────
@@ -99,68 +100,58 @@ class MediaFile(
     /**
      * Represents a geographical location with latitude and longitude.
      *
-     * This is a value class that efficiently stores latitude and longitude
-     * as a single `Long` value by packing two `Float` values.
-     * It is annotated with `@JvmInline` for performance benefits, avoiding
-     * object allocation overhead where possible.
-     *
-     * Use the primary constructor to create an instance from latitude and longitude values.
-     *
      * @property packed The underlying packed `Long` representation of the location.
-     * @property latitude The geographical latitude.
-     * @property longitude The geographical longitude.
-     *
-     * @constructor Creates a `Location` instance from the given latitude and longitude.
-     * @param latitude The latitude of the location.
-     * @param longitude The longitude of the location.
+     * @property latitude The geographical latitude. `Float.NaN` when not available.
+     * @property longitude The geographical longitude. `Float.NaN` when not available.
      */
     @JvmInline
     value class Location internal constructor(internal val packed: Long) {
         val latitude: Float get() = unpackFloat1(packed)
         val longitude: Float get() = unpackFloat2(packed)
 
-        constructor(latitude: Float, longitude: Float) : this(packFloats(latitude, longitude))
+        /**
+         * Creates a `Location` instance from the given [latitude] and [longitude].
+         */
+        constructor(latitude: Float = Float.NaN, longitude: Float = Float.NaN) : this(packFloats(latitude, longitude))
 
         override fun toString(): String {
             return "Location(latitude=$latitude, longitude=$longitude)"
         }
+
+        operator fun component1() = latitude
+        operator fun component2() = longitude
     }
 
     /**
      * Represents the resolution (width and height) of a media item, such as a photo or video.
      *
-     * This class is used to store dimension information for media stored in a database
-     * or retrieved from a content provider. It provides a simple data structure for holding
-     * the width and height as integer values.
-     *
-     * @property width The width of the media item in pixels.
-     * @property height The height of the media item in pixels.
+     * @property width The width of the media item in pixels. Use `-1` when not available.
+     * @property height The height of the media item in pixels. Use `-1` when not available.
      */
     @JvmInline
     value class Resolution internal constructor(internal val packed: Long) {
         val width: Int get() = unpackInt1(packed)
         val height: Int get() = unpackInt2(packed)
 
-       constructor(width: Int = Int.MIN_VALUE, height: Int = Int.MIN_VALUE) : this(
-            packInts(
-                width,
-                height
-            )
-        )
+        /**
+         * Creates a `Location` instance from the given [width] and [height].
+         */
+        constructor(width: Int = -1, height: Int = -1) :
+                this(packInts(width, height))
 
         override fun toString(): String {
             return "Resolution(width=$width, height=$height)"
         }
+
+        operator fun component1() = width
+        operator fun component2() = height
     }
 
     /**
      * Represents a playback timeline, packing position and duration into a single `Long`.
      *
-     * This value class efficiently stores playback progress for media like videos.
-     *
-     * @property position Current playback position in milliseconds.
-     * @property duration Total duration of the media in milliseconds.
-     * @property isSpecified True if the timeline has been set (i.e., not the default value).
+     * @property position Current playback position in milliseconds. `-1` if unavailable.
+     * @property duration Total duration of the media in milliseconds. `-1` if unavailable.
      */
     @JvmInline
     value class Timeline internal constructor(internal val packed: Long) {
@@ -168,11 +159,14 @@ class MediaFile(
         val duration: Int get() = unpackInt2(packed)
 
 
-        constructor(position: Int = Int.MIN_VALUE, duration: Int = Int.MIN_VALUE) :
+        constructor(position: Int = -1, duration: Int = -1) :
                 this(packInts(position, duration))
 
         fun copy(position: Int = this.position, duration: Int = this.duration) =
             Timeline(position, duration)
+
+        operator fun component1() = position
+        operator fun component2() = duration
 
         override fun toString(): String {
             return "Timeline(position=$position, duration=$duration)"
@@ -180,29 +174,29 @@ class MediaFile(
     }
 
     /**
-     * Bit-packed extras stored in a single SQLite `LONG` column.
+     * Represents a set of bit‑packed metadata stored in a single SQLite `LONG` column.
      *
-     * Multiple logical columns (flags + orientation) are encoded into one
-     * `Long` value for compact storage, indexing, and faster I/O.
+     * Multiple logical attributes (flags and orientation) are encoded into one `Long`
+     * for compact storage, efficient indexing, and faster I/O.
      *
-     * @property packed Raw SQLite value containing all encoded extras.
-     * @property isPrivate Whether the row is marked as private.
-     * @property isArchived Whether the row is archived.
-     * @property isTrashed Whether the row is trashed.
-     * @property isLiked Whether the row is liked/favorited.
-     * @property orientation Orientation value extracted from masked bits.
+     * @property packed The raw SQLite `Long` value containing all encoded attributes.
+     * @property isPrivate Represents whether the row is marked as private.
+     * @property isArchived Represents whether the row is archived.
+     * @property isTrashed Represents whether the row is trashed or deleted.
+     * @property isLiked Represents whether the row is liked or favorited.
+     * @property orientation Represents the orientation value extracted from masked bits.
      */
     @JvmInline
     value class Extras internal constructor(internal val packed: Int) {
 
         // Boolean flags decoded from packed bits
-        val isPrivate get() = packed and I.FLAG_PRIVATE != 0
-        val isArchived get() = packed and I.FLAG_ARCHIVED != 0
-        val isTrashed get() = packed and I.FLAG_TRASHED != 0
-        val isLiked get() = packed and I.FLAG_LIKED != 0
+        val isPrivate get() = packed and MP.FLAG_PRIVATE != 0
+        val isArchived get() = packed and MP.FLAG_ARCHIVED != 0
+        val isTrashed get() = packed and MP.FLAG_TRASHED != 0
+        val isLiked get() = packed and MP.FLAG_LIKED != 0
 
         // Integer field stored in a fixed bit range
-        val orientation get() = ((packed and I.MASK_ORIENTATION) shr 4).toInt()
+        val orientation get() = ((packed and MP.MASK_ORIENTATION) shr 4)
 
         /**
          * Creates a new [Extras] by updating selected fields.
@@ -218,16 +212,16 @@ class MediaFile(
             orientation: Int = this.orientation
         ): Extras {
             // Start from default/cleared bit layout
-            var value = I.DEFAULT_EXTRAS
+            var value = MP.DEFAULT_EXTRAS
 
             // Encode boolean flags
-            if (isPrivate) value = value or I.FLAG_PRIVATE
-            if (isArchived) value = value or I.FLAG_ARCHIVED
-            if (isTrashed) value = value or I.FLAG_TRASHED
-            if (isLiked) value = value or I.FLAG_LIKED
+            if (isPrivate) value = value or MP.FLAG_PRIVATE
+            if (isArchived) value = value or MP.FLAG_ARCHIVED
+            if (isTrashed) value = value or MP.FLAG_TRASHED
+            if (isLiked) value = value or MP.FLAG_LIKED
 
             // Encode orientation into its masked bit segment
-            value = value or ((orientation shl 4) and I.MASK_ORIENTATION)
+            value = value or ((orientation shl 4) and MP.MASK_ORIENTATION)
 
             return Extras(value)
         }
@@ -236,7 +230,6 @@ class MediaFile(
             return "Extras(isPrivate=$isPrivate, isArchived=$isArchived, isTrashed=$isTrashed, isLiked=$isLiked, orientation=$orientation)"
         }
     }
-
 
     val extras get() = Extras(rawExtras)
     val location get() = Location(rawLocation)
@@ -247,7 +240,7 @@ class MediaFile(
         id: Long = 0,
         storeID: Long,
         name: String,
-        source: String,
+        data: String,
 
         dateExpires: Long,
         dateAdded: Long,
@@ -261,14 +254,14 @@ class MediaFile(
 
         description: String? = null,
 
-        timeline: Timeline = Timeline(Int.MIN_VALUE, Int.MIN_VALUE),
-        extras: Extras = Extras(I.DEFAULT_EXTRAS),
-        location: Location = Location(Float.NaN, Float.NaN),
-        resolution: Resolution = Resolution(Int.MIN_VALUE, Int.MIN_VALUE)
+        timeline: Timeline = Timeline(),
+        extras: Extras = Extras(MP.DEFAULT_EXTRAS),
+        location: Location = Location(),
+        resolution: Resolution = Resolution()
     ) : this(
         id = id,
         storeID =  storeID,
-        source = source,
+        data = data,
         name = name,
         mimeType = mimeType,
         size = size,
@@ -304,7 +297,7 @@ class MediaFile(
         if (rawTimeline != other.rawTimeline) return false
         if (rawResolution != other.rawResolution) return false
         if (rawLocation != other.rawLocation) return false
-        if (source != other.source) return false
+        if (data != other.data) return false
         if (name != other.name) return false
         if (mimeType != other.mimeType) return false
         if (description != other.description) return false
@@ -326,7 +319,7 @@ class MediaFile(
         result = 31 * result + rawTimeline.hashCode()
         result = 31 * result + rawResolution.hashCode()
         result = 31 * result + rawLocation.hashCode()
-        result = 31 * result + source.hashCode()
+        result = 31 * result + data.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + (mimeType?.hashCode() ?: 0)
         result = 31 * result + (description?.hashCode() ?: 0)
@@ -334,6 +327,6 @@ class MediaFile(
     }
 
     override fun toString(): String {
-        return "MediaFile(id=$id, storeID=$storeID, source='$source', name='$name', mimeType=$mimeType, size=$size, bitrate=$bitrate, year=$year, description=$description, dateAdded=$dateAdded, dateModified=$dateModified, dateTaken=$dateTaken, dateExpires=$dateExpires, rawExtras=$rawExtras, rawTimeline=$rawTimeline, rawResolution=$rawResolution, rawLocation=$rawLocation, extras=$extras, location=$location, resolution=$resolution, timeline=$timeline)"
+        return "MediaFile(dateExpires=$dateExpires, dateTaken=$dateTaken, dateModified=$dateModified, dateAdded=$dateAdded, description=$description, year=$year, bitrate=$bitrate, size=$size, mimeType=$mimeType, name='$name', data='$data', storeID=$storeID, id=$id, extras=$extras, location=$location, resolution=$resolution, timeline=$timeline)"
     }
 }

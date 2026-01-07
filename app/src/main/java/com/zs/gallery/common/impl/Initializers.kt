@@ -25,12 +25,11 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import androidx.compose.animation.core.AnimationConstants
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.startup.Initializer
 import coil3.asImage
 import coil3.request.crossfade
 import com.zs.common.analytics.Analytics
-import com.zs.common.db.album.MediaProvider
+import com.zs.common.db.media.MediaProvider
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.gallery.common.AppConfig
 import com.zs.gallery.common.Res
@@ -39,7 +38,6 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.module.dsl.singleOf
-import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import androidx.appcompat.content.res.AppCompatResources.getDrawable as Drawable
@@ -120,6 +118,7 @@ class AppInitializer : Initializer<Unit> {
         }
     }
 }
+
 // TODO - Move this logic of initializing pref to Preference DataStore.
 // Volatile ensures visibility of changes across threads
 @Volatile
@@ -185,7 +184,5 @@ private val AppModules = module {
     factory { MediaProvider.getInstance() }
 
     // --- ViewModels ---
-    viewModel() {params ->
-        FilesViewModel(get(), if (params.isEmpty()) null else params.get())
-    }
+    viewModelOf(::FilesViewModel)
 }

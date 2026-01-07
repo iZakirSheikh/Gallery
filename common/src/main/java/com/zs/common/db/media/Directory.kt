@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 4 of Jan 2026
+ * Created by sheik on 7 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 4 of Jan 2026
+ * Last Modified by sheik on 7 of Jan 2026
  *
  */
 
-package com.zs.common.db.album
+package com.zs.common.db.media
 
-
-import androidx.room.ColumnInfo
-import androidx.room.DatabaseView
-
-@DatabaseView(
-    value = """
-        SELECT
-            tbl_media.source AS poster,
-            SUBSTR(source, 1, LENGTH(RTRIM(source, REPLACE(source, '/', ''))) - 1 ) AS folder_path,
-            COUNT(*) AS count,
-            MAX(date_modified) AS dateModified,
-            SUM(size) AS size
-        FROM tbl_media
-        GROUP BY folder_path
-        ORDER BY dateModified DESC
-    """,
-    viewName = "vw_folder"
-)
-class Folder(
-    @JvmField val poster: String?,
-    @JvmField @ColumnInfo(name = "folder_path") val path: String,
+/**
+ * Represents a collection of [MediaFile] items grouped either by their parent folder
+ * (via [MediaFile.data]) or by an [Album].
+ *
+ * This model provides lightweight metadata about a directory or album, optimized
+ * for display and aggregation rather than full media detail.
+ *
+ * @property thumbnail Optional file path or URI of a representative thumbnail for the directory.
+ * @property key Unique key identifying the directory or album (e.g., folder path or album ID).
+ * @property count Total number of media items contained in the directory.
+ * @property size Combined size of all media items in bytes.
+ * @property dateModified Timestamp (ms since epoch) when the directory or album was last modified.
+ */
+class Directory(
+    @JvmField val thumbnail: String?,
+    @JvmField val key: String,
     @JvmField val count: Int,
     @JvmField val size: Long, // size in bytes
     @JvmField val dateModified: Long,
@@ -50,13 +45,13 @@ class Folder(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Folder
+        other as Directory
 
         if (count != other.count) return false
         if (size != other.size) return false
         if (dateModified != other.dateModified) return false
-        if (poster != other.poster) return false
-        if (path != other.path) return false
+        if (thumbnail != other.thumbnail) return false
+        if (key != other.key) return false
 
         return true
     }
@@ -65,12 +60,12 @@ class Folder(
         var result = count
         result = 31 * result + size.hashCode()
         result = 31 * result + dateModified.hashCode()
-        result = 31 * result + (poster?.hashCode() ?: 0)
-        result = 31 * result + path.hashCode()
+        result = 31 * result + (thumbnail?.hashCode() ?: 0)
+        result = 31 * result + key.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "Folder(poster=$poster, path='$path', count=$count, bytes=$size, lastModified=$dateModified)"
+        return "Directory(thumbnail=$thumbnail, key='$key', count=$count, size=$size, dateModified=$dateModified)"
     }
 }

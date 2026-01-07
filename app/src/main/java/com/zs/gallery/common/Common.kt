@@ -57,7 +57,7 @@ enum class ThemeAccentPolicy { CUSTOM, DEFAULT, WALLPAPER }
 enum class NightMode { ENABLED, DISABLED, FOLLOW_SYSTEM }
 
 /** A short-hand for [Navigator] */
-typealias NavController = Navigator<Route>
+typealias NavController = Navigator<NavKey>
 
 
 private fun noLocalProvidedFor(name: String): Nothing {
@@ -76,7 +76,6 @@ private fun noLocalProvidedFor(name: String): Nothing {
 val LocalSystemFacade = staticCompositionLocalOf<SystemFacade> {
     noLocalProvidedFor("LocalSystemFacade")
 }
-
 
 /** Provides a [NavController] that can be accessed within a Compose hierarchy. */
 val LocalNavController =
@@ -168,3 +167,5 @@ fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
 
 @Composable
 inline fun vectorResource(@DrawableRes id: Int) = ImageVector.vectorResource(id)
+
+inline fun <T> runIf(condition: Boolean, block: () -> T): T? = if (condition) block() else null

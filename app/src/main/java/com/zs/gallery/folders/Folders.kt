@@ -22,8 +22,6 @@
 package com.zs.gallery.folders
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.zs.gallery.common.Route
 
 @Composable
 fun Folders(viewState: FolderViewState) {

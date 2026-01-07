@@ -32,14 +32,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.zs.common.db.album.MediaProvider
+import com.zs.common.db.media.MediaProvider
 import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.OutlinedButton
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.Res
-import com.zs.gallery.common.Route
+import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.compose.Placeholder
 import com.google.accompanist.permissions.rememberMultiplePermissionsState as Permissions
 
@@ -61,7 +61,7 @@ fun AppIntro() {
         // Check if all permissions are granted; if not, exit early.
         if (!results.all { (_, state) -> state }) return@Permissions
         MediaProvider.runImmediateSync(context)  // Perform immediate sync of media content.
-        navigator.rebase(Route.Timeline)   // Navigate to Timeline as the new starting route.
+        navigator.rebase(NavKey.Timeline)   // Navigate to Timeline as the new starting route.
     }
 
     // --- UI Placeholder ---

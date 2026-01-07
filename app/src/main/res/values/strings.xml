@@ -39,4 +39,19 @@
     <string name="msg_unknown_error">Oops! An unknown error occurred</string>
     <string name="albums">Albums</string>
 
+    <string name="scr_timeline_title"><b>Time</b>line<font color='grey' size='11'>\n  Past to present, all in one view.</font></string>
+
+    <!-- Base words -->
+    <string name="share">Share</string>
+    <string name="rate_us">Rate us</string>
+    <string name="airdrop">AirDrop</string>
+    <string name="like">Like</string>
+    <string name="unlike">Unlike</string>
+    <string name="trash">Trash</string>
+    <string name="restore">Restore</string>
+    <string name="delete">Delete</string>
+    <string name="select_all">Select All</string>
+    <string name="select">Select</string>
+    <string name="info">Info</string>
+
 </resources>

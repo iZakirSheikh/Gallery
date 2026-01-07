@@ -26,16 +26,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.zs.common.db.AppDb.Companion.initialize
-import com.zs.common.db.album.Album
-import com.zs.common.db.album.Album.Memory
-import com.zs.common.db.album.MediaProvider
-import com.zs.common.db.album.Folder
-import com.zs.common.db.album.MediaFile
+import com.zs.common.db.media.Album
+import com.zs.common.db.media.Album.Memory
+import com.zs.common.db.media.MediaFile
+import com.zs.common.db.media.MediaProvider
 
 @Database(
     version = 1,
-    entities = [MediaFile::class, Album::class, Memory::class],
-    views = [Folder::class]
+    entities = [MediaFile::class, Album::class, Memory::class]
 )
 internal abstract class AppDb : RoomDatabase() {
 

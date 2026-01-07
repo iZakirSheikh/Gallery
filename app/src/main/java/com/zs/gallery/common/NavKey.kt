@@ -12,7 +12,7 @@ import android.net.Uri
  *
  * Dynamic routes: [Files], [Viewer]
  */
-sealed interface Route {
+sealed interface NavKey {
 
     /**
      * Domain identifier for the route, derived from the class name.
@@ -25,13 +25,13 @@ sealed interface Route {
         }
 
     // Static destinations (no parameters required)
-    object Settings : Route
-    object AboutUs : Route
-    object Lockscreen : Route
-    object AppIntro : Route
-    object Folders : Route
-    object Albums : Route
-    object Timeline: Route
+    object Settings : NavKey
+    object AboutUs : NavKey
+    object Lockscreen : NavKey
+    object AppIntro : NavKey
+    object Folders : NavKey
+    object Albums : NavKey
+    object Timeline: NavKey
     /**
      * Dynamic route for an album’s file list.
      *
@@ -45,7 +45,7 @@ sealed interface Route {
     class Files private constructor(
         val albumId: Long = -1,
         val path: String? = null
-    ) : Route {
+    ) : NavKey {
         /** Represents Album Media */
         constructor(albumId: Long) : this(albumId, null)
 
@@ -71,7 +71,7 @@ sealed interface Route {
         val path: String? = null,
         val uri: Uri? = null,
         val mimeType: String? = null
-    ) : Route {
+    ) : NavKey {
         /** Represents Album Viewer */
         constructor(id: Long, albumId: Long) : this(id, albumId, null, null)
         /** Represents Folder Viewer */

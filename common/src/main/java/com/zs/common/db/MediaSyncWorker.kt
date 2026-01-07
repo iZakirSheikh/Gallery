@@ -31,9 +31,9 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.zs.common.db.album.MediaFile
-import com.zs.common.db.album.MediaFile.Timeline
-import com.zs.common.db.album.MediaProvider
+import com.zs.common.db.media.MediaFile
+import com.zs.common.db.media.MediaFile.Timeline
+import com.zs.common.db.media.MediaProvider
 import com.zs.common.util.query2
 import java.util.concurrent.TimeUnit
 import android.provider.MediaStore.Files.FileColumns as Column
@@ -212,7 +212,7 @@ internal class MediaSyncWorker private constructor(
                         val newFile = MediaFile(
                             id = existing?.id ?: 0, // reuse DB id if present
                             storeID = storeID,
-                            source = cursor.getString(1),   // file path
+                            data = cursor.getString(1),   // file path
                             name = cursor.getString(2),     // display name
                             mimeType = mimeType,
                             size = cursor.getLong(4),

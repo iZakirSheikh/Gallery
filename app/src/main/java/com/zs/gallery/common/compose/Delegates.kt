@@ -12,11 +12,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -277,5 +283,39 @@ inline fun Placeholder(
             )
         },
         action = action,
+    )
+}
+
+
+/**
+ * Applies a fading edge effect to content.
+ *
+ * Creates a gradient that fades the content to transparency at the edges.
+ *
+ * @param colors Gradient colors, e.g., `listOf(backgroundColor, Color.Transparent)`. Horizontal if `vertical` is `false`.
+ * @param length Fade length from the edge.
+ * @param vertical `true` for top/bottom fade, `false` for left/right. Defaults to `true`.
+ * @return A [Modifier] with the fading edge effect.
+ */
+// TODO - Add logic to make fading edge apply/exclude content padding in real one.
+fun Modifier.fadingEdge2(
+    length: Dp = 10.dp,
+    vertical: Boolean = true,
+) = graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen).drawWithContent {
+    drawContent()
+    drawRect(
+        Brush.verticalGradient(
+            listOf(Color.Black, Color.Transparent), endY = length.toPx(), startY = 0f
+        ), blendMode = BlendMode.DstOut, size = size.copy(height = length.toPx())
+    )
+    drawRect(
+        brush = Brush.verticalGradient(
+            colors = listOf(Color.Transparent, Color.Black),
+            startY = size.height - length.toPx(),
+            endY = size.height
+        ),
+        //  topLeft = Offset(0f, size.height - length.toPx()),
+        // size = size.copy(height = length.toPx()),
+        blendMode = BlendMode.DstOut
     )
 }

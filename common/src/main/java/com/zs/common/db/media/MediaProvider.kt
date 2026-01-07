@@ -19,10 +19,10 @@
  *
  */
 
-package com.zs.common.db.album
+package com.zs.common.db.media
 
 import android.content.Context
-import android.database.Cursor
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -100,8 +100,8 @@ abstract class MediaProvider {
     internal abstract suspend fun count(): Int
 
     @RawQuery
-    internal abstract suspend fun rawQuery (query: RoomRawQuery): Int
-    internal suspend fun deleteByStoreIdNotIn (ids: String) {
+    internal abstract suspend fun rawQuery(query: RoomRawQuery): Int
+    internal suspend fun deleteByStoreIdNotIn(ids: String) {
         // Deletes rows from tbl_media where store_id is NOT in the provided ids.
         //
         // Why this approach?
@@ -119,5 +119,52 @@ abstract class MediaProvider {
         // - This method does not return the number of rows deleted. If you need that,
         //   prefer a count() fun.
         rawQuery(RoomRawQuery("DELETE FROM tbl_media WHERE store_id NOT IN ($ids)"))
+    }
+
+    @RawQuery(observedEntities = [MediaFile::class])
+    internal abstract fun rawSnapshot(query: RoomRawQuery): PagingSource<Int, Snapshot>
+
+    fun folderSnapshotSource(path: String? = null): PagingSource<Int, Snapshot> {
+        // Base projection: common columns selected for every row
+        // needs to be extracted to top
+        val FOLDER_BASE_PROJECTION =
+            "id, data AS thumbnail, -1 AS `order`, extras AS rawExtras, " +
+                    " resolution AS rawResolution, location AS rawLocation, timeline AS rawTimeline,  "+
+                    "CASE WHEN mimeType LIKE 'image%' THEN 1 ELSE 0 END AS isImage, "
+        val query = buildString {
+            append("SELECT ")
+            append(FOLDER_BASE_PROJECTION)
+            append(" ")
+
+            // Grouping logic: decide when to emit a "header" marker
+            append(
+                """
+            CASE
+                -- First row in the result set → always emit header
+                WHEN LAG(date_modified, 1, -1) OVER (ORDER BY date_modified DESC) = -1
+                THEN date_modified
+
+                -- Last row in the result set → never emit header
+                WHEN LEAD(date_modified, 1, -1) OVER (ORDER BY date_modified DESC) = -1
+                THEN NULL
+
+                -- Emit header when calendar day changes compared to previous row
+                -- Using SQLite date() function to normalize timestamp to local day
+                WHEN LAG(
+                    date(date_modified / 1000, 'unixepoch', 'localtime')
+                ) OVER (ORDER BY date_modified DESC)
+                != date(date_modified / 1000, 'unixepoch', 'localtime')
+                THEN date_modified
+
+                -- Otherwise → no header
+                ELSE NULL
+            END AS header
+            """.trimIndent()
+            )
+            append(" ")
+            append("FROM tbl_media WHERE (extras & $FLAG_TRASHED) = 0 AND (extras & $FLAG_ARCHIVED) = 0 AND " +
+                    "(extras & $FLAG_PRIVATE) = 0 ORDER BY date_modified DESC")
+        }
+        return rawSnapshot(RoomRawQuery(query))
     }
 }
