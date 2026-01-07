@@ -189,12 +189,12 @@ fun Files(viewState: FilesViewState) {
                     100.dp
                     /** multiplier*/
                 ),
-                horizontalArrangement = Res.spacing.gap_x_small,
-                verticalArrangement = Res.spacing.gap_x_small,
+                horizontalArrangement = Res.dimens.spacing_x_small,
+                verticalArrangement = Res.dimens.spacing_x_small,
                 contentPadding = (inAppNavInsets.add(WindowInsets.content)
                     .union(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))).asPaddingValues() +
-                        (PaddingValues(end = if (!compact) Res.spacing.large else 0.dp) + PaddingValues(
-                            horizontal = Res.spacing.medium
+                        (PaddingValues(end = if (!compact) Res.dimens.large else 0.dp) + PaddingValues(
+                            horizontal = Res.dimens.medium
                         )),
                 modifier = Modifier
                     .fillMaxSize()

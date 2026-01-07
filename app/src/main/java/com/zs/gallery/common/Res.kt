@@ -92,7 +92,7 @@ private val ColorSaver = object : IntSaver<Color> {
  * @see mainfest
  * @see shape
  * @see action
- * @see spacing
+ * @see dimens
  */
 object Res {
 
@@ -190,11 +190,11 @@ object Res {
     }
 
     /**
-     * Standardized spacing values for Compose layouts.
+     * Standardized dimens values for Compose layouts.
      *
      * Provides consistent [Dp] values and [Arrangement] gaps for UI components.
      */
-    object spacing {
+    object dimens {
         val x_small: Dp = 4.dp
         val small: Dp = 8.dp
         val medium: Dp = 12.dp
@@ -203,10 +203,10 @@ object Res {
         val x_large: Dp = 32.dp
 
         // Gap arrangements for list/grid items
-        val gap_x_small = Arrangement.spacedBy(x_small)
-        val gap_small = Arrangement.spacedBy(small)
-        val gap_medium = Arrangement.spacedBy(medium)
-        val gap_large = Arrangement.spacedBy(large)
+        val spacing_x_small = Arrangement.spacedBy(x_small)
+        val spacing_small = Arrangement.spacedBy(small)
+        val spacing_medium = Arrangement.spacedBy(medium)
+        val spacing_large = Arrangement.spacedBy(large)
     }
 
     /**
