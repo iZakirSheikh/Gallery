@@ -53,5 +53,6 @@
     <string name="select_all">Select All</string>
     <string name="select">Select</string>
     <string name="info">Info</string>
-
+    <string name="folder">Folder</string>
+    <string name="album">Album</string>
 </resources>

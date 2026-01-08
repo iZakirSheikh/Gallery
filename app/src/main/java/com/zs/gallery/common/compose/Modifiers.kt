@@ -33,7 +33,4 @@ import androidx.compose.ui.unit.dp
  * This modifier streamlines the creation of Lottie-based button icons by defaulting
  * to the standard Material Design icon size (24.dp) and allowing for easy scaling.
  */
-inline fun Modifier.lottie(scale: Float = 1f) =
-    this
-        .requiredSize(24.dp)
-        .then(Modifier.scale(scale))
+inline fun Modifier.lottie(scale: Float = 1f) = requiredSize(24.dp).then(Modifier.scale(scale))

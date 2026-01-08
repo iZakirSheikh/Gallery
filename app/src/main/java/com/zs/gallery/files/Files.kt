@@ -54,6 +54,7 @@ import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalContentColor
 import com.zs.compose.theme.LocalWindowSize
+import com.zs.compose.theme.TonalIconButton
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
 import com.zs.compose.theme.adaptive.Scaffold
@@ -67,6 +68,7 @@ import com.zs.gallery.common.Res
 import com.zs.gallery.common.compose.acrylic
 import com.zs.gallery.common.compose.fadingEdge2
 import com.zs.gallery.common.compose.rememberBackdropProvider
+import com.zs.gallery.common.compose.shine
 import com.zs.gallery.common.compose.source
 import com.zs.gallery.common.runIf
 import com.zs.gallery.common.vectorResource
@@ -120,6 +122,13 @@ fun Files(viewState: FilesViewState) {
                         onClick = {},
                         contentDescription = null
                     )
+                },
+                actions = {
+                    IconButton(
+                        icon = vectorResource(Res.drawable.ic_settings_outline),
+                        onClick = {},
+                        contentDescription = null
+                    )
                 }
             )
 
@@ -146,10 +155,12 @@ fun Files(viewState: FilesViewState) {
                                 content = {
                                     TonalHeader(header)
                                     // toggle
-                                    IconButton(
+                                    TonalIconButton(
                                         icon = vectorResource(Res.drawable.ic_circle_outline),
                                         contentDescription = null,
-                                        tint = /*if (level == SelectionTracker.Level.FULL) AppTheme.colors.accent*/  LocalContentColor.current,
+                                        border = colors.shine,
+                                        shape = AppTheme.shapes.small,
+                                        //tint = /*if (level == SelectionTracker.Level.FULL) AppTheme.colors.accent*/  LocalContentColor.current,
                                         onClick = { /*viewState.select(header.toString()*/ }
                                     )
                                 }
@@ -162,7 +173,6 @@ fun Files(viewState: FilesViewState) {
                         contentType = "media_file",
                         content = {
                             Snapshot(
-                                focused = false,
                                 data = item,
                                 checked = 0 /*when {
                                     selected.isEmpty() -> -1

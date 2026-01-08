@@ -22,13 +22,13 @@
 package com.zs.gallery.files
 
 import android.text.format.DateUtils
+import androidx.annotation.IntRange
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,24 +62,22 @@ private const val TAG = "MediaFile"
 /**
  * Displays a [Snapshot] of MediaFile.
  *
- * @param value The MediaFile object to display.
- * @param focused Whether the item is currently focused.
- * @param checked The selection state of the item:
- *                 - -1: Show a selected circle (partially selected).
- *                 - 0: Unchecked.
- *                 - 1: Checked.
+ * @param data The MediaFile object to display.
+ * @param checked The selection state of the item.
+ *  *   `0` - Unchecked.
+ *  *   `1` - unchecked active.
+ *  *   `2` - checked
  * @param modifier Modifier to be applied to the item.
  */
 @Composable
 fun Snapshot(
     data: Snapshot,
-    focused: Boolean,
-    checked: Int, // -1 for show selected circle; pass 0 for unchecked, 1 for checked.
+    @IntRange(0, 2,) checked: Int,
     modifier: Modifier = Modifier,
 ) {
     val elevation = if (kotlin.random.Random.nextBoolean()) 0.5.dp else 1.dp
     Box(modifier = Modifier.background(AppTheme.colors.background(elevation = elevation)) then modifier) {
-        val selected = checked == 1
+        val selected = checked == 2
         val progress by animateFloatAsState(
             targetValue = if (selected) 1f else 0f,
             AppTheme.motionScheme.fastSpatialSpec()
@@ -131,7 +129,7 @@ fun Snapshot(
                     )
                 }
             )
-        if (checked == -1) return@Box
+        if (checked == 0) return@Box
 
         Icon(
             imageVector = vectorResource(if (selected) Res.drawable.ic_check_circle_filled else Res.drawable.ic_circle_outline),
@@ -139,10 +137,7 @@ fun Snapshot(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(4.dp)
-                .background(
-                    if (selected) Color.White else Color.Transparent,
-                    CircleShape
-                ),
+                .background(if (selected) Color.White else Color.Transparent, Res.shape.circle),
             tint = if (selected) AppTheme.colors.accent else Color.Gray
         )
     }
