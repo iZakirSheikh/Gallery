@@ -44,7 +44,7 @@ nextlib = { module = "io.github.anilbeesetti:nextlib-media3ext", version = "1.8.
 # Play Store integration, billing, updates, reviews
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }
 play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.1" }
-google-billing-ktx = { module = "com.android.billingclient:billing-ktx", version = "8.1.0" }
+google-billing-ktx = { module = "com.android.billingclient:billing-ktx", version = "8.3.0" }
 
 # ─── Firebase ───
 # Analytics and crash reporting
@@ -53,8 +53,8 @@ firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-
 
 # ─── Ads & Monetization ───
 # Unity Ads SDKs for mediation and ad quality
-unity_ads_mediation = { module = "com.unity3d.ads-mediation:mediation-sdk", version = "7.9.0" }
-unity_ads_adquality = { module = "com.unity3d.ads-mediation:adquality-sdk", version = "7.19.2" }
+unity_ads_mediation = { module = "com.unity3d.ads-mediation:mediation-sdk", version = "9.2.0" }
+unity_ads_adquality = { module = "com.unity3d.ads-mediation:adquality-sdk", version = "9.2.1" }
 
 # ─── Jetpack Compose ───
 # Compose UI, tooling, and icons

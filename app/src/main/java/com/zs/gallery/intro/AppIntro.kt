@@ -61,7 +61,7 @@ fun AppIntro() {
         // Check if all permissions are granted; if not, exit early.
         if (!results.all { (_, state) -> state }) return@Permissions
         MediaProvider.runImmediateSync(context)  // Perform immediate sync of media content.
-        navigator.rebase(NavKey.Timeline)   // Navigate to Timeline as the new starting route.
+        navigator.rebase(NavKey.Files())   // Navigate to Timeline as the new starting route.
     }
 
     // --- UI Placeholder ---

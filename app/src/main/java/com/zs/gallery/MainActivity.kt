@@ -51,10 +51,11 @@ import com.zs.common.util.showPlatformToast
 import com.zs.compose.foundation.getText2
 import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.gallery.common.AppConfig
+import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.Navigator
 import com.zs.gallery.common.Res
-import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.SystemFacade
+import com.zs.gallery.common.versionCodeCompat
 import com.zs.preferences.Preferences
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -222,7 +223,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
         // Update the start destination to RouteTimeline
         if (navController.active == NavKey.Lockscreen) {
             Log.d(TAG, "unlock: updating start destination")
-            navController.rebase(NavKey.Timeline)
+            navController.rebase(NavKey.Files())
             // return from here;
             return@authenticate
         }
@@ -362,8 +363,8 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
                 // Compare stored version code with the current one.
                 // If different, update preferences and notify user with release notes.
-                if (info.longVersionCode != preferences[Res.key.app_version_code]) {
-                    preferences[Res.key.app_version_code] = info.longVersionCode
+                if (info.versionCodeCompat != preferences[Res.key.app_version_code]) {
+                    preferences[Res.key.app_version_code] = info.versionCodeCompat
                     // Show release notes snackbar to highlight new version changes.
                     showSnackbar(
                         message = Res.string.release_notes,
@@ -401,7 +402,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
                 !checkSelfPermissions(Res.manifest.permissions) -> Navigator(NavKey.AppIntro)
                 isAuthenticationRequired -> Navigator(NavKey.Lockscreen)
-                else -> Navigator(NavKey.Timeline)
+                else -> Navigator(NavKey.Files())
             }
         }
 

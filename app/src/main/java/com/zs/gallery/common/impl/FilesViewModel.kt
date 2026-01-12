@@ -43,7 +43,7 @@ class FilesViewModel(
 ) : KoinViewModel(), FilesViewState {
 
     val source = when (key) {
-        NavKey.Timeline -> provider.folderSnapshotSource()
+        is NavKey.Files -> provider.folderSnapshotSource()
         else -> TODO("$key not implemented yet!")
     }
 

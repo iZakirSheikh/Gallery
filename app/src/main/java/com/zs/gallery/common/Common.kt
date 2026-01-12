@@ -21,6 +21,8 @@
 
 package com.zs.gallery.common
 
+import android.content.pm.PackageInfo
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -169,3 +171,13 @@ fun <S, O> preference(key: Key.Key2<S, O>): State<O> {
 inline fun vectorResource(@DrawableRes id: Int) = ImageVector.vectorResource(id)
 
 inline fun <T> runIf(condition: Boolean, block: () -> T): T? = if (condition) block() else null
+
+/**
+ * Returns the application's version code, compatibly for all Android versions.
+ *
+ * On Android P (API 28) and above, this uses `PackageInfo.getLongVersionCode()`.
+ * On older versions, it falls back to the deprecated `PackageInfo.versionCode`,
+ * casting it to a [Long] for consistent return type.
+ */
+val PackageInfo.versionCodeCompat: Long get() =
+    if (Res.manifest.isAtLeast(Build.VERSION_CODES.P)) longVersionCode else versionCode.toLong()

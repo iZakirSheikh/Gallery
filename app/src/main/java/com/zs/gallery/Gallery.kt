@@ -47,11 +47,11 @@ import com.zs.compose.theme.dynamicAccentColor
 import com.zs.compose.theme.renderInSharedTransitionScopeOverlay
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
+import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.Navigator
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.NightMode.FOLLOW_SYSTEM
 import com.zs.gallery.common.Res
-import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.compose.NavigationBar
 import com.zs.gallery.common.compose.NavigationType
 import com.zs.gallery.common.impl.FilesViewModel
@@ -79,7 +79,7 @@ private val navGraph: NavGraphBuilder = { key: NavKey ->
         // but the ViewModel initialization differs:
         //   - For Files: pass the route as a parameter to the ViewModel.
         //   - For Timeline: use empty parameters.
-        is NavKey.Files, NavKey.Timeline -> NavEntry(key) {
+        is NavKey.Files -> NavEntry(key) {
             val viewModel = koinViewModel<FilesViewModel> { parametersOf(key) }
             Files(viewModel) // Render the Files screen with the resolved ViewModel.
         }
@@ -128,7 +128,7 @@ fun Gallery(
 
     // Determine Navigation Bar Visibility
     val isNavBarRequired =
-        entry is NavKey.Timeline || entry is NavKey.Folders || entry is NavKey.Albums
+        entry is NavKey.Files && entry.isTimeline || entry is NavKey.Folders || entry is NavKey.Albums
 
     // Navigation Bar Definition
     val navBar: @Composable () -> Unit = {
@@ -161,8 +161,8 @@ fun Gallery(
                 com.zs.gallery.common.compose.NavigationItem(
                     label = textResource(Res.string.timeline),
                     icon = Res.drawable.ic_photo_library_two_tone,
-                    checked = entry is NavKey.Timeline,
-                    onClick = { navController.navigate(NavKey.Timeline) },
+                    checked = entry is NavKey.Files && entry.isTimeline,
+                    onClick = { navController.navigate(NavKey.Files()) },
                     type = type,
                     colors = colors
                 )

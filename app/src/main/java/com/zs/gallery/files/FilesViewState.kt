@@ -23,14 +23,14 @@ package com.zs.gallery.files
 
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.paging.PagingData
-import com.zs.common.db.media.Directory
+import com.zs.common.db.media.Catalog
 import com.zs.common.db.media.Snapshot
 import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.Res.action
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Represents the state of a file view within a [Directory].
+ * Represents the state of a file view within a [Catalog].
  *
  * This interface models:
  * - The directory being browsed (timeline, album, folder, docs, liked, private, recycled, archived, etc.)
