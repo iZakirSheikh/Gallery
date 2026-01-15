@@ -22,44 +22,34 @@
 package com.zs.common.db.media
 
 
-import com.zs.common.db.media.MediaFile.Extras
-import com.zs.common.db.media.MediaFile.Resolution
-import com.zs.common.db.media.MediaFile.Timeline
-
 /**
- * Represents a lightweight, read-only snapshot of a media item optimized for list and grid rendering.
+ * A lightweight, read-only snapshot of a media item optimized for fast list and grid rendering.
  *
- * This model is a **projection**, not a full entity. It is typically backed by
- * a Room query that selects only the columns required for fast scrolling and preview
- * rendering. Several logical attributes are **bit-packed into `LONG` values** and
- * exposed through derived properties.
+ * This class is a **projection**, not a full entity. It is typically backed by a Room query
+ * that selects only the minimal set of columns required for smooth scrolling and preview display.
+ * Several attributes are **bit-packed into `Long` values** and exposed through derived properties.
  *
  * @property id Stable identifier of the media item.
- * @property thumbnail File path or URI of the thumbnail image.
- *
- * @property order Playback order of the item within its album, or `-1` if unavailable.
- *
- * @property header Column value used for grouping. Non-null for the first item in a group,
- *                  null for subsequent items.
- * @property isImage Indicates whether this snapshot represents a still image, video, or animated file.
- *
+ * @property mediaId Actual media identifier of the file. If the file is available locally,
+ *                   this is the store-ID (safe to convert to `Long`); otherwise, it represents
+ *                   a remote cloud source ID.
+ * @property order Playback order within the album, or `-1` if unavailable.
+ * @property header Grouping key. Non-null for the first item in a group, null for subsequent items.
+ * @property mimeType MIME type of the media, if available.
  * @property resolution Decoded [MediaFile.Resolution] derived from [rawResolution].
  * @property timeline Decoded [MediaFile.Timeline] derived from [rawTimeline].
  * @property extras Decoded [MediaFile.Extras] derived from [rawExtras].
  */
 class Snapshot(
     @JvmField val id: Long,
-    @JvmField val thumbnail: String,
+    @JvmField val mediaId: String,
     @JvmField val order: Int,
     @JvmField var header: String?,
-    @JvmField val isImage: Boolean,
+    @JvmField val mimeType: String?,
     @JvmField internal val rawResolution: Long,
     @JvmField internal val rawTimeline: Long,
-    @JvmField internal val rawExtras: Int,
-) {
-    val resolution get() = Resolution(rawResolution)
-    val timeline get() = Timeline(rawTimeline)
-    val extras get() = Extras(rawExtras)
+    @JvmField internal val rawExtras: Long
+){
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -68,12 +58,12 @@ class Snapshot(
 
         if (id != other.id) return false
         if (order != other.order) return false
-        if (isImage != other.isImage) return false
         if (rawResolution != other.rawResolution) return false
         if (rawTimeline != other.rawTimeline) return false
         if (rawExtras != other.rawExtras) return false
-        if (thumbnail != other.thumbnail) return false
+        if (mediaId != other.mediaId) return false
         if (header != other.header) return false
+        if (mimeType != other.mimeType) return false
 
         return true
     }
@@ -81,16 +71,16 @@ class Snapshot(
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + order
-        result = 31 * result + isImage.hashCode()
         result = 31 * result + rawResolution.hashCode()
         result = 31 * result + rawTimeline.hashCode()
-        result = 31 * result + rawExtras
-        result = 31 * result + thumbnail.hashCode()
+        result = 31 * result + rawExtras.hashCode()
+        result = 31 * result + mediaId.hashCode()
         result = 31 * result + (header?.hashCode() ?: 0)
+        result = 31 * result + (mimeType?.hashCode() ?: 0)
         return result
     }
 
     override fun toString(): String {
-        return "Snapshot(id=$id, thumbnail='$thumbnail', order=$order, header=$header, isImage=$isImage, resolution=$resolution, timeline=$timeline, extras=$extras)"
+        return "Snapshot(id=$id, mediaId='$mediaId', order=$order, header=$header, mimeType=$mimeType, rawResolution=$rawResolution, rawTimeline=$rawTimeline, rawExtras=$rawExtras)"
     }
 }

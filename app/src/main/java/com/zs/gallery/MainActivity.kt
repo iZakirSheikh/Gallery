@@ -1,23 +1,22 @@
 /*
- * Copyright (c)  2025 Zakir Sheikh
+ * Copyright 2024 Zakir Sheikh
  *
- * Created by sheik on 30 of Dec 2025
+ * Created by Zakir Sheikh on 20-07-2024.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at:
+ * You may obtain a copy of the License at
  *
- *     https://www.apache.org/licenses/LICENSE-2.0
+ *   https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Last Modified by sheik on 30 of Dec 2025
- *
  */
+
+@file:OptIn(ExperimentalFoundationApi::class)
 
 package com.zs.gallery
 
@@ -34,13 +33,13 @@ import android.view.WindowManager.LayoutParams
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -51,6 +50,7 @@ import com.zs.common.util.showPlatformToast
 import com.zs.compose.foundation.getText2
 import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.gallery.common.AppConfig
+import com.zs.gallery.common.NavController
 import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.Navigator
 import com.zs.gallery.common.Res
@@ -61,6 +61,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import kotlin.time.Duration.Companion.minutes
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen as configSplashScreen
 import com.zs.compose.theme.snackbar.SnackbarHostState as SnackbarController
 
 class MainActivity : ComponentActivity(), SystemFacade {
@@ -69,8 +70,12 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
     val preferences: Preferences by inject()
     val controller: SnackbarController by inject()
-    private var navController: Navigator<NavKey>? = null
+    private var navController: NavController? = null
     private val analytics: Analytics by inject()
+
+
+    var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
+        private set
 
     /**
      * Timestamp (mills) indicating when the app last went to the background.
@@ -81,8 +86,6 @@ class MainActivity : ComponentActivity(), SystemFacade {
      * - `> 0L`: The time in milliseconds when the app last entered the background.
      */
     private var timeAppWentToBackground = -1L
-    var inAppUpdateProgress by mutableFloatStateOf(Float.NaN)
-        private set
 
     /**
      * Checks if authentication is required.
@@ -106,7 +109,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
             // Check the app lock timeout setting.
             return when (val timeoutValue = AppConfig.lockTimeoutMinutes) {
-                Int.MIN_VALUE -> false // App lock is disabled (timeout value of -1)
+                -1 -> false // App lock is disabled (timeout value of -1)
                 0 -> true // Immediate authentication required (timeout value of 0)
                 else -> {
                     // Calculate the time elapsed since the app went to background.
@@ -117,21 +120,17 @@ class MainActivity : ComponentActivity(), SystemFacade {
             }
         }
 
-    // ===== OnPause =============
     override fun onPause() {
         super.onPause()
-        // TODO - Maybe navigate to Overlay screen when securemode is set.
         // The time when app went to background.
         // irrespective of what value it holds update it.
         Log.d(TAG, "onPause")
         timeAppWentToBackground = System.currentTimeMillis()
     }
 
-    // ===== OnResume +=============
     @SuppressLint("NewApi")
     override fun onResume() {
         super.onResume()
-        // paymaster.sync()
         Log.d(TAG, "onStart")
         // Only navigate to the lock screen if authentication is required and
         // this is not a fresh app start.
@@ -151,17 +150,14 @@ class MainActivity : ComponentActivity(), SystemFacade {
         }
     }
 
-    // ===== OnDestroy +=============
     override fun onDestroy() {
-        //paymaster.release()
         super.onDestroy()
     }
 
     override fun showToast(message: String, duration: Int) = showPlatformToast(message, duration)
     override fun showToast(message: Int, duration: Int) = showPlatformToast(message, duration)
-
-    @Suppress("UNCHECKED_CAST")
     override fun <T> getDeviceService(name: String): T = getSystemService(name) as T
+    override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
 
     @RequiresApi(Build.VERSION_CODES.P)
     override fun authenticate(
@@ -172,31 +168,33 @@ class MainActivity : ComponentActivity(), SystemFacade {
         Log.d(TAG, "preparing to show authentication dialog.")
         // Build the BiometricPrompt
         val prompt = BiometricPrompt.Builder(this).apply {
-            setTitle(getString(Res.string.lock_scr_title))
+            setTitle(getString(R.string.lock_scr_title))
             if (subtitle != null) setSubtitle(subtitle)
             if (desc != null) setDescription(desc)
             // Set allowed authenticators for Android R and above
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) setAllowedAuthenticators(
-                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
             // Allow device credential fallback for Android Q
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) setDeviceCredentialAllowed(true)
+            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q)
+                setDeviceCredentialAllowed(true)
             // On Android P and below, BiometricPrompt crashes if a negative button is not set.
             // We provide a "Dismiss" button to avoid the crash, but this does not offer alternative
             // authentication (like PIN).
             // Future versions might include support for alternative authentication on older Android versions
             // if a compatibility library or API becomes available.
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) setNegativeButton(
-                getString(Res.string.dismiss),
-                mainExecutor,
-                { _, _ -> })
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) setConfirmationRequired(false)/*if (Build.VERSION.SDK_INT >= 35) {
-                setLogoRes(Res.drawable.ic_app)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
+                setNegativeButton(getString(R.string.dismiss), mainExecutor, { _, _ -> })
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+                setConfirmationRequired(false)
+            /*if (Build.VERSION.SDK_INT >= 35) {
+                setLogoRes(R.drawable.ic_app)
             }*/
         }.build()
         // Start the authentication process
         prompt.authenticate(
-            CancellationSignal(), mainExecutor, object : BiometricPrompt.AuthenticationCallback() {
+            CancellationSignal(),
+            mainExecutor,
+            object : BiometricPrompt.AuthenticationCallback() {
                 // Implement callback methods for authentication events (success, error, etc.)
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult?) {
                     onAuthenticated()
@@ -204,14 +202,15 @@ class MainActivity : ComponentActivity(), SystemFacade {
 
                 override fun onAuthenticationFailed() {
                     super.onAuthenticationFailed()
-                    showToast(getString(Res.string.msg_auth_failed))
+                    showToast(getString(R.string.msg_auth_failed))
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence?) {
                     super.onAuthenticationError(errorCode, errString)
-                    showToast(getString(Res.string.msg_auth_error_s, errString))
+                    showToast(getString(R.string.msg_auth_error_s, errString))
                 }
-            })
+            }
+        )
     }
 
     @SuppressLint("NewApi")
@@ -241,7 +240,10 @@ class MainActivity : ComponentActivity(), SystemFacade {
     ) {
         lifecycleScope.launch {
             controller.showSnackbar(
-                message = message, icon = icon, accent = accent, duration = duration
+                message = message,
+                icon = icon,
+                accent = accent,
+                duration = duration
             )
         }
     }
@@ -252,10 +254,11 @@ class MainActivity : ComponentActivity(), SystemFacade {
         accent: Color,
         duration: SnackbarDuration,
     ) = showSnackbar(
-        resources.getText2(id = message), icon = icon, accent = accent, duration = duration
+        resources.getText2(id = message),
+        icon = icon,
+        accent = accent,
+        duration = duration
     )
-
-    override fun launch(intent: Intent, options: Bundle?) = startActivity(intent, options)
 
     override fun initiateUpdateFlow(report: Boolean) {
         TODO("Not yet implemented")
@@ -340,6 +343,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
         controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_DEFAULT
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -347,7 +351,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
         val isFreshLaunch = savedInstanceState == null
         if (isFreshLaunch) {
             // Show splash screen only on a fresh launch
-            installSplashScreen()
+            configSplashScreen()
 
             // Apply secure mode if user has enabled it in settings.
             // FLAG_SECURE prevents screenshots and screen recording of the app’s UI.

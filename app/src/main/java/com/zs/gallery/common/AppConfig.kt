@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 4 of Jan 2026
+ * Created by sheik on 15 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,183 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 4 of Jan 2026
- *
+ * Last Modified by sheik on 15 of Jan 2026
  */
 
 package com.zs.gallery.common
-
 import android.os.Build
+import android.util.Log
+import androidx.compose.runtime.Stable
+import com.zs.gallery.common.AppConfig.KEYS_DELIMITER
+import com.zs.gallery.common.AppConfig.RECORD_DELIMITER
+import com.zs.gallery.common.AppConfig.isBackgroundBlurEnabled
 
-
+/**
+ * Singleton object for managing application-wide configuration settings.
+ *
+ * `AppConfig` provides a centralized repository for settings that can be dynamically
+ * modified during runtime. Some changes may necessitate an application restart.
+ *
+ * Initialization occurs at application startup via the [update] method.
+ * Configuration values can be modified through the application's settings interface.
+ *
+ * This object handles default values and configurations not directly managed
+ * by Jetpack Compose, ensuring a clear separation of concerns for global settings.
+ *
+ * @author Zakir Sheikh
+ * @since 1.0.0
+ */
+@Stable
 object AppConfig {
-    @JvmField var isBackgroundBlurEnabled: Boolean = Res.manifest.isAtLeast(Build.VERSION_CODES.S)
+
+    private const val TAG = "AppConfig"
+
+    /** Get/Set strategy enable background blur. */
+    @JvmField var isBackgroundBlurEnabled: Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+    /** Determines if the trash can feature for deleted media is enabled. */
     @JvmField var isTrashCanEnabled: Boolean = true
-    @JvmField var fontScale: Float = Float.NaN
+
+    /** Specifies the font scaling factor for the application. -1f indicates system default. */
+    @JvmField var fontScale: Float = -1f
+
+    /** Multiplier for adjusting the size of items in grid layouts. */
     @JvmField var gridItemSizeMultiplier: Float = 1.0f
-    @JvmField var isFileGroupingEnabled: Boolean = true
+
+    /**
+     * Toggles between SurfaceView and TextureView for video rendering.
+     * `true` enables SurfaceView, `false` enables TextureView. Defaults to `true`.
+     */
+    @JvmField var isSurfaceViewVideoRenderingPreferred = true
+
+    /**
+     * Controls whether files displayed in directories (e.g., playlist members, audio files,
+     * video files, artist-specific files) are grouped.
+     *
+     * When `true` (default), files within these directory views will be organized into
+     * groups, potentially based on criteria like album, artist, or folder structure.
+     * This can enhance readability and navigation for large collections.
+     *
+     * When `false`, files will be displayed as a flat list without any grouping,
+     * which might be preferred for smaller collections or specific user preferences.
+     */
+    @JvmField var isFileGroupingEnabled = true
+
+    /** If true, waits for the splash screen animation to finish before proceeding.  */
+    @JvmField var isSplashAnimWaitEnabled = false
     @JvmField var lockTimeoutMinutes: Int = Int.MIN_VALUE
     @JvmField var isLiveGalleryEnabled: Boolean = false
     @JvmField var isAppSecureModeEnabled: Boolean = false
 
 
-    private fun encode(): String {
-        return ""
+    // Delimiters
+    private const val KEYS_DELIMITER = '\u001E'
+    private const val RECORD_DELIMITER = ':'
+
+    // Keys
+    private const val KEY_BACKGROUND_BLUR_ENABLED = "p1"
+    private const val KEY_TRASH_CAN_ENABLED = "p2"
+    private const val KEY_FONT_SCALE = "p3"
+    private const val KEY_GRID_ITEM_SIZE_MULTIPLIER = "p4"
+    private const val KEY_SURFACE_VIEW_VIDEO_RENDERING_PREFERRED = "p5"
+    private const val KEY_FILE_GROUPING_ENABLED = "p6"
+    private const val KEY_IS_SPLASH_ANIM_WAIT_ENABLED = "p7"
+
+    /**
+     * Appends a single key-value record to the given [StringBuilder].
+     *
+     * This operator function facilitates the construction of a serialized string
+     * representing application configuration. It appends the provided `key` and `value`
+     * to the `StringBuilder`, separated by [RECORD_DELIMITER] and followed by
+     * [KEYS_DELIMITER].
+     *
+     * Example usage: `stringBuilder["myKey"] = "myValue"` results in `myKey:myValue\u001E` being appended.
+     *
+     * @param T The type of the value. Must be a simple type (String, Int, Boolean, Float, Long).
+     * @param key The key for the configuration setting.
+     * @param value The value of the configuration setting.
+     * @throws IllegalArgumentException if the provided value type `T` is not supported.
+     */
+    @Throws(IllegalArgumentException::class)
+    private inline operator fun <reified T> StringBuilder.set(key: String, value: T) {
+        when (T::class) {
+            // append key, separator, value, and record delimiter in a single call chain
+            String::class, Int::class, Boolean::class, Float::class, Long::class -> {
+                append(key)
+                append(RECORD_DELIMITER)
+                append(value)
+                append(KEYS_DELIMITER)
+            }
+            else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
+        }
     }
 
-    fun restore(value: String?){}
+    /**
+     * Serializes the current configuration into a string format.
+     *
+     * This method converts the application's current settings, such as
+     * [isLoadThumbnailFromCache] and [isBackgroundBlurEnabled], into a
+     * single string. Each setting is represented as a key-value pair,
+     * delimited by [RECORD_DELIMITER], and multiple settings are separated
+     * by [KEYS_DELIMITER].
+     *
+     * The resulting string can be used for persisting the configuration or
+     * transmitting it. It can be later parsed by the [update] method to
+     * restore the configuration.
+     *
+     * @return A string representation of the current application configuration.
+     *         Example: "param1:true␞param2:false␞"
+     */
+    fun stringify(): String {
+        val records = StringBuilder()
+        records[KEY_BACKGROUND_BLUR_ENABLED] = isBackgroundBlurEnabled
+        records[KEY_TRASH_CAN_ENABLED] = isTrashCanEnabled
+        records[KEY_FONT_SCALE] = fontScale
+        records[KEY_GRID_ITEM_SIZE_MULTIPLIER] = gridItemSizeMultiplier
+        records[KEY_SURFACE_VIEW_VIDEO_RENDERING_PREFERRED] = isSurfaceViewVideoRenderingPreferred
+        records[KEY_FILE_GROUPING_ENABLED] = isFileGroupingEnabled
+        records[KEY_IS_SPLASH_ANIM_WAIT_ENABLED] = isSplashAnimWaitEnabled
+        Log.i(TAG, "stringify: $records")
+        return records.toString()
+    }
+
+    /**
+     * Updates the application configuration from a string representation.
+     *
+     * This function parses the input string, which is expected to be a series of
+     * key-value pairs delimited by [KEYS_DELIMITER]. Each record within the string
+     * should be in the format "key[RECORD_DELIMITER]value".
+     *
+     * The function iterates through each record, extracts the key and value,
+     * and updates the corresponding configuration property.
+     *
+     * Example of `from` string:
+     * `param1:true[KEYS_DELIMITER]param2:false[KEYS_DELIMITER]`
+     *
+     * @param from The string containing the configuration data to parse.
+     *             It should be a string generated by the [stringify] method or a string
+     *             following the same format.
+     */
+    fun restore(from: String?){
+        if (from == null) return
+        Log.i(TAG, "update: $from")
+        val records = from.split(KEYS_DELIMITER).filter { it.isNotEmpty() }
+        for (record in records) {
+            Log.i(TAG, "record: $record")
+            val sepIndex = record.indexOf(RECORD_DELIMITER)
+            if (sepIndex <= 0) continue
+
+            val key = record.substring(0, sepIndex)
+            val value = record.substring(sepIndex + 1)
+            when (key) {
+                KEY_BACKGROUND_BLUR_ENABLED -> isBackgroundBlurEnabled = value.toBoolean()
+                KEY_TRASH_CAN_ENABLED -> isTrashCanEnabled = value.toBoolean()
+                KEY_FONT_SCALE -> fontScale = value.toFloat()
+                KEY_GRID_ITEM_SIZE_MULTIPLIER -> gridItemSizeMultiplier = value.toFloat()
+                KEY_SURFACE_VIEW_VIDEO_RENDERING_PREFERRED -> isSurfaceViewVideoRenderingPreferred = value.toBoolean()
+                KEY_FILE_GROUPING_ENABLED -> isFileGroupingEnabled = value.toBoolean()
+                KEY_IS_SPLASH_ANIM_WAIT_ENABLED -> isSplashAnimWaitEnabled = value.toBoolean()
+            }
+        }
+    }
 }

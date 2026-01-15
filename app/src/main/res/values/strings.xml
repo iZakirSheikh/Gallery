@@ -55,4 +55,7 @@
     <string name="info">Info</string>
     <string name="folder">Folder</string>
     <string name="album">Album</string>
+
+    <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="scr_folders_name_sds">%1$d File(s) - %2$s</string>
 </resources>

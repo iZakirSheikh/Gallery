@@ -19,7 +19,7 @@
  *
  */
 
-@file:Suppress("ClassName", "EnumEntryName")
+@file:Suppress("ClassName", "EnumEntryName", "ConstPropertyName")
 
 package com.zs.gallery.common
 
@@ -89,7 +89,7 @@ private val ColorSaver = object : IntSaver<Color> {
  * cumbersome to access during typing.
  * @see string
  * @see drawable
- * @see mainfest
+ * @see manifest
  * @see shape
  * @see action
  * @see dimen

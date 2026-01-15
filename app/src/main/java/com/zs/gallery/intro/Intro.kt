@@ -38,14 +38,14 @@ import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.OutlinedButton
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.gallery.common.LocalNavController
-import com.zs.gallery.common.Res
 import com.zs.gallery.common.NavKey
+import com.zs.gallery.common.Res
 import com.zs.gallery.common.compose.Placeholder
 import com.google.accompanist.permissions.rememberMultiplePermissionsState as Permissions
 
 @Composable
 @NonRestartableComposable
-fun AppIntro() {
+fun Intro() {
     // --- Navigation & Context Setup ---
     // Obtain the current navigation controller to handle route changes.
     // Get the current Android context for permission handling and sync operations.

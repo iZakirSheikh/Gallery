@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 4 of Jan 2026
+ * Created by sheik on 15 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 4 of Jan 2026
- *
+ * Last Modified by sheik on 15 of Jan 2026
  */
 
-package com.zs.gallery.folders
+package com.zs.gallery.files
 
-interface FolderViewState {
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.zs.common.db.media.Snapshot
+
+@Composable
+fun FileView(
+    value: Snapshot,
+    modifier: Modifier = Modifier
+) {
+
 }

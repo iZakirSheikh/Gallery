@@ -25,7 +25,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.zs.common.db.AppDb.Companion.initialize
+import com.zs.common.db.RoomDb.Companion.initialize
 import com.zs.common.db.media.Album
 import com.zs.common.db.media.Album.Memory
 import com.zs.common.db.media.MediaFile
@@ -35,7 +35,7 @@ import com.zs.common.db.media.MediaProvider
     version = 1,
     entities = [MediaFile::class, Album::class, Memory::class]
 )
-internal abstract class AppDb : RoomDatabase() {
+internal abstract class RoomDb : RoomDatabase() {
 
     /**
      * Represents the [Dao] for managing [Album]
@@ -47,7 +47,7 @@ internal abstract class AppDb : RoomDatabase() {
         // Singleton prevents multiple instances of database opening at the
         // same time.
         @Volatile
-        private var INSTANCE: AppDb? = null
+        private var INSTANCE: RoomDb? = null
 
         /**
          * Initializes the singleton database instance.
@@ -70,7 +70,7 @@ internal abstract class AppDb : RoomDatabase() {
                     // This ensures we don’t accidentally leak an Activity or Service context.
                     INSTANCE = Room.databaseBuilder(
                         context.applicationContext,
-                        AppDb::class.java,
+                        RoomDb::class.java,
                         "app_db"
                     )
                         //.addCallback(CALLBACK) // Optional: run custom logic when DB is created/opened
@@ -90,7 +90,7 @@ internal abstract class AppDb : RoomDatabase() {
          * @return The singleton instance of [AppDb].
          * @throws IllegalArgumentException if the database has not been initialized.
          */
-        fun getInstance(): AppDb =
+        fun getInstance(): RoomDb =
             INSTANCE ?: error("Database instance missing — ensure initialization at app startup.")
     }
 }

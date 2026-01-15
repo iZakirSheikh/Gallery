@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.NonRestartableComposable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -185,9 +184,6 @@ val Colors.shine
     )
 
 typealias BackdropProvider = HazeState
-val LocalBackdropProvider = staticCompositionLocalOf<BackdropProvider?> {
-    error("no LocalBackdropProvider set.")
-}
 
 /** Creates and [remember] s the instance of [BackdropProvider] */
 @Composable

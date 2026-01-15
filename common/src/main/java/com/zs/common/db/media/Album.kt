@@ -25,6 +25,7 @@ package com.zs.common.db.media
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
@@ -36,6 +37,10 @@ import androidx.room.PrimaryKey
  * @property description Optional user-provided description for the album.
  * @property dateAdded Timestamp when the album was created.
  * @property dateModified Timestamp of the last modification to the album.
+ * @property coverID Identifier of the media item used as the album cover.
+ *                        If the file is available locally, this is the stored ID;
+ *                        otherwise, it refers to the remote source ID.
+ *                        Typically calculated as the ID of the most recently added item.
  */
 @Entity(tableName = "tbl_albums", indices = [Index(value = ["name"], unique = true)])
 class Album internal constructor(
@@ -45,6 +50,10 @@ class Album internal constructor(
     @ColumnInfo(name = "date_added") val dateAdded: Long = System.currentTimeMillis(),
     @ColumnInfo(name = "date_modified") val dateModified: Long = dateAdded
 ) {
+
+    @Ignore
+    val coverID: String = ""
+
     /**
      * Represents a Memory within an album.
      *
@@ -123,6 +132,7 @@ class Album internal constructor(
         if (dateModified != other.dateModified) return false
         if (name != other.name) return false
         if (description != other.description) return false
+        if (coverID != other.coverID) return false
 
         return true
     }
@@ -133,10 +143,11 @@ class Album internal constructor(
         result = 31 * result + dateModified.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + (description?.hashCode() ?: 0)
+        result = 31 * result + coverID.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "Album(id=$id, name='$name', description=$description, dateAdded=$dateAdded, dateModified=$dateModified)"
+        return "Album(id=$id, name='$name', description=$description, dateAdded=$dateAdded, dateModified=$dateModified, coverMediaID='$coverID')"
     }
 }

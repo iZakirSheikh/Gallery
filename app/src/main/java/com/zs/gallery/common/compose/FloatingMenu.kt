@@ -58,7 +58,6 @@ import com.zs.gallery.common.Res
 import com.zs.gallery.common.Res.action
 import com.zs.gallery.common.vectorResource
 
-
 /**
  * A composable that renders a single action item.
  *
@@ -268,4 +267,3 @@ fun FloatingActionMenu(
         }
     )
 }
-

@@ -1,7 +1,7 @@
 /*
  * Copyright (c)  2026 Zakir Sheikh
  *
- * Created by sheik on 7 of Jan 2026
+ * Created by sheik on 15 of Jan 2026
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Last Modified by sheik on 7 of Jan 2026
- *
+ * Last Modified by sheik on 15 of Jan 2026
  */
 
 package com.zs.common.db.media
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.zs.common.util.packFloats
 import com.zs.common.util.packInts
@@ -32,6 +30,32 @@ import com.zs.common.util.unpackFloat2
 import com.zs.common.util.unpackInt1
 import com.zs.common.util.unpackInt2
 import com.zs.common.db.media.MediaProvider as MP
+
+// This represents the base table in the app database, which points to the actual file.
+// It is comprised of IDs and data.
+
+// Identifiers:
+// - id: The main identifier, always present.
+// - store_id: Local storage ID. Set to -1 for files that are in special private folders or only
+//             available remotely.
+// - remote_id: (planned for future versions) A string with default value "".
+//              Empty means the file is not on a remote source.
+//              Non-empty means it points to a remote source (e.g., Google Photos, prefixed with "GP"
+//              for Google Photos or another code for other services).
+//              A photo can exist either in a single remote source, locally, or in a private local
+//              folder.
+
+// Deletion / Trashing:
+// - For local files, deletion depends on Android version:
+//   • Android > 10 → uses the system trash mechanism.
+//   • Android < 10 → uses the in-app trash mechanism.
+// - Trashed items are removed automatically after 30 days from the date of trashing.
+
+// Data field:
+// - Represents the absolute path of the file stored locally.
+// - Primarily used to provide folder view.
+// In the future, we may use a hash of metadata to resolve whether the file has been stored remotely
+// once the user removes and re-installs the app.
 
 /**
  * Room entity representing a single media file stored in local storage.
@@ -66,18 +90,18 @@ import com.zs.common.db.media.MediaProvider as MP
  *
  * ⚠️ **Note:** All timestamps are stored as milliseconds since epoch (UTC).
  */
-@Entity(tableName = "tbl_media", indices = [Index(value = ["data"], unique = true)])
+@Entity(tableName = "tbl_media")
 class MediaFile(
     // ── Identity ────────────────────────────────────────────
     @PrimaryKey(autoGenerate = true) @JvmField val id: Long,
-    @ColumnInfo("store_id") @JvmField val storeID: Long,
+    @ColumnInfo("store_id", defaultValue = "-1") @JvmField val storeID: Long,
 
     // ── Source / naming ─────────────────────────────────────
     @JvmField val data: String, // absolute path to file in local storage
     @JvmField val name: String,
 
     // ── Intrinsic media attributes ──────────────────────────
-    @JvmField val mimeType: String?,
+    @ColumnInfo("mime_type") @JvmField val mimeType: String?,
     @JvmField val size: Long,
     @JvmField val bitrate: Int,
     @JvmField val year: Int,
@@ -236,6 +260,9 @@ class MediaFile(
     val resolution get() = Resolution(rawResolution)
     val timeline get() = Timeline(rawTimeline)
 
+    /**
+     * Construct [MediaFile] from the given parameters.
+     */
     internal constructor(
         id: Long = 0,
         storeID: Long,

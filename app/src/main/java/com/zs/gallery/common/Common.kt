@@ -51,7 +51,7 @@ import kotlin.coroutines.CoroutineContext
  * Defines the strategies for extracting a source color accent
  * to construct the application theme.
  */
-enum class ThemeAccentPolicy { CUSTOM, DEFAULT, WALLPAPER }
+enum class AccentColorPolicy { CUSTOM, DEFAULT, WALLPAPER }
 
 /**
  * Represents the available options for applying dark theme behavior within the application.

@@ -148,7 +148,7 @@ internal class MediaSyncWorker private constructor(
     override suspend fun doWork(): Result {
         // Schedule next cycle immediately to keep sync continuous
         schedule(context)
-        val db = AppDb.getInstance()                // database wrapper
+        val db = RoomDb.getInstance()                // database wrapper
         val resolver = context.contentResolver      // MediaStore access
         val dao = db.mediaProvider                   // DAO for media table
         // --- Step 1: Detect and clean up missing files ---
@@ -257,7 +257,6 @@ internal class MediaSyncWorker private constructor(
                         if (existing == null) dao.insert(newFile) else dao.update(newFile)
                     }
                 }
-
                 // 🔒 Step D: Wrap in transaction for atomicity.
                 db.withTransaction(transaction)
             }
