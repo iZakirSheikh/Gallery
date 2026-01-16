@@ -48,8 +48,13 @@ class Snapshot(
     @JvmField val mimeType: String?,
     @JvmField internal val rawResolution: Long,
     @JvmField internal val rawTimeline: Long,
-    @JvmField internal val rawExtras: Long
+    @JvmField internal val rawExtras: Int
 ){
+
+    val resolution get() = MediaFile.Resolution(rawResolution)
+    val timeline get() = MediaFile.Timeline(rawTimeline)
+    val extras get() = MediaFile.Extras(rawExtras)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

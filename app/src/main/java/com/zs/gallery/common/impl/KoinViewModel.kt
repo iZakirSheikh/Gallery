@@ -157,4 +157,4 @@ abstract class KoinViewModel : ScopeViewModel() {
         super.onCleared()
         Log.d(TAG, "onCleared: ${this::class.simpleName}")
     }
-}-
+}

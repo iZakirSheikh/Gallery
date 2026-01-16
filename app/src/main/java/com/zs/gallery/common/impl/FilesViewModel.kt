@@ -20,16 +20,58 @@
 
 package com.zs.gallery.common.impl
 
+import android.text.format.DateUtils
+import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.zs.common.db.media.MediaProvider
 import com.zs.common.db.media.Snapshot
 import com.zs.gallery.common.NavKey
 import com.zs.gallery.files.FilesViewState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-class FilesViewModel(val key: NavKey.Files, val provider: MediaProvider) : KoinViewModel(), FilesViewState{
-    override val data: Flow<PagingData<Snapshot>>
-        get() = TODO("Not yet implemented")
+class FilesViewModel(
+    val key: NavKey.Files,
+    val provider: MediaProvider
+) : KoinViewModel(), FilesViewState {
 
+    private val pager = Pager(
+        // Configure paging behavior:
+        // - pageSize = 20 → each page loads 20 items at a time.
+        config = PagingConfig(pageSize = 20),
 
+        // Provide the factory that creates the paging source.
+        pagingSourceFactory = { provider.snapshots() }
+    )
+
+    override val data: Flow<PagingData<Snapshot>> =
+        pager.flow // Reactive stream of paged Snapshot items.
+            // Transform each emitted PagingData before it reaches the UI.
+            .map { list ->
+                // For each item in the paged list...
+                list.map { item ->
+                    // Attempt to interpret the item's header as a timestamp (Long).
+                    // If parsing fails, leave the item unchanged.
+                    val header = item.header?.toLongOrNull() ?: return@map item
+
+                    // Replace the raw timestamp with a human-readable relative time string.
+                    // Example: "5 minutes ago", "Yesterday", "3 days ago".
+                    item.header = DateUtils.getRelativeTimeSpanString(
+                        header,                       // The timestamp to format
+                        System.currentTimeMillis(),   // Compare against current time
+                        DateUtils.DAY_IN_MILLIS       // Minimum resolution: 1 day
+                    ).toString()
+
+                    // Return the updated item with its header transformed.
+                    item
+                }
+            }
+            // Cache the Flow in the ViewModel scope.
+            // This ensures the paging data survives configuration changes
+            // and avoids re-fetching when the UI is recreated.
+            .cachedIn(viewModelScope)
 }
