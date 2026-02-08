@@ -180,4 +180,4 @@ inline fun <T> runIf(condition: Boolean, block: () -> T): T? = if (condition) bl
  * casting it to a [Long] for consistent return type.
  */
 val PackageInfo.versionCodeCompat: Long get() =
-    if (Res.manifest.isAtLeast(Build.VERSION_CODES.P)) longVersionCode else versionCode.toLong()
+    if (Res.app.isAtLeast(Build.VERSION_CODES.P)) longVersionCode else versionCode.toLong()

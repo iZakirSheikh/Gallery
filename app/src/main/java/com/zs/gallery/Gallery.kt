@@ -110,13 +110,13 @@ fun Gallery(
     val accent = run {
         val enabled by preference(Res.key.dynamic_colors)
         when {
-            Res.manifest.isAtLeast(Build.VERSION_CODES.S) && enabled -> dynamicAccentColor(
+            Res.app.isAtLeast(Build.VERSION_CODES.S) && enabled -> dynamicAccentColor(
                 activity,
                 isDarkTheme
             )
 
-            isDarkTheme -> Res.manifest.color_accent_dark
-            else -> Res.manifest.color_accent_light
+            isDarkTheme -> Res.app.color_accent_dark
+            else -> Res.app.color_accent_light
         }
     }
 

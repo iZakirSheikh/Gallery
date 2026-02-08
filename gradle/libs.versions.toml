@@ -1,12 +1,12 @@
 [versions]
 agp = "9.0.0"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 room = "2.8.4"
-nav3 = "1.1.0-alpha01"
+nav3 = "1.1.0-alpha03"
 coil = "3.3.0"
 toolkit = "3.7.11-dev"
-glance = "1.0.0"
-media3 = "1.9.0"
+glance = "1.1.1"
+media3 = "1.9.2"
 
 [plugins]
 
@@ -32,18 +32,18 @@ androidx-splashscreen = { module = "androidx.core:core-splashscreen", version = 
 androidx-startup = { module = "androidx.startup:startup-runtime", version = "1.2.0" }
 androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", version = "1.4.2" }
 androidx-biometric = { module = "androidx.biometric:biometric-ktx", version = "1.4.0-alpha02" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.2" }
-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.0" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.3" }
+work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.1" }
 
 # ─── Media & Playback ───
 # Libraries for audio/video playback and media handling
 androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
-nextlib = { module = "io.github.anilbeesetti:nextlib-media3ext", version = "1.8.0-0.9.0" }
+nextlib = { module = "io.github.anilbeesetti:nextlib-media3ext", version = "1.9.1-0.11.0" }
 
 # ─── Google Play Services ───
 # Play Store integration, billing, updates, reviews
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }
-play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.1" }
+play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.2" }
 google-billing-ktx = { module = "com.android.billingclient:billing-ktx", version = "8.3.0" }
 
 # ─── Firebase ───
@@ -53,18 +53,18 @@ firebase-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics-
 
 # ─── Ads & Monetization ───
 # Unity Ads SDKs for mediation and ad quality
-unity_ads_mediation = { module = "com.unity3d.ads-mediation:mediation-sdk", version = "9.2.0" }
-unity_ads_adquality = { module = "com.unity3d.ads-mediation:adquality-sdk", version = "9.2.1" }
+unity_ads_mediation = { module = "com.unity3d.ads-mediation:mediation-sdk", version = "9.3.0" }
+unity_ads_adquality = { module = "com.unity3d.ads-mediation:adquality-sdk", version = "9.3.1" }
 
 # ─── Jetpack Compose ───
 # Compose UI, tooling, and icons
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2025.12.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.01.01" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
-androidx-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.10.0" }
+androidx-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.10.2" }
 telephoto-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.18.0" }
 
 # ─── Navigation ───
@@ -108,8 +108,8 @@ glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = 
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 
 # Paging
-androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version = "3.3.6" }
-androidx-paging-compose = { module = "androidx.paging:paging-compose", version = "3.4.0-beta01" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version = "3.4.0" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version = "3.4.0" }
 
 [bundles]
 coil = ["coil-compose", "coil-svg", "coil-video"]

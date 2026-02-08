@@ -224,14 +224,14 @@ interface SystemFacade {
      * @param pkg the package name of the app to open on the App Store.
      */
     fun launchAppStore(pkg: String) {
-        val url = "${Res.manifest.market_uri_prefix}$pkg"
+        val url = "${Res.app.market_uri_prefix}$pkg"
         // Create an Intent to open the Play Store app.
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {
             // Set the package to explicitly target the Play Store app.
             // Don't add this activity to the history stack.
             // Open in a new document (tab or window).
             // Allow multiple instances of the task.
-            setPackage(Res.manifest.market_package)
+            setPackage(Res.app.market_package)
             addFlags(
                 Intent.FLAG_ACTIVITY_NO_HISTORY
                         or Intent.FLAG_ACTIVITY_NEW_DOCUMENT
@@ -242,7 +242,7 @@ interface SystemFacade {
         val res = kotlin.runCatching { launch(intent) }
         // If launching the app fails, use the fallback URL to open in a web browser.
         if (res.isFailure) {
-            val fallback = "${Res.manifest.market_web_url_prefix}$pkg"
+            val fallback = "${Res.app.market_web_url_prefix}$pkg"
             launch(Intent(Intent.ACTION_VIEW, fallback.toUri()))
         }
     }

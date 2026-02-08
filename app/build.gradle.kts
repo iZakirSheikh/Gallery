@@ -87,7 +87,6 @@ android {
         create("community") {
             dimension = "edition"
             versionNameSuffix = "-foss"
-            applicationIdSuffix = ".foss"
         }
 
         // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
@@ -130,13 +129,9 @@ android {
         // DEBUG BUILD
         // -------------------------------------------------------------------------
         debug {
-            applicationIdSuffix =
-                ".dev"  // 📛 Appends ".debug" to the application ID so debug and release can coexist
-            resValue(
-                "string",
-                "launcher_label",
-                "Debug"
-            )  // 🏷️ Custom string resource for launcher label in debug builds
+            // 📛 Appends ".debug" to the application ID so debug and release can coexist
+            applicationIdSuffix = ".dev"
+            resValue("string", "launcher_label", "Debug")
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }

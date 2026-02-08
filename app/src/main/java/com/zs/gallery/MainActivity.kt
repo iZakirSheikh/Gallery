@@ -404,7 +404,7 @@ class MainActivity : ComponentActivity(), SystemFacade {
                     )
                 )
 
-                !checkSelfPermissions(Res.manifest.permissions) -> Navigator(NavKey.AppIntro)
+                !checkSelfPermissions(Res.app.permissions) -> Navigator(NavKey.AppIntro)
                 isAuthenticationRequired -> Navigator(NavKey.Lockscreen)
                 else -> Navigator(NavKey.Files())
             }

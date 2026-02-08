@@ -89,7 +89,7 @@ private val ColorSaver = object : IntSaver<Color> {
  * cumbersome to access during typing.
  * @see string
  * @see drawable
- * @see manifest
+ * @see app
  * @see shape
  * @see action
  * @see dimen
@@ -108,7 +108,7 @@ object Res {
      * Provides URIs, package names, default colors, and permission lists
      * required for app configuration and external navigation.
      */
-    object manifest {
+    object app {
         // Play Store URIs
         const val market_uri_prefix = "market://details?id="
         const val market_web_url_prefix = "http://play.google.com/store/apps/details?id="
@@ -180,11 +180,11 @@ object Res {
         )
         val app_launch_counter = intPreferenceKey("_launch_counter", 0)
         val dynamic_colors =
-            booleanPreferenceKey("_dynamic_colors", manifest.isAtLeast(Build.VERSION_CODES.S))
+            booleanPreferenceKey("_dynamic_colors", app.isAtLeast(Build.VERSION_CODES.S))
         val dark_accent_color =
-            intPreferenceKey("_dark_accent_color", manifest.color_accent_dark, ColorSaver)
+            intPreferenceKey("_dark_accent_color", app.color_accent_dark, ColorSaver)
         val light_accent_color =
-            intPreferenceKey("_light_accent_color", manifest.color_accent_light, ColorSaver)
+            intPreferenceKey("_light_accent_color", app.color_accent_light, ColorSaver)
         val app_version_code = longPreferenceKey("_app_version_code", -1)
         val app_config = stringPreferenceKey("_app_config")
     }

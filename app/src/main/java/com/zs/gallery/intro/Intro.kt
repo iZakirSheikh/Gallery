@@ -57,7 +57,7 @@ fun Intro() {
     // Once all required permissions are granted:
     //   1. Trigger immediate media synchronization.
     //   2. Rebase navigation to the Timeline route (main screen).
-    val permission = Permissions(permissions = Res.manifest.permissions) { results ->
+    val permission = Permissions(permissions = Res.app.permissions) { results ->
         // Check if all permissions are granted; if not, exit early.
         if (!results.all { (_, state) -> state }) return@Permissions
         MediaProvider.runImmediateSync(context)  // Perform immediate sync of media content.
