@@ -79,7 +79,7 @@ object AppConfig {
 
     /** If true, waits for the splash screen animation to finish before proceeding.  */
     @JvmField var isSplashAnimWaitEnabled = false
-    @JvmField var lockTimeoutMinutes: Int = Int.MIN_VALUE
+    @JvmField var lockTimeoutMinutes: Int = -1
     @JvmField var isLiveGalleryEnabled: Boolean = false
     @JvmField var isAppSecureModeEnabled: Boolean = false
 
