@@ -99,6 +99,10 @@ abstract class MediaProvider {
     @Query("SELECT COUNT(*) FROM tbl_media")
     internal abstract suspend fun count(): Int
 
+    /** @return store ID if available, -1 otherwise. */
+    @Query("SELECT COALESCE(store_id, -1) FROM tbl_media WHERE id = :id ")
+    internal abstract suspend fun getLocalStoreId(id: Long): Long
+
     @RawQuery
     internal abstract suspend fun rawQuery(query: RoomRawQuery): Int
     internal suspend fun deleteByStoreIdNotIn(ids: String) {

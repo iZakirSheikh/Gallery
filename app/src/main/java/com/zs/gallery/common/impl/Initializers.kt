@@ -27,8 +27,10 @@ import android.util.Log
 import androidx.compose.animation.core.AnimationConstants
 import androidx.startup.Initializer
 import coil3.asImage
+import coil3.fetch.Fetcher
 import coil3.request.crossfade
 import com.zs.common.analytics.Analytics
+import com.zs.common.coil.ThumbnailFetcher
 import com.zs.common.db.media.MediaProvider
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.gallery.common.AppConfig
@@ -69,8 +71,7 @@ class CoilInitializer : Initializer<Unit> {
             .error(error)
             .crossfade(AnimationConstants.DefaultDurationMillis)
             .components {
-                // Example: register custom fetchers or decoders here
-                // add(ThumbnailFetcher.Factory())
+                add(Fetcher.Factory<Long> { data, options, _ -> ThumbnailFetcher(data, options) })
             }
             .build()
 

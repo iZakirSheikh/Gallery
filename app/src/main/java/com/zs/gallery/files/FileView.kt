@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.zs.common.coil.mimeType
 import com.zs.common.db.media.Snapshot
 import com.zs.compose.foundation.thenIf
 import com.zs.compose.theme.AppTheme
@@ -84,7 +85,8 @@ fun FileView(
         AsyncImage(
             model = remember(key1 = value.id) {
                 ImageRequest.Builder(ctx).apply {
-                   // data(value.mediaUri)
+                   data(value.id)
+                   mimeType(value.mimeType)
                 }.build()
             },
             contentDescription = null,
