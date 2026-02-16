@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationDefaultConfig
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -22,6 +23,29 @@ val secrets = arrayOf(
     "PLAY_CONSOLE_APP_RSA_KEY",
 )
 
+// -----------------------------------------------------------------------------
+// KOTLIN COMPILER OPTIONS
+// -----------------------------------------------------------------------------
+kotlin {
+    compilerOptions {
+        // Target JVM bytecode version (was "11" string, now typed enum)
+        jvmTarget = JvmTarget.JVM_11
+
+        // Add experimental/advanced compiler flags
+        freeCompilerArgs.addAll(
+            //   "-XXLanguage:+ExplicitBackingFields", //  Explicit backing fields
+            "-XXLanguage:+NestedTypeAliases",
+            "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
+            "-Xwhen-guards",                 // Enable experimental when-guards
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
+            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",             // Custom theme experimental
+            "-Xnon-local-break-continue",    // Allow non-local break/continue
+            "-Xcontext-sensitive-resolution",// Context-sensitive overload resolution
+            "-Xcontext-parameters"           // Enable context parameters (experimental)
+        )
+    }
+}
+
 android {
     namespace = "com.zs.gallery"
     compileSdk = 36
@@ -30,8 +54,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
-        versionCode = 70
-        versionName = "0.9.0-dev"
+        versionCode = 71
+        versionName = "0.9.1-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -63,16 +87,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",
-            "-Xwhen-guards",
-            "-Xnon-local-break-continue"
-        )
-    }
+
     buildFeatures { compose = true; buildConfig = true }
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
