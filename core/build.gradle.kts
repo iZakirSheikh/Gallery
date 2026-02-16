@@ -1,39 +1,47 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+// -----------------------------------------------------------------------------
+// PLUGINS
+// Core build plugins for Android + Kotlin support
+// -----------------------------------------------------------------------------
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.android.library)          // Android Library plugin
+    alias(libs.plugins.jetbrains.kotlin.android) // Kotlin Android plugin
 }
 
 // -----------------------------------------------------------------------------
 // KOTLIN COMPILER OPTIONS
+// Configure Kotlin compiler behavior, JVM target, and experimental flags
 // -----------------------------------------------------------------------------
 kotlin {
     compilerOptions {
-        // Target JVM bytecode version (was "11" string, now typed enum)
+        // Target JVM bytecode version (typed enum instead of raw string)
         jvmTarget = JvmTarget.JVM_11
 
-        // Add experimental/advanced compiler flags
+        // Advanced / experimental compiler flags
         freeCompilerArgs.addAll(
-            //   "-XXLanguage:+ExplicitBackingFields", //  Explicit backing fields
-            "-XXLanguage:+NestedTypeAliases",
-            "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
-            "-Xwhen-guards",                 // Enable experimental when-guards
+            // "-XXLanguage:+ExplicitBackingFields", // Explicit backing fields (disabled for now)
+            "-XXLanguage:+NestedTypeAliases",       // Nested type aliases
+            "-Xopt-in=kotlin.RequiresOptIn",        // Opt-in to @RequiresOptIn APIs
+            "-Xwhen-guards",                        // Experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
-            "-Xnon-local-break-continue",    // Allow non-local break/continue
-            "-Xcontext-sensitive-resolution",// Context-sensitive overload resolution
-            "-Xcontext-parameters"           // Enable context parameters (experimental)
+            "-Xnon-local-break-continue",           // Allow non-local break/continue
+            "-Xcontext-sensitive-resolution",       // Context-sensitive overload resolution
+            "-Xcontext-parameters"                  // Context parameters (experimental)
         )
     }
 }
 
+// -----------------------------------------------------------------------------
+// ANDROID CONFIGURATION
+// Namespace, SDK versions, build types, and Java compatibility
+// -----------------------------------------------------------------------------
 android {
     namespace = "com.zs.core"
     compileSdk = 36
 
     defaultConfig {
         minSdk = 24
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
@@ -47,15 +55,20 @@ android {
             )
         }
     }
+
+    // Java compatibility settings
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 }
 
+// -----------------------------------------------------------------------------
+// DEPENDENCIES
+// -----------------------------------------------------------------------------
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation (libs.androidx.exifinterface)
+    implementation(libs.androidx.exifinterface)
     api(libs.bundles.coil)
     implementation(libs.androidx.activity.compose)
     implementation(libs.bundles.media3)

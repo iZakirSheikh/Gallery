@@ -1,14 +1,22 @@
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+// -----------------------------------------------------------------------------
+// PLUGINS
+// Core build plugins for Android Application, Kotlin, Compose, and Firebase
+// -----------------------------------------------------------------------------
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.google.service)
-    alias(libs.plugins.crashanlytics)
+    alias(libs.plugins.android.application)      // Android Application plugin
+    alias(libs.plugins.jetbrains.kotlin.android) // Kotlin Android plugin
+    alias(libs.plugins.compose.compiler)         // Compose compiler plugin
+    alias(libs.plugins.google.services)          // Google Services (Firebase integration)
+    alias(libs.plugins.crashanlytics)            // Firebase Crashlytics
 }
 
+// -----------------------------------------------------------------------------
+// BUILD CONFIG HELPERS
+// Utility to add BuildConfig fields (e.g., secrets, constants)
+// -----------------------------------------------------------------------------
 /**
  * Adds a string BuildConfig field to the project.
  */
@@ -16,36 +24,39 @@ private fun ApplicationDefaultConfig.buildConfigField(name: String, value: Strin
     buildConfigField("String", name, "\"" + value + "\"")
 
 /**
- * The secrets that needs to be added to BuildConfig at runtime.
+ * Secrets injected into BuildConfig at runtime (via GitHub env).
  */
 val secrets = arrayOf(
-//    "ADS_APP_ID",
-    "PLAY_CONSOLE_APP_RSA_KEY",
+    // "ADS_APP_ID", // Example placeholder
+    "PLAY_CONSOLE_APP_RSA_KEY"
 )
 
 // -----------------------------------------------------------------------------
 // KOTLIN COMPILER OPTIONS
+// Configure JVM target and experimental compiler flags
 // -----------------------------------------------------------------------------
 kotlin {
     compilerOptions {
-        // Target JVM bytecode version (was "11" string, now typed enum)
-        jvmTarget = JvmTarget.JVM_11
+        jvmTarget = JvmTarget.JVM_11 // Target JVM bytecode version
 
-        // Add experimental/advanced compiler flags
         freeCompilerArgs.addAll(
-            //   "-XXLanguage:+ExplicitBackingFields", //  Explicit backing fields
-            "-XXLanguage:+NestedTypeAliases",
-            "-Xopt-in=kotlin.RequiresOptIn", // Opt-in to @RequiresOptIn APIs
-            "-Xwhen-guards",                 // Enable experimental when-guards
+            // "-XXLanguage:+ExplicitBackingFields", // Explicit backing fields (disabled)
+            "-XXLanguage:+NestedTypeAliases",       // Nested type aliases
+            "-Xopt-in=kotlin.RequiresOptIn",        // Opt-in to @RequiresOptIn APIs
+            "-Xwhen-guards",                        // Experimental when-guards
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
             "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",             // Custom theme experimental
-            "-Xnon-local-break-continue",    // Allow non-local break/continue
-            "-Xcontext-sensitive-resolution",// Context-sensitive overload resolution
-            "-Xcontext-parameters"           // Enable context parameters (experimental)
+            "-Xnon-local-break-continue",           // Allow non-local break/continue
+            "-Xcontext-sensitive-resolution",       // Context-sensitive overload resolution
+            "-Xcontext-parameters"                  // Context parameters (experimental)
         )
     }
 }
 
+// -----------------------------------------------------------------------------
+// ANDROID CONFIGURATION
+// Namespace, SDK versions, build types, features, and packaging
+// -----------------------------------------------------------------------------
 android {
     namespace = "com.zs.gallery"
     compileSdk = 36
@@ -59,67 +70,92 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
-        // Load secrets into BuildConfig
-        // These are passed through env of github.
+
+        // Load secrets into BuildConfig (from GitHub env)
         for (secret in secrets) {
             buildConfigField(secret, System.getenv(secret) ?: "")
         }
     }
+
     buildTypes {
-        // Make sure release is version is optimised.
+        // Release build: optimized with shrinking + ProGuard
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
 
-        // Add necessary changes to debug apk.
+        // Debug build: suffixes for coexistence with release
         debug {
-            // makes it possible to install both release and debug versions in same device.
             applicationIdSuffix = ".dev"
             resValue("string", "app_name", "Debug")
             versionNameSuffix = "-debug"
         }
     }
+
+    // Java compatibility
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    // Enable Compose + BuildConfig features
     buildFeatures { compose = true; buildConfig = true }
+
+    // Exclude redundant license files
     packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
+// -----------------------------------------------------------------------------
+// DEPENDENCIES
+// Grouped by functional area: Core, Compose, Toolkit, UI, Firebase, Play Services
+// -----------------------------------------------------------------------------
 dependencies {
-    implementation(libs.androidx.koin)
+    // Local project modules
+    implementation(project(":core"))
+
+    // Compose core + BOM
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // Navigation + Toolkit
+    implementation(libs.navigation.compose)
+    implementation(libs.toolkit.theme)
+    implementation(libs.toolkit.foundation)
     implementation(libs.toolkit.preferences)
-    implementation(libs.androidx.startup.runtime)
-    implementation(libs.androidx.core.splashscreen)
+
+    // AndroidX utilities
+    implementation(libs.androidx.splashscreen)
+    implementation(libs.androidx.startup)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.google.fonts)
+
+    // Compose extensions
+    implementation(libs.telephoto.zoomable)
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.koin)
+    implementation(libs.chrisbanes.haze)
+    implementation(libs.lottie.compose)
+
+    // Bundles
+    implementation(libs.bundles.coil)   // Image loading
+    implementation(libs.bundles.icons)  // Material icons
+
+    // Firebase
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)
-    implementation(libs.androidx.ui.text.google.fonts)
-    implementation(libs.saket.zoomable)
-    implementation(libs.chrisbanes.haze)
+
+    // Play Services
     implementation(libs.play.app.update.ktx)
     implementation(libs.play.app.review.ktx)
 
-    // ui
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.navigation.compose)
-    implementation(libs.lottie.compose)
-    implementation(libs.toolkit.theme)
-    implementation(libs.toolkit.foundation)
-
-    // local
-    implementation(project(":core"))
-
-    // bundles
-    implementation(libs.bundles.icons)
-    implementation(libs.bundles.compose.ui)
-
-    implementation(libs.bundles.compose.ui.tooling)
-    //implementation("dev.chrisbanes.haze:haze-materials:1.5.3")
+    // Debug-only tooling
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
