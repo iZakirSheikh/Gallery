@@ -114,8 +114,8 @@ android {
 // Grouped by functional area: Core, Compose, Toolkit, UI, Firebase, Play Services
 // -----------------------------------------------------------------------------
 dependencies {
+    implementation(project(":common"))
     // Local project modules
-    implementation(project(":core"))
 
     // Compose core + BOM
     implementation(libs.androidx.activity.compose)
