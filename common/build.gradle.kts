@@ -1,17 +1,25 @@
+import com.android.build.api.dsl.VariantDimension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // -----------------------------------------------------------------------------
+// SECRETS
+// -----------------------------------------------------------------------------
+// 🔐 Keys or IDs injected into BuildConfig at runtime.
+private val secrets = arrayOf(/*"ADS_APP_ID",*/ "PLAY_CONSOLE_APP_RSA_KEY")
+// -----------------------------------------------------------------------------
 // PLUGINS
-// Core build plugins for Android + Kotlin support
 // -----------------------------------------------------------------------------
 plugins {
     alias(libs.plugins.android.library)          // Android Library plugin
     alias(libs.plugins.jetbrains.kotlin.android) // Kotlin Android plugin
 }
 
+/** Adds a string BuildConfig field to the project. */
+private fun VariantDimension.buildConfigField(name: String, value: String) =
+    buildConfigField("String", name, "\"" + value + "\"")
+
 // -----------------------------------------------------------------------------
 // KOTLIN COMPILER OPTIONS
-// Configure Kotlin compiler behavior, JVM target, and experimental flags
 // -----------------------------------------------------------------------------
 kotlin {
     compilerOptions {
@@ -32,20 +40,97 @@ kotlin {
     }
 }
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // ANDROID CONFIGURATION
-// Namespace, SDK versions, build types, and Java compatibility
-// -----------------------------------------------------------------------------
+// ============================================================================
 android {
     namespace = "com.zs.core"
-    compileSdk = 36
+    compileSdk { version = release(36) }
+    buildFeatures { buildConfig = true }
 
+    // Java compatibility settings
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    // DEFAULT CONFIGURATION
     defaultConfig {
         minSdk = 24
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
-    }
 
+        // --------------------------------------------------------------------
+        // BUILD CONFIG: SECRETS
+        // --------------------------------------------------------------------
+        // Inject secrets from environment variables.
+        // Missing values default to empty strings to avoid build failures.
+        for (secret in secrets)
+            buildConfigField(secret, System.getenv(secret) ?: "")
+
+        // 📌 Edition constants (used for comparison in code)
+        buildConfigField("FLAVOR_COMMUNITY", "_community")
+        buildConfigField("FLAVOR_STANDARD", "_standard")
+        buildConfigField("FLAVOR_PLUS", "_plus")
+        buildConfigField("FLAVOR_PREMIUM", "_premium")
+    }
+    // -------------------------------------------------------------------------
+    // PRODUCT FLAVORS
+    // -------------------------------------------------------------------------
+    flavorDimensions += "edition"
+    productFlavors {
+        // STANDARD → Default monetized edition.
+        // PLUS + Ad SDK
+        create("standard") { dimension = "edition" }
+
+        // COMMUNITY → FOSS/open‑source build.
+        // Minimal free edition with no ads, no telemetry, and no purchases.
+        create("community") { dimension = "edition" }
+
+        // PLUS → Privacy-friendly edition:
+        // No Ad SDK, but telemetry and in‑app purchases.
+        create("plus") { dimension = "edition" }
+
+        // PREMIUM → Full unlock build.
+        // Based on Community, but with all features enabled.
+        create("premium") { dimension = "edition" }
+    }
+    // -------------------------------------------------------------------------
+    // SOURCE SETS CONFIGURATION
+    // -------------------------------------------------------------------------
+    sourceSets {
+        // Community flavor → uses stubbed (no-op) implementations for all shared libs
+        getByName("community") {
+            java.srcDirs(
+                "src/shared/analytics/stub/java",
+                "src/shared/billing/stub/java",
+                "src/shared/ads/stub/java"
+            )
+        }
+
+        // Premium flavor → also wired to stub implementations (restricted feature set)
+        getByName("premium") {
+            java.srcDirs(
+                "src/shared/analytics/stub/java",
+                "src/shared/billing/stub/java",
+                "src/shared/ads/stub/java"
+            )
+        }
+
+        // Standard flavor → full/actual implementations of analytics, billing, and ads
+        getByName("standard") {
+            java.srcDirs(
+                "src/shared/analytics/actual/java",
+                "src/shared/billing/actual/java",
+                "src/shared/ads/actual/java"
+            )
+        }
+
+        // Plus flavor → only requires actual billing implementation (no analytics/ads)
+        getByName("plus") {
+            java.srcDirs("src/shared/billing/actual/java")
+        }
+    }
+    // BUILD TYPES
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -55,17 +140,11 @@ android {
             )
         }
     }
-
-    // Java compatibility settings
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }
 
-// -----------------------------------------------------------------------------
+// ============================================================================
 // DEPENDENCIES
-// -----------------------------------------------------------------------------
+// ============================================================================
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.exifinterface)

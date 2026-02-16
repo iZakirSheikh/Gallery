@@ -74,6 +74,7 @@ import com.zs.compose.foundation.runCatching
 import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.compose.theme.snackbar.SnackbarResult
+import com.zs.core.BuildConfig
 import com.zs.core.billing.Paymaster
 import com.zs.core.billing.Product
 import com.zs.core.billing.Purchase
@@ -465,7 +466,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
             // Get the first install time of the app.
             // Check if enough time has passed since the first install.
             val firstInstallTime =
-                packageManager.getPackageInfoCompat(BuildConfig.APPLICATION_ID)?.firstInstallTime
+                packageManager.getPackageInfoCompat(packageName)?.firstInstallTime
                     ?: 0
             val currentTime = System.currentTimeMillis()
             if (currentTime - firstInstallTime < INITIAL_REVIEW_DELAY.inWholeMilliseconds)
@@ -594,7 +595,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
             // TODO - properly handle promotional content.
             lifecycleScope.launch {
                 // Show "What's New" message if the app version has changed
-                val versionCode = BuildConfig.VERSION_CODE
+                val versionCode = packageManager.getPackageInfoCompat(packageName)?.versionCode ?: 0
                 val savedVersionCode = preferences[KEY_APP_VERSION_CODE]
                 if (savedVersionCode != versionCode) {
                     preferences[KEY_APP_VERSION_CODE] = versionCode

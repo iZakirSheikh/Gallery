@@ -39,7 +39,6 @@ import androidx.core.net.toUri
 import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.core.billing.Product
 import com.zs.core.billing.Purchase
-import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.settings.Settings.PKG_MARKET_ID
 import com.zs.gallery.settings.Settings.PREFIX_MARKET_FALLBACK
@@ -111,7 +110,11 @@ interface SystemFacade {
      *
      * @param pkg the package name of the app to open on the App Store.
      */
-    fun launchAppStore(pkg: String = BuildConfig.APPLICATION_ID) {
+    fun launchAppStore(pkg: String?= null) {
+        val pkg = pkg ?: let {
+            val ctx = if (this is Context) this else return
+            ctx.packageName
+        }
         val url = "${PREFIX_MARKET_URL}$pkg"
         // Create an Intent to open the Play Store app.
         val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply {

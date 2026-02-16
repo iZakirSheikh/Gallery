@@ -1,39 +1,20 @@
-import com.android.build.api.dsl.ApplicationDefaultConfig
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // -----------------------------------------------------------------------------
 // PLUGINS
-// Core build plugins for Android Application, Kotlin, Compose, and Firebase
 // -----------------------------------------------------------------------------
+// 📦 Core plugins required for Android + Kotlin + Compose support.
 plugins {
-    alias(libs.plugins.android.application)      // Android Application plugin
+    alias(libs.plugins.android.application)   // Android application plugin
     alias(libs.plugins.jetbrains.kotlin.android) // Kotlin Android plugin
     alias(libs.plugins.compose.compiler)         // Compose compiler plugin
-    alias(libs.plugins.google.services)          // Google Services (Firebase integration)
-    alias(libs.plugins.crashanlytics)            // Firebase Crashlytics
+    // TODO - Find a way to apply these to only standard flavour
+    // ⚠️ Currently Crashlytics + Google Services are applied globally.
+    alias(libs.plugins.crashanlytics) // Firebase Crashlytics (should be flavor-scoped)
+    alias(libs.plugins.google.services) // Google Services (should be flavor-scoped)
 }
-
-// -----------------------------------------------------------------------------
-// BUILD CONFIG HELPERS
-// Utility to add BuildConfig fields (e.g., secrets, constants)
-// -----------------------------------------------------------------------------
-/**
- * Adds a string BuildConfig field to the project.
- */
-private fun ApplicationDefaultConfig.buildConfigField(name: String, value: String) =
-    buildConfigField("String", name, "\"" + value + "\"")
-
-/**
- * Secrets injected into BuildConfig at runtime (via GitHub env).
- */
-val secrets = arrayOf(
-    // "ADS_APP_ID", // Example placeholder
-    "PLAY_CONSOLE_APP_RSA_KEY"
-)
-
 // -----------------------------------------------------------------------------
 // KOTLIN COMPILER OPTIONS
-// Configure JVM target and experimental compiler flags
 // -----------------------------------------------------------------------------
 kotlin {
     compilerOptions {
@@ -54,64 +35,109 @@ kotlin {
 }
 
 // -----------------------------------------------------------------------------
+// COMPOSE COMPILER CONFIGURATION
+// -----------------------------------------------------------------------------
+// ⚙️ Controls advanced Compose compiler reporting and stability checks.
+// Reports/metrics can be enabled for debugging but are usually disabled in release builds.
+composeCompiler {
+    // TODO - I guess disable these in release builds.reportsDestination =
+    // layout.buildDirectory.dir("compose_compiler")
+    // metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    stabilityConfigurationFiles = listOf(
+        rootProject.layout.projectDirectory.file("stability_config.conf")
+    )
+}
+
+// -----------------------------------------------------------------------------
 // ANDROID CONFIGURATION
-// Namespace, SDK versions, build types, features, and packaging
 // -----------------------------------------------------------------------------
 android {
     namespace = "com.zs.gallery"
-    compileSdk = 36
+    compileSdk { version = release(36) }
+    buildFeatures { compose = true }
+    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } } // Exclude redundant license files
 
+    //
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
+    }
+    // -----------------------------------------------------------------------------
+    // DEFAULT CONFIGURATION
+    // -----------------------------------------------------------------------------
+    // 📦 Core app settings: ID, SDK versions, versioning, and test runner.
     defaultConfig {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
         versionCode = 71
         versionName = "0.9.1-dev"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables { useSupportLibrary = true }
+    }
+    // -------------------------------------------------------------------------
+    // PRODUCT FLAVORS
+    // -------------------------------------------------------------------------
+    flavorDimensions += "edition"
+    productFlavors {
+        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        create("standard") { dimension = "edition" }
 
-        // Load secrets into BuildConfig (from GitHub env)
-        for (secret in secrets) {
-            buildConfigField(secret, System.getenv(secret) ?: "")
+        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        create("community") {
+            dimension = "edition"
+            versionNameSuffix = "-foss"
+        }
+
+        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        create("plus") {
+            dimension = "edition"
+            versionNameSuffix = "-plus"
+            applicationIdSuffix = ".plus"
+        }
+
+        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        create("premium") {
+            dimension = "edition"
+            versionNameSuffix = "-pro"
+            applicationIdSuffix = ".pro"
         }
     }
-
+    // -----------------------------------------------------------------------------
+    // Build Types
+    // -----------------------------------------------------------------------------
     buildTypes {
-        // Release build: optimized with shrinking + ProGuard
+        // -------------------------------------------------------------------------
+        // RELEASE BUILD
+        // -------------------------------------------------------------------------
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // ⚙️ Code shrinking/obfuscation (ProGuard/R8) and resource shrinking
+            isMinifyEnabled = true          // Enable code shrinking/obfuscation
+            isShrinkResources = true        // Remove unused resources to reduce APK size
+
+            // 📜 ProGuard/R8 rules for release builds
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // 🔑 Signing configuration (currently using debug keys for convenience)
+            // signingConfig = signingConfigs.getByName("debug")
         }
 
-        // Debug build: suffixes for coexistence with release
+        // -------------------------------------------------------------------------
+        // DEBUG BUILD
+        // -------------------------------------------------------------------------
         debug {
+            // 📛 Appends ".debug" to the application ID so debug and release can coexist
             applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Debug")
-            versionNameSuffix = "-debug"
+            resValue("string", "launcher_label", "Debug")
+            versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }
-
-    // Java compatibility
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    // Enable Compose + BuildConfig features
-    buildFeatures { compose = true; buildConfig = true }
-
-    // Exclude redundant license files
-    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
 }
 
 // -----------------------------------------------------------------------------
-// DEPENDENCIES
-// Grouped by functional area: Core, Compose, Toolkit, UI, Firebase, Play Services
+// APP DEPENDENCIES
 // -----------------------------------------------------------------------------
 dependencies {
     implementation(project(":common"))
