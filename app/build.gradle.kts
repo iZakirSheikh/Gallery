@@ -140,8 +140,8 @@ android {
 // APP DEPENDENCIES
 // -----------------------------------------------------------------------------
 dependencies {
-    implementation(project(":common"))
     // Local project modules
+    implementation(project(":common"))
 
     // Compose core + BOM
     implementation(libs.androidx.activity.compose)
@@ -172,10 +172,6 @@ dependencies {
     // Bundles
     implementation(libs.bundles.coil)   // Image loading
     implementation(libs.bundles.icons)  // Material icons
-
-    // Firebase
-    implementation(libs.firebase.analytics.ktx)
-    implementation(libs.firebase.crashlytics.ktx)
 
     // Play Services
     implementation(libs.play.app.update.ktx)

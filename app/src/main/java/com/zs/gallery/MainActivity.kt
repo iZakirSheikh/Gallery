@@ -63,11 +63,6 @@ import com.google.android.play.core.ktx.requestAppUpdateInfo
 import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.ktx.requestUpdateFlow
 import com.google.android.play.core.review.ReviewManagerFactory
-import com.google.firebase.Firebase
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.analytics
-import com.google.firebase.analytics.logEvent
-import com.google.firebase.crashlytics.crashlytics
 import com.zs.compose.foundation.Amber
 import com.zs.compose.foundation.getText2
 import com.zs.compose.foundation.runCatching
@@ -75,6 +70,7 @@ import com.zs.compose.theme.snackbar.SnackbarDuration
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.compose.theme.snackbar.SnackbarResult
 import com.zs.core.BuildConfig
+import com.zs.core.analytics.Analytics
 import com.zs.core.billing.Paymaster
 import com.zs.core.billing.Product
 import com.zs.core.billing.Purchase
@@ -450,7 +446,7 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 }
             }
         }.catch {
-            Firebase.crashlytics.recordException(it)
+            Analytics.getInstance().record(it)
             if (!report) return@catch
             showToast(R.string.msg_update_check_error)
         }.launchIn(lifecycleScope)
@@ -501,11 +497,10 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         dest: NavDestination,
         args: Bundle?,
     ) {
-        Firebase.analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {  // Log the event.
+        Analytics.getInstance().logEvent(Analytics.EVENT_SCREEN_VIEW) {  // Log the event.
             // create params for the event.
             val domain = dest.domain ?: "unknown"
-            Log.d(TAG, "onNavDestChanged: $domain")
-            param(FirebaseAnalytics.Param.SCREEN_NAME, domain)
+            putString(Analytics.PARAM_SCREEN_NAME, domain)
         }
     }
 
