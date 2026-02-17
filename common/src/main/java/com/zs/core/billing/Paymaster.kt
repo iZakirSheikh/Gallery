@@ -21,6 +21,9 @@ package com.zs.core.billing
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
+import com.zs.core.BuildConfig
+import com.zs.core.PaymasterImpl
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -41,6 +44,15 @@ interface Paymaster {
         /** Creates an instance of [Paymaster]. */
         operator fun invoke(context: Context, securityKey: String, products: Array<String>): Paymaster =
             PaymasterImpl(context, securityKey, products)
+
+        // Represents different
+        const val STATE_UNSPECIFIED = 0   // No purchase or unknown state
+        const val STATE_PURCHASED = 1    // Item purchased, not yet acknowledged
+        const val STATE_PENDING = 2      // Purchase initiated but not completed
+
+        init {
+            Log.d("Paymaster", " : ${BuildConfig.FLAVOR}")
+        }
     }
 
     val purchases: StateFlow<List<Purchase>>

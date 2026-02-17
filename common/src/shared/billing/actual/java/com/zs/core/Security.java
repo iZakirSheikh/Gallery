@@ -1,4 +1,4 @@
-package com.zs.core.billing;
+package com.zs.core;
 
 /*
  * This class is an sample of how you can check to make sure your purchases on the device came from

@@ -151,10 +151,10 @@ dependencies {
     api(libs.bundles.coil)
     implementation(libs.androidx.activity.compose)
     implementation(libs.bundles.media3)
-    implementation(libs.google.billing.ktx)
 
     // Standard only
-   // "standardImplementation"(libs.bundles.play.services)
+    //"standardImplementation"(libs.bundles.play.services)
     "standardImplementation"(libs.bundles.analytics)
+    "standardImplementation"(libs.google.billing.ktx)
    // "standardImplementation"(libs.bundles.ads)
 }
