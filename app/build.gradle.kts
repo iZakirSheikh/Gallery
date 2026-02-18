@@ -121,7 +121,7 @@ android {
             )
 
             // 🔑 Signing configuration (currently using debug keys for convenience)
-            // signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debug")
         }
 
         // -------------------------------------------------------------------------
