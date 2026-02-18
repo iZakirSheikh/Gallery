@@ -129,7 +129,7 @@ jobs:
         uses: r0adkll/sign-android-release@v1
         id: signed_standard_aab
         with:
-          releaseDirectory: app/build/outputs/bundle/standard/release/
+          releaseDirectory: app/build/outputs/bundle/standardRelease/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -141,7 +141,7 @@ jobs:
         uses: r0adkll/sign-android-release@v1
         id: signed_community_aab
         with:
-          releaseDirectory: app/build/outputs/bundle/community/release/
+          releaseDirectory: app/build/outputs/bundle/communityRelease/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
