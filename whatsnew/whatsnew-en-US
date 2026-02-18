@@ -1,7 +1,4 @@
+✓ <b>Smoother Updates</b>: Release builds are now properly signed, ensuring reliable installs and upgrades.
 ✓ <b>UI Refinements</b>: Floating menu redesigned with labels below icons, now on a rounded rectangular surface.
 ✓ <b>Animated Splash Screen</b>: A fresh animated splash experience for Android 12+ devices.
 ✓ Introduced the M3 Motion Scheme for a more dynamic experience.
-✓ Added Ambient Mode to simulate rich ambient lighting.
-✓ Share instantly with Nearby/Quick Share.
-✓ Explore images with Google Lens integration.
-✓ General bug fixes and performance improvements.
