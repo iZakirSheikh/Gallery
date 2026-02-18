@@ -115,7 +115,7 @@ jobs:
       # Sign Standard APK
       - name: Signing Community APK
         uses: r0adkll/sign-android-release@v1
-        id: signed_standard_apk
+        id: signed_community_apk
         with:
           releaseDirectory: app/build/outputs/apk/community/release/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
@@ -129,7 +129,7 @@ jobs:
         uses: r0adkll/sign-android-release@v1
         id: signed_standard_aab
         with:
-          releaseDirectory: app/build/outputs/bundle/standrd/release/
+          releaseDirectory: app/build/outputs/bundle/standard/release/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
