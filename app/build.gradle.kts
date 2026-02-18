@@ -88,7 +88,7 @@ android {
             versionNameSuffix = "-foss"
         }
 
-        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+/*        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
         create("plus") {
             dimension = "edition"
             versionNameSuffix = "-plus"
@@ -100,7 +100,7 @@ android {
             dimension = "edition"
             versionNameSuffix = "-pro"
             applicationIdSuffix = ".pro"
-        }
+        }*/
     }
     // -----------------------------------------------------------------------------
     // Build Types

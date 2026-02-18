@@ -88,11 +88,11 @@ android {
 
         // PLUS → Privacy-friendly edition:
         // No Ad SDK, but telemetry and in‑app purchases.
-        create("plus") { dimension = "edition" }
+        //create("plus") { dimension = "edition" }
 
         // PREMIUM → Full unlock build.
         // Based on Community, but with all features enabled.
-        create("premium") { dimension = "edition" }
+        //create("premium") { dimension = "edition" }
     }
     // -------------------------------------------------------------------------
     // SOURCE SETS CONFIGURATION
@@ -108,13 +108,13 @@ android {
         }
 
         // Premium flavor → also wired to stub implementations (restricted feature set)
-        getByName("premium") {
+     /*   getByName("premium") {
             java.srcDirs(
                 "src/shared/analytics/stub/java",
                 "src/shared/billing/stub/java",
                 "src/shared/ads/stub/java"
             )
-        }
+        }*/
 
         // Standard flavor → full/actual implementations of analytics, billing, and ads
         getByName("standard") {
@@ -125,10 +125,10 @@ android {
             )
         }
 
-        // Plus flavor → only requires actual billing implementation (no analytics/ads)
+        /*// Plus flavor → only requires actual billing implementation (no analytics/ads)
         getByName("plus") {
             java.srcDirs("src/shared/billing/actual/java")
-        }
+        }*/
     }
     // BUILD TYPES
     buildTypes {
