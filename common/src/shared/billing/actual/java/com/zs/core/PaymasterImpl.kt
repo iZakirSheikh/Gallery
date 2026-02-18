@@ -215,9 +215,9 @@ internal class PaymasterImpl(
             // Update the product details state flow with the retrieved product information.
             details.value = list.map(){value ->
                 Product(
-                    value = value.title.trim(),
+                    value = value,
                     id = value.productId,
-                    title = value.title,
+                    title = value.title.trim(),
                     formattedPrice = value.oneTimePurchaseOfferDetails?.formattedPrice?.trim(),
                     description = value.description.trim()
                 )
