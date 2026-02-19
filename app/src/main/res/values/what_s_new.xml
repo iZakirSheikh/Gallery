@@ -4,20 +4,11 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
+            \n🌟 <b>Smoother Updates</b>: Release builds are now properly signed, ensuring reliable installs and upgrades.
             \n🌟 <b>Animated Splash Screen</b>: A fresh animated splash experience for Android 12+ devices.
             \n🌟 <b>UI Refinements</b>: Floating menu redesigned with labels below icons, now on a rounded rectangular surface.
             \n🌟 Added Portuguese (Brazil) translation.
             \n🌟 The app lock screen is now re-enabled for better security.
-            \n🌟 The details view dialog has been updated for better usability.
-            \n🌟 Overall bug fixes and performance improvements.
-	        \n🌟 Added Turkish translation thanks to <b>𝗛𝗼𝗹𝗶 (mikropsoft)</b>💕 from <b>Crowdin</b>.
-            \n🌟 Bug fixes and performance improvements.
-            \n🌟 <b>M3 Motion Scheme</b>: Enjoy a more dynamic experience with the M3 expressive motion scheme.
-            \n🌟 <b>Bug Fix</b>: Resolved an issue that caused a blinking effect when tapping on an image to display it.
-            \n🌟 <b>Ambient mode</b> - Simulates ambient lighting for a rich visual experience.
-            \n🌟 Share via <b>Nearby/Quick share</b>.
-            \n🌟 Now you can <b>Instantly share</b> with nearby devices.
-            \n🌟 Search with Google Lens! Explore images like never before.
         </font>
     </string>
 </resources>

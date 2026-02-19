@@ -1,110 +1,179 @@
-import com.android.build.api.dsl.ApplicationDefaultConfig
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
+// -----------------------------------------------------------------------------
+// PLUGINS
+// -----------------------------------------------------------------------------
+// 📦 Core plugins required for Android + Kotlin + Compose support.
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.google.service)
-    alias(libs.plugins.crashanlytics)
+    alias(libs.plugins.android.application)   // Android application plugin
+    alias(libs.plugins.jetbrains.kotlin.android) // Kotlin Android plugin
+    alias(libs.plugins.compose.compiler)         // Compose compiler plugin
+    // TODO - Find a way to apply these to only standard flavour
+    // ⚠️ Currently Crashlytics + Google Services are applied globally.
+    alias(libs.plugins.crashanlytics) // Firebase Crashlytics (should be flavor-scoped)
+    alias(libs.plugins.google.services) // Google Services (should be flavor-scoped)
+}
+// -----------------------------------------------------------------------------
+// KOTLIN COMPILER OPTIONS
+// -----------------------------------------------------------------------------
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11 // Target JVM bytecode version
+
+        freeCompilerArgs.addAll(
+            // "-XXLanguage:+ExplicitBackingFields", // Explicit backing fields (disabled)
+            "-XXLanguage:+NestedTypeAliases",       // Nested type aliases
+            "-Xopt-in=kotlin.RequiresOptIn",        // Opt-in to @RequiresOptIn APIs
+            "-Xwhen-guards",                        // Experimental when-guards
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
+            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",             // Custom theme experimental
+            "-Xnon-local-break-continue",           // Allow non-local break/continue
+            "-Xcontext-sensitive-resolution",       // Context-sensitive overload resolution
+            "-Xcontext-parameters"                  // Context parameters (experimental)
+        )
+    }
 }
 
-/**
- * Adds a string BuildConfig field to the project.
- */
-private fun ApplicationDefaultConfig.buildConfigField(name: String, value: String) =
-    buildConfigField("String", name, "\"" + value + "\"")
+// -----------------------------------------------------------------------------
+// COMPOSE COMPILER CONFIGURATION
+// -----------------------------------------------------------------------------
+// ⚙️ Controls advanced Compose compiler reporting and stability checks.
+// Reports/metrics can be enabled for debugging but are usually disabled in release builds.
+composeCompiler {
+    // TODO - I guess disable these in release builds.reportsDestination =
+    // layout.buildDirectory.dir("compose_compiler")
+    // metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    stabilityConfigurationFiles = listOf(
+        rootProject.layout.projectDirectory.file("stability_config.conf")
+    )
+}
 
-/**
- * The secrets that needs to be added to BuildConfig at runtime.
- */
-val secrets = arrayOf(
-//    "ADS_APP_ID",
-    "PLAY_CONSOLE_APP_RSA_KEY",
-)
-
+// -----------------------------------------------------------------------------
+// ANDROID CONFIGURATION
+// -----------------------------------------------------------------------------
 android {
     namespace = "com.zs.gallery"
-    compileSdk = 36
+    compileSdk { version = release(36) }
+    buildFeatures { compose = true }
+    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } } // Exclude redundant license files
 
-    defaultConfig {
-        applicationId = "com.googol.android.apps.photos"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = 70
-        versionName = "0.9.0-dev"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables { useSupportLibrary = true }
-        // Load secrets into BuildConfig
-        // These are passed through env of github.
-        for (secret in secrets) {
-            buildConfigField(secret, System.getenv(secret) ?: "")
-        }
-    }
-    buildTypes {
-        // Make sure release is version is optimised.
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-            )
-        }
-
-        // Add necessary changes to debug apk.
-        debug {
-            // makes it possible to install both release and debug versions in same device.
-            applicationIdSuffix = ".dev"
-            resValue("string", "app_name", "Debug")
-            versionNameSuffix = "-debug"
-        }
-    }
+    //
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
-            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",
-            "-Xwhen-guards",
-            "-Xnon-local-break-continue"
-        )
+    // -----------------------------------------------------------------------------
+    // DEFAULT CONFIGURATION
+    // -----------------------------------------------------------------------------
+    // 📦 Core app settings: ID, SDK versions, versioning, and test runner.
+    defaultConfig {
+        applicationId = "com.googol.android.apps.photos"
+        minSdk = 24
+        targetSdk = 36
+        versionCode = 73
+        versionName = "1.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
-    buildFeatures { compose = true; buildConfig = true }
-    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } }
+    // -------------------------------------------------------------------------
+    // PRODUCT FLAVORS
+    // -------------------------------------------------------------------------
+    flavorDimensions += "edition"
+    productFlavors {
+        // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
+        create("standard") { dimension = "edition" }
+
+        // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
+        create("community") {
+            dimension = "edition"
+            versionNameSuffix = "-foss"
+        }
+
+/*        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        create("plus") {
+            dimension = "edition"
+            versionNameSuffix = "-plus"
+            applicationIdSuffix = ".plus"
+        }
+
+        // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
+        create("premium") {
+            dimension = "edition"
+            versionNameSuffix = "-pro"
+            applicationIdSuffix = ".pro"
+        }*/
+    }
+    // -----------------------------------------------------------------------------
+    // Build Types
+    // -----------------------------------------------------------------------------
+    buildTypes {
+        // -------------------------------------------------------------------------
+        // RELEASE BUILD
+        // -------------------------------------------------------------------------
+        release {
+            // ⚙️ Code shrinking/obfuscation (ProGuard/R8) and resource shrinking
+            isMinifyEnabled = true          // Enable code shrinking/obfuscation
+            isShrinkResources = true        // Remove unused resources to reduce APK size
+
+            // 📜 ProGuard/R8 rules for release builds
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
+            // 🔑 Signing configuration (currently using debug keys for convenience)
+            // signingConfig = signingConfigs.getByName("debug")
+        }
+
+        // -------------------------------------------------------------------------
+        // DEBUG BUILD
+        // -------------------------------------------------------------------------
+        debug {
+            // 📛 Appends ".debug" to the application ID so debug and release can coexist
+            applicationIdSuffix = ".dev"
+            resValue("string", "launcher_label", "Debug")
+            versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
+        }
+    }
 }
 
+// -----------------------------------------------------------------------------
+// APP DEPENDENCIES
+// -----------------------------------------------------------------------------
 dependencies {
-    implementation(libs.androidx.koin)
-    implementation(libs.toolkit.preferences)
-    implementation(libs.androidx.startup.runtime)
-    implementation(libs.androidx.core.splashscreen)
-    implementation(libs.accompanist.permissions)
-    implementation(libs.firebase.analytics.ktx)
-    implementation(libs.firebase.crashlytics.ktx)
-    implementation(libs.androidx.ui.text.google.fonts)
-    implementation(libs.saket.zoomable)
-    implementation(libs.chrisbanes.haze)
-    implementation(libs.play.app.update.ktx)
-    implementation(libs.play.app.review.ktx)
+    // Local project modules
+    implementation(project(":common"))
 
-    // ui
+    // Compose core + BOM
     implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // Navigation + Toolkit
     implementation(libs.navigation.compose)
-    implementation(libs.lottie.compose)
     implementation(libs.toolkit.theme)
     implementation(libs.toolkit.foundation)
+    implementation(libs.toolkit.preferences)
 
-    // local
-    implementation(project(":core"))
+    // AndroidX utilities
+    implementation(libs.androidx.splashscreen)
+    implementation(libs.androidx.startup)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.google.fonts)
 
-    // bundles
-    implementation(libs.bundles.icons)
-    implementation(libs.bundles.compose.ui)
+    // Compose extensions
+    implementation(libs.telephoto.zoomable)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.koin)
+    implementation(libs.chrisbanes.haze)
+    implementation(libs.lottie.compose)
 
-    implementation(libs.bundles.compose.ui.tooling)
-    //implementation("dev.chrisbanes.haze:haze-materials:1.5.3")
+    // Bundles
+    implementation(libs.bundles.coil)   // Image loading
+    implementation(libs.bundles.icons)  // Material icons
+
+    // Debug-only tooling
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

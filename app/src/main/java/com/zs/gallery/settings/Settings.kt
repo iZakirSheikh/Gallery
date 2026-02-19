@@ -72,6 +72,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -108,7 +109,6 @@ import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.Text
 import com.zs.core.billing.Paymaster
-import com.zs.gallery.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.NightMode
@@ -417,10 +417,11 @@ private fun Sponsor(modifier: Modifier = Modifier) {
         },
         // Build version info.
         heading = {
+            val ctx = LocalContext.current
             Text(
                 text = textResource(
                     R.string.pref_scr_version_by_author_s,
-                    BuildConfig.VERSION_NAME
+                    ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: ""
                 ),
                 style = AppTheme.typography.label3,
                 fontWeight = FontWeight.Normal
@@ -482,8 +483,9 @@ private fun ColumnScope.AboutUs() {
     BaseListItem(
         heading = { Label(textResource(R.string.version), fontWeight = FontWeight.Bold) },
         subheading = {
+            val ctx = LocalContext.current
             Label(
-                textResource(R.string.version_info_s, BuildConfig.VERSION_NAME)
+                textResource(R.string.version_info_s, ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: "")
             )
         },
         footer = {

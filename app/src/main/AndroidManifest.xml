@@ -43,11 +43,7 @@
             tools:node="merge">
             <!--Firebase-->
             <meta-data
-                android:name="com.zs.gallery.impl.FirebaseInitializer"
-                android:value="androidx.startup" />
-            <!--Crashlytics-->
-            <meta-data
-                android:name="com.zs.gallery.impl.CrashlyticsInitializer"
+                android:name="com.zs.gallery.impl.AnalyticsInitializer"
                 android:value="androidx.startup" />
             <!-- Koin-->
             <meta-data
@@ -58,13 +54,6 @@
                 android:name="com.zs.gallery.impl.CoilInitializer"
                 android:value="androidx.startup" />
         </provider>
-        <!-- Disable FirebaseInitProvider -->
-        <provider
-            android:name="com.google.firebase.provider.FirebaseInitProvider"
-            android:authorities="${applicationId}.firebaseinitprovider"
-            android:enabled="false"
-            android:exported="false"
-            tools:node="remove" />
         <!--MainActivity-->
         <activity
             android:name=".MainActivity"

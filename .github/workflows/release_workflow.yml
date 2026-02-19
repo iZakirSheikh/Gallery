@@ -99,11 +99,12 @@ jobs:
           echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
           echo Last build tool version is: $BUILD_TOOL_VERSION
 
-      - name: Signing APK
+      # Sign Standard APK + AAB
+      - name: Signing Standard APK
         uses: r0adkll/sign-android-release@v1
-        id: signed_apk
+        id: signed_standard_apk
         with:
-          releaseDirectory: app/build/outputs/apk/release/
+          releaseDirectory: app/build/outputs/apk/standard/release/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -111,11 +112,36 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
-      - name: Signing AAB
+      # Sign Standard APK
+      - name: Signing Community APK
         uses: r0adkll/sign-android-release@v1
-        id: signed_aab
+        id: signed_community_apk
         with:
-          releaseDirectory: app/build/outputs/bundle/release/
+          releaseDirectory: app/build/outputs/apk/community/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+
+      - name: Signing Standard AAB
+        uses: r0adkll/sign-android-release@v1
+        id: signed_standard_aab
+        with:
+          releaseDirectory: app/build/outputs/bundle/standardRelease/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+
+      - name: Signing Community AAB
+        uses: r0adkll/sign-android-release@v1
+        id: signed_community_aab
+        with:
+          releaseDirectory: app/build/outputs/bundle/communityRelease/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -131,8 +157,10 @@ jobs:
           body: ${{ steps.notes.outputs.notes }}
           prerelease: true
           files: |
-            ${{steps.signed_aab.outputs.signedReleaseFile}}
-            ${{steps.signed_apk.outputs.signedReleaseFile}}
+            ${{steps.signed_standard_apk.outputs.signedReleaseFile}}
+            ${{steps.signed_standard_aab.outputs.signedReleaseFile}}
+            ${{steps.signed_community_apk.outputs.signedReleaseFile}}
+            ${{steps.signed_community_aab.outputs.signedReleaseFile}}
 
       # Uploading Signed AAB to internal track of PlayConsole
       - name: Deploy to Play Store (Internal)
@@ -140,6 +168,6 @@ jobs:
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.googol.android.apps.photos
-          releaseFiles: ${{steps.signed_aab.outputs.signedReleaseFile}}
+          releaseFiles: ${{steps.signed_standard_aab.outputs.signedReleaseFile}}
           track: internal
           whatsNewDirectory: ./whatsnew

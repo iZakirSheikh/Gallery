@@ -27,9 +27,8 @@ import androidx.startup.Initializer
 import coil3.annotation.DelicateCoilApi
 import coil3.asImage
 import coil3.request.crossfade
-import com.google.firebase.FirebaseApp
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.zs.compose.theme.snackbar.SnackbarHostState
+import com.zs.core.analytics.Analytics
 import com.zs.core.coil.ThumbnailFetcher
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.R
@@ -84,10 +83,10 @@ class KoinInitializer : Initializer<Unit> {
     override fun dependencies(): List<Class<out Initializer<*>>> = emptyList()
 }
 
-class FirebaseInitializer : Initializer<Unit> {
+class AnalyticsInitializer : Initializer<Unit> {
     override fun create(context: Context): Unit {
         // Initialize Firebase
-        FirebaseApp.initializeApp(context)
+        Analytics.initialize(context)
     }
 
     override fun dependencies(): List<Class<out Initializer<*>>> {
@@ -95,16 +94,6 @@ class FirebaseInitializer : Initializer<Unit> {
     }
 }
 
-class CrashlyticsInitializer : Initializer<Unit> {
-    override fun create(context: Context): Unit {
-        // Initialize Crashlytics
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-    }
-
-    override fun dependencies(): List<Class<out Initializer<*>>> {
-        return listOf(FirebaseInitializer::class.java)
-    }
-}
 
 class CoilInitializer : Initializer<Unit> {
     override fun create(context: Context) {
