@@ -103,7 +103,8 @@ android {
             java.srcDirs(
                 "src/shared/analytics/stub/java",
                 "src/shared/billing/stub/java",
-                "src/shared/ads/stub/java"
+                "src/shared/ads/stub/java",
+                "src/shared/market/stub/java"
             )
         }
 
@@ -121,7 +122,8 @@ android {
             java.srcDirs(
                 "src/shared/analytics/actual/java",
                 "src/shared/billing/actual/java",
-                "src/shared/ads/actual/java"
+                "src/shared/ads/actual/java",
+                "src/shared/market/actual/java"
             )
         }
 
@@ -156,5 +158,8 @@ dependencies {
     //"standardImplementation"(libs.bundles.play.services)
     "standardImplementation"(libs.bundles.analytics)
     "standardImplementation"(libs.google.billing.ktx)
+    // Play Services
+    "standardImplementation"(libs.play.app.update.ktx)
+    "standardImplementation"(libs.play.app.review.ktx)
    // "standardImplementation"(libs.bundles.ads)
 }

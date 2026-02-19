@@ -57,12 +57,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.ktx.AppUpdateResult
-import com.google.android.play.core.ktx.requestAppUpdateInfo
-import com.google.android.play.core.ktx.requestReview
-import com.google.android.play.core.ktx.requestUpdateFlow
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.zs.compose.foundation.Amber
 import com.zs.compose.foundation.getText2
 import com.zs.compose.foundation.runCatching
@@ -77,6 +71,7 @@ import com.zs.core.billing.Purchase
 import com.zs.core.billing.purchased
 import com.zs.core.common.showPlatformToast
 import com.zs.core.getPackageInfoCompat
+import com.zs.core.market.AppMarketManager
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
@@ -93,11 +88,8 @@ import com.zs.preferences.Preferences
 import com.zs.preferences.intPreferenceKey
 import com.zs.preferences.longPreferenceKey
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
@@ -108,16 +100,11 @@ import androidx.navigation.NavController.OnDestinationChangedListener as NavDest
 
 private const val TAG = "MainActivity"
 
-// In-app update and review settings
-// Maximum staleness days allowed for a flexible update.
-// If the app is older than this, an immediate update will be enforced.
-private const val FLEXIBLE_UPDATE_MAX_STALENESS_DAYS = 2
-
 // Minimum number of app launches before prompting for a review.
 private const val MIN_LAUNCHES_BEFORE_REVIEW = 5
 
 // Number of days to wait before showing the first review prompt.
-private val INITIAL_REVIEW_DELAY = 3.days
+private val INITIAL_REVIEW_DELAY = 1.days
 
 // The maximum number of distinct promotional messages to display to the user.
 private val MAX_PROMO_MESSAGES = 2
@@ -392,64 +379,41 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
         startActivity(intent, options)
 
     override fun initiateUpdateFlow(report: Boolean) {
-        val manager = AppUpdateManagerFactory.create(this@MainActivity)
-        manager.requestUpdateFlow().onEach { result ->
-            when (result) {
-                is AppUpdateResult.NotAvailable -> if (report) showToast(R.string.msg_update_not_available)
-                is AppUpdateResult.InProgress -> {
-                    val state = result.installState
-                    val total = state.totalBytesToDownload()
-                    val downloaded = state.bytesDownloaded()
-                    val progress = when {
-                        total <= 0 -> -1f
-                        total == downloaded -> Float.NaN
-                        else -> downloaded / total.toFloat()
+        val manager = AppMarketManager()
+        lifecycleScope.launch {
+            manager.initiateUpdateFlow(this@MainActivity){result ->
+                return@initiateUpdateFlow  when(result){
+                    AppMarketManager.UPDATE_NOT_AVAILABLE -> {
+                        if (report) showToast(R.string.msg_update_not_available)
+                        AppMarketManager.ACTION_IGNORE
                     }
-                    inAppUpdateProgress = progress
-                }
 
-                is AppUpdateResult.Downloaded -> {
-                    val info = manager.requestAppUpdateInfo()
-                    //when update first becomes available
-                    //don't force it.
-                    // make it required when staleness days overcome allowed limit
-                    val isFlexible = (info.clientVersionStalenessDays()
-                        ?: -1) <= FLEXIBLE_UPDATE_MAX_STALENESS_DAYS
-
-                    // forcefully update; if it's flexible
-                    if (!isFlexible) {
-                        manager.completeUpdate()
-                        return@onEach
+                    AppMarketManager.UPDATE_NOT_SUPPORTED -> {
+                        /*No-op*/
+                        AppMarketManager.ACTION_IGNORE
                     }
-                    // else show the toast.
-                    val res = snackbarHostState.showSnackbar(
-                        message = resources.getText2(R.string.msg_new_update_downloaded),
-                        action = resources.getText2(R.string.install),
-                        duration = SnackbarDuration.Long,
-                        icon = Icons.Outlined.NewReleases
-                    )
-                    // complete update when ever user clicks on action.
-                    if (res == SnackbarResult.ActionPerformed) manager.completeUpdate()
-                }
 
-                is AppUpdateResult.Available -> {
-                    // if user choose to skip the update handle that case also.
-                    val isFlexible = (result.updateInfo.clientVersionStalenessDays()
-                        ?: -1) <= FLEXIBLE_UPDATE_MAX_STALENESS_DAYS
-                    if (isFlexible) result.startFlexibleUpdate(
-                        activity = this@MainActivity, 1000
-                    )
-                    else result.startImmediateUpdate(
-                        activity = this@MainActivity, 1000
-                    )
-                    // no message needs to be shown
+                    AppMarketManager.UPDATE_DOWNLOADED -> {
+                        // else show the toast.
+                        val res = snackbarHostState.showSnackbar(
+                            message = resources.getText2(R.string.msg_new_update_downloaded),
+                            action = resources.getText2(R.string.install),
+                            duration = SnackbarDuration.Long,
+                            icon = Icons.Outlined.NewReleases
+                        )
+                        // complete update when ever user clicks on action.
+                        if (res == SnackbarResult.ActionPerformed) AppMarketManager.ACTION_INSTALL
+                        else AppMarketManager.ACTION_IGNORE
+                    }
+                    // progress
+                    else -> {
+                        inAppUpdateProgress = result
+                        Log.d(TAG, "initiateUpdateFlow: $result")
+                        AppMarketManager.ACTION_IGNORE
+                    }
                 }
             }
-        }.catch {
-            Analytics.getInstance().record(it)
-            if (!report) return@catch
-            showToast(R.string.msg_update_check_error)
-        }.launchIn(lifecycleScope)
+        }
     }
 
     override fun initiateReviewFlow() {
@@ -475,11 +439,10 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
 
             // Request and launch the review flow.
             runCatching(TAG) {
-                val reviewManager = ReviewManagerFactory.create(this@MainActivity)
+                val reviewManager = AppMarketManager()
                 // Update the last asked time in preferences
                 preferences[KEY_LAST_REVIEW_TIME] = System.currentTimeMillis()
-                val info = reviewManager.requestReview()
-                reviewManager.launchReviewFlow(this@MainActivity, info)
+                reviewManager.initiateReviewFlow(this@MainActivity)
                 // Optionally log an event to Firebase Analytics.
                 // host.fAnalytics.logReviewPromptShown()
             }

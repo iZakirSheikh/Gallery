@@ -70,8 +70,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
-        versionCode = 72
-        versionName = "0.9.2-dev"
+        versionCode = 73
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // -------------------------------------------------------------------------
@@ -172,10 +172,6 @@ dependencies {
     // Bundles
     implementation(libs.bundles.coil)   // Image loading
     implementation(libs.bundles.icons)  // Material icons
-
-    // Play Services
-    implementation(libs.play.app.update.ktx)
-    implementation(libs.play.app.review.ktx)
 
     // Debug-only tooling
     debugImplementation(libs.androidx.compose.ui.tooling)
