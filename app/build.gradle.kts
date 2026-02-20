@@ -70,8 +70,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
-        versionCode = 75
-        versionName = "1.0.2"
+        versionCode = 76
+        versionName = "1.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // -------------------------------------------------------------------------
@@ -85,6 +85,7 @@ android {
         // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
         create("community") {
             dimension = "edition"
+            applicationId = "com.zs.android.apps.photos"
             versionNameSuffix = "-foss"
         }
 
