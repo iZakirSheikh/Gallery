@@ -37,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.zs.core.BuildConfig
 import com.zs.core.store.MediaFile
 import com.zs.core.store.MediaProvider
 import com.zs.gallery.R
@@ -174,7 +175,8 @@ class MediaViewerViewModel(
                 return@buildList
             }
             this += if (favourite) UN_STAR else STAR
-            this += GOOGLE_LENS
+            if (BuildConfig.FLAVOR != BuildConfig.FLAVOR_COMMUNITY)
+                this += GOOGLE_LENS
             this += QUICK_SHARE
             // if this is video currently return otherwise editing can be called for video also
             if (current?.isImage == true)
