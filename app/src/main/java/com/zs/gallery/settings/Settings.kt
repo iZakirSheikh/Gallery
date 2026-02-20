@@ -20,12 +20,15 @@ package com.zs.gallery.settings
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -108,6 +111,8 @@ import com.zs.compose.theme.minimumInteractiveComponentSize
 import com.zs.compose.theme.text.Header
 import com.zs.compose.theme.text.Label
 import com.zs.compose.theme.text.Text
+import com.zs.core.BuildConfig
+import com.zs.core.Intent
 import com.zs.core.billing.Paymaster
 import com.zs.gallery.R
 import com.zs.gallery.common.IAP_BUY_ME_COFFEE
@@ -455,7 +460,12 @@ private fun Sponsor(modifier: Modifier = Modifier) {
                     FilledTonalButton(
                         stringResource(R.string.rate_us),
                         icon = Icons.Outlined.RateReview,
-                        onClick = facade::launchAppStore,
+                        onClick = {
+                            if (BuildConfig.FLAVOR != BuildConfig.FLAVOR_COMMUNITY)
+                                facade.launchAppStore()
+                            else
+                                facade.launch(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/iZakirSheikh/Gallery")))
+                        },
                         colors = ButtonDefaults.filledTonalButtonColors(
                             backgroundColor = AppTheme.colors.background(
                                 4.dp
@@ -467,7 +477,13 @@ private fun Sponsor(modifier: Modifier = Modifier) {
                     Button(
                         stringResource(R.string.buy_me_a_coffee),
                         icon = Icons.Outlined.DataObject,
-                        onClick = { facade.initiatePurchaseFlow(Paymaster.IAP_BUY_ME_COFFEE) },
+                        onClick = {
+                            when(BuildConfig.FLAVOR){
+                                BuildConfig.FLAVOR_COMMUNITY -> facade.launch(Intent(Intent.ACTION_VIEW,
+                                    Uri.parse("https://github.com/sponsors/iZakirSheikh")))
+                                else -> facade.initiatePurchaseFlow(Paymaster.IAP_BUY_ME_COFFEE)
+                            }
+                        },
                     )
                 }
             )
@@ -489,6 +505,8 @@ private fun ColumnScope.AboutUs() {
             )
         },
         footer = {
+            if (BuildConfig.FLAVOR == BuildConfig.FLAVOR_COMMUNITY)
+                return@BaseListItem Spacer(Modifier)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(CP.medium),

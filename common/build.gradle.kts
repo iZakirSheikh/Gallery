@@ -68,10 +68,10 @@ android {
             buildConfigField(secret, System.getenv(secret) ?: "")
 
         // 📌 Edition constants (used for comparison in code)
-        buildConfigField("FLAVOR_COMMUNITY", "_community")
-        buildConfigField("FLAVOR_STANDARD", "_standard")
-        buildConfigField("FLAVOR_PLUS", "_plus")
-        buildConfigField("FLAVOR_PREMIUM", "_premium")
+        buildConfigField("FLAVOR_COMMUNITY", "community")
+        buildConfigField("FLAVOR_STANDARD", "standard")
+        buildConfigField("FLAVOR_PLUS", "plus")
+        buildConfigField("FLAVOR_PREMIUM", "premium")
     }
     // -------------------------------------------------------------------------
     // PRODUCT FLAVORS

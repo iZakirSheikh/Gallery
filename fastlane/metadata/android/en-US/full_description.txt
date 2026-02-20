@@ -1,18 +1,18 @@
 Meet Gallery, your intelligent, lightweight, and lightning-fast photo and video gallery crafted with Jetpack Compose. Gallery loads images faster than Google Photos or any other gallery app out there. It is incredibly fast and uses very little device storage—just 3MBs—with almost no battery usage. It boasts an awesome design and supports both light and dark mods. Plus, it contains a built-in video player.
 
 Features:
-    * Smart Organization - Automatically arranges your photos and videos by time, folder, and more for easy browsing.
-    * Recycle Bin (Android 11+) - Recover accidentally deleted files with ease.
-    * External Storage Support.
-    * App Lock - Secure your media with PIN, Pattern, or Fingerprint. Choose when to lock: instantly, after 1 minute, or after 30 minutes.
-    * Favorites Album - Mark and access your favorite photos and videos in one place.
-    * Quick Share - Share multiple files instantly—no hard limits like 100 items.
-    * Built-in HD Video Player - Enjoy your videos without switching apps.
-    * Instant Media Updates - New files appear immediately—no manual refresh needed.
-    * Pinch to Zoom - Zoom in up to 5x with intuitive gestures.
-    * Dark Mode - Supports system sync or manual toggle for comfortable viewing.
-    * Customizable UI -Tweak font size, grid spacing, and layout to your preference.
-    * Ambient Mode - A beautiful, immersive mode for viewing your memories.
-    * Google Lens - Search photos visually with google lens directly from the app.
+ * Smart Organization - Automatically arranges your photos and videos by time, folder, and more for easy browsing.
+ * Recycle Bin (Android 11+) - Recover accidentally deleted files with ease.
+ * External Storage Support.
+ * App Lock - Secure your media with PIN, Pattern, or Fingerprint. Choose when to lock: instantly, after 1 minute, or after 30 minutes.
+ * Favorites Album - Mark and access your favorite photos and videos in one place.
+ * Quick Share - Share multiple files instantly—no hard limits like 100 items.
+ * Built-in HD Video Player - Enjoy your videos without switching apps.
+ * Instant Media Updates - New files appear immediately—no manual refresh needed.
+ * Pinch to Zoom - Zoom in up to 5x with intuitive gestures.
+ * Dark Mode - Supports system sync or manual toggle for comfortable viewing.
+ * Customizable UI -Tweak font size, grid spacing, and layout to your preference.
+ * Ambient Mode - A beautiful, immersive mode for viewing your memories.
+ * Google Lens - Search photos visually with google lens directly from the app.
 
 📥 Download now and experience your gallery—reimagined, refined, and fast like never before.
