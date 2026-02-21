@@ -28,6 +28,7 @@ import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import com.zs.core.BuildConfig
 import com.zs.gallery.R
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
@@ -236,7 +237,9 @@ object Settings {
         putExtra(Intent.EXTRA_SUBJECT, "Feedback/Suggestion for Audiofy")
     }
     val PrivacyPolicyIntent = Intent(Intent.ACTION_VIEW).apply {
-        data =
+        data = if (BuildConfig.FLAVOR == BuildConfig.FLAVOR_COMMUNITY)
+            "https://github.com/iZakirSheikh/Gallery/blob/master/PRIVACY_POLICY.md".toUri()
+            else
             "https://docs.google.com/document/d/1D9wswWSrt65ol7h3HLKhk31OVTqDtN4uLJ73_Rk9hT8/edit?usp=sharing".toUri()
     }
     val GitHubIssuesPage = Intent(Intent.ACTION_VIEW).apply {

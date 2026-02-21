@@ -549,13 +549,13 @@ private fun ColumnScope.AboutUs() {
             backgroundColor = AppTheme.colors.background(1.dp),
             contentColor = AppTheme.colors.accent
         )
-        Chip(
+       /* Chip(
             content = { Label(textResource(R.string.rate_us)) },
             leadingIcon = { Icon(Icons.Outlined.Star, null) },
             onClick = facade::launchAppStore,
             colors = colors,
             shape = AppTheme.shapes.xSmall
-        )
+        )*/
 
         Chip(
             content = { Label(textResource(R.string.add_your_language)) },

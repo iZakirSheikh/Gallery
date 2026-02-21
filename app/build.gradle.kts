@@ -70,8 +70,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
-        versionCode = 76
-        versionName = "1.0.3"
+        versionCode = 77
+        versionName = "1.0.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // -------------------------------------------------------------------------
@@ -130,7 +130,7 @@ android {
         // -------------------------------------------------------------------------
         debug {
             // 📛 Appends ".debug" to the application ID so debug and release can coexist
-            applicationIdSuffix = ".dev"
+            // applicationIdSuffix = ".dev"
             resValue("string", "launcher_label", "Debug")
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
