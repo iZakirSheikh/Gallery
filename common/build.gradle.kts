@@ -88,7 +88,7 @@ android {
 
         // PLUS → Privacy-friendly edition:
         // No Ad SDK, but telemetry and in‑app purchases.
-        //create("plus") { dimension = "edition" }
+        create("plus") { dimension = "edition" }
 
         // PREMIUM → Full unlock build.
         // Based on Community, but with all features enabled.
@@ -127,10 +127,15 @@ android {
             )
         }
 
-        /*// Plus flavor → only requires actual billing implementation (no analytics/ads)
+        // Plus flavor → only requires actual billing implementation (no analytics/ads)
         getByName("plus") {
-            java.srcDirs("src/shared/billing/actual/java")
-        }*/
+            java.srcDirs(
+                "src/shared/analytics/actual/java",
+                "src/shared/billing/actual/java",
+                "src/shared/ads/stub/java",
+                "src/shared/market/actual/java"
+            )
+        }
     }
     // BUILD TYPES
     buildTypes {
@@ -161,5 +166,13 @@ dependencies {
     // Play Services
     "standardImplementation"(libs.play.app.update.ktx)
     "standardImplementation"(libs.play.app.review.ktx)
+    // ads
    // "standardImplementation"(libs.bundles.ads)
+    // Plus
+    "plusImplementation"(libs.bundles.analytics)
+    "plusImplementation"(libs.google.billing.ktx)
+    // Play Services
+    "plusImplementation"(libs.play.app.update.ktx)
+    "plusImplementation"(libs.play.app.review.ktx)
+    // no-ads
 }

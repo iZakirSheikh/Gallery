@@ -70,8 +70,8 @@ android {
         applicationId = "com.googol.android.apps.photos"
         minSdk = 24
         targetSdk = 36
-        versionCode = 77
-        versionName = "1.0.4"
+        versionCode = 78
+        versionName = "1.0.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // -------------------------------------------------------------------------
@@ -89,13 +89,14 @@ android {
             versionNameSuffix = "-foss"
         }
 
-/*        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
+        // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
         create("plus") {
             dimension = "edition"
+            applicationId = "com.zs.android.apps.photos"
             versionNameSuffix = "-plus"
-            applicationIdSuffix = ".plus"
         }
 
+/*
         // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
         create("premium") {
             dimension = "edition"
