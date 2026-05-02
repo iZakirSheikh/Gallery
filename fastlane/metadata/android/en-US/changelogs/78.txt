@@ -1,0 +1,6 @@
+- New "Plus" Flavor: Introduced a premium build flavor with integrated billing and enhanced features.
+- Localization: Added Polish, Russian, and German support; updated Spanish and Portuguese.
+- Improved UX: Reduced frequency of promotional messages for a cleaner experience.
+- Core Updates: Updated Kotlin, Compose, and Media3 to latest versions for better stability.
+- CI/CD: Enhanced release workflow for automated "PLUS" flavor distribution.
+

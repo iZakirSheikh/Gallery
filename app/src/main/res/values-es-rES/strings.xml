@@ -210,4 +210,7 @@
     <string name="properties">Propiedades</string>
     <string name="pref_ambient_mode"><b>Modo ambiente</b><font color="grey">\nAñade iluminación inmersiva alrededor del visor de medios para una experiencia más cinematográfica.</font></string>
     <string name="authenticate">Autenticar</string>
+    <string name="confirm">Confirmar</string>
+    <string name="msg_favourites_modify_d">¿Modificar %1$d objetos en Favoritos?</string>
+    <string name="add_your_language">Añadir tu Idioma</string>
 </resources>

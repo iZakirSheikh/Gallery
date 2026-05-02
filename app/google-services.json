@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "849036525156",
     "project_id": "gallery-b17a1",
-    "storage_bucket": "gallery-b17a1.appspot.com"
+    "storage_bucket": "gallery-b17a1.firebasestorage.app"
   },
   "client": [
     {
@@ -45,7 +45,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:849036525156:android:3082fbf2efe108e0d42971",
+        "mobilesdk_app_id": "1:849036525156:android:2db1cf14e976d4fdd42971",
         "android_client_info": {
           "package_name": "com.zs.android.apps.photos"
         }

@@ -112,7 +112,7 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
-      # Sign Standard APK
+      # Sign COMMUNITY APK
       - name: Signing Community APK
         uses: r0adkll/sign-android-release@v1
         id: signed_community_apk
@@ -125,6 +125,7 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
+      # Sign STANDARD AAB
       - name: Signing Standard AAB
         uses: r0adkll/sign-android-release@v1
         id: signed_standard_aab
@@ -137,11 +138,38 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
+      # Sign COMMUNITY AAB
       - name: Signing Community AAB
         uses: r0adkll/sign-android-release@v1
         id: signed_community_aab
         with:
           releaseDirectory: app/build/outputs/bundle/communityRelease/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+
+      # Sign PLUS APK
+      - name: Signing PLUS APK
+        uses: r0adkll/sign-android-release@v1
+        id: signed_plus_apk
+        with:
+          releaseDirectory: app/build/outputs/apk/plus/release/
+          signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+          alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
+
+      # Sign PLUS AAB
+      - name: Signing Plus AAB
+        uses: r0adkll/sign-android-release@v1
+        id: signed_plus_aab
+        with:
+          releaseDirectory: app/build/outputs/bundle/plusRelease/
           signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
           alias: ${{ secrets.SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
@@ -161,6 +189,8 @@ jobs:
             ${{steps.signed_standard_aab.outputs.signedReleaseFile}}
             ${{steps.signed_community_apk.outputs.signedReleaseFile}}
             ${{steps.signed_community_aab.outputs.signedReleaseFile}}
+            ${{steps.signed_plus_aab.outputs.signedReleaseFile}}
+            ${{steps.signed_plus_apk.outputs.signedReleaseFile}}
 
       # Uploading Signed AAB to internal track of PlayConsole
       - name: Deploy to Play Store (Internal)

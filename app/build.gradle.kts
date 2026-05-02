@@ -55,7 +55,10 @@ android {
     namespace = "com.zs.gallery"
     compileSdk { version = release(36) }
     buildFeatures { compose = true }
-    packaging { resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" } } // Exclude redundant license files
+    packaging {
+        resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }  // Exclude redundant license files
+        jniLibs.keepDebugSymbols.add("**/*.so")
+    }
 
     //
     compileOptions {
@@ -123,7 +126,7 @@ android {
             )
 
             // 🔑 Signing configuration (currently using debug keys for convenience)
-            // signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debug")
         }
 
         // -------------------------------------------------------------------------

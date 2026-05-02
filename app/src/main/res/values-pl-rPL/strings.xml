@@ -15,6 +15,194 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name">Galeria</string>
+    <string name="permission_scr_title">Uprawnienie do pamięci</string>
+    <string name="allow">Zezwól</string>
+    <string name="permission_scr_desc"><b>Galeria</b> wymaga uprawnienia dostępu do
+        pamięci twojego urządzenia, żeby wyświetlać obrazy i filmy.
+        <b>\n\nNa Android 14 I nowszych:</b>
+        <font color="grey">
+            \n  1. Proszę wybrać <b>Zezwól na wszystkie</b> w oknie dialogowym uprawnień, żeby aplikacja działała poprawnie.
+        </font>
+    </string>
+    <string name="photos">Zdjęcia</string>
+    <string name="settings">Ustawienia</string>
+    <string name="folders">Foldery</string>
+    <string name="loading">Ładowanie</string>
+    <string name="oops_empty">Ups, pusto!!</string>
     <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="folders_scr_folder_name_sds">%1$d Pliki - %2$s</string>
+    <string name="size">Rozmiar</string>
+    <string name="name">Nazwa</string>
+    <string name="recent">Ostatnie</string>
+    <string name="dark">Ciemny</string>
+    <string name="light">Jasny</string>
+    <string name="sync_with_system">Systemowy</string>
+    <string name="general">Ogólne</string>
+    <string name="appearance">Wygląd</string>
+    <string name="feedback">Informacja zwrotna</string>
+    <string name="about_gallery">O aplikacji</string>
+    <string name="msg_unknown_error">Coś poszło nie źle. Wystąpił nieznany błąd.</string>
+    <string name="report">Zgłoś</string>
+    <string name="timeline">Oś czasu</string>
+    <string name="files_source_folder_title_s">123%1$s</string>
+    <string name="files_selected_d">Wybrano %1$d</string>
+    <string name="select_all">Wybierz wszystko</string>
+    <string name="bin">Kosz</string>
+    <string name="recycle_bin">Kosz</string>
+    <string name="favourites">Ulubione</string>
     <!--returns a string with multiplied x e.g., 1.3x-->
+    <string name="times_factor_x_f">%1$sx</string>
+    <string name="last_modified">Ostatnio zmodyfikowano</string>
+    <string name="msg_error_sharing_files">Ups, coś poszło źle podczas udostępniania plików. Proszę spróbować ponownie.</string>
+    <string name="msg_files_delete_unknown_error">Ups, coś poszło źle podczas usuwania plików. Proszę spróbować ponownie.</string>
+    <string name="msg_files_trash_unknown_error">Ups, coś poszło źle podczas usuwania plików. Proszę spróbować ponownie.</string>
+    <string name="trash">Usuń</string>
+    <string name="msg_files_restore_unknown_error">Ups, coś poszło źle podczas przywracania plików. Proszę spróbować ponownie.</string>
+    <string name="share">Udostępnij</string>
+    <string name="edit">Edytuj</string>
+    <string name="delete">Usuń</string>
+    <string name="info">Informacje</string>
+    <string name="edit_in">Edytuj w</string>
+    <string name="use_as">Użyj jako</string>
+    <string name="set_as_wallpaper">Ustaw jako tapetę</string>
+    <string name="like">Polub</string>
+    <string name="unlike">Usuń z ulubionych</string>
+    <string name="details">Szczegóły</string>
+    <string name="title">Tytuł</string>
+    <string name="path">Ścieżka</string>
+    <string name="metadata">MetaDane</string>
+    <string name="msg_files_confirm_deletion"><b>Usuń</b>
+        <font color="grey">\nCzy jesteś pewien, że chcesz usunąć? Nie będziesz mógł tego odzyskać.
+        </font>
+    </string>
+    <string name="msg_update_check_error">Ups! Coś poszło źle podczas sprawdzania aktualizacji.</string>
+    <string name="msg_update_not_available">Wszystko gotowe! Brak dostępnych aktualizacji.</string>
+    <string name="msg_new_update_downloaded">Aktualizacja gotowa! Można kontynuować instalację.</string>
+    <string name="install">Instaluj</string>
+    <string name="lock_scr_title">Potwierdź swoją tożsamość</string>
+    <string name="lock_scr_subtitle">Uwierzytelnij za pomocą biometrii</string>
+    <string name="lock_scr_desc">Uwierzytelnij za pomocą odcisku palca lub rozpoznawania twarzy
+        żeby kontynuować. To kluczowy krok dla ochrony twoich danych.
+    </string>
+    <string name="msg_enroll_biometric">Włącz uwierzytelnianie biometrią w ustawieniach.</string>
+    <string name="msg_favourites_updated">Zaktualizowano ulubione!</string>
+    <string name="msg_media_player_promotion"><b>Nowy Odtwarzacz mediów!</b>
+        <font color="gray">\n🎶 Sprawdź nasz nowy <b>Odtwarzacz!</b> Ciesz się ulubionymi piosenkami
+            i filmami bez wysiłku. Spróbuj go! 🎥
+        </font>
+    </string>
+    <string name="get">Weź</string>
+    <string name="dismiss">Odrzuć</string>
+    <string name="msg_auth_failed">Błąd uwierzytelniania! Proszę spróbować ponownie lub użyć innej metody.</string>
+    <string name="msg_auth_error_s">Błąd uwierzytelniania: %1$s</string>
+    <string name="restore">Przywróć</string>
+    <string name="empty_bin">Opróżnij kosz</string>
+    <string name="files_d" documentation="returns e.g., 23 Files">%1$s Plików</string>
+    <string name="viewer_msg_no_wallpaper_app_found">Ups! Brak aplikacji do tapety. Zainstaluj ją, żeby kontynuować.</string>
+    <string name="viewer_set_as">Ustaw jako</string>
+    <string name="today">Dziś</string>
+    <string name="trash_one_day_left">1 dzień pozostał</string>
+    <string name="trash_days_left_d">%1$s dni pozostało</string>
+    <string name="auth_confirm_biometric">Potwierdź biometrią</string>
+    <string name="pref_app_theme_s"><b>Motyw aplikacji %1$s </b>          <font color="grey" size="14">              \nDostosuj wygląd aplikacji, wybierając motyw Nocny, Dzienny lub Systemowy.           </font>     </string>
+    <string name="pref_immersive_view"><b>Tryb pełnoekranowy </b>          <font color="grey" size="14">              \nUkryj pasek stanu i pasek nawigacji, aby uzyskać pełnoekranowe środowisko bez rozpraszaczy.    </font>     </string>
+    <string name="pref_enable_trash_can"><b>Kosz (Android 11+)</b>
+          <font color="grey" size="14">
+              \nWłącz, aby przenosić usunięte pliki do Kosza, zamiast usuwać je na stałe.
+          </font>
+    </string>
+    <string name="pref_grid_item_size_multiplier"><b>Mnożnik układu siatki</b>
+          <font color="grey" size="14">
+              \nDostosuj miejsce zajmowane przez każdy element w układzie siatki.
+          </font>
+    </string>
+    <string name="pref_colorization_strategy"><b>Automatyczne kolory <sup><font color="#ae1c27" size="10"><b>Beta</b></font></sup></b>
+         <font color="grey" size="14">
+             \nDynamicznie generuj motyw na podstawie kolorów okładki aktualnie odtwarzanego utworu.
+          </font>
+    </string>
+    <string name="pref_privacy_policy"><b>Polityka prywatności</b>
+           <font color="grey" size="14">
+               \nKliknij tu, żeby zobaczyć politykę prywatności.
+          </font>
+    </string>
+    <string name="pref_live_gallery"><b>Żywa galeria</b>
+           <font color="grey" size="14">
+               \n Włącz animacje i automatyczne odtwarzanie.
+          </font></string>
+    <string name="pref_font_scale"><b>Skala czcionki</b>
+         <font color="grey" size="14">
+            \nDostosuj rozmiar czcionki, aby tekst był łatwiejszy do odczytania. Wybierz skalę, która pasuje do twoich
+             preferencji dla lepszej czytelności.
+        </font>
+    </string>
+    <string name="pref_transparent_system_bars"><b>Paski systemowe</b>
+        <font color="grey" size="14">
+            \nWłącz przezroczyste paski systemowe, aby uzyskać pełnoekranowe wrażenia. <b><i>\n(Android 6.0+)</i></b>
+        </font>
+    </string>
+    <string name="pref_report_an_issue"><b>Zgłoś błąd</b>
+        <font color="grey" size="14">
+           \nSkontaktuj się z naszym zespołem wsparcia, aby uzyskać pomoc lub zgłosić problemy.
+        </font>
+    </string>
+    <string-array name="pref_night_mode_entries">
+        <item>Ciemny</item>
+        <item>Jasny</item>
+        <item>Systemowy</item>
+    </string-array>
+    <string name="version">Wersja</string>
+    <string name="version_info_s">Wersja: %1$s</string>
+    <string name="pref_secure_mode"><b>Tryb bezpieczny</b>
+        <font color="grey" size="14">
+           \nTryb Bezpieczny ukrywa zawartość aplikacji w podglądzie, chroniąc prywatność użytkownika, gdy
+            aplikacja nie jest aktywnie używana.
+        </font>
+    </string>
+    <string name="pref_app_lock_s"><b>Blokada aplikacji</b> (<small>%1$s</small>)<sup><font color="#ae1c27" size="10"><b> Beta</b></font></sup>
+          <font color="grey" size="14">
+              \nZabezpiecz Galerię biometrią.
+        </font>
+    </string>
+    <string name="pref_color_nav_bar"><b>Koloruj pasek nawigacjnawigacji</b><font color="grey" size="14">\nUżyj koloru akcentu w pasku nawigacyjnym.
+        </font>
+    </string>
+    <string name="about_us">O nas</string>
+    <string name="postfix_x_f">%1$.1fx</string>
+    <string name="system">System</string>
+    <string name="join_the_beta">Dołącz do Beta</string>
+    <string name="update_gallery">Zaktualizuj Galerię</string>
+    <string name="rate_us">Oceń nas</string>
+    <string name="share_app_label">Podziel się z przyjaciółmi</string>
+    <string name="pref_dynamic_colors"><b>Kolory dynamiczne</b>\n<font color="grey" size="14">Przełącz użycie dynamicznych kolorów. Ta funkcja jest dostępna tylko na <b>Androidzie 12</b> lub nowszym.
+        </font>
+    </string>
+    <string name="error">Błąd</string>
+    <string-array name="pref_app_lock_options">
+        <item>Wyłączone</item>
+        <item>Stale</item>
+        <item>1 minuta</item>
+        <item>30 minut</item>
+    </string-array>
+    <string name="pref_scr_version_by_author_s">"w%1$s przez <b> <i>Zakir Sheikh</i> </b>"</string>
+    <string name="buy_me_a_coffee">Postaw mi kawę</string>
+    <string name="msg_support_gallery"><b>Galeria dopiero się zaczyna — i będzie się tylko poprawiać.</b>
+    \nGaleria jest otwartoźródłowa, pięknie zaprojektowana i szybko się rozwija. Możesz ją wspierać,
+        \n1. 🌍 Polecając innym
+        \n2. 🔧 Zgłaszając błędy
+        \n3. ☕ Motywując mnie małym gestem, np. kupując kawę lub częstując posiłkiem. 😊
+    </string>
+    <string name="fuel">Zasil</string>
+    <string name="viewer_scr_open_in_lens">Otwórz w Lens</string>
+    <string name="quick_share">Udostępnij szybko</string>
+    <string name="msg_viewer_scr_no_g_lens">Zainstaluj aplikację Google, żeby użyć Lens</string>
+    <string name="msg_files_quick_share_error">Zainstaluj Szybkie udostępnianie, żeby użyć tej funkcji.</string>
+    <string name="none">Żaden</string>
+    <string name="properties">Właściwości</string>
+    <string name="pref_ambient_mode"><b>Tryb Otoczenia</b><font color="grey">\nDodaje efektowne oświetlenie wokół odtwarzacza multimediów, dla bardziej kinowych wrażeń.</font></string>
+    <string name="authenticate">Uwierzytelnij</string>
+    <string name="confirm">Potwierdź</string>
+    <string name="msg_favourites_modify_d">Zmienić %1$d element w Ulubionych?</string>
+    <string name="add_your_language">Dodaj swój język</string>
 </resources>

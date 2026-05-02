@@ -112,7 +112,7 @@ private val MAX_PROMO_MESSAGES = 2
 // The number of app launches to skip between showing consecutive promotional messages.
 // After each promotional message is shown, the app will skip this many launches before
 // potentially showing another promotional message.
-private val PROMO_SKIP_LAUNCHES = 10
+private val PROMO_SKIP_LAUNCHES = 30
 
 
 // Minimum number of days between subsequent review prompts.

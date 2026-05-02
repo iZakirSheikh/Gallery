@@ -4,12 +4,11 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟 Privacy: Removed ACCESS_MEDIA_LOCATION permission.
-            \n🌟 Settings: "Rate Us" now links to GitHub repo; "Support Development" points to GitHub Sponsors; Contribute section hidden.
-            \n🌟 Build: Refined flavor config for consistency.
-            \n🌟 Store: Updated description formatting, refreshed screenshots, and metadata.
-            \n🌟 <b>Smoother Updates</b>: Release builds are now properly signed, ensuring reliable installs and upgrades.
-            \n🌟 <b>Animated Splash Screen</b>: A fresh animated splash experience for Android 12+ devices.
+            \n🌟 <b>New "Plus" Flavor</b>: Introduced a premium build flavor with integrated billing and enhanced features.
+            \n🌟 <b>Localization</b>: Added Polish, Russian, and German support; updated Spanish and Portuguese.
+            \n🌟 <b>Improved UX</b>: Reduced frequency of promotional messages for a cleaner experience.
+            \n🌟 <b>Core Updates</b>: Updated Kotlin, Compose, and Media3 to latest versions for better stability.
+            \n🌟 <b>CI/CD</b>: Enhanced release workflow for automated "PLUS" flavor distribution.
         </font>
     </string>
 </resources>

@@ -15,6 +15,7 @@
        5. The snackbar message should have this structure: Title\n bold + experimental + message.
           The string resources should follow the above rules strictly
      -->
+    <string name="app_name"></string>
     <string name="permission_scr_desc"><b>Gallery</b> precisa das seguintes permissões  acesso as 
         Suas fotos e vídeos 
         No Android 14 ou superior 
