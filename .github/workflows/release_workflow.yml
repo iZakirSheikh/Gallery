@@ -192,12 +192,22 @@ jobs:
             ${{steps.signed_plus_aab.outputs.signedReleaseFile}}
             ${{steps.signed_plus_apk.outputs.signedReleaseFile}}
 
-      # Uploading Signed AAB to internal track of PlayConsole
+      # Uploading Standard Signed AAB to internal track of PlayConsole
       - name: Deploy to Play Store (Internal)
         uses: r0adkll/upload-google-play@v1
         with:
           serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
           packageName: com.googol.android.apps.photos
           releaseFiles: ${{steps.signed_standard_aab.outputs.signedReleaseFile}}
+          track: internal
+          whatsNewDirectory: ./whatsnew
+
+      # Uploading Plus Signed AAB to internal track of PlayConsole
+      - name: Deploy to Play Store (Internal)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.zs.android.apps.photos
+          releaseFiles: ${{steps.signed_plus_aab.outputs.signedReleaseFile}}
           track: internal
           whatsNewDirectory: ./whatsnew

@@ -97,7 +97,6 @@
     <string name="msg_auth_failed">¡Autenticación Fallida! Inténtelo de nuevo o utilice un método alternativo.</string>
     <string name="msg_auth_error_s">Error de autenticación: %1$s</string>
     <string name="restore">Restaurar</string>
-    <string name="empty_bin">Papelera Vacía</string>
     <string name="files_d" documentation="returns e.g., 23 Files">%1$s Archivos</string>
     <string name="viewer_msg_no_wallpaper_app_found">Ups! No se detectó ninguna aplicación de fondo de pantalla. Instale uno para continuar.</string>
     <string name="viewer_set_as">Establecer como</string>

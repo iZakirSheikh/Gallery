@@ -4,11 +4,10 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟 <b>New "Plus" Flavor</b>: Introduced a premium build flavor with integrated billing and enhanced features.
-            \n🌟 <b>Localization</b>: Added Polish, Russian, and German support; updated Spanish and Portuguese.
-            \n🌟 <b>Improved UX</b>: Reduced frequency of promotional messages for a cleaner experience.
-            \n🌟 <b>Core Updates</b>: Updated Kotlin, Compose, and Media3 to latest versions for better stability.
-            \n🌟 <b>CI/CD</b>: Enhanced release workflow for automated "PLUS" flavor distribution.
+            \n🌟 <b>Themed Icon Support</b>: Added monochrome launcher icon for Android 13+ themed icons.
+            \n🌟 <b>Localization Updates</b>: Refined Spanish translations and streamlined Russian/Portuguese resources.
+            \n🌟 <b>Dependency Updates</b>: Updated AGP to 9.2.1 and core Compose libraries to latest stable versions.
+            \n🌟 <b>Performance &amp; Stability</b>: Minor cleanup and optimizations for a smoother experience.
         </font>
     </string>
 </resources>
