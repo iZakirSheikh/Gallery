@@ -30,6 +30,8 @@ height="80" />](https://play.google.com/store/apps/details?id=com.googol.android
 alt='Get it on Github'
 src='https://github.com/user-attachments/assets/28de125a-29d3-42a6-9a2b-66f06c72325f'
 height="80" />](https://github.com/iZakirSheikh/Gallery/releases/latest)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.zs.android.apps.photos)
+
 
 ### Features
 
