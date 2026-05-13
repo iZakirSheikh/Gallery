@@ -25,7 +25,7 @@ the [Issues](https://github.com/iZakirSheikh/Gallery/issues) section.**
 [<img
 alt='Get it on Google Play'
 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'
-height="80" />](https://play.google.com/store/apps/details?id=com.googol.android.apps.photos)
+height="80" />](https://play.google.com/store/apps/details?id=com.zs.android.apps.photos)
 [<img
 alt='Get it on Github'
 src='https://github.com/user-attachments/assets/28de125a-29d3-42a6-9a2b-66f06c72325f'
