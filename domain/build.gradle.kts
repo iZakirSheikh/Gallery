@@ -131,17 +131,8 @@ android {
             java.srcDirs("src/shared/billing/actual/java")
         }
     }
-    // BUILD TYPES
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
 }
+
 // ============================================================================
 // DEPENDENCIES
 // ============================================================================

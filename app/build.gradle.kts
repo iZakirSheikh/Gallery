@@ -50,24 +50,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     // -----------------------------------------------------------------------------
-    // COMPOSE COMPILER CONFIGURATION
-    // -----------------------------------------------------------------------------
-    // ⚙️ Controls advanced Compose compiler reporting and stability checks.
-    // Reports/metrics can be enabled for debugging but are usually disabled in release builds.
-    composeCompiler {
-        // TODO - I guess disable these in release builds.reportsDestination =
-        // layout.buildDirectory.dir("compose_compiler")
-        // metricsDestination = layout.buildDirectory.dir("compose_compiler")
-        stabilityConfigurationFiles = listOf(
-            rootProject.layout.projectDirectory.file("stability_config.conf")
-        )
-    }
-    // -----------------------------------------------------------------------------
     // DEFAULT CONFIGURATION
     // -----------------------------------------------------------------------------
     // 📦 Core app settings: ID, SDK versions, versioning, and test runner.
     defaultConfig {
-        applicationId = "com.googol.android.apps.photos"
+        applicationId = "com.zs.android.apps.photos"
         minSdk = 24
         targetSdk = 37
         versionCode = 1000
@@ -80,26 +67,19 @@ android {
     flavorDimensions += "edition"
     productFlavors {
         // STANDARD (Default monetized edition: ads + telemetry + in-app purchases enabled)
-        create("standard") { dimension = "edition" }
+        create("standard") {
+            dimension = "edition"; applicationId = "com.googol.android.apps.photos"
+        }
 
         // COMMUNITY (Open-source edition: minimal free build, no ads, no telemetry, no purchases)
-        create("community") {
-            dimension = "edition"
-            versionNameSuffix = "-foss"
-        }
+        create("community") { dimension = "edition"; versionNameSuffix = "-foss" }
 
         // PLUS (Privacy-friendly edition: ads + in-app purchases, but telemetry disabled)
-        create("plus") {
-            dimension = "edition"
-            versionNameSuffix = "-plus"
-            applicationIdSuffix = ".plus"
-        }
+        create("plus") { dimension = "edition"; versionNameSuffix = "-plus" }
 
         // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
         create("premium") {
-            dimension = "edition"
-            versionNameSuffix = "-pro"
-            applicationIdSuffix = ".pro"
+            dimension = "edition"; versionNameSuffix = "-pro"; applicationIdSuffix = ".pro"
         }
     }
     // -----------------------------------------------------------------------------
@@ -126,6 +106,20 @@ android {
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
     }
+}
+
+// -----------------------------------------------------------------------------
+// COMPOSE COMPILER CONFIGURATION
+// -----------------------------------------------------------------------------
+// ⚙️ Controls advanced Compose compiler reporting and stability checks.
+// Reports/metrics can be enabled for debugging but are usually disabled in release builds.
+composeCompiler {
+    // TODO - I guess disable these in release builds.reportsDestination =
+    // layout.buildDirectory.dir("compose_compiler")
+    // metricsDestination = layout.buildDirectory.dir("compose_compiler")
+    stabilityConfigurationFiles = listOf(
+        rootProject.layout.projectDirectory.file("stability_config.conf")
+    )
 }
 
 // -----------------------------------------------------------------------------
