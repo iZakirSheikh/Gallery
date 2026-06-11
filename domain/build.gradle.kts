@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.VariantDimension
+import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // -----------------------------------------------------------------------------
@@ -47,7 +48,7 @@ kotlin {
 android {
     namespace = "com.zs.domain"
     compileSdk { version = release(37) }
-    buildFeatures { buildConfig = true }
+    buildFeatures { buildConfig = true; resValues = true }
 
     // JAVA Config
     compileOptions {
@@ -57,7 +58,7 @@ android {
 
     // DEFAULT CONFIGURATION
     defaultConfig {
-        minSdk = 24
+        minSdk = 28
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // --------------------------------------------------------------------

@@ -43,7 +43,7 @@ kotlin {
 android {
     namespace = "com.zs.gallery"
     compileSdk { version = release(37) }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; resValues = true }
     //
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -55,7 +55,7 @@ android {
     // 📦 Core app settings: ID, SDK versions, versioning, and test runner.
     defaultConfig {
         applicationId = "com.zs.android.apps.photos"
-        minSdk = 24
+        minSdk = 28
         targetSdk = 37
         versionCode = 1000
         versionName = "2.0.0-dev"
@@ -101,7 +101,7 @@ android {
         // -------------------------------------------------------------------------
         debug {
             // 📛 Appends ".debug" to the application ID so debug and release can coexist
-            applicationIdSuffix = ".dev"
+            // applicationIdSuffix = ".dev"
             resValue("string", "launcher_label", "Debug")
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }
