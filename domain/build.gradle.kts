@@ -1,5 +1,4 @@
 import com.android.build.api.dsl.VariantDimension
-import com.android.build.api.variant.BuildConfigField
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // -----------------------------------------------------------------------------
