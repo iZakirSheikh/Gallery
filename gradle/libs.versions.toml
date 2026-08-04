@@ -1,9 +1,9 @@
 [versions]
-agp = "9.2.1"
-kotlin = "2.4.0"
-coil = "3.4.0"
+agp = "9.3.1"
+kotlin = "2.4.10"
+coil = "3.5.0"
 material_icons = "1.7.8"
-toolkit = "3.7.14-dev"
+toolkit = "3.7.15-dev"
 glance = "1.1.1"
 media3 = "1.10.1"
 
@@ -43,7 +43,7 @@ androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "medi
 # Play Store integration, billing, updates, reviews
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version = "2.1.0" }
 play-app-review-ktx = { module = "com.google.android.play:review-ktx", version = "2.0.2" }
-google-billing-ktx = { module = "com.android.billingclient:billing-ktx", version = "9.0.0" }
+google-billing-ktx = { module = "com.android.billingclient:billing-ktx", version = "9.1.0" }
 
 # ─── Firebase ───
 # Analytics and crash reporting
@@ -57,13 +57,13 @@ unity_ads_adquality = { module = "com.unity3d.ads-mediation:adquality-sdk", vers
 
 # ─── Jetpack Compose ───
 # Compose UI, tooling, and icons
-androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.05.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "2026.06.01" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui" }
 androidx-compose-ui-graphics = { module = "androidx.compose.ui:ui-graphics" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
-androidx-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.11.2" }
+androidx-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version = "1.11.4" }
 telephoto-zoomable = { module = "me.saket.telephoto:zoomable", version = "0.19.0" }
 
 # ─── Image Loading ───
@@ -72,19 +72,19 @@ coil-core = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
-coil-video = { module = "io.coil-kt.coil3:coil-video", version = "3.4.0" }
+coil-video = { module = "io.coil-kt.coil3:coil-video", version = "3.5.0" }
 avif-coder-coil = { module = "com.github.awxkee:avif-coder-coil", version = "2.1.4" }
 
 # ─── Toolkit ───
 # Prime Toolkit modules for foundation, preferences, and theming
-toolkit-foundation = { module = "com.github.prime-zs.toolkit:foundation", version.ref = "toolkit" }
-toolkit-preferences = { module = "com.github.prime-zs.toolkit:preferences", version.ref = "toolkit" }
-toolkit-theme = { module = "com.github.prime-zs.toolkit:theme", version.ref = "toolkit" }
+toolkit-foundation = { module = "com.github.googol-apps.toolkit:foundation", version.ref = "toolkit" }
+toolkit-preferences = { module = "com.github.googol-apps.toolkit:preferences", version.ref = "toolkit" }
+toolkit-theme = { module = "com.github.googol-apps.toolkit:theme", version.ref = "toolkit" }
 
 # ─── UI Enhancements ───
 # Extra UI libraries for Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
-androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.2.1" }
+androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.2.2" }
 chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version = "1.6.10" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 
