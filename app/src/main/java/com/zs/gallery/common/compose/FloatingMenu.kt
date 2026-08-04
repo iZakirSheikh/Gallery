@@ -96,7 +96,7 @@ fun FloatingActionMenu(
                 background = background,
                 contentColor = contentColor,
                 elevation = 12.dp,
-                shape = AppTheme.shapes.medium,
+                shape = CircleShape,
                 border = border,
                 content = {
                     Row(

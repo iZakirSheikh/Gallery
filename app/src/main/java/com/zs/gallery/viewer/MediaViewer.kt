@@ -320,7 +320,8 @@ fun MediaViewer(viewState: MediaViewerViewState) {
                     OverflowMenu(
                         actions,
                         onItemClicked = { viewState.onPerformAction(it, ctx.findActivity()) },
-                        collapsed = 5
+                        collapsed = 4,
+                        compact = true
                     )
                 }
             )

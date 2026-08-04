@@ -238,18 +238,18 @@ object Settings {
     }
     val PrivacyPolicyIntent = Intent(Intent.ACTION_VIEW).apply {
         data = if (BuildConfig.FLAVOR == BuildConfig.FLAVOR_COMMUNITY)
-            "https://github.com/iZakirSheikh/Gallery/blob/master/PRIVACY_POLICY.md".toUri()
+            "https://github.com/googol-apps/Gallery/blob/master/PRIVACY_POLICY.md".toUri()
             else
             "https://docs.google.com/document/d/1D9wswWSrt65ol7h3HLKhk31OVTqDtN4uLJ73_Rk9hT8/edit?usp=sharing".toUri()
     }
     val GitHubIssuesPage = Intent(Intent.ACTION_VIEW).apply {
-        data = "https://github.com/iZakirSheikh/Gallery/issues".toUri()
+        data = "https://github.com/googol-apps/Gallery/issues".toUri()
     }
     val TelegramIntent = Intent(Intent.ACTION_VIEW).apply {
         data = "https://t.me/audiofy_support".toUri()
     }
     val GithubIntent = Intent(Intent.ACTION_VIEW).apply {
-        data = "https://github.com/iZakirSheikh/Gallery".toUri()
+        data = "https://github.com/googol-apps/Gallery".toUri()
     }
     val JoinBetaIntent = Intent(Intent.ACTION_VIEW).apply {
         data = "https://play.google.com/apps/testing/com.zs.gallery/join".toUri()
