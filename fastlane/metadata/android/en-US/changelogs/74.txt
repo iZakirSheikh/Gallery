@@ -1,4 +1,0 @@
-- Privacy: Removed ACCESS_MEDIA_LOCATION permission.
-- Settings: "Rate Us" now links to GitHub repo; "Support Development" points to GitHub Sponsors; Contribute section hidden.
-- Build: Refined flavor config for consistency.
-- Store: Updated description formatting, refreshed screenshots, and metadata.

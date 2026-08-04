@@ -20,7 +20,10 @@ package com.zs.gallery
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -28,13 +31,18 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.FolderCopy
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Settings
@@ -46,6 +54,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -66,13 +75,16 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.zs.compose.foundation.Background
 import com.zs.compose.foundation.ClaretViolet
+import com.zs.compose.foundation.background
 import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.ContentAlpha
+import com.zs.compose.theme.FloatingActionButton
 import com.zs.compose.theme.Icon
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.MotionScheme
 import com.zs.compose.theme.OutlinedButton
+import com.zs.compose.theme.Surface
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.NavigationSuiteScaffold
 import com.zs.compose.theme.appbar.AppBarDefaults
@@ -85,12 +97,14 @@ import com.zs.compose.theme.dynamicAccentColor
 import com.zs.compose.theme.renderInSharedTransitionScopeOverlay
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.compose.theme.text.Label
+import com.zs.core.Intent
 import com.zs.core.common.checkSelfPermissions
 import com.zs.core.isAppearanceLightSystemBars
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.Route
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
+import com.zs.gallery.common.compose.ContentPadding
 import com.zs.gallery.common.compose.LocalNavController
 import com.zs.gallery.common.compose.LocalSystemFacade
 import com.zs.gallery.common.compose.background
@@ -372,6 +386,7 @@ private fun NavigationBar(
 ) {
     // Get the current theme colors
     val colors = AppTheme.colors
+    val facade = LocalSystemFacade.current
     val routes = @Composable {
         // Get the current navigation destination from NavController
         val current by navController.currentBackStackEntryAsState()
@@ -420,6 +435,40 @@ private fun NavigationBar(
     }
     // Load appropriate navigation bar.
     when {
+        true -> Row(
+            modifier = Modifier
+                .windowInsetsPadding(
+                    AppBarDefaults.bottomAppBarWindowInsets.union(WindowInsets(bottom = 16.dp)).add(WindowInsets(bottom = 10.dp)),
+                )
+                .padding(horizontal = ContentPadding.large),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(ContentPadding.normal, alignment = Alignment.End)) {
+            Surface (
+                contentColor = contentColor,
+                background = background,
+                elevation = 12.dp,
+                border = colors.shine,
+                shape = AppTheme.shapes.xLarge,
+                content = { Row(modifier = Modifier.padding(horizontal = ContentPadding.normal)) { routes() } },   // Display routes at the contre of available space
+            )
+
+            FloatingActionButton(
+                content = {
+                    Icon(imageVector = Icons.Filled.Camera, contentDescription = null)
+                },
+                onClick = {
+                    val intent = Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA){
+                        // Ensures the intent opens in a new independent task
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    // Verify that a camera app exists on the device before launching
+                    if (intent.resolveActivity((facade as Context).packageManager) != null) {
+                        facade.launch(intent)
+                    }
+                }
+            )
+        }
+
         isBottomAligned -> FloatingBottomNavigationBar(
             contentColor = contentColor,
             background = background,
@@ -431,7 +480,6 @@ private fun NavigationBar(
             // Display routes at the contre of available space
             content = { routes() }
         )
-
         else -> SideBar(
             modifier = modifier.width(SIDE_BAR_WIDTH),
             windowInsets = AppBarDefaults.sideBarWindowInsets,
@@ -470,7 +518,7 @@ fun Home(
     // BottomBar appears only if the window size suits a mobile screen.
     // Consider this scenario: a large screen that fits the mobile description, like a desktop screen in portrait mode.
     // In this case, maybe showing the BottomBar is preferable!
-    val portrait = clazz.width < Category.Medium
+    val portrait = /*clazz.width < Category.Medium*/ true
     val surface = rememberAcrylicSurface()
 
     // content

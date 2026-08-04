@@ -4,8 +4,9 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟 <b>Navigation Improvements</b>: Moved Settings to the Files screen overflow menu for a cleaner interface.
-            \n🌟 <b>Localization Updates</b>: Added full support for the Galician language.
+            \n🌟 <b>Navigation Improvements</b>: Added dynamic navbar.
+            \n🌟 <b>Camera</b>: Added dedicated camera button.
+            \n🌟 <b>Navigation Improvements</b>: Added dynamic navbar.
             \n🌟 <b>Themed Icon Support</b>: Added monochrome launcher icon for Android 13+ themed icons.
             \n🌟 <b>Performance &amp; Stability</b>: General optimizations and internal cleanups for a smoother experience.
         </font>

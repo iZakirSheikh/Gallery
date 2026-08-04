@@ -1,4 +1,0 @@
-- <b>Themed Icon Support</b>: Added monochrome launcher icon for Android 13+ themed icons.
-- <b>Localization Updates</b>: Refined Spanish translations and streamlined Russian/Portuguese resources.
-- <b>Dependency Updates</b>: Updated AGP to 9.2.1 and core Compose libraries to latest stable versions.
-- <b>Performance &amp; Stability</b>: Minor cleanup and optimizations for a smoother experience.

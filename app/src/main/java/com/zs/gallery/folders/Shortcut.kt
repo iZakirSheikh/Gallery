@@ -63,7 +63,7 @@ fun Shortcut(
         modifier = modifier
             .aspectRatio(16 / 11f)
             .clip(Folder) // Shape the shortcut like a folder
-            .background(colors.background(1.5.dp), Folder)
+            .background(colors.background(4.dp), Folder)
             // .border(1.dp, accent.copy(0.5f), Folder) // Light border
             //  .background(colors.backgroundColorAtElevation(0.4.dp), FolderShape)
             .clickable(
