@@ -26,7 +26,7 @@ import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.ktx.requestUpdateFlow
 import com.google.android.play.core.review.ReviewManagerFactory
 import com.zs.core.market.AppMarketManager
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.catch
 
 internal class AppMarketManagerImpl() : AppMarketManager {
     override suspend fun initiateReviewFlow(activity: Activity) {
@@ -40,7 +40,9 @@ internal class AppMarketManagerImpl() : AppMarketManager {
         provider: suspend (result: Float) -> Int
     ) {
         val manager = AppUpdateManagerFactory.create(activity)
-        manager.requestUpdateFlow().onEach { result ->
+        manager.requestUpdateFlow()
+            .catch { e ->  provider(AppMarketManager.UPDATE_NOT_SUPPORTED) }
+            .collect { result ->
             when(result){
                 is AppUpdateResult.NotAvailable -> provider(AppMarketManager.UPDATE_NOT_AVAILABLE)
                 is AppUpdateResult.InProgress -> {
@@ -77,7 +79,7 @@ internal class AppMarketManagerImpl() : AppMarketManager {
                     // forcefully update; if it's flexible
                     if (!isFlexible) {
                         manager.completeUpdate()
-                        return@onEach
+                        return@collect
                     }
 
                     val action = provider(AppMarketManager.UPDATE_DOWNLOADED)
