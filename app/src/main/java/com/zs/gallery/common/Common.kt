@@ -20,7 +20,10 @@ package com.zs.gallery.common
 
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.text.format.Formatter
 import android.view.Window
 import androidx.compose.foundation.text.input.TextFieldState
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavDestination
+import com.zs.core.Intent
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
@@ -185,4 +189,40 @@ fun ZoomableState.scaledInsideAndCenterAlignedFrom(size: Size) {
             size
         )
     )
+}
+
+/**
+ * Extension property to check if the current app
+ * was installed from the official Google Play Store.
+ *
+ * - Uses modern API (getInstallSourceInfo) on Android 11+ (API 30).
+ * - Falls back to deprecated getInstallerPackageName for older devices.
+ * - Returns true only if the installer is Play Store.
+ */
+val Context.isInstalledFromPlayStore: Boolean
+    get() = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Modern API: richer install source info
+            val sourceInfo = packageManager.getInstallSourceInfo(packageName)
+            sourceInfo.installingPackageName == "com.android.vending"
+        } else {
+            // Legacy API: still works pre‑Android 11
+            val installer = packageManager.getInstallerPackageName(packageName)
+            installer == "com.android.vending" || installer == "com.google.android.feedback"
+        }
+    } catch (e: PackageManager.NameNotFoundException) {
+        // Defensive: if package info lookup fails, assume not Play Store
+        false
+    }
+
+/**
+ * Checks if the device can resolve an intent to open the Play Store.
+ * This indirectly confirms whether Play Store (com.android.vending) is installed.
+ */
+fun Context.isPlayStoreAvailable(): Boolean {
+    val playStoreIntent = Intent(Intent.ACTION_VIEW) {
+        data = Uri.parse("market://details?id=$packageName")
+        setPackage("com.android.vending") // Target Play Store explicitly
+    }
+    return playStoreIntent.resolveActivity(packageManager) != null
 }

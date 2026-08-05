@@ -235,6 +235,8 @@
     <string name="wallpaper">Wallpaper</string>
     <string name="lens">Lens</string>
     <string name="beam">Beam</string>
-
+    <string name="msg_playstore_encouragement"><b>Get Gallery on Play Store</b>
+        <font color='grey'>\n✨ Enjoy trusted updates, new features, and extra benefits by switching to the official Play Store version!</font>
+    </string>
 
 </resources>

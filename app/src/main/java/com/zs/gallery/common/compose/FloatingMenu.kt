@@ -67,6 +67,7 @@ import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.IconToggleButton
 import com.zs.compose.theme.LocalContentColor
 import com.zs.compose.theme.Surface
+import com.zs.compose.theme.TonalIconButton
 import com.zs.compose.theme.menu.DropDownMenu
 import com.zs.compose.theme.menu.DropDownMenuItem
 import com.zs.compose.theme.ripple
@@ -173,11 +174,13 @@ inline fun RowScope.OverflowMenu(
     repeat(minOf(size, collapsed)) { index ->
         val item = items[index]
         when{
-            compact -> IconButton(
+            compact -> TonalIconButton(
                 icon = item.icon ?: Icons.Outlined.BrokenImage, // Fallback for missing icons
                 onClick = { onItemClicked(item) },
                 contentDescription = stringResource(item.label),
-                enabled = item.enabled
+                enabled = item.enabled,
+                modifier = Modifier.scale(0.9f),
+                color = AppTheme.colors.accent
             )
 
             else -> {
@@ -221,7 +224,13 @@ inline fun RowScope.OverflowMenu(
 
     // "More" button to toggle dropdown visibility
     IconToggleButton(checked = show, onCheckedChange = { onDismissRequest(it) }) {
-        Icon(Icons.Outlined.MoreVert, contentDescription = "More actions")
+        Surface(color = AppTheme.colors.accent, shape = AppTheme.shapes.small) {
+            Icon(
+                Icons.Outlined.MoreVert,
+                contentDescription = "More actions",
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+        }
 
         // DropdownMenu: shows remaining items beyond the collapsed count
         DropDownMenu(

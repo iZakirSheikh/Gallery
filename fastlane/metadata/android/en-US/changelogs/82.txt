@@ -1,3 +1,4 @@
+- 🌟<b>Material3 Makeover</b>: Started applying Material3 colors to the app.
 - <b>Navigation Improvements</b>: Added dynamic navbar.
 - <b>Camera</b>: Added dedicated camera button.
 - <b>Localization Updates</b>: Added full support for the Galician language.

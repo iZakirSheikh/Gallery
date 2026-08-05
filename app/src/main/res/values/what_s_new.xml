@@ -4,6 +4,7 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
+            \n🌟<b>Material3 Makeover</b>: Started applying Material3 colors to the app.
             \n🌟 <b>Navigation Improvements</b>: Added dynamic navbar.
             \n🌟 <b>Camera</b>: Added dedicated camera button.
             \n🌟 <b>Navigation Improvements</b>: Added dynamic navbar.

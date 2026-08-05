@@ -38,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Coffee
 import androidx.compose.material.icons.outlined.GetApp
 import androidx.compose.material.icons.outlined.NewReleases
+import androidx.compose.material.icons.outlined.Store
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.NonRestartableComposable
@@ -76,6 +77,8 @@ import com.zs.gallery.common.IAP_BUY_ME_COFFEE
 import com.zs.gallery.common.SystemFacade
 import com.zs.gallery.common.WindowStyle
 import com.zs.gallery.common.domain
+import com.zs.gallery.common.isInstalledFromPlayStore
+import com.zs.gallery.common.isPlayStoreAvailable
 import com.zs.gallery.common.products
 import com.zs.gallery.files.RouteFiles
 import com.zs.gallery.lockscreen.RouteLockScreen
@@ -558,6 +561,18 @@ class MainActivity : ComponentActivity(), SystemFacade, NavDestListener {
                 if (savedVersionCode != versionCode) {
                     preferences[KEY_APP_VERSION_CODE] = versionCode
                     showPromoToast(0) // What's new
+                    return@launch
+                }
+                // check if app is installed from market other than playstore.
+                if(!isInstalledFromPlayStore && isPlayStoreAvailable()){
+                    val res = snackbarHostState.showSnackbar(
+                        resources.getText2(R.string.msg_playstore_encouragement),
+                        duration = SnackbarDuration.Indefinite,
+                        icon = Icons.Outlined.Store,
+                        action = resources.getString(R.string.get)
+                    )
+                    if (res == SnackbarResult.ActionPerformed)
+                        launchAppStore("com.googol.android.apps.photos")
                     return@launch
                 }
                 // Promotional messages are displayed only after the app has been launched

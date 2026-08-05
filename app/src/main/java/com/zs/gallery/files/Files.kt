@@ -63,6 +63,7 @@ import com.zs.compose.theme.IconButton
 import com.zs.compose.theme.LocalContentColor
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.None
+import com.zs.compose.theme.Surface
 import com.zs.compose.theme.VerticalDivider
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.FabPosition
@@ -193,12 +194,14 @@ fun Files(viewState: FilesViewState) {
                 border = colors.shine,
                 content = {
                     // Label
-                    Label(
-                        text = "${viewState.selected.size}",
-                        style = AppTheme.typography.title2,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier
-                    )
+                    Surface(color = AppTheme.colors.accent, shape = AppTheme.shapes.medium) {
+                        Label(
+                            text = "${viewState.selected.size}",
+                            style = AppTheme.typography.title2,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = CP.medium, vertical = CP.small)
+                        )
+                    }
 
                     // Divider
                     VerticalDivider(
@@ -211,7 +214,8 @@ fun Files(viewState: FilesViewState) {
                     OverflowMenu(
                         actions,
                         onItemClicked = { viewState.onRequest(it, ctx.findActivity()) },
-                        collapsed = 5
+                        collapsed = 4,
+                        compact = true
                     )
                 }
             )

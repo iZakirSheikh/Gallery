@@ -72,6 +72,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -101,6 +102,7 @@ import com.zs.compose.theme.SliderPreference
 import com.zs.compose.theme.Surface
 import com.zs.compose.theme.SwitchPreference
 import com.zs.compose.theme.TextButton
+import com.zs.compose.theme.TonalIconButton
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.HorizontalTwoPaneStrategy
 import com.zs.compose.theme.adaptive.SinglePaneStrategy
@@ -607,16 +609,20 @@ fun Settings(viewState: SettingsViewState) {
                 actions = {
                     // Join our telegram channel
                     val facade = LocalSystemFacade.current
-                    IconButton(
+                    TonalIconButton(
                         icon = Icons.Outlined.Textsms,
                         contentDescription = null,
                         onClick = { facade.launch(Settings.TelegramIntent) },
+                        color = AppTheme.colors.accent,
+                        modifier = Modifier.scale(0.9f)
                     )
                     // Report Bugs on Github.
-                    IconButton(
+                    TonalIconButton (
                         icon = Icons.Outlined.BugReport,
                         contentDescription = null,
                         onClick = { facade.launch(Settings.GitHubIssuesPage) },
+                        color = AppTheme.colors.accent,
+                        modifier = Modifier.scale(0.9f)
                     )
                 }
             )

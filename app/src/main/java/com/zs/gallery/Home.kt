@@ -25,6 +25,7 @@ import android.content.Intent
 import android.os.Build
 import android.provider.MediaStore
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -58,11 +59,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -75,9 +79,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.zs.compose.foundation.Background
 import com.zs.compose.foundation.ClaretViolet
+import com.zs.compose.foundation.OrientRed
+import com.zs.compose.foundation.SignalWhite
+import com.zs.compose.foundation.UmbraGrey
 import com.zs.compose.foundation.background
 import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.AppTheme
+import com.zs.compose.theme.Colors
 import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.FloatingActionButton
 import com.zs.compose.theme.Icon
@@ -85,6 +93,7 @@ import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.MotionScheme
 import com.zs.compose.theme.OutlinedButton
 import com.zs.compose.theme.Surface
+import com.zs.compose.theme.Typography
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.NavigationSuiteScaffold
 import com.zs.compose.theme.appbar.AppBarDefaults
@@ -132,6 +141,7 @@ import com.zs.gallery.viewer.MediaViewer
 import com.zs.gallery.viewer.RouteIntentViewer
 import com.zs.gallery.viewer.RouteViewer
 import org.koin.androidx.compose.koinViewModel
+import kotlin.math.ln
 import com.google.accompanist.permissions.rememberMultiplePermissionsState as Permissions
 
 private const val TAG = "Home"
@@ -493,6 +503,9 @@ private fun NavigationBar(
     }
 }
 
+internal fun applyTonalElevation(accent: Color, background: Color, elevation: Dp) =
+    accent.copy(alpha = ((4.5f * ln(elevation.value + 1)) + 2f) / 100f).compositeOver(background)
+
 /** The main navigation host for the app. */
 @Composable
 fun Home(
@@ -574,19 +587,38 @@ fun Home(
     // Setup App Theme and provide necessary dependencies.
     // Provide the navController and window size class to child composable.
     val useDynamicColors by activity.observeAsState(Settings.KEY_DYNAMIC_COLORS)
-    AppTheme(
-        isLight = !isDark,
-        fontFamily = Settings.DefaultFontFamily,
-        motionScheme = MotionScheme.expressive(),
-        accent = when {
-            useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(
-                activity,
-                isDark
-            )
+    val motionScheme = MotionScheme.expressive()
+    val accent = when {
+        useDynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicAccentColor(
+        activity,
+        isDark
+        )
 
-            isDark -> DarkAccentColor
-            else -> LightAccentColor
+        isDark -> DarkAccentColor
+        else -> LightAccentColor
+    }
+    val background by animateColorAsState(
+        targetValue = when {
+            isDark -> applyTonalElevation(accent, Color.Black, 1.dp)
+            else -> applyTonalElevation(accent, Color.White, 4.dp)
         },
+        animationSpec = motionScheme.slowEffectsSpec(), label = "background"
+    )
+
+    val primary2 by animateColorAsState(accent, motionScheme.defaultEffectsSpec(), "accent")
+    val colors = Colors(
+        accent = primary2,
+        background = background,
+        onBackground = if (!isDark) Color.UmbraGrey else Color.SignalWhite,
+        onAccent = if (primary2.luminance() > 0.45f) Color.Black else Color.SignalWhite,
+        error = Color.OrientRed,
+        onError = Color.SignalWhite,
+    )
+
+    AppTheme(
+        colors = colors,
+        typography = Typography(Settings.DefaultFontFamily) ,
+        motionScheme = MotionScheme.expressive(),
         content = {
             // Provide the navController, newWindowClass through LocalComposition.
             CompositionLocalProvider(
