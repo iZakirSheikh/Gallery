@@ -20,6 +20,10 @@ private val config: Config.() -> Unit  = {
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    // TODO - Find a way to apply these to only standard flavour
+    // ⚠️ Currently Crashlytics + Google Services are applied globally.
+    alias(libs.plugins.crashanlytics) // Firebase Crashlytics (should be flavor-scoped)
+    alias(libs.plugins.google.services) // Google Services (should be flavor-scoped)
 }
 
 // -----------------------------------------------------------------------------
@@ -57,10 +61,10 @@ private val flavors: NamedDomainObjectContainer<ApplicationProductFlavor>.() -> 
     }
 
     // PREMIUM (Full unlock edition: all features enabled, no ads, no telemetry, no purchases)
-    create("premium") {
+    create("gold") {
         dimension = "edition"
-        versionNameSuffix = "-pro"
-        applicationIdSuffix = ".pro"
+        versionNameSuffix = "-gold"
+        applicationIdSuffix = ".gold"
     }
 }
 
@@ -106,7 +110,7 @@ android {
         // -------------------------------------------------------------------------
         debug {
             // 📛 Appends ".debug" to the application ID so debug and release can coexist
-            // applicationIdSuffix = ".dev"
+            applicationIdSuffix = ".dev"
             resValue("string", "launcher_label", "Debug")
             versionNameSuffix = "-debug" // 🔖 Adds "-debug" suffix to version name for clarity
         }

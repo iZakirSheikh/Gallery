@@ -34,7 +34,7 @@ private val config: Config.() -> Unit = {
     this["FLAVOR_COMMUNITY"] = "community"
     this["FLAVOR_STANDARD"] = "standard"
     this["FLAVOR_PLUS"] = "plus"
-    this["FLAVOR_PREMIUM"] = "premium"
+    this["FLAVOR_GOLD"] = "gold"
     // Inject secrets from environment variables.
     // Missing values default to empty strings to avoid build failures.
     for (secret in secrets)
@@ -59,14 +59,40 @@ private val flavours: NamedDomainObjectContainer<LibraryProductFlavor>.() -> Uni
 
     // PREMIUM → Full unlock build.
     // Based on Community, but with all features enabled.
-    create("premium") { dimension = "edition" }
+    create("gold") { dimension = "edition" }
 }
 
 // 📂 SOURCE SETS
 // Customizes the directory structure for source files, resources, and manifests.
 // Useful for flavor-specific logic or test directories.
 private val sources: NamedDomainObjectContainer<AndroidLibrarySourceSet>.() -> Unit  = {
+// Community flavor → uses stubbed (no-op) implementations for all shared libs
+    getByName("community") {
+        kotlin.directories += "src/shared/analytics/stub/java"
+        kotlin.directories += "src/shared/ads/stub/java"
+        kotlin.directories += "src/shared/billing/stub/java"
+    }
 
+    // Premium flavor → also wired to stub implementations (restricted feature set)
+    getByName("plus") {
+        kotlin.directories += "src/shared/analytics/actual/java"
+        kotlin.directories += "src/shared/ads/stub/java"
+        kotlin.directories += "src/shared/billing/actual/java"
+    }
+
+    // Standard flavor → full/actual implementations of analytics, billing, and ads
+    getByName("standard") {
+        kotlin.directories += "src/shared/analytics/actual/java"
+        kotlin.directories += "src/shared/ads/actual/java"
+        kotlin.directories += "src/shared/billing/actual/java"
+    }
+
+    // Gold flavor → only requires actual market implementation (no analytics/ads)
+    getByName("gold") {
+        kotlin.directories += "src/shared/analytics/stub/java"
+        kotlin.directories += "src/shared/ads/stub/java"
+        kotlin.directories += "src/shared/billing/stub/java"
+    }
 }
 
 // -----------------------------------------------------------------------------
