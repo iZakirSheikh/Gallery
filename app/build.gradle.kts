@@ -118,9 +118,30 @@ android {
 // -----------------------------------------------------------------------------
 // 📚 External libraries and frameworks required to build and run the app.
 dependencies {
-    implementation(platform(libs.androidx.compose.bom))
+    // local
+    implementation(project(":domain"))
+    //
     implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    //
+    implementation(libs.bundles.nav3)
+    implementation(libs.toolkit.theme)
+    implementation(libs.toolkit.foundation)
+    implementation(libs.androidx.splashscreen)
+    implementation(libs.androidx.startup)
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.google.fonts)
+    implementation(libs.telephoto.zoomable)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.koin)
+    implementation(libs.chrisbanes.haze)
+    implementation(libs.lottie.compose)
+    implementation(libs.bundles.coil)
+    implementation(libs.androidx.paging.compose)
+
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

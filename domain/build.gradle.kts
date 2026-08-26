@@ -23,6 +23,7 @@ private val secrets = arrayOf(/*"ADS_APP_ID",*/ "PLAY_CONSOLE_APP_RSA_KEY")
 // -----------------------------------------------------------------------------
 plugins {
     alias(libs.plugins.android.library)          // Android Library plugin
+    alias(libs.plugins.ksp)
 }
 
 // ⚙️ DEFAULT CONFIGURATION
@@ -111,4 +112,18 @@ android {
 // ============================================================================
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    implementation(libs.work.runtime.ktx)
+    ksp(libs.room.compiler)
+    implementation(libs.coil.core)
+    api(libs.toolkit.preferences)
+    implementation(libs.room.paging)
+    implementation(libs.androidx.paging.runtime)
+    // Plus only
+    "plusImplementation"(libs.bundles.play.services)
+    // Standard only
+    "standardImplementation"(libs.bundles.play.services)
+    "standardImplementation"(libs.bundles.analytics)
+    "standardImplementation"(libs.bundles.ads)
 }
