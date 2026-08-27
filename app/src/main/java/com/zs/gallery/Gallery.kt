@@ -39,6 +39,7 @@ import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.ContentAlpha
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.MotionScheme
+import com.zs.compose.theme.Surface
 import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.NavigationSuiteScaffold
 import com.zs.compose.theme.appbar.NavigationItemDefaults
@@ -123,7 +124,7 @@ fun Gallery(
         entry is NavKey.Files && entry.isTimeline || entry is NavKey.Folders || entry is NavKey.Albums
     // Navigation Bar Definition
     val navBar: @Composable () -> Unit = {
-
+        Surface { }
     }
     // Main Content Scaffold
     val content: @Composable () -> Unit = {
