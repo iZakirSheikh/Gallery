@@ -40,6 +40,7 @@ kotlin {
         freeCompilerArgs.addAll(
             "-Xopt-in=kotlin.RequiresOptIn",        // Opt-in to @RequiresOptIn APIs
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
+            "-Xopt-in=com.zs.compose.theme.ExperimentalThemeApi",             // Custom theme experimental
             "-Xcontext-sensitive-resolution",       // Context-sensitive overload resolution
         )
     }

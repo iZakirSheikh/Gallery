@@ -99,7 +99,7 @@ toolkit-theme = { module = "com.github.googol-apps.toolkit:theme", version.ref =
 # Extra UI libraries for Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
 androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.2.2" }
-chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version = "1.6.10" }
+chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version = "2.0.0-beta01" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 
 # ─── Glance ───

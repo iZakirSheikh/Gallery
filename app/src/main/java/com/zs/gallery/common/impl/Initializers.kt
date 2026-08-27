@@ -17,6 +17,7 @@ import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.GlobalContext.startKoin
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import androidx.appcompat.content.res.AppCompatResources.getDrawable as Drawable
 import coil3.ImageLoader.Builder as ImageLoader
@@ -161,5 +162,5 @@ private val AppModules = module {
     factory { MediaProvider.getInstance() }
 
     // --- ViewModels ---
-    //viewModelOf(::FilesViewModel)
+    viewModelOf(::FilesViewModel)
 }
