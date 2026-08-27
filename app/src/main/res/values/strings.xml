@@ -1,3 +1,58 @@
+<!--
+ Naming convention for string resources:
+  - The string can be styled following the rules of styling without CDATA, as the toolkit does not support CDATA.
+  - The string resources should be named as follows:
+    1. If the string is simple, like Delete, its name should be R.string.delete.
+    2. If the string contains complex text, the name should be in this format: scr_screen_name_purpose_variables
+       (optional; if no variables, omit this). For example, timeline_scr_items_d
+    3. General message (snackbar) messages should be named as msg_add_to_playlist_error_s (optional).
+       The message can be styled as bold or experimental, like alpha superscript. The message
+       can have any length.
+    4. Snackbar messages that belong to a specific screen should be named as msg_screen_name_s
+       (optional). E.g., msg_preference_permission_s
+    5. The snackbar message should have this structure: Title\n bold + experimental + message.
+       The string resources should follow the above rules strictly
+-->
+
 <resources>
     <string name="app_name">Gallery</string>
+    <string name="msg_enroll_biometric">Enable biometric authentication in settings.</string>
+    <string name="scr_permission_title">Storage Permission</string>
+    <string name="scr_permission_desc">Let’s bring your memories to life!
+        \<b>nGallery</b> needs access to your <i>photos &amp; videos</i>
+        \n✨ So you can browse, relive, and share moments
+        \n🔒 Your files stay <b>safe</b> on your device
+        \nPlease grant access to continue.
+    </string>
+    <string name="allow">Allow</string>
+    <string name="lock_scr_title">Verify Your Identity</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="msg_auth_failed">Authentication Failed! Please try again or use an alternative method.</string>
+    <string name="msg_auth_error_s">Authentication Error: %1$s</string>
+    <string name="timeline">Timeline</string>
+    <string name="folders">Folders</string>
+    <string name="error">Error</string>
+    <string name="report">Report</string>
+    <string name="msg_unknown_error">Oops! An unknown error occurred</string>
+    <string name="albums">Albums</string>
+
+    <string name="scr_timeline_title"><b>Time</b>line<font color='grey' size='11'>\n  Past to present, all in one view.</font></string>
+
+    <!-- Base words -->
+    <string name="share">Share</string>
+    <string name="rate_us">Rate us</string>
+    <string name="airdrop">AirDrop</string>
+    <string name="like">Like</string>
+    <string name="unlike">Unlike</string>
+    <string name="trash">Trash</string>
+    <string name="restore">Restore</string>
+    <string name="delete">Delete</string>
+    <string name="select_all">Select All</string>
+    <string name="select">Select</string>
+    <string name="info">Info</string>
+    <string name="folder">Folder</string>
+    <string name="album">Album</string>
+
+    <!--E.g., Facebook \n 306 Files - 24.42MB-->
+    <string name="scr_folders_name_sds">%1$d File(s) - %2$s</string>
 </resources>

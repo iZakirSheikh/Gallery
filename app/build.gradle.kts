@@ -1,4 +1,5 @@
 import com.android.build.api.dsl.ApplicationProductFlavor
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import com.android.build.api.dsl.ApplicationDefaultConfig as Config
 
 // -----------------------------------------------------------------------------
@@ -24,6 +25,24 @@ plugins {
     // ⚠️ Currently Crashlytics + Google Services are applied globally.
     alias(libs.plugins.crashanlytics) // Firebase Crashlytics (should be flavor-scoped)
     alias(libs.plugins.google.services) // Google Services (should be flavor-scoped)
+}
+
+
+// -----------------------------------------------------------------------------
+// KOTLIN COMPILER OPTIONS
+// -----------------------------------------------------------------------------
+kotlin {
+    compilerOptions {
+        // Target JVM bytecode version (typed enum instead of raw string)
+        jvmTarget = JvmTarget.JVM_11
+
+        // Advanced / experimental compiler flags
+        freeCompilerArgs.addAll(
+            "-Xopt-in=kotlin.RequiresOptIn",        // Opt-in to @RequiresOptIn APIs
+            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
+            "-Xcontext-sensitive-resolution",       // Context-sensitive overload resolution
+        )
+    }
 }
 
 // -----------------------------------------------------------------------------

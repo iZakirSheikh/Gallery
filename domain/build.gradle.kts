@@ -41,7 +41,6 @@ private val config: Config.() -> Unit = {
         this[secret] = System.getenv(secret) ?: ""
 }
 
-
 //🧊 PRODUCT FLAVORS
 //Configuration for different versions (e.g., Free vs Pro).
 private val flavours: NamedDomainObjectContainer<LibraryProductFlavor>.() -> Unit = {
@@ -106,8 +105,6 @@ kotlin {
         // Advanced / experimental compiler flags
         freeCompilerArgs.addAll(
             "-Xopt-in=kotlin.RequiresOptIn",        // Opt-in to @RequiresOptIn APIs
-            "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi", // Compose foundation experimental
-            "-Xcontext-sensitive-resolution",       // Context-sensitive overload resolution
         )
     }
 }
