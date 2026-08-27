@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import coil3.Uri
 
 /**
  * Shows a platform Toast message with the given text.
@@ -40,3 +41,19 @@ fun Context.isPermissionGranted(permission: String) =
  */
 fun Context.checkSelfPermissions(values: List<String>) =
     values.all { isPermissionGranted(it) }
+
+
+private val previewUri = Uri("gallery", "media", "preview").newBuilder()
+
+/**
+ * Constructs a custom [Uri] for media thumbnails using a specific internal scheme.
+ *
+ * The resulting URI follows the format: `gallery://media/preview?id={id}&mimetype={mimeType}`.
+ * This is typically used to provide a consistent identifier for image loading libraries.
+ *
+ * @param id The unique identifier of the media item.
+ * @param mimeType The optional MIME type of the media item to assist in decoding.
+ * @return A [Uri] configured for the media preview.
+ */
+internal fun buildMediaThumbnailUri(id: String, mimeType: String? = null): Uri =
+    previewUri.query("id=$id&mimetype=$mimeType").build()

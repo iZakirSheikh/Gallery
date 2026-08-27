@@ -1,5 +1,7 @@
 package com.zs.domain.db.media
 
+import com.zs.domain.util.buildMediaThumbnailUri
+
 /**
  * A lightweight, read-only snapshot of a media item optimized for fast list and grid rendering.
  *
@@ -32,6 +34,11 @@ class Snapshot(
     val resolution get() = MediaFile.Resolution(rawResolution)
     val timeline get() = MediaFile.Timeline(rawTimeline)
     val extras get() = MediaFile.Extras(rawExtras)
+
+    /**
+     * @see buildMediaThumbnailUri
+     */
+    val thumbnailUri get() = buildMediaThumbnailUri(mediaId, mimeType)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
