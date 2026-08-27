@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,6 +30,7 @@ fun NavigationBar(
             modifier = modifier
                 .windowInsetsPadding(insets)
                 .padding(horizontal = Res.dimen.normal)
+                //.acrylic(elevation= elevation, shape = shape,AppTheme.colors.background, AppTheme.colors.accent)
                 .backropEffect(shape, elevation, handle = handle)
                 .padding(horizontal = Res.dimen.normal, vertical = Res.dimen.small)
                 .height(56.dp),
