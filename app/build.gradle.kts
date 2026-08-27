@@ -165,6 +165,7 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.bundles.coil)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.kyant.backdrop)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

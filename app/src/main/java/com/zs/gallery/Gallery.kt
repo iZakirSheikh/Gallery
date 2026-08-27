@@ -36,16 +36,15 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.zs.compose.foundation.textResource
 import com.zs.compose.theme.AppTheme
-import com.zs.compose.theme.ContentAlpha
+import com.zs.compose.theme.Icon
 import com.zs.compose.theme.LocalWindowSize
 import com.zs.compose.theme.MotionScheme
-import com.zs.compose.theme.Surface
-import com.zs.compose.theme.WindowSize.Category
 import com.zs.compose.theme.adaptive.NavigationSuiteScaffold
-import com.zs.compose.theme.appbar.NavigationItemDefaults
+import com.zs.compose.theme.appbar.BottomNavigationItem
 import com.zs.compose.theme.calculateWindowSizeClass
 import com.zs.compose.theme.dynamicAccentColor
 import com.zs.compose.theme.renderInSharedTransitionScopeOverlay
+import com.zs.compose.theme.text.Label
 import com.zs.gallery.common.LocalNavController
 import com.zs.gallery.common.LocalSystemFacade
 import com.zs.gallery.common.NavController
@@ -53,8 +52,12 @@ import com.zs.gallery.common.NavKey
 import com.zs.gallery.common.NightMode
 import com.zs.gallery.common.NightMode.FOLLOW_SYSTEM
 import com.zs.gallery.common.Res
+import com.zs.gallery.common.compose.NavigationBar
+import com.zs.gallery.common.compose.backgdrop
+import com.zs.gallery.common.compose.rememberBackdropHandle
 import com.zs.gallery.common.impl.FilesViewModel
 import com.zs.gallery.common.preference
+import com.zs.gallery.common.vectorResource
 import com.zs.gallery.files.Files
 import com.zs.gallery.intro.Intro
 import org.koin.androidx.compose.koinViewModel
@@ -93,7 +96,7 @@ fun Gallery(
     // Environment & State Setup
     val clazz = calculateWindowSizeClass(activity = activity) // Screen size classification
     val entry = navController.active                          // Current navigation entry
-    val portrait = clazz.width < Category.Medium              // Orientation check
+    val backdrop = rememberBackdropHandle()
 
     // Resolve dark/light theme
     val isDarkTheme = run {
@@ -124,12 +127,41 @@ fun Gallery(
         entry is NavKey.Files && entry.isTimeline || entry is NavKey.Folders || entry is NavKey.Albums
     // Navigation Bar Definition
     val navBar: @Composable () -> Unit = {
-        Surface { }
+        NavigationBar(
+            handle = backdrop,
+            elevation = 8.dp,
+            shape = AppTheme.shapes.xLarge,
+            modifier = Modifier.renderInSharedTransitionScopeOverlay(0.3f),
+            content = {
+                BottomNavigationItem(
+                    selected = entry is NavKey.Files && entry.isTimeline,
+                    icon = { Icon(vectorResource(Res.drawable.ic_photo_library_two_tone), contentDescription = null) },
+                    label = { Label(textResource(Res.string.folders)) },
+                    onClick = {
+                        navController.navigate(NavKey.Files())
+                    }
+                )
+
+                BottomNavigationItem(
+                    selected = entry is NavKey.Folders,
+                    icon = { Icon(vectorResource(Res.drawable.ic_rounded_folder_open_outline), contentDescription = null) },
+                    label = { Label(textResource(Res.string.timeline)) },
+                    onClick = {   navController.navigate(NavKey.Folders) }
+                )
+
+                BottomNavigationItem(
+                    selected = entry is NavKey.Albums,
+                    icon = { Icon(vectorResource(Res.drawable.ic_award_star_outline), contentDescription = null) },
+                    label = { Label(textResource(Res.string.albums)) },
+                    onClick = {  navController.navigate(NavKey.Albums)}
+                )
+            }
+        )
     }
     // Main Content Scaffold
     val content: @Composable () -> Unit = {
         NavigationSuiteScaffold(
-            vertical = portrait,
+            vertical = true,
             containerColor = AppTheme.colors.background,
             progress = activity.inAppUpdateProgress,
             snackbarHostState = controller,
@@ -138,6 +170,7 @@ fun Gallery(
                 NavDisplay(
                     backStack = navController.backstack,
                     onBack = navController::navigateUp,
+                    modifier = Modifier.backgdrop(handle = backdrop),
                     entryDecorators = listOf(
                         rememberSaveableStateHolderNavEntryDecorator(),
                         rememberViewModelStoreNavEntryDecorator()
@@ -160,7 +193,7 @@ fun Gallery(
                 LocalSystemFacade provides activity,
                 LocalWindowSize provides when {
                     !isNavBarRequired -> clazz
-                    portrait -> clazz.consume(56.dp) // Adjust for bottom nav
+                    // portrait -> clazz.consume(56.dp) // Adjust for bottom nav
                     else -> clazz.consume(100.dp)   // Adjust for nav rail
                 },
                 content = content
