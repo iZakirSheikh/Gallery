@@ -137,7 +137,7 @@ fun NearByShareIntent(vararg uri: Uri) =
     com.zs.core.Intent("com.google.android.gms.SHARE_NEARBY") {
         component = ComponentName(
             "com.google.android.gms",
-            "com.google.android.gms.nearby.sharing.send.SendActivity"
+            "com.google.android.gms.nearby.sharing.main.MainActivity"
         )
         // Add the URIs as extras.
         putParcelableArrayListExtra(
