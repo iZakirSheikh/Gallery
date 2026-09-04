@@ -24,7 +24,7 @@ private fun VariantDimension.buildConfigField(name: String, value: String) =
 kotlin {
     compilerOptions {
         // Target JVM bytecode version (typed enum instead of raw string)
-        jvmTarget = JvmTarget.JVM_11
+        jvmTarget = JvmTarget.JVM_17
 
         // Advanced / experimental compiler flags
         freeCompilerArgs.addAll(
@@ -45,19 +45,18 @@ kotlin {
 // ============================================================================
 android {
     namespace = "com.zs.core"
-    compileSdk { version = release(36) }
+    compileSdk { version = release(37) }
     buildFeatures { buildConfig = true }
 
     // Java compatibility settings
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     // DEFAULT CONFIGURATION
     defaultConfig {
-        minSdk = 24
+        minSdk = 29
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
 
         // --------------------------------------------------------------------
         // BUILD CONFIG: SECRETS

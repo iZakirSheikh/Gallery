@@ -23,7 +23,6 @@ package com.zs.gallery.common
 import android.content.Context
 import android.content.Intent
 import android.hardware.biometrics.BiometricManager
-import android.hardware.fingerprint.FingerprintManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -44,7 +43,6 @@ import com.zs.gallery.settings.Settings.PKG_MARKET_ID
 import com.zs.gallery.settings.Settings.PREFIX_MARKET_FALLBACK
 import com.zs.gallery.settings.Settings.PREFIX_MARKET_URL
 import com.zs.preferences.Key
-
 
 /**
  * An interface defining the methods and properties needed for common app functionality,
@@ -110,7 +108,7 @@ interface SystemFacade {
      *
      * @param pkg the package name of the app to open on the App Store.
      */
-    fun launchAppStore(pkg: String?= null) {
+    fun launchAppStore(pkg: String? = null) {
         val pkg = pkg ?: let {
             val ctx = if (this is Context) this else return
             ctx.packageName
@@ -229,27 +227,19 @@ interface SystemFacade {
      * Checks if biometric authentication is available on the device.
      */
     fun canAuthenticate(): Boolean = when {
-        // Biometric authentication is not available on devices below Android P.
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.P -> false
-        // For Android P, check if fingerprints are enrolled using FingerprintManager.
-        Build.VERSION.SDK_INT == Build.VERSION_CODES.P -> {
-            val manager = getDeviceService<FingerprintManager>(Context.FINGERPRINT_SERVICE)
-            manager.hasEnrolledFingerprints()
-        }
         // For Android Q and above, check if any biometric authentication is available using BiometricManager.
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
-            val manager = getDeviceService(Context.BIOMETRIC_SERVICE) as BiometricManager
-            manager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
-        }
-        // For other Android versions, check if strong biometric or device credential authentication is available.
-        else -> {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R -> {
             val manager = getDeviceService(Context.BIOMETRIC_SERVICE) as BiometricManager
             val authenticators =
                 BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_STRONG
             manager.canAuthenticate(authenticators) == BiometricManager.BIOMETRIC_SUCCESS
         }
+        // For other Android versions, check if strong biometric or device credential authentication is available.
+        else -> {
+            val manager = getDeviceService(Context.BIOMETRIC_SERVICE) as BiometricManager
+            manager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS
+        }
     }
-
 
     /** Launches billing flow for the provided product [id]. */
     fun initiatePurchaseFlow(id: String): Boolean

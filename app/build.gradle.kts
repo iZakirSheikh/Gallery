@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.android.build.api.dsl.ApplicationDefaultConfig as Config
 
 // -----------------------------------------------------------------------------
 // PLUGINS
@@ -13,13 +14,29 @@ plugins {
     alias(libs.plugins.crashanlytics) // Firebase Crashlytics (should be flavor-scoped)
     alias(libs.plugins.google.services) // Google Services (should be flavor-scoped)
 }
+
+///
+//  -------------------------------------------------------------------------------------
+//  APPLICATION CONFIGURATION
+//  -------------------------------------------------------------------------------------
+//  Defines the core identity and compatibility parameters of the application.
+//  This lambda is applied to the [defaultConfig] block within the [android] section.
+private val config: Config.() -> Unit = {
+    versionCode = 84                                    // Internal version code
+    versionName = "1.0.10"                               // User-facing version name
+    applicationId = "com.googol.android.apps.photos" // Unique app ID
+    minSdk = 29                                         // Minimum supported Android version
+    targetSdk = 37                                      // Target SDK
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    vectorDrawables { useSupportLibrary = true }
+}
+
 // -----------------------------------------------------------------------------
 // KOTLIN COMPILER OPTIONS
 // -----------------------------------------------------------------------------
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_11 // Target JVM bytecode version
-
+        jvmTarget = JvmTarget.JVM_17 // Target JVM bytecode version
         freeCompilerArgs.addAll(
             // "-XXLanguage:+ExplicitBackingFields", // Explicit backing fields (disabled)
             "-XXLanguage:+NestedTypeAliases",       // Nested type aliases
@@ -53,30 +70,26 @@ composeCompiler {
 // -----------------------------------------------------------------------------
 android {
     namespace = "com.zs.gallery"
-    compileSdk { version = release(36) }
+    compileSdk { version = release(37) }
     buildFeatures { compose = true }
+    defaultConfig(config)
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }  // Exclude redundant license files
         jniLibs.keepDebugSymbols.add("**/*.so")
     }
 
-    //
+    // -----------------------------
+    // Java Compatibility Options
+    // -----------------------------
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     // -----------------------------------------------------------------------------
     // DEFAULT CONFIGURATION
     // -----------------------------------------------------------------------------
     // 📦 Core app settings: ID, SDK versions, versioning, and test runner.
-    defaultConfig {
-        applicationId = "com.googol.android.apps.photos"
-        minSdk = 24
-        targetSdk = 37
-        versionCode = 83
-        versionName = "1.0.9"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+
     // -------------------------------------------------------------------------
     // PRODUCT FLAVORS
     // -------------------------------------------------------------------------

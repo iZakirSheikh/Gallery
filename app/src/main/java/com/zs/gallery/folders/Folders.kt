@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.plus
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -47,7 +48,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.zs.compose.foundation.fullLineSpan
-import com.zs.compose.foundation.plus
+import androidx.compose.foundation.layout.plus
 import com.zs.compose.foundation.stickyHeader
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Icon
