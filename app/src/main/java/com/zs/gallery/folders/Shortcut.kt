@@ -18,21 +18,29 @@
 
 package com.zs.gallery.folders
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.zs.compose.foundation.linearGradient
 import com.zs.compose.theme.AppTheme
 import com.zs.compose.theme.Icon
+import com.zs.compose.theme.Surface
 import com.zs.compose.theme.ripple
 import com.zs.compose.theme.text.Label
 import com.zs.gallery.common.shapes.Folder as FolderShape
@@ -54,42 +62,39 @@ fun Shortcut(
     label: CharSequence,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-) {
-    // Base container for the shortcut with styling and click handling
-    val colors = AppTheme.colors
-    val accent = colors.onBackground
-    Box(
-        modifier = modifier
-            .aspectRatio(16 / 11f)
-            .clip(Folder) // Shape the shortcut like a folder
-            .background(colors.background(4.dp), Folder)
-            // .border(1.dp, accent.copy(0.5f), Folder) // Light border
-            //  .background(colors.backgroundColorAtElevation(0.4.dp), FolderShape)
-            .clickable(
-                null,
-                ripple(true, color = AppTheme.colors.accent), // Ripple effect on click
-                role = Role.Button, // Semantically indicate a button
-                onClick = onClick, // Trigger the action on click
-                enabled = enabled
-            )
-            .padding(horizontal = 12.dp, vertical = 8.dp) // Add internal padding
-        // then modifier // Apply additional modifiers
-    ) {
-        // Icon at the top
-        Icon(
-            imageVector = icon,
-            contentDescription = null, // Ensure a content description is provided elsewhere
-            tint = accent,
-            modifier = Modifier.align(AbsoluteAlignment.TopLeft)
+) = Surface (
+    shape = Folder,
+    color = AppTheme.colors.background(4.dp),
+    // border = BorderStroke(1.dp, AppTheme.colors.onBackground.copy(0.4f)),
+    border = BorderStroke(
+        1.dp,
+        Brush.linearGradient(
+            0.0f  to Color.White.copy(alpha = 0.55f),
+            0.45f to Color.White.copy(alpha = 0.08f),
+            0.55f to Color.Transparent,
+            1.0f  to Color.Black.copy(alpha = 0.15f),
+            angle =  0f
         )
+    ),
+    onClick = onClick,
+    contentColor = AppTheme.colors.onBackground,
+    modifier = modifier,
+    content = {
+        Column(
+            modifier = Modifier.aspectRatio(1.35f).padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.SpaceBetween,
+            content = {
+                Icon(// Icon at the top
+                    imageVector = icon,
+                    // Ensure a content description is provided elsewhere
+                    contentDescription = null,
+                )
 
-        // Label at the bottom
-        Label(
-            text = label,
-            style = AppTheme.typography.label3,
-            color = accent,
-            modifier = Modifier.align(AbsoluteAlignment.BottomLeft)
+                Label(// Label at the bottom
+                    text = label,
+                    style = AppTheme.typography.title3,
+                )
+            }
         )
     }
-}
+)

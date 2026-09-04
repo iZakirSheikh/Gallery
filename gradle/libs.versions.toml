@@ -30,7 +30,7 @@ androidx-exifinterface = { module = "androidx.exifinterface:exifinterface", vers
 androidx-biometric = { module = "androidx.biometric:biometric-ktx", version = "1.4.0-alpha02" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.13.0" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.2" }
-navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.10.0" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version = "2.9.8" }
 
 # ─── Media & Playback ───
 # Libraries for audio/video playback and media handling

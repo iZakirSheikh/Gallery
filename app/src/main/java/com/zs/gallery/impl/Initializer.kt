@@ -27,6 +27,7 @@ import androidx.startup.Initializer
 import coil3.annotation.DelicateCoilApi
 import coil3.asImage
 import coil3.request.crossfade
+import coil3.svg.SvgDecoder
 import com.zs.compose.theme.snackbar.SnackbarHostState
 import com.zs.core.analytics.Analytics
 import com.zs.core.coil.ThumbnailFetcher
@@ -104,6 +105,7 @@ class CoilInitializer : Initializer<Unit> {
             .crossfade(AnimationConstants.DefaultDurationMillis)
             .components {
                 add(ThumbnailFetcher.Factory())
+                add(SvgDecoder.Factory())
             }.build()
         // set global image loader
         Coil(loader)
