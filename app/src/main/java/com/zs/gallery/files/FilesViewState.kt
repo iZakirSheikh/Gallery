@@ -20,12 +20,42 @@
 
 package com.zs.gallery.files
 
+import androidx.compose.runtime.IntState
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.paging.PagingData
 import com.zs.domain.db.media.Snapshot
+import com.zs.gallery.common.Res.action
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Interface representing the state for the files view.
+ *
+ * @property meta If icon is null use app icon.
+ * @property data Represents the data associated with this screen.
+ * @property actions The list of actions supported by screen.
+ * @property selected Represents the selected items in this view.
+ * @property isInSelectionMode Indicates whether there is an active selection.
+ */
 interface FilesViewState {
-
+    val meta: Pair<ImageVector?, CharSequence>
     val data: Flow<PagingData<Snapshot>>
+    val actions: List<action>
+    // selection
+    val selected: List<Long>
+    val isInSelectionMode: Boolean
 
+    /**
+     * Toggles the selection of item having [id]
+     */
+    fun select(id: Long)
+
+    /**
+     * Clears the selection.
+     */
+    fun clear()
+
+    /**
+     * Selects all items.
+     */
+    fun selectAll()
 }

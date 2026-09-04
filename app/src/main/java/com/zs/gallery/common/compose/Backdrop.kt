@@ -1,14 +1,17 @@
 package com.zs.gallery.common.compose
 
 import android.graphics.BlurMaskFilter
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.PaintingStyle
@@ -27,6 +30,7 @@ import com.kyant.backdrop.effects.vibrancy
 import com.kyant.backdrop.shadow.Shadow
 import com.zs.compose.foundation.ImageBrush
 import com.zs.compose.foundation.visualEffect
+import com.zs.compose.theme.Colors
 import com.zs.gallery.common.Res
 
 typealias BackdropHandle = LayerBackdrop
@@ -161,5 +165,32 @@ fun Modifier.acrylic(
             }
         }
         .visualEffect(ImageBrush.NoiseBrush, if (containerColor.luminance() > 0.5f) 0.1f else 0.05f)
+
+/**
+ * Adds a subtle shine effect to components, particularly [Acrylic] ones,
+ * mimicking the gleaming edge of glass.
+ *
+ * This property defines a [BorderStroke] that uses a vertical gradient.
+ * The gradient's colors are determined by whether the current theme is light or dark.
+ * - In a light theme, it transitions from the `background` color to a slightly darker,
+ *   semi-transparent version of the `background`.
+ * - In a dark theme, it transitions from a semi-transparent gray to an even more
+ *   transparent gray.
+ *
+ * This creates a visual highlight, suggesting a light source reflecting off the edge
+ * of the component.
+ */
+val Colors.shine
+    @Stable
+    get() = BorderStroke(
+        0.5.dp,
+        Brush.verticalGradient(
+            listOf(
+                if (isLight) background else Color.Gray.copy(0.24f),
+                if (isLight) background.copy(0.3f) else Color.Gray.copy(0.075f),
+            )
+        )
+    )
+
 
 

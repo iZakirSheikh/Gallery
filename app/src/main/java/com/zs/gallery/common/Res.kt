@@ -7,6 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.ChecksSdkIntAtLeast
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.graphics.Color
@@ -186,5 +188,21 @@ object Res {
     object shape {
         val circle = CircleShape
         val rectangle = RectangleShape
+    }
+
+    /**
+     * Enum representing common user actions with associated icons and labels.
+     *
+     * Provides a unified mapping between drawable resources and string labels.
+     */
+    enum class action(@DrawableRes val icon: Int, @StringRes val label: Int) {
+        select_all(drawable.ic_select_all_filled, string.select_all),
+        airdrop(drawable.ic_share_outline, string.airdrop),
+        like(drawable.ic_star_outline, string.like),
+        unlike(drawable.ic_star_filled, string.unlike),
+        delete(drawable.ic_delete_outline, string.delete),
+        share(drawable.ic_share_outline, string.share),
+        trash(drawable.ic_remove_outline, string.trash),
+        restore(drawable.ic_restore_filled, string.restore)
     }
 }

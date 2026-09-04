@@ -21,23 +21,54 @@
 package com.zs.gallery.common.impl
 
 import android.text.format.DateUtils
+import android.util.Log
+import androidx.collection.mutableIntSetOf
+import androidx.compose.runtime.IntState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
 import androidx.paging.map
 import com.zs.domain.db.media.MediaProvider
 import com.zs.domain.db.media.Snapshot
 import com.zs.gallery.common.NavKey
+import com.zs.gallery.common.Res
 import com.zs.gallery.files.FilesViewState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.singleOrNull
+import kotlinx.coroutines.launch
 
 class FilesViewModel(
     val key: NavKey.Files,
     val provider: MediaProvider
 ) : KoinViewModel(), FilesViewState {
+
+    private val TAG = "FilesViewModel"
+
+    override val meta: Pair<ImageVector?, CharSequence> =
+        when(key.key){
+            NavKey.Files.SRC_TIMELINE -> null to getText(Res.string.timeline)
+            NavKey.Files.SRC_TRASH -> imageVector(Res.drawable.ic_recycling_filled) to getText(Res.string.trash)
+            NavKey.Files.SRC_FAVOURITES -> imageVector(Res.drawable.ic_award_star_outline) to "Liked"
+            else -> TODO("$key type not implemented yet!")
+        }
+
+    override val actions: List<Res.action> by derivedStateOf {
+        buildList {
+            val src = key.key
+            this += Res.action.share; this += Res.action.restore; this += Res.action.select_all
+        }
+    }
 
     private val pager = Pager(
         // Configure paging behavior:
@@ -47,7 +78,6 @@ class FilesViewModel(
         // Provide the factory that creates the paging source.
         pagingSourceFactory = { provider.snapshots() }
     )
-
     override val data: Flow<PagingData<Snapshot>> =
         pager.flow // Reactive stream of paged Snapshot items.
             // Transform each emitted PagingData before it reaches the UI.
@@ -74,4 +104,45 @@ class FilesViewModel(
             // This ensures the paging data survives configuration changes
             // and avoids re-fetching when the UI is recreated.
             .cachedIn(viewModelScope)
+
+    override val isInSelectionMode: Boolean by derivedStateOf { selected.isNotEmpty() }
+    override val selected = mutableStateListOf<Long>()
+    override fun clear() {
+        selected.clear()
+    }
+
+    /**
+     * Consumes the currently selected items and returns them as an array.
+     *
+     * This function creates a new array containing the selected items, clears the `selected` list, and returns the array.
+     * @return An array containing the previously selected items.
+     */
+    fun consume(): LongArray {
+        // Efficiently convert the list to an array.
+        val data = selected.toLongArray()
+        // Clear the selected items list.
+        selected.clear()
+        Log.d(TAG, "consume: ${data.size}")
+        return data
+    }
+
+    override fun select(id: Long) {
+        val contains = selected.contains(id)
+        if (contains) selected.remove(id) else selected.add(id)
+    }
+
+    override fun select(key: String) {
+        viewModelScope.launch {
+            val list = data.first()
+            list.
+        }
+    }
+
+    override fun selectAll() {
+        TODO("Not yet implemented")
+    }
+
+    override fun isGroupSelected(key: String): IntState {
+        return mutableIntStateOf(0)
+    }
 }

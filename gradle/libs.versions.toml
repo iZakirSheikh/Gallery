@@ -1,11 +1,11 @@
 [versions]
-agp = "9.3.2"
+agp = "9.4.0"
 kotlin = "2.4.10"
 room = "2.8.4"
-nav3 = "1.1.6"
-coil = "3.6.0"
-toolkit = "3.9.0-dev"
-glance = "1.1.1"
+nav3 = "1.1.7"
+coil = "3.6.2"
+toolkit = "3.10.0-dev"
+glance = "1.2.0"
 media3 = "1.11.0"
 
 [plugins]
@@ -87,7 +87,7 @@ coil-core = { module = "io.coil-kt.coil3:coil", version.ref = "coil" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor", version.ref = "coil" }
 coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coil" }
-coil-video = { module = "io.coil-kt.coil3:coil-video", version = "3.5.0" }
+coil-video = { module = "io.coil-kt.coil3:coil-video", version = "3.6.2" }
 avif-coder-coil = { module = "com.github.awxkee:avif-coder-coil", version = "2.1.4" }
 
 # ─── Toolkit ───
@@ -100,7 +100,7 @@ toolkit-theme = { module = "com.github.googol-apps.toolkit:theme", version.ref =
 # Extra UI libraries for Compose
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version = "0.37.3" }
 androidx-koin = { module = "io.insert-koin:koin-androidx-compose", version = "4.2.2" }
-chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version = "2.0.0-beta01" }
+chrisbanes-haze = { module = "dev.chrisbanes.haze:haze", version = "2.0.0-beta02" }
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version = "6.7.1" }
 
 # ─── Glance ───
