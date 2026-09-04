@@ -4,12 +4,11 @@
     <string name="what_s_new_latest" translatable="false">
         <b>What\'s new</b>
         <font color='grey'>
-            \n🌟<b>Material3 Makeover</b>: Started applying Material3 colors to the app.
-            \n🌟 <b>Navigation Improvements</b>: Added dynamic navbar.
-            \n🌟 <b>Camera</b>: Added dedicated camera button.
-            \n🌟 <b>Navigation Improvements</b>: Added dynamic navbar.
-            \n🌟 <b>Themed Icon Support</b>: Added monochrome launcher icon for Android 13+ themed icons.
-            \n🌟 <b>Performance &amp; Stability</b>: General optimizations and internal cleanups for a smoother experience.
+            \n🌟 <b>UI Enhancements</b>: Redesigned Shortcut components with gradient borders and native SVG support.
+            \n🌟 <b>Nearby Share Fix</b>: Resolved target component issues for more reliable sharing.
+            \n🌟 <b>System Requirements</b>: Minimum requirement updated to Android 10 (API 29) for improved security and performance.
+            \n🌟 <b>Biometrics</b>: Streamlined authentication flow for modern Android versions.
+            \n🌟 <b>Under the Hood</b>: Major dependency updates including Java 17, Gradle 9, and Compose optimizations.
         </font>
     </string>
 </resources>

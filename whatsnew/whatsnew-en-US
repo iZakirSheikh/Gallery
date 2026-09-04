@@ -1,6 +1,5 @@
-- <b>Material3 Makeover</b>: Started applying Material3 colors to the app.
-- <b>Navigation Improvements</b>: Added dynamic navbar.
-- <b>Camera</b>: Added dedicated camera button.
-- <b>Localization Updates</b>: Added full support for the Galician language.
-- <b>Themed Icon Support</b>: Added monochrome launcher icon for Android 13+ themed icons.
-- <b>Performance &amp; Stability</b>: Minor cleanup and optimizations for a smoother experience.
+- <b>UI Enhancements</b>: Redesigned Shortcut components with gradient borders and native SVG support.
+- <b>Nearby Share Fix</b>: Resolved target component issues for more reliable sharing.
+- <b>System Requirements</b>: Minimum requirement updated to Android 10 (API 29) for improved security and performance.
+- <b>Biometrics</b>: Streamlined authentication flow for modern Android versions.
+- <b>Under the Hood</b>: Major dependency updates including Java 17, Gradle 9, and Compose optimizations.
